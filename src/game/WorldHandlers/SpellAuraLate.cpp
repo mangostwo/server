@@ -160,7 +160,7 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(linkedSpell);
     if (!spellInfo)
     {
-        sLog.outError("Aura::HandleTriggerLinkedAura for spell %u effect %u triggering unknown spell id %u", GetSpellProto()->Id, m_effIndex, linkedSpell);
+        sLog.outError("Aura::HandleTriggerLinkedAura for spell %u effect %u triggering unknown spell id %u", GetSpellProto()->ID, m_effIndex, linkedSpell);
         return;
     }
 

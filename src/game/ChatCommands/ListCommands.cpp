@@ -64,7 +64,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
 
         SpellAuraHolder* holder = itr->second;
-        char const* name = holder->GetSpellProto()->SpellName[GetSessionDbcLocale()];
+        char const* name = holder->GetSpellProto()->Name_lang[GetSessionDbcLocale()];
 
         for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
@@ -107,7 +107,7 @@ bool ChatHandler::HandleListAurasCommand(char* /*args*/)
         {
             bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
 
-            char const* name = (*itr)->GetSpellProto()->SpellName[GetSessionDbcLocale()];
+            char const* name = (*itr)->GetSpellProto()->Name_lang[GetSessionDbcLocale()];
 
             if (m_session)
             {
@@ -713,7 +713,7 @@ void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, Locale
  */
 void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc)
 {
-    uint32 id = spellInfo->Id;
+    uint32 id = spellInfo->ID;
 
     bool known = target && target->HasSpell(id);
     bool learn = (spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEARN_SPELL);
@@ -732,11 +732,11 @@ void ChatHandler::ShowSpellListHelper(Player* target, SpellEntry const* spellInf
     std::ostringstream ss;
     if (m_session)
     {
-        ss << id << " - |cffffffff|Hspell:" << id << "|h[" << spellInfo->SpellName[loc];
+        ss << id << " - |cffffffff|Hspell:" << id << "|h[" << spellInfo->Name_lang[loc];
     }
     else
     {
-        ss << id << " - " << spellInfo->SpellName[loc];
+        ss << id << " - " << spellInfo->Name_lang[loc];
     }
 
     // include rank in link name

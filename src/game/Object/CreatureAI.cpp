@@ -66,7 +66,7 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
     if (!isTriggered)
     {
         // Spell is on cooldown
-        if (m_creature->HasSpellCooldown(pSpell->Id))
+        if (m_creature->HasSpellCooldown(pSpell->ID))
         {
             return CAST_FAIL_STATE;
         }
@@ -94,18 +94,18 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         }
 
         // Check for power (also done by Spell::CheckCast())
-        if (m_creature->GetPower((Powers)pSpell->powerType) < Spell::CalculatePowerCost(pSpell, m_creature))
+        if (m_creature->GetPower((Powers)pSpell->PowerType) < Spell::CalculatePowerCost(pSpell, m_creature))
         {
             return CAST_FAIL_POWER;
         }
     }
 
-    if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->rangeIndex))
+    if (const SpellRangeEntry* pSpellRange = sSpellRangeStore.LookupEntry(pSpell->RangeIndex))
     {
         if (pTarget != m_creature)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float fDistance = m_creature->GetCombatDistance(pTarget, pSpell->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+            float fDistance = m_creature->GetCombatDistance(pTarget, pSpell->RangeIndex == SPELL_RANGE_IDX_COMBAT);
 
             if (fDistance > (m_creature->IsHostileTo(pTarget) ? pSpellRange->maxRange : pSpellRange->maxRangeFriendly))
             {

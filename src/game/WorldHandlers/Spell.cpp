@@ -97,7 +97,7 @@ bool IsQuestTameSpell(uint32 spellId)
     }
 
     return spellproto->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_THREAT
-           && spellproto->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_APPLY_AURA && spellproto->EffectApplyAuraName[EFFECT_INDEX_1] == SPELL_AURA_DUMMY;
+           && spellproto->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_APPLY_AURA && spellproto->EffectAura[EFFECT_INDEX_1] == SPELL_AURA_DUMMY;
 }
 
 SpellCastTargets::SpellCastTargets()
@@ -406,11 +406,11 @@ void SpellCastTargets::write(ByteBuffer& data) const
 Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy)
 {
     MANGOS_ASSERT(caster != NULL && info != NULL);
-    MANGOS_ASSERT(info == sSpellStore.LookupEntry(info->Id) && "`info` must be pointer to sSpellStore element");
+    MANGOS_ASSERT(info == sSpellStore.LookupEntry(info->ID) && "`info` must be pointer to sSpellStore element");
 
-    if (info->SpellDifficultyId && caster->IsInWorld() && caster->GetMap()->IsDungeon())
+    if (info->Difficulty && caster->IsInWorld() && caster->GetMap()->IsDungeon())
     {
-        if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(info->SpellDifficultyId, caster->GetMap()->GetDifficulty(), caster->GetMap()->IsRaid()))
+        if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(info->Difficulty, caster->GetMap()->GetDifficulty(), caster->GetMap()->IsRaid()))
         {
             m_spellInfo = spellEntry;
         }
@@ -495,7 +495,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
 
     m_spellFlags = SPELL_FLAG_NORMAL;
 
-    if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED))
+    if (m_spellInfo->DefenseType == SPELL_DAMAGE_CLASS_MAGIC && !m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED))
     {
         for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
@@ -504,7 +504,7 @@ Spell::Spell(Unit* caster, SpellEntry const* info, bool triggered, ObjectGuid or
                 continue;
             }
 
-            if (!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j], m_spellInfo->EffectImplicitTargetB[j]))
+            if (!IsPositiveTarget(m_spellInfo->ImplicitTargetA[j], m_spellInfo->ImplicitTargetB[j]))
             {
                 m_canReflect = true;
             }
@@ -621,7 +621,7 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
         return;
     }
 
-    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->Id, m_caster))
+    if (DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, m_caster))
     {
         SendCastResult(SPELL_FAILED_SPELL_UNAVAILABLE);
         finish(false);
@@ -721,7 +721,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
         return SPELL_CAST_OK;
     }
 
-    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->runeCostID);
+    SpellRuneCostEntry const* src = sSpellRuneCostStore.LookupEntry(m_spellInfo->RuneCostID);
 
     if (!src)
     {
@@ -742,7 +742,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
     int32 runeCostMod = 10000;
     if (Player* modOwner = plr->GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, runeCostMod);
+        modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_COST, runeCostMod);
     }
 
     if (runeCostMod > 0)
@@ -885,7 +885,7 @@ void Spell::Delayed()
     // check pushback reduce
     int32 delaytime = 500;                                  // spellcasting delay is normally 500ms
     int32 delayReduce = 100;                                // must be initialized to 100 for percent modifiers
-    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce);
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->ID, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce);
     delayReduce += m_caster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
     {
@@ -904,7 +904,7 @@ void Spell::Delayed()
         m_timer += delaytime;
     }
 
-    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->Id, delaytime);
+    DETAIL_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for (%d) ms at damage", m_spellInfo->ID, delaytime);
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8 + 4);
     data << m_caster->GetPackGUID();
@@ -931,7 +931,7 @@ void Spell::DelayedChannel()
     // check pushback reduce
     int32 delaytime = GetSpellDuration(m_spellInfo) * 25 / 100;// channeling delay is normally 25% of its time per hit
     int32 delayReduce = 100;                                // must be initialized to 100 for percent modifiers
-    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce);
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->ID, SPELLMOD_NOT_LOSE_CASTING_TIME, delayReduce);
     delayReduce += m_caster->GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100;
     if (delayReduce >= 100)
     {
@@ -950,7 +950,7 @@ void Spell::DelayedChannel()
         m_timer -= delaytime;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, delaytime, m_timer);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->ID, delaytime, m_timer);
 
     for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
     {
@@ -958,7 +958,7 @@ void Spell::DelayedChannel()
         {
             if (Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID))
             {
-                unit->DelaySpellAuraHolder(m_spellInfo->Id, delaytime, unit->GetObjectGuid());
+                unit->DelaySpellAuraHolder(m_spellInfo->ID, delaytime, unit->GetObjectGuid());
             }
         }
     }
@@ -966,7 +966,7 @@ void Spell::DelayedChannel()
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         // partially interrupt persistent area auras
-        if (DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, SpellEffectIndex(j)))
+        if (DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->ID, SpellEffectIndex(j)))
         {
             dynObj->Delay(delaytime);
         }
@@ -1016,8 +1016,8 @@ void Spell::UpdatePointers()
  */
 bool Spell::IsNeedSendToClient() const
 {
-    return m_spellInfo->SpellVisual[0] || m_spellInfo->SpellVisual[1] || IsChanneledSpell(m_spellInfo) ||
-           m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
+    return m_spellInfo->SpellVisualID[0] || m_spellInfo->SpellVisualID[1] || IsChanneledSpell(m_spellInfo) ||
+           m_spellInfo->Speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
 
 /**
@@ -1027,7 +1027,7 @@ bool Spell::IsNeedSendToClient() const
  */
 bool Spell::IsTriggeredSpellWithRedundentCastTime() const
 {
-    return m_IsTriggeredSpell && (m_spellInfo->manaCost || m_spellInfo->ManaCostPercentage);
+    return m_IsTriggeredSpell && (m_spellInfo->ManaCost || m_spellInfo->ManaCostPct);
 }
 
 /**
@@ -1084,7 +1084,7 @@ SpellEvent::~SpellEvent()
     else
     {
         sLog.outError("~SpellEvent: %s %u tried to delete non-deletable spell %u. Was not deleted, causes memory leak.",
-                      (m_Spell->GetCaster()->GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), m_Spell->GetCaster()->GetGUIDLow(), m_Spell->m_spellInfo->Id);
+                      (m_Spell->GetCaster()->GetTypeId() == TYPEID_PLAYER ? "Player" : "Creature"), m_Spell->GetCaster()->GetGUIDLow(), m_Spell->m_spellInfo->ID);
     }
 }
 
@@ -1386,7 +1386,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
                     SpellEntry const* spellInfo = sSpellStore.LookupEntry(iter->first);
                     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
-                        if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
+                        if (spellInfo->EffectAura[i] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
                         {
                             int32 mountSpeed = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
 
@@ -1451,24 +1451,24 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
     }
     else
     {
-        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
     }
 
     if (Unit* realCaster = GetAffectiveCaster())
     {
         if (Player* modOwner = realCaster->GetSpellModOwner())
         {
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget);
+            modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_RADIUS, radius);
+            modOwner->ApplySpellMod(m_spellInfo->ID, SPELLMOD_JUMP_TARGETS, EffectChainTarget);
         }
     }
 
     // custom target amount cases
-    switch (m_spellInfo->SpellFamilyName)
+    switch (m_spellInfo->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
                 case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
@@ -1684,7 +1684,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
         }
         case SPELLFAMILY_MAGE:
         {
-            if (m_spellInfo->Id == 38194)                   // Blink
+            if (m_spellInfo->ID == 38194)                   // Blink
             {
                 unMaxTargets = 1;
             }
@@ -1693,7 +1693,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
         case SPELLFAMILY_WARRIOR:
         {
             // Sunder Armor (main spell)
-            if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000004000), 0x00000000) && m_spellInfo->SpellVisual[0] == 406)
+            if (m_spellInfo->IsFitToFamilyMask(UI64LIT(0x0000000000004000), 0x00000000) && m_spellInfo->SpellVisualID[0] == 406)
             {
                 if (m_caster->HasAura(58387))               // Glyph of Sunder Armor
                 {
@@ -1720,15 +1720,15 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
             break;
         }
         case SPELLFAMILY_PALADIN:
-            if (m_spellInfo->Id == 20424)                   // Seal of Command (2 more target for single targeted spell)
+            if (m_spellInfo->ID == 20424)                   // Seal of Command (2 more target for single targeted spell)
             {
                 // overwrite EffectChainTarget for non single target spell
                 if (Spell* currSpell = m_caster->GetCurrentSpell(CURRENT_GENERIC_SPELL))
                 {
-                    if (currSpell->m_spellInfo->MaxAffectedTargets > 0 ||
-                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_0] > 0 ||
-                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_1] > 0 ||
-                            currSpell->m_spellInfo->EffectChainTarget[EFFECT_INDEX_2] > 0)
+                    if (currSpell->m_spellInfo->MaxTargets > 0 ||
+                            currSpell->m_spellInfo->EffectChainTargets[EFFECT_INDEX_0] > 0 ||
+                            currSpell->m_spellInfo->EffectChainTargets[EFFECT_INDEX_1] > 0 ||
+                            currSpell->m_spellInfo->EffectChainTargets[EFFECT_INDEX_2] > 0)
                     {
                         EffectChainTarget = 0;              // no chain targets
                     }
@@ -1740,11 +1740,11 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
     }
 
     // custom radius cases
-    switch (m_spellInfo->SpellFamilyName)
+    switch (m_spellInfo->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 24811:                                 // Draw Spirit (Lethon)
                 {
@@ -1757,7 +1757,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
                 case 28241:                                 // Poison (Naxxramas, Grobbulus Cloud)
                 case 54363:                                 // Poison (Naxxramas, Grobbulus Cloud) (H)
                 {
-                    uint32 auraId = (m_spellInfo->Id == 28241 ? 28158 : 54362);
+                    uint32 auraId = (m_spellInfo->ID == 28241 ? 28158 : 54362);
                     if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(auraId))
                     {
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
@@ -1802,7 +1802,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
         }
         case SPELLFAMILY_DRUID:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 49376:                                 // Feral Charge - Cat
                     // No default radius for this spell, so we need to use the contact distance

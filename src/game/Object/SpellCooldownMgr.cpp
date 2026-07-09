@@ -52,7 +52,7 @@ void SpellCooldownMgr::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
         {
             for (int idx = 0; idx < MAX_ITEM_PROTO_SPELLS; ++idx)
             {
-                if (proto->Spells[idx].SpellId == spellInfo->Id)
+                if (proto->Spells[idx].SpellId == spellInfo->ID)
                 {
                     cat    = proto->Spells[idx].SpellCategory;
                     rec    = proto->Spells[idx].SpellCooldown;
@@ -88,7 +88,7 @@ void SpellCooldownMgr::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
     {
         // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
         // prevent 0 cooldowns set by another way
-        if (rec <= 0 && catrec <= 0 && (cat == 76 || (IsAutoRepeatRangedSpell(spellInfo) && spellInfo->Id != SPELL_ID_AUTOSHOT)))
+        if (rec <= 0 && catrec <= 0 && (cat == 76 || (IsAutoRepeatRangedSpell(spellInfo) && spellInfo->ID != SPELL_ID_AUTOSHOT)))
         {
             rec = m_owner->GetAttackTime(RANGED_ATTACK);
         }
@@ -96,12 +96,12 @@ void SpellCooldownMgr::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
         // Now we have cooldown data (if found any), time to apply mods
         if (rec > 0)
         {
-            m_owner->ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, rec);
+            m_owner->ApplySpellMod(spellInfo->ID, SPELLMOD_COOLDOWN, rec);
         }
 
         if (catrec > 0)
         {
-            m_owner->ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
+            m_owner->ApplySpellMod(spellInfo->ID, SPELLMOD_COOLDOWN, catrec);
         }
 
         // replace negative cooldowns by 0
@@ -123,7 +123,7 @@ void SpellCooldownMgr::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
     // self spell cooldown
     if (recTime > 0)
     {
-        AddSpellCooldown(spellInfo->Id, itemId, recTime);
+        AddSpellCooldown(spellInfo->ID, itemId, recTime);
     }
 
     // category spells
@@ -134,7 +134,7 @@ void SpellCooldownMgr::AddSpellAndCategoryCooldowns(SpellEntry const* spellInfo,
         {
             for (SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                if (*i_scset == spellInfo->Id)              // skip main spell, already handled above
+                if (*i_scset == spellInfo->ID)              // skip main spell, already handled above
                 {
                     continue;
                 }
@@ -160,7 +160,7 @@ void SpellCooldownMgr::SendCooldownEvent(SpellEntry const* spellInfo, uint32 ite
 
     // Send activate cooldown timer (possible 0) at client side
     WorldPacket data(SMSG_COOLDOWN_EVENT, (4 + 8));
-    data << uint32(spellInfo->Id);
+    data << uint32(spellInfo->ID);
     data << m_owner->GetObjectGuid();
     m_owner->SendDirectMessage(&data);
 }

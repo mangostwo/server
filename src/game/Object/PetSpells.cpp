@@ -254,18 +254,18 @@ void Pet::_LoadAuras(uint32 timediff)
             }
 
             // prevent wrong values of remaincharges
-            if (spellproto->procCharges == 0)
+            if (spellproto->ProcCharges == 0)
             {
                 remaincharges = 0;
             }
 
-            if (!spellproto->StackAmount)
+            if (!spellproto->CumulativeAura)
             {
                 stackcount = 1;
             }
-            else if (spellproto->StackAmount < stackcount)
+            else if (spellproto->CumulativeAura < stackcount)
             {
-                stackcount = spellproto->StackAmount;
+                stackcount = spellproto->CumulativeAura;
             }
             else if (!stackcount)
             {
@@ -337,7 +337,7 @@ void Pet::_SaveAuras()
         for (int32 j = 0; j < MAX_EFFECT_INDEX; ++j)
         {
             SpellEntry const* spellInfo = holder->GetSpellProto();
-            if (spellInfo->EffectApplyAuraName[j] == SPELL_AURA_MOD_STEALTH ||
+            if (spellInfo->EffectAura[j] == SPELL_AURA_MOD_STEALTH ||
                     spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
                     spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_PET)
             {
@@ -632,14 +632,14 @@ void Pet::InitLevelupSpellsForLevel()
             }
 
             // will called first if level down
-            if (spellEntry->spellLevel > level)
+            if (spellEntry->SpellLevel > level)
             {
-                unlearnSpell(spellEntry->Id, true);
+                unlearnSpell(spellEntry->ID, true);
             }
             // will called if level up
             else
             {
-                learnSpell(spellEntry->Id);
+                learnSpell(spellEntry->ID);
             }
         }
     }

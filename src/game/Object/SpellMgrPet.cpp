@@ -91,7 +91,7 @@ void SpellMgr::LoadSpellPetAuras()
 
             if (spellInfo->Effect[eff] != SPELL_EFFECT_DUMMY &&
                     (spellInfo->Effect[eff] != SPELL_EFFECT_APPLY_AURA ||
-                     spellInfo->EffectApplyAuraName[eff] != SPELL_AURA_DUMMY))
+                     spellInfo->EffectAura[eff] != SPELL_AURA_DUMMY))
             {
                 sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                 continue;
@@ -104,7 +104,7 @@ void SpellMgr::LoadSpellPetAuras()
                 continue;
             }
 
-            PetAura pa(pet, aura, spellInfo->EffectImplicitTargetA[eff] == TARGET_PET, spellInfo->CalculateSimpleValue(eff));
+            PetAura pa(pet, aura, spellInfo->ImplicitTargetA[eff] == TARGET_PET, spellInfo->CalculateSimpleValue(eff));
             mSpellPetAuraMap[(spell << 8) + eff] = pa;
         }
 
@@ -160,7 +160,7 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 ++family_count;
             }
 
-            spellSet.insert(PetLevelupSpellSet::value_type(spell->spellLevel, spell->Id));
+            spellSet.insert(PetLevelupSpellSet::value_type(spell->SpellLevel, spell->ID));
             ++count;
         }
     }
@@ -349,11 +349,11 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                         {
                             if (pl)
                             {
-                                ChatHandler(pl).PSendSysMessage("Craft spell %u not have create item entry.", spellInfo->Id);
+                                ChatHandler(pl).PSendSysMessage("Craft spell %u not have create item entry.", spellInfo->ID);
                             }
                             else
                             {
-                                sLog.outErrorDb("Craft spell %u not have create item entry.", spellInfo->Id);
+                                sLog.outErrorDb("Craft spell %u not have create item entry.", spellInfo->ID);
                             }
                         }
                         return false;
@@ -366,11 +366,11 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                     {
                         if (pl)
                         {
-                            ChatHandler(pl).PSendSysMessage("Craft spell %u create item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->EffectItemType[i]);
+                            ChatHandler(pl).PSendSysMessage("Craft spell %u create item (Entry: %u) but item does not exist in item_template.", spellInfo->ID, spellInfo->EffectItemType[i]);
                         }
                         else
                         {
-                            sLog.outErrorDb("Craft spell %u create item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->EffectItemType[i]);
+                            sLog.outErrorDb("Craft spell %u create item (Entry: %u) but item does not exist in item_template.", spellInfo->ID, spellInfo->EffectItemType[i]);
                         }
                     }
                     return false;
@@ -388,11 +388,11 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                     {
                         if (pl)
                         {
-                            ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u, and then...", spellInfo->Id, spellInfo->EffectTriggerSpell[i]);
+                            ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u, and then...", spellInfo->ID, spellInfo->EffectTriggerSpell[i]);
                         }
                         else
                         {
-                            sLog.outErrorDb("Spell %u learn to invalid spell %u, and then...", spellInfo->Id, spellInfo->EffectTriggerSpell[i]);
+                            sLog.outErrorDb("Spell %u learn to invalid spell %u, and then...", spellInfo->ID, spellInfo->EffectTriggerSpell[i]);
                         }
                     }
                     return false;
@@ -412,11 +412,11 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                 {
                     if (pl)
                     {
-                        ChatHandler(pl).PSendSysMessage("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->Reagent[j]);
+                        ChatHandler(pl).PSendSysMessage("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->ID, spellInfo->Reagent[j]);
                     }
                     else
                     {
-                        sLog.outErrorDb("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->Reagent[j]);
+                        sLog.outErrorDb("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->ID, spellInfo->Reagent[j]);
                     }
                 }
                 return false;

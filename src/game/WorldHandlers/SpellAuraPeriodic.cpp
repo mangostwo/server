@@ -271,11 +271,11 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
     bool loading = (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->GetSession()->PlayerLoading());
 
     SpellEntry const* spell = GetSpellProto();
-    switch (spell->SpellFamilyName)
+    switch (spell->SpellClassSet)
     {
         case SPELLFAMILY_ROGUE:
         {
-            switch (spell->Id)
+            switch (spell->ID)
             {
                     // Master of Subtlety
                 case 31666:
@@ -344,7 +344,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
         }
 
         // Gift of the Naaru (have diff spellfamilies)
-        if (GetSpellProto()->SpellIconID == 329 && GetSpellProto()->SpellVisual[0] == 7625)
+        if (GetSpellProto()->SpellIconID == 329 && GetSpellProto()->SpellVisualID[0] == 7625)
         {
             int32 ap = int32(0.22f * caster->GetTotalAttackPowerValue(BASE_ATTACK));
             int32 holy = caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(GetSpellProto()));
@@ -356,7 +356,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool /*Real*/)
             m_modifier.m_amount += ap > holy ? ap : holy;
         }
         // Lifeblood
-        else if (GetSpellProto()->SpellIconID == 3088 && GetSpellProto()->SpellVisual[0] == 8145)
+        else if (GetSpellProto()->SpellIconID == 3088 && GetSpellProto()->SpellVisualID[0] == 8145)
         {
             int32 healthBonus = int32(0.0032f * caster->GetMaxHealth());
             m_modifier.m_amount += healthBonus;
@@ -443,12 +443,12 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             return;
         }
 
-        switch (spellProto->SpellFamilyName)
+        switch (spellProto->SpellClassSet)
         {
             case SPELLFAMILY_WARRIOR:
             {
                 // Rend
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000020))
+                if (spellProto->SpellClassMask & UI64LIT(0x0000000000000020))
                 {
                     // $0.2*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -466,7 +466,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case SPELLFAMILY_DRUID:
             {
                 // Rip
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x000000000000800000))
+                if (spellProto->SpellClassMask & UI64LIT(0x000000000000800000))
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                     {
@@ -493,7 +493,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case SPELLFAMILY_ROGUE:
             {
                 // Rupture
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x000000000000100000))
+                if (spellProto->SpellClassMask & UI64LIT(0x000000000000100000))
                 {
                     if (caster->GetTypeId() != TYPEID_PLAYER)
                     {
@@ -516,7 +516,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case SPELLFAMILY_PALADIN:
             {
                 // Holy Vengeance / Blood Corruption
-                if (spellProto->SpellFamilyFlags & UI64LIT(0x0000080000000000) && spellProto->SpellVisual[0] == 7902)
+                if (spellProto->SpellClassMask & UI64LIT(0x0000080000000000) && spellProto->SpellVisualID[0] == 7902)
                 {
                     // AP * 0.025 + SPH * 0.013 bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
@@ -536,7 +536,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
         {
             // SpellDamageBonusDone for magic spells
-            if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+            if (spellProto->DefenseType == SPELL_DAMAGE_CLASS_NONE || spellProto->DefenseType == SPELL_DAMAGE_CLASS_MAGIC)
             {
                 m_modifier.m_amount = caster->SpellDamageBonusDone(target, GetSpellProto(), m_modifier.m_amount, DOT, GetStackAmount());
             }
@@ -552,7 +552,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     else
     {
         // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-        if (spellProto->Id == 41917)
+        if (spellProto->ID == 41917)
         {
             target->CastSpell(target, 41915, true);
         }
@@ -1638,7 +1638,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         return;
     }
 
-    if (GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0)
+    if (GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInvTypes != 0)
     {
         // wand magic case (skip generic to all item spell bonuses)
         // done in Player::_ApplyWeaponDependentAuraMods
@@ -1737,7 +1737,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         return;
     }
 
-    if (GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0)
+    if (GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInvTypes != 0)
     {
         // wand magic case (skip generic to all item spell bonuses)
         // done in Player::_ApplyWeaponDependentAuraMods

@@ -136,7 +136,7 @@ void Player::CheckAreaExploreAndOutdoor()
             {
                 continue;
             }
-            if ((spellInfo->Stances || spellInfo->StancesNot) && !IsNeedCastSpellAtFormApply(spellInfo, GetShapeshiftForm()))
+            if ((spellInfo->ShapeshiftMask || spellInfo->ShapeshiftExclude) && !IsNeedCastSpellAtFormApply(spellInfo, GetShapeshiftForm()))
             {
                 continue;
             }

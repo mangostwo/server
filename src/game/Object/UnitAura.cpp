@@ -414,7 +414,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     // passive and persistent auras can stack with themselves any number of times
     if ((!holder->IsPassive() && !holder->IsPersistent()) || holder->IsAreaAura())
     {
-        SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(aurSpellInfo->Id);
+        SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(aurSpellInfo->ID);
 
         // take out same spell
         for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second; ++iter)
@@ -423,7 +423,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
             if (foundHolder->GetCasterGuid() == holder->GetCasterGuid())
             {
                 // Aura can stack on self -> Stack it;
-                if (aurSpellInfo->StackAmount)
+                if (aurSpellInfo->CumulativeAura)
                 {
                     // can be created with >1 stack by some spell mods
                     foundHolder->ModStackAmount(holder->GetStackAmount());
@@ -445,7 +445,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                         if (Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i)))
                         {
                             // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
-                            AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
+                            AuraType aurNameReal = AuraType(aurSpellInfo->EffectAura[i]);
 
                             if (aurNameReal == SPELL_AURA_PERIODIC_DAMAGE && aur->GetAuraDuration() > 0)
                             {
@@ -458,7 +458,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                                 }
                                 else
                                 {
-                                    DEBUG_LOG("Holder (spell %u) on target (lowguid: %u) doesn't have aura on effect index %u. skipping.", aurSpellInfo->Id, holder->GetTarget()->GetGUIDLow(), i);
+                                    DEBUG_LOG("Holder (spell %u) on target (lowguid: %u) doesn't have aura on effect index %u. skipping.", aurSpellInfo->ID, holder->GetTarget()->GetGUIDLow(), i);
                                 }
                             }
                         }
@@ -481,7 +481,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 }
 
                 // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
-                AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
+                AuraType aurNameReal = AuraType(aurSpellInfo->EffectAura[i]);
 
                 switch (aurNameReal)
                 {
@@ -555,7 +555,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                             // remove from target if target found
                             if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
                             {
-                                itr_target->RemoveAurasDueToSpell(itr_spellEntry->Id);  // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
+                                itr_target->RemoveAurasDueToSpell(itr_spellEntry->ID);  // TODO AURA_REMOVE_BY_TRACKING (might require additional work elsewhere)
                             }
                             else                            // Normally the tracking will be removed by the AuraRemoval
                             {
@@ -583,7 +583,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                             // remove from target if target found
                             if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
                             {
-                                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, caster->GetObjectGuid());
+                                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->ID, caster->GetObjectGuid());
                             }
                             else                            // Normally the tracking will be removed by the AuraRemoval
                             {
@@ -748,7 +748,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             continue;
         }
 
-        uint32 i_spellId = i_spellProto->Id;
+        uint32 i_spellId = i_spellProto->ID;
 
         // early checks that spellId is passive non stackable spell
         if (IsPassiveSpell(i_spellProto))
@@ -885,7 +885,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         }
 
         // Potions stack aura by aura (elixirs/flask already checked)
-        if (spellProto->SpellFamilyName == SPELLFAMILY_POTION && i_spellProto->SpellFamilyName == SPELLFAMILY_POTION)
+        if (spellProto->SpellClassSet == SPELLFAMILY_POTION && i_spellProto->SpellClassSet == SPELLFAMILY_POTION)
         {
             if (IsNoStackAuraDueToAura(spellId, i_spellId))
             {
@@ -1008,7 +1008,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
 
     // Custom dispel case
     // Unstable Affliction
-    if (spellEntry->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellEntry->SpellFamilyFlags & UI64LIT(0x010000000000)))
+    if (spellEntry->SpellClassSet == SPELLFAMILY_WARLOCK && (spellEntry->SpellClassMask & UI64LIT(0x010000000000)))
     {
         if (Aura* dotAura = GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, UI64LIT(0x010000000000), 0x00000000, casterGuid))
         {
@@ -1025,7 +1025,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
         }
     }
     // Lifebloom
-    else if (spellEntry->SpellFamilyName == SPELLFAMILY_DRUID && (spellEntry->SpellFamilyFlags & UI64LIT(0x0000001000000000)))
+    else if (spellEntry->SpellClassSet == SPELLFAMILY_DRUID && (spellEntry->SpellClassMask & UI64LIT(0x0000001000000000)))
     {
         if (Aura* dotAura = GetAura(SPELL_AURA_DUMMY, SPELLFAMILY_DRUID, UI64LIT(0x0000001000000000), 0x00000000, casterGuid))
         {
@@ -1034,13 +1034,13 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
 
             if (Unit* caster = dotAura->GetCaster())
             {
-                int32 returnmana = (spellEntry->ManaCostPercentage * caster->GetCreateMana() / 100) * stackAmount / 2;
+                int32 returnmana = (spellEntry->ManaCostPct * caster->GetCreateMana() / 100) * stackAmount / 2;
                 caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, dotAura, casterGuid);
             }
         }
     }
     // Flame Shock
-    else if (spellEntry->SpellFamilyName == SPELLFAMILY_SHAMAN && (spellEntry->SpellFamilyFlags & UI64LIT(0x10000000)))
+    else if (spellEntry->SpellClassSet == SPELLFAMILY_SHAMAN && (spellEntry->SpellClassMask & UI64LIT(0x10000000)))
     {
         Unit* caster = NULL;
         uint32 triggeredSpell = 0;
@@ -1077,7 +1077,7 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
         return;
     }
     // Vampiric touch (first dummy aura)
-    else if (spellEntry->SpellFamilyName == SPELLFAMILY_PRIEST && spellEntry->SpellFamilyFlags & UI64LIT(0x0000040000000000))
+    else if (spellEntry->SpellClassSet == SPELLFAMILY_PRIEST && spellEntry->SpellClassMask & UI64LIT(0x0000040000000000))
     {
         if (Aura* dot = GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, UI64LIT(0x0000040000000000), 0x00000000, casterGuid))
         {
@@ -1176,10 +1176,10 @@ void Unit::RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid)
     for (SpellAuraHolderMap::iterator itr = auras.begin(); itr != auras.end();)
     {
         SpellEntry const* spell = itr->second->GetSpellProto();
-        if (((1 << spell->Dispel) & dispelMask) && (!casterGuid || casterGuid == itr->second->GetCasterGuid()))
+        if (((1 << spell->DispelType) & dispelMask) && (!casterGuid || casterGuid == itr->second->GetCasterGuid()))
         {
             // Dispel aura
-            RemoveAurasDueToSpell(spell->Id);
+            RemoveAurasDueToSpell(spell->ID);
             itr = auras.begin();
         }
         else
@@ -1223,10 +1223,10 @@ void Unit::RemoveAuraHolderFromStack(uint32 spellId, uint32 stackAmount, ObjectG
 void Unit::RemoveAurasDueToSpell(uint32 spellId, SpellAuraHolder* except, AuraRemoveMode mode)
 {
     SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellId);
-    if (spellEntry && spellEntry->SpellDifficultyId && IsInWorld() && GetMap()->IsDungeon())
-        if (SpellEntry const* spellDiffEntry = GetSpellEntryByDifficulty(spellEntry->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+    if (spellEntry && spellEntry->Difficulty && IsInWorld() && GetMap()->IsDungeon())
+        if (SpellEntry const* spellDiffEntry = GetSpellEntryByDifficulty(spellEntry->Difficulty, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
         {
-            spellId = spellDiffEntry->Id;
+            spellId = spellDiffEntry->ID;
         }
 
     SpellAuraHolderBounds bounds = GetSpellAuraHolderBounds(spellId);
@@ -1367,7 +1367,7 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
                     // remove from target if target found
                     if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
                     {
-                        itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+                        itr_target->RemoveAurasByCasterSpell(itr_spellEntry->ID, GetObjectGuid());
                     }
 
                     itr = scTargets.begin();                // list can be changed at remove aura
@@ -1383,7 +1383,7 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
                         // remove from target if target found
                         if (itr_target)
                         {
-                            itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+                            itr_target->RemoveAurasByCasterSpell(itr_spellEntry->ID, GetObjectGuid());
                         }
 
                         itr = scTargets.begin();            // list can be changed at remove aura
@@ -1815,10 +1815,10 @@ bool Unit::HasAura(uint32 spellId, SpellEffectIndex effIndex) const
 bool Unit::HasAuraOfDifficulty(uint32 spellId) const
 {
     SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellId);
-    if (spellEntry && spellEntry->SpellDifficultyId && IsInWorld() && GetMap()->IsDungeon())
-        if (SpellEntry const* spellDiffEntry = GetSpellEntryByDifficulty(spellEntry->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+    if (spellEntry && spellEntry->Difficulty && IsInWorld() && GetMap()->IsDungeon())
+        if (SpellEntry const* spellDiffEntry = GetSpellEntryByDifficulty(spellEntry->Difficulty, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
         {
-            spellId = spellDiffEntry->Id;
+            spellId = spellDiffEntry->ID;
         }
 
     return m_spellAuraHolders.find(spellId) != m_spellAuraHolders.end();

@@ -2113,7 +2113,7 @@ bool Creature::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectInd
         // Taunt aura apply check
         if (spellInfo->Effect[index] == SPELL_EFFECT_APPLY_AURA)
         {
-            if (spellInfo->EffectApplyAuraName[index] == SPELL_AURA_MOD_TAUNT)
+            if (spellInfo->EffectAura[index] == SPELL_AURA_MOD_TAUNT)
             {
                 return true;
             }
@@ -2172,15 +2172,15 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
             continue;
         }
 
-        if (spellInfo->manaCost > GetPower(POWER_MANA))
+        if (spellInfo->ManaCost > GetPower(POWER_MANA))
         {
             continue;
         }
-        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->RangeIndex);
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
 
-        float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+        float dist = GetCombatDistance(pVictim, spellInfo->RangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
@@ -2241,15 +2241,15 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
             continue;
         }
 
-        if (spellInfo->manaCost > GetPower(POWER_MANA))
+        if (spellInfo->ManaCost > GetPower(POWER_MANA))
         {
             continue;
         }
-        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->RangeIndex);
         float range = GetSpellMaxRange(srange);
         float minrange = GetSpellMinRange(srange);
 
-        float dist = GetCombatDistance(pVictim, spellInfo->rangeIndex == SPELL_RANGE_IDX_COMBAT);
+        float dist = GetCombatDistance(pVictim, spellInfo->RangeIndex == SPELL_RANGE_IDX_COMBAT);
 
         // if (!IsInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
@@ -2640,8 +2640,8 @@ bool Creature::LoadCreatureAddon(bool reload)
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(*cAura);  // Already checked on load
 
             // Get Difficulty mode for initial case (npc not yet added to world)
-            if (spellInfo->SpellDifficultyId && !reload && GetMap()->IsDungeon())
-                if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(spellInfo->SpellDifficultyId, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
+            if (spellInfo->Difficulty && !reload && GetMap()->IsDungeon())
+                if (SpellEntry const* spellEntry = GetSpellEntryByDifficulty(spellInfo->Difficulty, GetMap()->GetDifficulty(), GetMap()->IsRaid()))
                 {
                     spellInfo = spellEntry;
                 }
@@ -2748,21 +2748,21 @@ bool Creature::MeetsSelectAttackingRequirement(Unit* pTarget, SpellEntry const* 
         return false;
     }
 
-    if (pSpellInfo && selectFlags & SELECT_FLAG_IN_LOS && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, pSpellInfo->Id, pTarget, SPELL_DISABLE_LOS) && !IsWithinLOSInMap(pTarget))
+    if (pSpellInfo && selectFlags & SELECT_FLAG_IN_LOS && !DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, pSpellInfo->ID, pTarget, SPELL_DISABLE_LOS) && !IsWithinLOSInMap(pTarget))
     {
         return false;
     }
 
     if (pSpellInfo)
     {
-        switch (pSpellInfo->rangeIndex)
+        switch (pSpellInfo->RangeIndex)
         {
             case SPELL_RANGE_IDX_SELF_ONLY: return false;
             case SPELL_RANGE_IDX_ANYWHERE:  return true;
             case SPELL_RANGE_IDX_COMBAT:    return CanReachWithMeleeAttack(pTarget);
         }
 
-        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->rangeIndex);
+        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(pSpellInfo->RangeIndex);
         float max_range = GetSpellMaxRange(srange);
         float min_range = GetSpellMinRange(srange);
         float dist = GetCombatDistance(pTarget, false);

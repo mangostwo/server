@@ -197,7 +197,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             {
                 SpellEntry const* spellInfo = itr->second->GetSpellProto();
                 if (itr->second->IsPassive() && spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT)
-                        && (spellInfo->StancesNot & (1 << (form - 1))))
+                        && (spellInfo->ShapeshiftExclude & (1 << (form - 1))))
                 {
                     target->RemoveAurasDueToSpell(itr->second->GetId());
                     itr = tAuras.begin();
@@ -227,7 +227,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if (((Player*)target)->HasSpell(17007))
             {
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(24932);
-                if (spellInfo && spellInfo->Stances & (1 << (form - 1)))
+                if (spellInfo && spellInfo->ShapeshiftMask & (1 << (form - 1)))
                 {
                     target->CastSpell(target, 24932, true, NULL, this);
                 }
@@ -245,7 +245,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 Unit::AuraList const& modAuras = target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
                 for (Unit::AuraList::const_iterator i = modAuras.begin(); i != modAuras.end(); ++i)
                 {
-                    if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                    if ((*i)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DRUID &&
                             (*i)->GetSpellProto()->SpellIconID == 961)
                     {
                         int32 bp = (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
@@ -264,7 +264,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 Unit::AuraList const& dummyAuras = target->GetAurasByType(SPELL_AURA_DUMMY);
                 for (Unit::AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
                 {
-                    if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                    if ((*i)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DRUID &&
                             (*i)->GetSpellProto()->SpellIconID == 2855)
                     {
                         uint32 spell_id = 0;
@@ -338,7 +338,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 {
                     continue;
                 }
-                if (spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && (spellInfo->StancesNot & (1 << (form - 1))))
+                if (spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && (spellInfo->ShapeshiftExclude & (1 << (form - 1))))
                 {
                     target->CastSpell(target, itr->first, true, NULL, this);
                 }
@@ -668,18 +668,18 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
         if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
         {
             float DoneActualBenefit = 0.0f;
-            switch (spellProto->SpellFamilyName)
+            switch (spellProto->SpellClassSet)
             {
                 case SPELLFAMILY_GENERIC:
                     // Stoicism
-                    if (spellProto->Id == 70845)
+                    if (spellProto->ID == 70845)
                     {
                         DoneActualBenefit = caster->GetMaxHealth() * 0.20f;
                     }
                     break;
                 case SPELLFAMILY_PRIEST:
                     // Power Word: Shield
-                    if (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001))
+                    if (spellProto->SpellClassMask & UI64LIT(0x0000000000000001))
                     {
                         //+80.68% from +spell bonus
                         DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * 0.8068f;
@@ -688,7 +688,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                         for (Unit::AuraList::const_iterator itr = borrowedTime.begin(); itr != borrowedTime.end(); ++itr)
                         {
                             SpellEntry const* i_spell = (*itr)->GetSpellProto();
-                            if (i_spell->SpellFamilyName == SPELLFAMILY_PRIEST && i_spell->SpellIconID == 2899 && i_spell->EffectMiscValue[(*itr)->GetEffIndex()] == 24)
+                            if (i_spell->SpellClassSet == SPELLFAMILY_PRIEST && i_spell->SpellIconID == 2899 && i_spell->EffectMiscValue[(*itr)->GetEffIndex()] == 24)
                             {
                                 DoneActualBenefit += DoneActualBenefit * (*itr)->GetModifier()->m_amount / 100;
                                 break;
@@ -736,8 +736,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     else
     {
         if (// Power Word: Shield
-                spellProto->SpellFamilyName == SPELLFAMILY_PRIEST && spellProto->Mechanic == MECHANIC_SHIELD &&
-                (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001)) &&
+                spellProto->SpellClassSet == SPELLFAMILY_PRIEST && spellProto->Mechanic == MECHANIC_SHIELD &&
+                (spellProto->SpellClassMask & UI64LIT(0x0000000000000001)) &&
                 // completely absorbed or dispelled
                 (m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK || m_removeMode == AURA_REMOVE_BY_DISPEL))
         {
@@ -747,14 +747,14 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                 SpellEntry const* vSpell = (*itr)->GetSpellProto();
 
                 // Rapture (main spell)
-                if (vSpell->SpellFamilyName == SPELLFAMILY_PRIEST && vSpell->SpellIconID == 2894 && vSpell->Effect[EFFECT_INDEX_1])
+                if (vSpell->SpellClassSet == SPELLFAMILY_PRIEST && vSpell->SpellIconID == 2894 && vSpell->Effect[EFFECT_INDEX_1])
                 {
                     switch ((*itr)->GetEffIndex())
                     {
                         case EFFECT_INDEX_0:
                         {
                             // energize caster
-                            int32 manapct1000 = 5 * ((*itr)->GetModifier()->m_amount + sSpellMgr.GetSpellRank(vSpell->Id));
+                            int32 manapct1000 = 5 * ((*itr)->GetModifier()->m_amount + sSpellMgr.GetSpellRank(vSpell->ID));
                             int32 basepoints0 = caster->GetMaxPower(POWER_MANA) * manapct1000 / 1000;
                             caster->CastCustomSpell(caster, 47755, &basepoints0, NULL, NULL, true);
                             break;

@@ -135,7 +135,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                                 criteria->ID, criteria->Type, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.effect_idx);
                 return false;
             }
-            if (!spellEntry->EffectApplyAuraName[aura.effect_idx])
+            if (!spellEntry->EffectAura[aura.effect_idx])
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have non-aura spell effect (ID: %u Effect: %u), ignore.",
                                 criteria->ID, criteria->Type, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id, aura.effect_idx);

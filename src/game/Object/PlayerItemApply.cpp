@@ -690,7 +690,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
             bool found = false;
             for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
             {
-                SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->Id);
+                SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellInfo->ID);
                 for (SpellAuraHolderMap::const_iterator iter = spair.first; iter != spair.second; ++iter)
                 {
                     if (!item || iter->second->GetCastItemGuid() == item->GetObjectGuid())
@@ -711,7 +711,7 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
             }
         }
 
-        DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);
+        DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->ID);
 
         CastSpell(this, spellInfo, true, item);
     }
@@ -728,11 +728,11 @@ void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply
 
         if (item)
         {
-            RemoveAurasDueToItemSpell(item, spellInfo->Id); // un-apply all spells , not only at-equipped
+            RemoveAurasDueToItemSpell(item, spellInfo->ID); // un-apply all spells , not only at-equipped
         }
         else
         {
-            RemoveAurasDueToSpell(spellInfo->Id); // un-apply spell (item set case)
+            RemoveAurasDueToSpell(spellInfo->ID); // un-apply spell (item set case)
         }
     }
 }
@@ -855,7 +855,7 @@ void Player::DestroyItemWithOnStoreSpell(Item* item, uint32 spellId)
 void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo)
 {
     SpellAuraHolder const* dPoison = NULL;
-    SpellAuraHolderConstBounds holders = Target->GetSpellAuraHolderBounds(spellInfo->Id);
+    SpellAuraHolderConstBounds holders = Target->GetSpellAuraHolderBounds(spellInfo->ID);
     for (SpellAuraHolderMap::const_iterator iter = holders.first; iter != holders.second; ++iter)
     {
         if (iter->second->GetCaster() == this)
@@ -864,7 +864,7 @@ void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEn
             break;
         }
     }
-    if (dPoison && dPoison->GetStackAmount() == spellInfo->StackAmount)
+    if (dPoison && dPoison->GetStackAmount() == spellInfo->CumulativeAura)
     {
         Item* otherWeapon = GetWeaponForAttack(attType == BASE_ATTACK ? OFF_ATTACK : BASE_ATTACK);
         if (!otherWeapon)
@@ -893,7 +893,7 @@ void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEn
             }
 
             SpellEntry const* combatEntry = sSpellStore.LookupEntry(pSecondEnchant->EffectArg[s]);
-            if (combatEntry && combatEntry->Dispel == DISPEL_POISON)
+            if (combatEntry && combatEntry->DispelType == DISPEL_POISON)
             {
                 CastSpell(Target, combatEntry, true, otherWeapon);
             }
@@ -955,7 +955,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             return;
         }
 
-        float chance = (float)spellInfo->procChance;
+        float chance = (float)spellInfo->ProcChance;
 
         if (spellData.SpellPPMRate)
         {
@@ -969,7 +969,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 
         if (roll_chance_f(chance))
         {
-            CastSpell(Target, spellInfo->Id, true, item);
+            CastSpell(Target, spellInfo->ID, true, item);
         }
     }
 
@@ -998,31 +998,31 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
             }
 
             // Use first rank to access spell item enchant procs
-            float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->Id);
+            float ppmRate = sSpellMgr.GetItemEnchantProcChance(spellInfo->ID);
 
             float chance = ppmRate
                            ? GetPPMProcChance(proto->Delay, ppmRate)
                            : pEnchant->EffectPointsMin[s] != 0 ? float(pEnchant->EffectPointsMin[s]) : GetWeaponProcChance();
 
 
-            ApplySpellMod(spellInfo->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
-            ApplySpellMod(spellInfo->Id, SPELLMOD_FREQUENCY_OF_SUCCESS, chance);
+            ApplySpellMod(spellInfo->ID, SPELLMOD_CHANCE_OF_SUCCESS, chance);
+            ApplySpellMod(spellInfo->ID, SPELLMOD_FREQUENCY_OF_SUCCESS, chance);
 
             if (roll_chance_f(chance))
             {
-                if (IsPositiveSpell(spellInfo->Id))
+                if (IsPositiveSpell(spellInfo->ID))
                 {
-                    CastSpell(this, spellInfo->Id, true, item);
+                    CastSpell(this, spellInfo->ID, true, item);
                 }
                 else
                 {
                     // Deadly Poison, unique effect needs to be handled before casting triggered spell
-                    if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->SpellFamilyFlags & UI64LIT(0x10000))
+                    if (spellInfo->SpellClassSet == SPELLFAMILY_ROGUE && spellInfo->SpellClassMask & UI64LIT(0x10000))
                     {
                         _HandleDeadlyPoison(Target, attType, spellInfo);
                     }
 
-                    CastSpell(Target, spellInfo->Id, true, item);
+                    CastSpell(Target, spellInfo->ID, true, item);
                 }
             }
         }

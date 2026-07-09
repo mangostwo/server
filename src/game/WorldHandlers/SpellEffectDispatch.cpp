@@ -86,7 +86,7 @@ void Spell::HandleEffects(Unit* pUnitTarget, Item* pItemTarget, GameObject* pGOT
     damage = int32(CalculateDamage(i, unitTarget) * DamageMultiplier);
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u Effect%d : %u Targets: %s, %s, %s",
-                     m_spellInfo->Id, i, eff,
+                     m_spellInfo->ID, i, eff,
                      unitTarget ? unitTarget->GetGuidStr().c_str() : "-",
                      itemTarget ? itemTarget->GetGuidStr().c_str() : "-",
                      gameObjTarget ? gameObjTarget->GetGuidStr().c_str() : "-");
@@ -112,7 +112,7 @@ void Spell::AddTriggeredSpell(uint32 spellId)
 
     if (!spellInfo)
     {
-        sLog.outError("Spell::AddTriggeredSpell: unknown spell id %u used as triggred spell for spell %u)", spellId, m_spellInfo->Id);
+        sLog.outError("Spell::AddTriggeredSpell: unknown spell id %u used as triggred spell for spell %u)", spellId, m_spellInfo->ID);
         return;
     }
 
@@ -130,7 +130,7 @@ void Spell::AddPrecastSpell(uint32 spellId)
 
     if (!spellInfo)
     {
-        sLog.outError("Spell::AddPrecastSpell: unknown spell id %u used as pre-cast spell for spell %u)", spellId, m_spellInfo->Id);
+        sLog.outError("Spell::AddPrecastSpell: unknown spell id %u used as pre-cast spell for spell %u)", spellId, m_spellInfo->ID);
         return;
     }
 

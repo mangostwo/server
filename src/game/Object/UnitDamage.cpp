@@ -230,7 +230,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
         SpellEntry const* i_spellProto = (*i)->GetSpellProto();
         // Fire Ward or Frost Ward
-        if (i_spellProto->SpellFamilyName == SPELLFAMILY_MAGE && i_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000108))
+        if (i_spellProto->SpellClassSet == SPELLFAMILY_MAGE && i_spellProto->SpellClassMask & UI64LIT(0x0000000000000108))
         {
             int chance = 0;
             Unit::AuraList const& auras = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
@@ -238,7 +238,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             {
                 SpellEntry const* itr_spellProto = (*itr)->GetSpellProto();
                 // Frost Warding (chance full absorb)
-                if (itr_spellProto->SpellFamilyName == SPELLFAMILY_MAGE && itr_spellProto->SpellIconID == 501)
+                if (itr_spellProto->SpellClassSet == SPELLFAMILY_MAGE && itr_spellProto->SpellIconID == 501)
                 {
                     // chance stored in next dummy effect
                     chance = itr_spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
@@ -288,7 +288,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         // Handle custom absorb auras
         // TODO: try find better way
 
-        switch (spellProto->SpellFamilyName)
+        switch (spellProto->SpellClassSet)
         {
             case SPELLFAMILY_GENERIC:
             {
@@ -322,7 +322,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     continue;
                 }
                 // Reflective Shield (Lady Malande boss)
-                if (spellProto->Id == 41475 && canReflect)
+                if (spellProto->ID == 41475 && canReflect)
                 {
                     if (RemainingDamage < currentAbsorb)
                     {
@@ -337,8 +337,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     reflectTriggeredBy->SetInUse(true);     // lock aura from final deletion until processing
                     break;
                 }
-                if (spellProto->Id == 39228 ||              // Argussian Compass
-                        spellProto->Id == 60218)            // Essence of Gossamer
+                if (spellProto->ID == 39228 ||              // Argussian Compass
+                        spellProto->ID == 60218)            // Essence of Gossamer
                 {
                     // Max absorb stored in 1 dummy effect
                     int32 max_absorb = spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
@@ -363,7 +363,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     continue;
                 }
                 // Moonkin Form passive
-                if (spellProto->Id == 69366)
+                if (spellProto->ID == 69366)
                 {
                     // reduces all damage taken while Stunned
                     if (unitflag & UNIT_FLAG_STUNNED)
@@ -464,7 +464,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     continue;
                 }
                 // Anti-Magic Shell (on self)
-                if (spellProto->Id == 48707)
+                if (spellProto->ID == 48707)
                 {
                     // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
                     // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
@@ -475,13 +475,13 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     continue;
                 }
                 // Anti-Magic Shell (on single party/raid member)
-                if (spellProto->Id == 50462)
+                if (spellProto->ID == 50462)
                 {
                     RemainingDamage -= RemainingDamage * currentAbsorb / 100;
                     continue;
                 }
                 // Anti-Magic Zone
-                if (spellProto->Id == 50461)
+                if (spellProto->ID == 50461)
                 {
                     Unit* caster = (*i)->GetCaster();
                     if (!caster)
@@ -583,7 +583,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             currentAbsorb = RemainingDamage;
         }
 
-        if (float manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()])
+        if (float manaMultiplier = (*i)->GetSpellProto()->EffectAmplitude[(*i)->GetEffIndex()])
         {
             if (Player* modOwner = GetSpellModOwner())
             {
@@ -627,7 +627,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             SpellEntry const* itr_spellProto = (*itr)->GetSpellProto();
 
             // Incanter's Absorption
-            if (itr_spellProto->SpellFamilyName == SPELLFAMILY_GENERIC &&
+            if (itr_spellProto->SpellClassSet == SPELLFAMILY_GENERIC &&
                     itr_spellProto->SpellIconID == 2941)
             {
                 int32 amount = int32(incanterAbsorption * (*itr)->GetModifier()->m_amount / 100);
@@ -683,7 +683,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             uint32 splitted_absorb = 0;
             pCaster->DealDamageMods(caster, splitted, &splitted_absorb);
 
-            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, false, 0, false);
+            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->ID, splitted, schoolMask, splitted_absorb, 0, false, 0, false);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
@@ -714,7 +714,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             uint32 split_absorb = 0;
             pCaster->DealDamageMods(caster, splitted, &split_absorb);
 
-            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, false, 0, false);
+            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->ID, splitted, schoolMask, split_absorb, 0, false, 0, false);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
             pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
@@ -727,7 +727,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
     // Apply death prevention spells effects
     if (preventDeathSpell && RemainingDamage >= (int32)GetHealth())
     {
-        switch (preventDeathSpell->SpellFamilyName)
+        switch (preventDeathSpell->SpellClassSet)
         {
                 // Cheat Death
             case SPELLFAMILY_ROGUE:
@@ -751,7 +751,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 {
                     int32 healAmount = GetMaxHealth() * preventDeathAmount / 100;
                     CastCustomSpell(this, 48153, &healAmount, NULL, NULL, true);
-                    RemoveAurasDueToSpell(preventDeathSpell->Id);
+                    RemoveAurasDueToSpell(preventDeathSpell->ID);
                     RemainingDamage = 0;
                 }
                 break;
@@ -774,7 +774,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 {
     bool blocked = false;
     // Get blocked status
-    switch (spellProto->DmgClass)
+    switch (spellProto->DefenseType)
     {
             // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:

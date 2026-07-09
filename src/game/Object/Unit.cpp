@@ -930,7 +930,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         }
 
         // Spirit of Redemtion Talent
-        bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
+        bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->ID == 27795;
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
         if (!damageFromSpiritOfRedemtionTalent &&           // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
@@ -1220,14 +1220,14 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
                     }
                     else if ((channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)))
                     {
-                        DETAIL_LOG("Spell %u canceled at damage!", spell->m_spellInfo->Id);
+                        DETAIL_LOG("Spell %u canceled at damage!", spell->m_spellInfo->ID);
                         pVictim->InterruptSpell(CURRENT_CHANNELED_SPELL);
                     }
                 }
                 else if (spell->getState() == SPELL_STATE_DELAYED)
                     // break channeled spell in delayed state on damage
                 {
-                    DETAIL_LOG("Spell %u canceled at damage!", spell->m_spellInfo->Id);
+                    DETAIL_LOG("Spell %u canceled at damage!", spell->m_spellInfo->ID);
                     pVictim->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 }
             }
@@ -1301,7 +1301,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         if (creator && creator->GetCharmGuid() == victim->GetObjectGuid())
         {
             Spell* channeledSpell = creator->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
-            if (channeledSpell && channeledSpell->m_spellInfo->Id == spellInfo->Id)
+            if (channeledSpell && channeledSpell->m_spellInfo->ID == spellInfo->ID)
             {
                 creator->InterruptNonMeleeSpells(false);
             }
@@ -1442,7 +1442,7 @@ void Unit::CastStop(uint32 except_spellid)
 {
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
     {
-        if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id != except_spellid)
+        if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->ID != except_spellid)
         {
             InterruptSpell(CurrentSpellTypes(i), false);
         }
@@ -1508,7 +1508,7 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
 
     if (castItem)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->ID);
     }
 
     if (triggeredByAura)
@@ -1522,7 +1522,7 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
     }
     else
     {
-        triggeredByAura = GetTriggeredByClientAura(spellInfo->Id);
+        triggeredByAura = GetTriggeredByClientAura(spellInfo->ID);
         if (triggeredByAura)
         {
             triggered = true;
@@ -1614,7 +1614,7 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 cons
 
     if (castItem)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->ID);
     }
 
     if (triggeredByAura)
@@ -1700,7 +1700,7 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const* spellInfo, boo
 
     if (castItem)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
+        DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->ID);
     }
 
     if (triggeredByAura)
@@ -1740,7 +1740,7 @@ void Unit::CastSpell(float x, float y, float z, SpellEntry const* spellInfo, boo
 uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage)
 {
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellID);
-    SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
+    SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->ID, SpellSchoolMask(spellInfo->SchoolMask));
     CalculateSpellDamage(&damageInfo, damage, spellInfo);
     damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
     DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb);
@@ -1780,7 +1780,7 @@ void Unit::CalculateSpellDamage(SpellNonMeleeDamage* damageInfo, int32 damage, S
     bool crit = IsSpellCrit(pVictim, spellInfo, damageSchoolMask, attackType);
 
     // damage bonus (per damage class)
-    switch (spellInfo->DmgClass)
+    switch (spellInfo->DefenseType)
     {
             // Melee and Ranged Spells
         case SPELL_DAMAGE_CLASS_RANGED:
@@ -2155,7 +2155,7 @@ void Unit::_UpdateSpells(uint32 time)
  */
 void Unit::_UpdateAutoRepeatSpell()
 {
-    bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == SPELL_ID_AUTOSHOT;
+    bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->ID == SPELL_ID_AUTOSHOT;
 
     // check movement
     if (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving())
@@ -2235,7 +2235,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
             {
                 // break autorepeat if not Auto Shot
-                if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
+                if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->ID != SPELL_ID_AUTOSHOT)
                 {
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 }
@@ -2250,7 +2250,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
 
             // it also does break autorepeat if not Auto Shot
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
-                    m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
+                    m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->ID != SPELL_ID_AUTOSHOT)
                     {
                         InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                     }
@@ -2259,7 +2259,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
         case CURRENT_AUTOREPEAT_SPELL:
         {
             // only Auto Shoot does not break anything
-            if (pSpell->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
+            if (pSpell->m_spellInfo->ID != SPELL_ID_AUTOSHOT)
             {
                 // generic autorepeats break generic non-delayed and channeled non-delayed spells
                 InterruptSpell(CURRENT_GENERIC_SPELL, false);
@@ -2398,19 +2398,19 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
 void Unit::InterruptNonMeleeSpells(bool withDelayed, uint32 spell_id)
 {
     // generic spells are interrupted if they are not finished or delayed
-    if (m_currentSpells[CURRENT_GENERIC_SPELL] && (!spell_id || m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spell_id))
+    if (m_currentSpells[CURRENT_GENERIC_SPELL] && (!spell_id || m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->ID == spell_id))
     {
         InterruptSpell(CURRENT_GENERIC_SPELL, withDelayed);
     }
 
     // autorepeat spells are interrupted if they are not finished or delayed
-    if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] && (!spell_id || m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == spell_id))
+    if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] && (!spell_id || m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->ID == spell_id))
     {
         InterruptSpell(CURRENT_AUTOREPEAT_SPELL, withDelayed);
     }
 
     // channeled spells are interrupted if they are not finished, even if they are delayed
-    if (m_currentSpells[CURRENT_CHANNELED_SPELL] && (!spell_id || m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id == spell_id))
+    if (m_currentSpells[CURRENT_CHANNELED_SPELL] && (!spell_id || m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ID == spell_id))
     {
         InterruptSpell(CURRENT_CHANNELED_SPELL, true);
     }
@@ -2426,7 +2426,7 @@ Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
     {
-        if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id == spell_id)
+        if (m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->ID == spell_id)
         {
             return m_currentSpells[i];
         }
@@ -3603,7 +3603,7 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellPro
     }
 
     // overheal = addhealth - gain
-    unit->SendHealSpellLog(pVictim, spellProto->Id, addhealth, addhealth - gain, critical, absorb);
+    unit->SendHealSpellLog(pVictim, spellProto->ID, addhealth, addhealth - gain, critical, absorb);
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
     {
@@ -3652,7 +3652,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
     }
 
     // Magic case
-    if (spell && spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+    if (spell && spell->m_spellInfo->DefenseType == SPELL_DAMAGE_CLASS_MAGIC)
     {
         Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
         for (Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
@@ -3840,7 +3840,7 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
  */
 void Unit::ApplySpellDispelImmunity(const SpellEntry* spellProto, DispelType type, bool apply)
 {
-    ApplySpellImmune(spellProto->Id, IMMUNITY_DISPEL, type, apply);
+    ApplySpellImmune(spellProto->ID, IMMUNITY_DISPEL, type, apply);
 
     if (apply && spellProto->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
     {
@@ -4467,21 +4467,21 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
     uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
 
     int32 level = int32(getLevel());
-    if (level > (int32)spellProto->maxLevel && spellProto->maxLevel > 0)
+    if (level > (int32)spellProto->MaxLevel && spellProto->MaxLevel > 0)
     {
-        level = (int32)spellProto->maxLevel;
+        level = (int32)spellProto->MaxLevel;
     }
-    else if (level < (int32)spellProto->baseLevel)
+    else if (level < (int32)spellProto->BaseLevel)
     {
-        level = (int32)spellProto->baseLevel;
+        level = (int32)spellProto->BaseLevel;
     }
-    level -= (int32)spellProto->spellLevel;
+    level -= (int32)spellProto->SpellLevel;
 
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     int32 basePoints = effBasePoints ? *effBasePoints - 1 : spellProto->EffectBasePoints[effect_index];
     basePoints += int32(level * basePointsPerLevel);
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index]);
-    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
+    float comboDamage = spellProto->EffectPointsPerCombo[effect_index];
 
     switch (randomPoints)
     {
@@ -4509,28 +4509,28 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
 
     if (Player* modOwner = GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
+        modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_ALL_EFFECTS, value);
 
         switch (effect_index)
         {
             case EFFECT_INDEX_0:
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT1, value);
+                modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_EFFECT1, value);
                 break;
             case EFFECT_INDEX_1:
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT2, value);
+                modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_EFFECT2, value);
                 break;
             case EFFECT_INDEX_2:
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT3, value);
+                modOwner->ApplySpellMod(spellProto->ID, SPELLMOD_EFFECT3, value);
                 break;
         }
     }
 
-    if (spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel &&
+    if (spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->SpellLevel &&
         spellProto->Effect[effect_index] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
         spellProto->Effect[effect_index] != SPELL_EFFECT_KNOCK_BACK &&
-        (spellProto->Effect[effect_index] != SPELL_EFFECT_APPLY_AURA || spellProto->EffectApplyAuraName[effect_index] != SPELL_AURA_MOD_DECREASE_SPEED))
+        (spellProto->Effect[effect_index] != SPELL_EFFECT_APPLY_AURA || spellProto->EffectAura[effect_index] != SPELL_AURA_MOD_DECREASE_SPEED))
         {
-            value = int32(value * 0.25f * exp(getLevel() * (70 - spellProto->spellLevel) / 1000.0f));
+            value = int32(value * 0.25f * exp(getLevel() * (70 - spellProto->SpellLevel) / 1000.0f));
         }
 
     return value;
@@ -4564,8 +4564,8 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
 
     if (!IsPositiveSpell(spellProto))
     {
-        dispelMod   = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->Dispel);
-        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS, spellProto->DmgClass);
+        dispelMod   = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_EFFECTS_BY_DISPEL, spellProto->DispelType);
+        dmgClassMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS, spellProto->DefenseType);
     }
 
     int32 durationMod = std::min(mechanicMod, std::min(dispelMod, dmgClassMod));
@@ -4582,11 +4582,11 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
 
     if (caster == this)
     {
-        switch (spellProto->SpellFamilyName)
+        switch (spellProto->SpellClassSet)
         {
             case SPELLFAMILY_DRUID:
                 // Thorns
-                if (spellProto->SpellIconID == 53 && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000100)))
+                if (spellProto->SpellIconID == 53 && (spellProto->SpellClassMask & UI64LIT(0x0000000000000100)))
                 {
                     // Glyph of Thorns
                     if (Aura* aur = GetAura(57862, EFFECT_INDEX_0))
@@ -4597,7 +4597,7 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
                 break;
             case SPELLFAMILY_PALADIN:
                 // Blessing of Might
-                if (spellProto->SpellIconID == 298 && spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000002))
+                if (spellProto->SpellIconID == 298 && spellProto->SpellClassMask & UI64LIT(0x0000000000000002))
                 {
                     // Glyph of Blessing of Might
                     if (Aura* aur = GetAura(57958, EFFECT_INDEX_0))
@@ -4606,7 +4606,7 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellProto, uint32 effectMas
                     }
                 }
                 // Blessing of Wisdom
-                else if (spellProto->SpellIconID == 306 && spellProto->SpellFamilyFlags & UI64LIT(0x0000000000010000))
+                else if (spellProto->SpellIconID == 306 && spellProto->SpellClassMask & UI64LIT(0x0000000000010000))
                 {
                     // Glyph of Blessing of Wisdom
                     if (Aura* aur = GetAura(57979, EFFECT_INDEX_0))
@@ -4998,7 +4998,7 @@ void CharmInfo::InitCharmCreateSpells()
 
             for (uint32 i = 0; i < 3 && onlyselfcast; ++i)  // nonexistent spell will not make any problems as onlyselfcast would be false -> break right away
             {
-                if (spellInfo->EffectImplicitTargetA[i] != TARGET_SELF && spellInfo->EffectImplicitTargetA[i] != 0)
+                if (spellInfo->ImplicitTargetA[i] != TARGET_SELF && spellInfo->ImplicitTargetA[i] != 0)
                 {
                     onlyselfcast = false;
                 }
@@ -5372,8 +5372,8 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
             // check if the aura is interruptible by damage
             if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE)
             {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
-                removedSpells.push_back(se->Id);
+                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->ID);
+                removedSpells.push_back(se->ID);
             }
             continue;
         }
@@ -5450,7 +5450,7 @@ void Unit::ProcDamageAndSpellFor(bool isVictim, Unit* pTarget, uint32 procFlag, 
                     }
                 }
 
-                SpellAuraProcResult procResult = (*this.*AuraProcHandler[triggeredByHolder->GetSpellProto()->EffectApplyAuraName[i]])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
+                SpellAuraProcResult procResult = (*this.*AuraProcHandler[triggeredByHolder->GetSpellProto()->EffectAura[i]])(pTarget, damage, triggeredByAura, procSpell, procFlag, procExtra, cooldown);
                 switch (procResult)
                 {
                     case SPELL_AURA_PROC_CANT_TRIGGER:
@@ -6150,7 +6150,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
     for (Unit::SpellAuraHolderMap::iterator iter = auras.begin(); iter != auras.end();)
     {
         SpellEntry const* spell = iter->second->GetSpellProto();
-        if (spell->Id == exceptSpellId)
+        if (spell->ID == exceptSpellId)
         {
             ++iter;
         }
@@ -6164,7 +6164,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
         }
         else if (iter->second->HasMechanicMask(mechMask))
         {
-            RemoveAurasDueToSpell(spell->Id);
+            RemoveAurasDueToSpell(spell->ID);
 
             if (auras.empty())
             {

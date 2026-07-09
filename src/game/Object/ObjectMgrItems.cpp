@@ -965,7 +965,7 @@ void ObjectMgr::LoadItemRequiredTarget()
             {
                 if (pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                 {
-                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->Id);
+                    SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->ID);
                     if (bounds.first != bounds.second)
                     {
                         break;
@@ -973,10 +973,10 @@ void ObjectMgr::LoadItemRequiredTarget()
 
                     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
                     {
-                        if (pSpellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
-                            pSpellInfo->EffectImplicitTargetB[j] == TARGET_CHAIN_DAMAGE ||
-                            pSpellInfo->EffectImplicitTargetA[j] == TARGET_DUELVSPLAYER ||
-                            pSpellInfo->EffectImplicitTargetB[j] == TARGET_DUELVSPLAYER)
+                        if (pSpellInfo->ImplicitTargetA[j] == TARGET_CHAIN_DAMAGE ||
+                            pSpellInfo->ImplicitTargetB[j] == TARGET_CHAIN_DAMAGE ||
+                            pSpellInfo->ImplicitTargetA[j] == TARGET_DUELVSPLAYER ||
+                            pSpellInfo->ImplicitTargetB[j] == TARGET_DUELVSPLAYER)
                         {
                             bIsItemSpellValid = true;
                             break;
