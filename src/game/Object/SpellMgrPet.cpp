@@ -139,16 +139,16 @@ void SpellMgr::LoadPetLevelupSpellMap()
                 continue;
             }
 
-            if (skillLine->skillId != creatureFamily->skillLine[0] &&
-                    (!creatureFamily->skillLine[1] || skillLine->skillId != creatureFamily->skillLine[1]))
+            if (skillLine->SkillLine != creatureFamily->SkillLine[0] &&
+                    (!creatureFamily->SkillLine[1] || skillLine->SkillLine != creatureFamily->SkillLine[1]))
                 continue;
 
-            if (skillLine->learnOnGetSkill != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+            if (skillLine->AcquireMethod != ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
             {
                 continue;
             }
 
-            SpellEntry const* spell = sSpellStore.LookupEntry(skillLine->spellId);
+            SpellEntry const* spell = sSpellStore.LookupEntry(skillLine->Spell);
             if (!spell)                                     // not exist
             {
                 continue;

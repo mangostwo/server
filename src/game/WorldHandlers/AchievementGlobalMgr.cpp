@@ -158,13 +158,13 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
         bar.step();
 
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(entryId);
-        if (!achievement || !achievement->refAchievement)
+        if (!achievement || !achievement->Shares_criteria)
         {
             continue;
         }
 
         // Check refAchievement exists
-        AchievementEntry const* refAchiev = sAchievementStore.LookupEntry(achievement->refAchievement);
+        AchievementEntry const* refAchiev = sAchievementStore.LookupEntry(achievement->Shares_criteria);
         if (!refAchiev)
         {
             sLog.outDetail("Removed achieviement %u, because referred achievement does not exist", entryId);
@@ -172,7 +172,7 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
             continue;
         }
 
-        m_AchievementListByReferencedId[achievement->refAchievement].push_back(achievement);
+        m_AchievementListByReferencedId[achievement->Shares_criteria].push_back(achievement);
         ++count;
     }
 

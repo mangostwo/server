@@ -1459,7 +1459,7 @@ bool ChatHandler::HandleGoGraveyardCommand(char* args)
         return false;
     }
 
-    return HandleGoHelper(_player, gy->map_id, gy->x, gy->y, &gy->z);
+    return HandleGoHelper(_player, gy->Continent, gy->LocX, gy->LocY, &gy->LocZ);
 }
 
 /**

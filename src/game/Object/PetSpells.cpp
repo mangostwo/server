@@ -800,7 +800,7 @@ bool Pet::resetTalents(bool no_cost)
     }
     // Check pet talent type
     CreatureFamilyEntry const* pet_family = sCreatureFamilyStore.LookupEntry(ci->Family);
-    if (!pet_family || pet_family->petTalentType < 0)
+    if (!pet_family || pet_family->PetTalentType < 0)
     {
         return false;
     }
@@ -840,7 +840,7 @@ bool Pet::resetTalents(bool no_cost)
         }
 
         // unlearn only talents for pets family talent type
-        if (!((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask))
+        if (!((1 << pet_family->PetTalentType) & talentTabInfo->PetTalentMask))
         {
             continue;
         }

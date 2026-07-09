@@ -1262,7 +1262,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             {
                 if (SummonPropertiesEntry const* summon_prop = sSummonPropertiesStore.LookupEntry(m_spellInfo->EffectMiscValueB[i]))
                 {
-                    if (summon_prop->Group == SUMMON_PROP_GROUP_PETS)
+                    if (summon_prop->Control == SUMMON_PROP_GROUP_PETS)
                     {
                         if (m_caster->GetPetGuid())
                         {

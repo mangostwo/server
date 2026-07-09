@@ -573,7 +573,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                                 return false;
                             }
 
-                            SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skillInfo->skillId);
+                            SkillLineEntry const* skillLine = sSkillLineStore.LookupEntry(skillInfo->SkillLine);
                             if (!skillLine)
                             {
                                 return false;
@@ -684,7 +684,7 @@ bool ChatHandler::isValidChatMessage(const char* message)
                         bool foundName = false;
                         for (uint8 i = 0; i < MAX_LOCALE; ++i)
                         {
-                            if (*linkedAchievement->name[i] && strcmp(linkedAchievement->name[i], buffer) == 0)
+                            if (*linkedAchievement->Title_lang[i] && strcmp(linkedAchievement->Title_lang[i], buffer) == 0)
                             {
                                 foundName = true;
                                 break;

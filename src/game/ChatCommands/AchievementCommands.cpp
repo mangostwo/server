@@ -82,7 +82,7 @@ void ChatHandler::ShowAchievementCriteriaListHelper(AchievementCriteriaEntry con
         ss << " = " << target->GetAchievementMgr().GetCriteriaProgressCounter(criEntry);
     }
 
-    if (achEntry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achEntry->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         ss << GetMangosString(LANG_COUNTER);
     }
@@ -166,7 +166,7 @@ bool ChatHandler::HandleAchievementAddCommand(char* args)
     }
 
     AchievementEntry const* achEntry = sAchievementStore.LookupEntry(achId);
-    if (!achEntry || achEntry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (!achEntry || achEntry->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         PSendSysMessage(LANG_ACHIEVEMENT_NOT_EXIST, achId);
         SetSentErrorMessage(true);

@@ -308,7 +308,7 @@ void ObjectMgr::LoadInstanceEncounters()
                 CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(creditEntry);
                 if (!cInfo)
                 {
-                    sLog.outErrorDb("Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->encounterName[0]);
+                    sLog.outErrorDb("Table `instance_encounters` has an invalid creature (entry %u) linked to the encounter %u (%s), skipped!", creditEntry, entry, dungeonEncounter->Name_lang[0]);
                     continue;
                 }
                 break;
@@ -324,7 +324,7 @@ void ObjectMgr::LoadInstanceEncounters()
                 break;
             }
             default:
-                sLog.outErrorDb("Table `instance_encounters` has an invalid credit type (%u) for encounter %u (%s), skipped!", creditType, entry, dungeonEncounter->encounterName[0]);
+                sLog.outErrorDb("Table `instance_encounters` has an invalid credit type (%u) for encounter %u (%s), skipped!", creditType, entry, dungeonEncounter->Name_lang[0]);
                 continue;
         }
         uint32 lastEncounterDungeon = fields[3].GetUInt32();

@@ -167,7 +167,7 @@ void SpellMgr::LoadSpellChains()
             uint32 spell_id = ab_itr->first;
 
             // skip GM/test/internal spells.begin Its not have ranks anyway
-            if (ab_itr->second->skillId == SKILL_INTERNAL)
+            if (ab_itr->second->SkillLine == SKILL_INTERNAL)
             {
                 continue;
             }
@@ -180,7 +180,7 @@ void SpellMgr::LoadSpellChains()
             }
 
             // ignore spell without forwards (non ranked or missing info in skill abilities)
-            uint32 forward_id = ab_itr->second->forward_spellid;
+            uint32 forward_id = ab_itr->second->SupercededBySpell;
             if (!forward_id)
             {
                 continue;
@@ -398,7 +398,7 @@ void SpellMgr::LoadSpellChains()
                 {
                     // spell listed as forward and not listed as ability
                     // this is marker for removed ranks
-                    if (ab_itr->second->forward_spellid == spell_id)
+                    if (ab_itr->second->SupercededBySpell == spell_id)
                     {
                         sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` is removed rank by DBC data.",
                                         spell_id, node.prev, node.first, node.rank, node.req);

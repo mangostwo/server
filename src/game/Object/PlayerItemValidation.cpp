@@ -1363,7 +1363,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
 
             ScalingStatDistributionEntry const* ssd = pProto->ScalingStatDistribution ? sScalingStatDistributionStore.LookupEntry(pProto->ScalingStatDistribution) : 0;
             // check allowed level (extend range to upper values if MaxLevel more or equal max player level, this let GM set high level with 1...max range items)
-            if (ssd && ssd->MaxLevel < DEFAULT_MAX_LEVEL && ssd->MaxLevel < getLevel())
+            if (ssd && ssd->Maxlevel < DEFAULT_MAX_LEVEL && ssd->Maxlevel < getLevel())
             {
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
             }
@@ -1857,18 +1857,18 @@ InventoryResult Player::CanUseItem(Item* pItem, bool direct_action) const
                             continue;
                         }
 
-                        if (skillInfo->skillId != item_use_skill)
+                        if (skillInfo->SkillLine != item_use_skill)
                         {
                             continue;
                         }
 
                         // can't learn
-                        if (skillInfo->classmask && (skillInfo->classmask & getClassMask()) == 0)
+                        if (skillInfo->ClassMask && (skillInfo->ClassMask & getClassMask()) == 0)
                         {
                             continue;
                         }
 
-                        if (skillInfo->racemask && (skillInfo->racemask & getRaceMask()) == 0)
+                        if (skillInfo->RaceMask && (skillInfo->RaceMask & getRaceMask()) == 0)
                         {
                             continue;
                         }

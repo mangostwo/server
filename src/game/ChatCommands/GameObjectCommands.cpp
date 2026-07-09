@@ -44,7 +44,7 @@
   ***********************************************************************/
 void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date /*= NULL*/, Player* target /*= NULL */)
 {
-    std::string name = achEntry->name[loc];
+    std::string name = achEntry->Title_lang[loc];
 
     ObjectGuid guid = target ? target->GetObjectGuid() : ObjectGuid();
 

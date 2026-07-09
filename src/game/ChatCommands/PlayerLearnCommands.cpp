@@ -814,7 +814,7 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
         return false;
     }
 
-    if (pet_family->petTalentType < 0)                      // not hunter pet
+    if (pet_family->PetTalentType < 0)                      // not hunter pet
     {
         SendSysMessage(LANG_WRONG_PET_TYPE);
         SetSentErrorMessage(true);
@@ -836,7 +836,7 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
         }
 
         // prevent learn talent for different family (cheating)
-        if (((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask) == 0)
+        if (((1 << pet_family->PetTalentType) & talentTabInfo->PetTalentMask) == 0)
         {
             continue;
         }
@@ -898,7 +898,7 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(char* /*args*/)
             continue;
         }
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry->spellId);
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry->Spell);
         if (!spellInfo)
         {
             continue;
@@ -1135,36 +1135,36 @@ void ChatHandler::HandleLearnSkillRecipesHelper(Player* player, uint32 skill_id)
         }
 
         // wrong skill
-        if (skillLine->skillId != skill_id)
+        if (skillLine->SkillLine != skill_id)
         {
             continue;
         }
 
         // not high rank
-        if (skillLine->forward_spellid)
+        if (skillLine->SupercededBySpell)
         {
             continue;
         }
 
         // skip racial skills
-        if (skillLine->racemask != 0)
+        if (skillLine->RaceMask != 0)
         {
             continue;
         }
 
         // skip wrong class skills
-        if (skillLine->classmask && (skillLine->classmask & classmask) == 0)
+        if (skillLine->ClassMask && (skillLine->ClassMask & classmask) == 0)
         {
             continue;
         }
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->Spell);
         if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, player, false))
         {
             continue;
         }
 
-        player->learnSpell(skillLine->spellId, false);
+        player->learnSpell(skillLine->Spell, false);
     }
 }
 

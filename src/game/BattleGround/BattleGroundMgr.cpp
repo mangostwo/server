@@ -954,9 +954,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         WorldSafeLocsEntry const* start = sWorldSafeLocsStore.LookupEntry(start1);
         if (start)
         {
-            AStartLoc[0] = start->x;
-            AStartLoc[1] = start->y;
-            AStartLoc[2] = start->z;
+            AStartLoc[0] = start->LocX;
+            AStartLoc[1] = start->LocY;
+            AStartLoc[2] = start->LocZ;
             AStartLoc[3] = fields[4].GetFloat();
         }
         else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB)
@@ -977,9 +977,9 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         start = sWorldSafeLocsStore.LookupEntry(start2);
         if (start)
         {
-            HStartLoc[0] = start->x;
-            HStartLoc[1] = start->y;
-            HStartLoc[2] = start->z;
+            HStartLoc[0] = start->LocX;
+            HStartLoc[1] = start->LocY;
+            HStartLoc[2] = start->LocZ;
             HStartLoc[3] = fields[6].GetFloat();
         }
         else if (bgTypeID == BATTLEGROUND_AA || bgTypeID == BATTLEGROUND_RB)

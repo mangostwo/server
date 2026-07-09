@@ -2556,7 +2556,7 @@ uint32 SpellMgr::GetProfessionSpellMinLevel(uint32 spellId)
         return 0;
     }
 
-    switch (bounds.first->second->skillId)
+    switch (bounds.first->second->SkillLine)
     {
         case SKILL_FISHING:
             return s2l[rank][2];
@@ -2593,12 +2593,12 @@ bool SpellMgr::IsSkillBonusSpell(uint32 spellId) const
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
         SkillLineAbilityEntry const* pAbility = _spell_idx->second;
-        if (!pAbility || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+        if (!pAbility || pAbility->AcquireMethod != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
         {
             continue;
         }
 
-        if (pAbility->req_skill_value > 0)
+        if (pAbility->MinSkillLineRank > 0)
         {
             return true;
         }

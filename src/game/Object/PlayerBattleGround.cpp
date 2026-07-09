@@ -153,7 +153,7 @@ void Player::SetBattleGroundEntryPoint()
         {
             if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
             {
-                m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
+                m_bgData.joinPos = WorldLocation(entry->Continent, entry->LocX, entry->LocY, entry->LocZ, 0.0f);
                 m_bgData.m_needSave = true;
                 return;
             }

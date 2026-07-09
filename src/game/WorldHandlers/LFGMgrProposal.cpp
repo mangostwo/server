@@ -565,7 +565,7 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         return;
     }
 
-    pGroup->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+    pGroup->SetDungeonDifficulty(Difficulty(dungeon->Difficulty));
 
     // Add group to our group set and group map, then teleport to the dungeon
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
@@ -588,7 +588,7 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
         return;
     }
 
-    uint32 mapID = (uint32)dungeon->mapID;
+    uint32 mapID = (uint32)dungeon->MapID;
     float x, y, z, o;
     LFGTeleportError err = LFG_TELEPORTERROR_OK;
 
@@ -694,7 +694,7 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out)
     if (out)
     {
         LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-        if (dungeon && pPlayer->GetMapId() == dungeon->mapID)
+        if (dungeon && pPlayer->GetMapId() == dungeon->MapID)
         {
             pPlayer->TeleportToBGEntryPoint();
         }
@@ -878,7 +878,7 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
             // check if player did a random dungeon
             uint32 randomDungeonId = 0;
             LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-            if (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON || IsSeasonal(dungeon->flags))
+            if (dungeon->TypeID == LFG_TYPE_RANDOM_DUNGEON || IsSeasonal(dungeon->Flags))
             {
                 randomDungeonId = dungeon->ID;
             }
