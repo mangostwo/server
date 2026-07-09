@@ -4553,9 +4553,9 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     if (!res)
     {
         m_MirrorTimerFlags &= ~(UNDERWATER_INWATER | UNDERWATER_INLAVA | UNDERWATER_INSLIME | UNDERWATER_INDARKWATER);
-        if (m_lastLiquid && m_lastLiquid->SpellId)
+        if (m_lastLiquid && m_lastLiquid->SpellID)
         {
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellID == 37025 ? 37284 : m_lastLiquid->SpellID);
         }
         m_lastLiquid = NULL;
         return;
@@ -4564,22 +4564,22 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
     if (uint32 liqEntry = liquid_status.entry)
     {
         LiquidTypeEntry const* liquid = sLiquidTypeStore.LookupEntry(liqEntry);
-        if (m_lastLiquid && m_lastLiquid->SpellId && m_lastLiquid->Id != liqEntry)
+        if (m_lastLiquid && m_lastLiquid->SpellID && m_lastLiquid->ID != liqEntry)
         {
-            RemoveAurasDueToSpell(m_lastLiquid->SpellId);
+            RemoveAurasDueToSpell(m_lastLiquid->SpellID);
         }
 
-        if (liquid && liquid->SpellId)
+        if (liquid && liquid->SpellID)
         {
             // Exception for SSC water
-            uint32 liquidSpellId = liquid->SpellId == 37025 ? 37284 : liquid->SpellId;
+            uint32 liquidSpellId = liquid->SpellID == 37025 ? 37284 : liquid->SpellID;
 
             if (res & (LIQUID_MAP_UNDER_WATER | LIQUID_MAP_IN_WATER))
             {
                 if (!HasAura(liquidSpellId))
                 {
                     // Handle exception for SSC water
-                    if (liquid->SpellId == 37025)
+                    if (liquid->SpellID == 37025)
                     {
                         if (InstanceData* pInst = GetInstanceData())
                         {
@@ -4612,9 +4612,9 @@ void Player::UpdateUnderwaterState(Map* m, float x, float y, float z)
 
         m_lastLiquid = liquid;
     }
-    else if (m_lastLiquid && m_lastLiquid->SpellId)
+    else if (m_lastLiquid && m_lastLiquid->SpellID)
     {
-        RemoveAurasDueToSpell(m_lastLiquid->SpellId == 37025 ? 37284 : m_lastLiquid->SpellId);
+        RemoveAurasDueToSpell(m_lastLiquid->SpellID == 37025 ? 37284 : m_lastLiquid->SpellID);
         m_lastLiquid = NULL;
     }
 
