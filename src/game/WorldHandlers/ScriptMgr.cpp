@@ -210,14 +210,14 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
         {
             TaxiPathNodeEntry const& node = sTaxiPathNodesByPath[path_idx][node_idx];
 
-            if (node.arrivalEventID)
+            if (node.ArrivalEventID)
             {
-                eventIds.insert(node.arrivalEventID);
+                eventIds.insert(node.ArrivalEventID);
             }
 
-            if (node.departureEventID)
+            if (node.DepartureEventID)
             {
-                eventIds.insert(node.departureEventID);
+                eventIds.insert(node.DepartureEventID);
             }
         }
     }

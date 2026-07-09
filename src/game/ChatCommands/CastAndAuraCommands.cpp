@@ -433,7 +433,7 @@ bool ChatHandler::HandleAuraGroupCommand(char* args)
         else
         {
             AddAuraToPlayer(spellInfo, playerTarget, m_session->GetPlayer());
-            PSendSysMessage(LANG_COMMAND_AURAGROUP_AURA_APPLIED, spellInfo->Id, nameLink.c_str());
+            PSendSysMessage(LANG_COMMAND_AURAGROUP_AURA_APPLIED, spellInfo->ID, nameLink.c_str());
             return true;
         }
     }
@@ -460,7 +460,7 @@ bool ChatHandler::HandleAuraGroupCommand(char* args)
             }
 
             AddAuraToPlayer(spellInfo, pl, m_session->GetPlayer());
-            PSendSysMessage(LANG_COMMAND_AURAGROUP_AURA_APPLIED, spellInfo->Id, nameLink.c_str());
+            PSendSysMessage(LANG_COMMAND_AURAGROUP_AURA_APPLIED, spellInfo->ID, nameLink.c_str());
 
          }
 

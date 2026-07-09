@@ -626,7 +626,7 @@ void WorldSession::SendSpiritResurrect()
 
         if (corpseGrave != ghostGrave)
         {
-            _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+            _player->TeleportTo(corpseGrave->Continent, corpseGrave->LocX, corpseGrave->LocY, corpseGrave->LocZ, _player->GetOrientation());
         }
         // or update at original position
         else
@@ -1014,10 +1014,10 @@ void WorldSession::HandleBuyStableSlot(WorldPacket& recv_data)
     if (GetPlayer()->GetStableSlots() < MAX_PET_STABLES)
     {
         StableSlotPricesEntry const* SlotPrice = sStableSlotPricesStore.LookupEntry(GetPlayer()->GetStableSlots() + 1);
-        if (_player->GetMoney() >= SlotPrice->Price)
+        if (_player->GetMoney() >= SlotPrice->Cost)
         {
             GetPlayer()->SetStableSlots(GetPlayer()->GetStableSlots() + 1);
-            _player->ModifyMoney(-int32(SlotPrice->Price));
+            _player->ModifyMoney(-int32(SlotPrice->Cost));
             SendStableResult(STABLE_SUCCESS_BUY_SLOT);
         }
         else

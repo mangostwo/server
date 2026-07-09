@@ -97,15 +97,15 @@ void Player::FillBGWeekendWorldStates(WorldPacket& data, uint32& count)
     for (uint32 i = 1; i < sBattlemasterListStore.GetNumRows(); ++i)
     {
         BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i);
-        if (bl && bl->HolidayWorldStateId)
+        if (bl && bl->holiday_world_state)
         {
             if (BattleGroundMgr::IsBGWeekend(BattleGroundTypeId(bl->id)))
             {
-                FillInitialWorldState(data, count, bl->HolidayWorldStateId, 1);
+                FillInitialWorldState(data, count, bl->holiday_world_state, 1);
             }
             else
             {
-                FillInitialWorldState(data, count, bl->HolidayWorldStateId, 0);
+                FillInitialWorldState(data, count, bl->holiday_world_state, 0);
             }
         }
     }
@@ -153,7 +153,7 @@ void Player::SetBattleGroundEntryPoint()
         {
             if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
             {
-                m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
+                m_bgData.joinPos = WorldLocation(entry->Continent, entry->LocX, entry->LocY, entry->LocZ, 0.0f);
                 m_bgData.m_needSave = true;
                 return;
             }

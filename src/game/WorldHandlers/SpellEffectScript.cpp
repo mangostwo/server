@@ -85,11 +85,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 {
     // TODO: we must implement hunter pet summon at login there (spell 6962)
 
-    switch (m_spellInfo->SpellFamilyName)
+    switch (m_spellInfo->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 1509:                                  // GM Mode OFF
                 {
@@ -195,7 +195,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     uint8 race = m_caster->getRace();
                     uint32 spellId = 0;
 
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 24194:
                             switch (race)
@@ -372,7 +372,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     uint32 spellid;
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 25140: spellid =  32568; break;
                         case 25143: spellid =  32572; break;
@@ -513,7 +513,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    float downToHealthPercent = (m_spellInfo->Id != 71123 ? 5 : m_spellInfo->CalculateSimpleValue(eff_idx)) * 0.01f;
+                    float downToHealthPercent = (m_spellInfo->ID != 71123 ? 5 : m_spellInfo->CalculateSimpleValue(eff_idx)) * 0.01f;
 
                     int32 damage = unitTarget->GetHealth() - unitTarget->GetMaxHealth() * downToHealthPercent;
                     if (damage > 0)
@@ -885,12 +885,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     // check target entry specific to each spell
-                    if (m_spellInfo->Id == 44323 && unitTarget->GetEntry() != 24746)
+                    if (m_spellInfo->ID == 44323 && unitTarget->GetEntry() != 24746)
                     {
                         return;
                     }
 
-                    if (m_spellInfo->Id == 44407 && unitTarget->GetEntry() != 24747)
+                    if (m_spellInfo->ID == 44407 && unitTarget->GetEntry() != 24747)
                     {
                         return;
                     }
@@ -1515,7 +1515,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     uint8 gender = unitTarget->getGender();
                     uint32 spellId;
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 48762: spellId = (gender == GENDER_MALE ? 48763 : 48761); break;
                         case 45759: spellId = (gender == GENDER_MALE ? 45760 : 45762); break;
@@ -1604,7 +1604,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     // Each target hit buffs the caster
-                    unitTarget->CastSpell(m_caster, m_spellInfo->Id == 49380 ? 49381 : 59805, true, NULL, NULL, m_caster->GetObjectGuid());
+                    unitTarget->CastSpell(m_caster, m_spellInfo->ID == 49380 ? 49381 : 59805, true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
                 case 49405:                                 // Invader Taunt Trigger
@@ -1746,7 +1746,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     unitTarget->RemoveAurasDueToSpell(50812);
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->Id == 50810 ? 50811 : 61547 , true, NULL, NULL, m_caster->GetObjectGuid());
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->ID == 50810 ? 50811 : 61547 , true, NULL, NULL, m_caster->GetObjectGuid());
                     return;
                 }
                 case 50894:                                 // Zul'Drak Rat
@@ -1756,9 +1756,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    if (SpellAuraHolder* pHolder = unitTarget->GetSpellAuraHolder(m_spellInfo->Id))
+                    if (SpellAuraHolder* pHolder = unitTarget->GetSpellAuraHolder(m_spellInfo->ID))
                     {
-                        if (pHolder->GetStackAmount() + 1 >= m_spellInfo->StackAmount)
+                        if (pHolder->GetStackAmount() + 1 >= m_spellInfo->CumulativeAura)
                         {
                             // Gluttonous Lurkers: Summon Gorged Lurking Basilisk
                             unitTarget->CastSpell(m_caster, 50928, true);
@@ -2184,7 +2184,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     // learn random explicit discovery recipe (if any)
-                    if (uint32 discoveredSpell = GetExplicitDiscoverySpell(m_spellInfo->Id, (Player*)m_caster))
+                    if (uint32 discoveredSpell = GetExplicitDiscoverySpell(m_spellInfo->ID, (Player*)m_caster))
                     {
                         ((Player*)m_caster)->learnSpell(discoveredSpell, false);
                     }
@@ -2226,7 +2226,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     else
                     {
-                        uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->StackAmount);
+                        uint32 stackAmount = urand(1, GetSpellStore()->LookupEntry(62239)->CumulativeAura);
 
                         for (uint8 i = 0; i < stackAmount; ++i)
                         {
@@ -2247,7 +2247,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     uint32 ownerAura = 0;
 
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 62282: ownerAura = 62283; break;
                         case 62440: ownerAura = 62438; break;
@@ -2300,7 +2300,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     uint32 numStacks = 0;
 
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 62524: numStacks = 2;  break;
                         case 62525: numStacks = 10; break;
@@ -2495,7 +2495,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     uint8 removedAmount = 0;
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case 63803: removedAmount = 2; break;
                         case 64164: removedAmount = 4; break;
@@ -2835,7 +2835,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     // Cast summon spells 72701, 72702, 72703, 72704
-                    for (uint32 triggeredSpell = m_spellInfo->CalculateSimpleValue(eff_idx); triggeredSpell < m_spellInfo->Id; ++triggeredSpell)
+                    for (uint32 triggeredSpell = m_spellInfo->CalculateSimpleValue(eff_idx); triggeredSpell < m_spellInfo->ID; ++triggeredSpell)
                     {
                         unitTarget->CastSpell(unitTarget, triggeredSpell, true);
                     }
@@ -2857,7 +2857,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_WARLOCK:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case  6201:                                 // Healthstone creating spells
                 case  6202:
@@ -2902,7 +2902,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         {36892, 36893, 36894}               // Fel Healthstone
                     };
 
-                    switch (m_spellInfo->Id)
+                    switch (m_spellInfo->ID)
                     {
                         case  6201:
                             itemtype = itypes[0][rank]; break; // Minor Healthstone
@@ -2955,8 +2955,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (Unit::SpellAuraHolderMap::iterator itr = suAuras.begin(); itr != suAuras.end(); ++itr)
                     {
                         SpellEntry const* spellInfo = (*itr).second->GetSpellProto();
-                        if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-                                (spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000000002)) &&
+                        if (spellInfo->SpellClassSet == SPELLFAMILY_WARLOCK &&
+                                (spellInfo->SpellClassMask & UI64LIT(0x0000000000000002)) &&
                                 (*itr).second->GetCasterGuid() == m_caster->GetObjectGuid())
                             (*itr).second->RefreshHolder();
                     }
@@ -2977,7 +2977,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_PRIEST:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 47948:                                 // Pain and Suffering
                 {
@@ -2991,8 +2991,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (Unit::SpellAuraHolderMap::iterator itr = auras.begin(); itr != auras.end(); ++itr)
                     {
                         SpellEntry const* spellInfo = (*itr).second->GetSpellProto();
-                        if (spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST &&
-                                (spellInfo->SpellFamilyFlags & UI64LIT(0x0000000000008000)) &&
+                        if (spellInfo->SpellClassSet == SPELLFAMILY_PRIEST &&
+                                (spellInfo->SpellClassMask & UI64LIT(0x0000000000008000)) &&
                                 (*itr).second->GetCasterGuid() == m_caster->GetObjectGuid())
                         {
                             (*itr).second->RefreshHolder();
@@ -3008,7 +3008,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_HUNTER:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 53209:                                 // Chimera Shot
                 {
@@ -3030,7 +3030,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         }
 
                         // Search only Serpent Sting, Viper Sting, Scorpid Sting auras
-                        ClassFamilyMask const& familyFlag = holder->GetSpellProto()->SpellFamilyFlags;
+                        ClassFamilyMask const& familyFlag = holder->GetSpellProto()->SpellClassMask;
                         if (!familyFlag.IsFitToFamilyMask(UI64LIT(0x000000800000C000)))
                         {
                             continue;
@@ -3153,14 +3153,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 uint32 spellId2 = 0;
 
                 // Judgement self add switch
-                switch (m_spellInfo->Id)
+                switch (m_spellInfo->ID)
                 {
                     case 53407: spellId1 = 20184; break;    // Judgement of Justice
                     case 20271:                             // Judgement of Light
                     case 57774: spellId1 = 20185; break;    // Judgement of Light
                     case 53408: spellId1 = 20186; break;    // Judgement of Wisdom
                     default:
-                        sLog.outError("Unsupported Judgement (seal trigger) spell (Id: %u) in Spell::EffectScriptEffect", m_spellInfo->Id);
+                        sLog.outError("Unsupported Judgement (seal trigger) spell (Id: %u) in Spell::EffectScriptEffect", m_spellInfo->ID);
                         return;
                 }
 
@@ -3213,7 +3213,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_POTION:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 28698:                                 // Dreaming Glory
                 {
@@ -3276,7 +3276,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            switch (m_spellInfo->Id)
+            switch (m_spellInfo->ID)
             {
                 case 50842:                                 // Pestilence
                 {
@@ -3387,7 +3387,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
     // So called only for not processed cases
     if (unitTarget->GetTypeId() == TYPEID_UNIT || unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
-        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->Id, eff_idx, unitTarget, m_originalCasterGUID))
+        if (sScriptMgr.OnEffectScriptEffect(m_caster, m_spellInfo->ID, eff_idx, unitTarget, m_originalCasterGUID))
         {
             return;
         }
@@ -3399,6 +3399,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         return;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectScriptEffect", m_spellInfo->Id);
-    m_caster->GetMap()->ScriptsStart(DBS_ON_SPELL, m_spellInfo->Id, m_caster, unitTarget);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectScriptEffect", m_spellInfo->ID);
+    m_caster->GetMap()->ScriptsStart(DBS_ON_SPELL, m_spellInfo->ID, m_caster, unitTarget);
 }

@@ -222,7 +222,7 @@ bool CharacterDatabaseCleaner::TalentCheck(uint32 talent_id)
         return false;
     }
 
-    return sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+    return sTalentTabStore.LookupEntry(talentInfo->TabID);
 }
 
 void CharacterDatabaseCleaner::CleanCharacterTalent()

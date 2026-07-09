@@ -405,7 +405,7 @@ time_t DungeonPersistentState::GetResetTimeForDB() const
 {
     // only state the reset time for normal instances
     const MapEntry* entry = sMapStore.LookupEntry(GetMapId());
-    if (!entry || entry->map_type == MAP_RAID || GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
+    if (!entry || entry->InstanceType == MAP_RAID || GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
     {
         return 0;
     }
@@ -423,16 +423,16 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
     {
         DungeonEncounterEntry const* dbcEntry = iter->second->dbcEntry;
 
-        if (iter->second->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->mapId == GetMapId())
+        if (iter->second->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->MapID == GetMapId())
         {
-            m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
+            m_completedEncountersMask |= 1 << dbcEntry->Bit;
 
             CharacterDatabase.PExecute("UPDATE `instance` SET `encountersMask` = '%u' WHERE `id` = '%u'", m_completedEncountersMask, GetInstanceId());
 
-            DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
+            DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
             if (/*uint32 dungeonId =*/ iter->second->lastEncounterDungeon)
             {
-                DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
+                DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->Name_lang[sWorld.GetDefaultDbcLocale()]);
                 // Place LFG reward here
             }
             return;
@@ -453,12 +453,12 @@ bool BattleGroundPersistentState::CanBeUnload() const
 
 uint32 DungeonResetScheduler::GetMaxResetTimeFor(MapDifficultyEntry const* mapDiff)
 {
-    if (!mapDiff || !mapDiff->resetTime)
+    if (!mapDiff || !mapDiff->RaidDuration)
     {
         return 0;
     }
 
-    uint32 delay = uint32(mapDiff->resetTime / DAY * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) * DAY;
+    uint32 delay = uint32(mapDiff->RaidDuration / DAY * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) * DAY;
 
     if (delay < DAY)                                        // the reset_delay must be at least one day
     {
@@ -606,7 +606,7 @@ void DungeonResetScheduler::LoadResetTimes()
         MapDifficultyEntry const* mapDiff = itr->second;
 
         // skip mapDiff without global reset time
-        if (!mapDiff->resetTime)
+        if (!mapDiff->RaidDuration)
         {
             continue;
         }
@@ -813,7 +813,7 @@ MapPersistentStateManager::~MapPersistentStateManager()
 */
 MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool load /*=false*/, bool initPools /*= true*/, uint32 completedEncountersMask /*= 0*/)
 {
-    if (MapPersistentState* old_save = GetPersistentState(mapEntry->MapID, instanceId))
+    if (MapPersistentState* old_save = GetPersistentState(mapEntry->ID, instanceId))
     {
         return old_save;
     }
@@ -824,25 +824,25 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
         {
             // initialize reset time
             // for normal instances if no creatures are killed the instance will reset in two hours
-            if (mapEntry->map_type == MAP_RAID || difficulty > DUNGEON_DIFFICULTY_NORMAL)
+            if (mapEntry->InstanceType == MAP_RAID || difficulty > DUNGEON_DIFFICULTY_NORMAL)
             {
-                resetTime = m_Scheduler.GetResetTimeFor(mapEntry->MapID, difficulty);
+                resetTime = m_Scheduler.GetResetTimeFor(mapEntry->ID, difficulty);
             }
             else
             {
                 resetTime = time(NULL) + 2 * HOUR;
                 // normally this will be removed soon after in DungeonMap::Add, prevent error
-                m_Scheduler.ScheduleReset(true, resetTime, DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, mapEntry->MapID, difficulty, instanceId));
+                m_Scheduler.ScheduleReset(true, resetTime, DungeonResetEvent(RESET_EVENT_NORMAL_DUNGEON, mapEntry->ID, difficulty, instanceId));
             }
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = '" UI64FMTD "', canRset = %u", mapEntry->MapID, instanceId, uint64(resetTime), canReset ? 1 : 0);
+    DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MapPersistentStateManager::AddPersistentState: mapid = %d, instanceid = %d, reset time = '" UI64FMTD "', canRset = %u", mapEntry->ID, instanceId, uint64(resetTime), canReset ? 1 : 0);
 
     MapPersistentState* state;
     if (mapEntry->IsDungeon())
     {
-        DungeonPersistentState* dungeonState = new DungeonPersistentState(mapEntry->MapID, instanceId, difficulty, resetTime, canReset, completedEncountersMask);
+        DungeonPersistentState* dungeonState = new DungeonPersistentState(mapEntry->ID, instanceId, difficulty, resetTime, canReset, completedEncountersMask);
         if (!load)
         {
             dungeonState->SaveToDB();
@@ -851,11 +851,11 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     }
     else if (mapEntry->IsBattleGroundOrArena())
     {
-        state = new BattleGroundPersistentState(mapEntry->MapID, instanceId, difficulty);
+        state = new BattleGroundPersistentState(mapEntry->ID, instanceId, difficulty);
     }
     else
     {
-        state = new WorldPersistentState(mapEntry->MapID);
+        state = new WorldPersistentState(mapEntry->ID);
     }
 
     if (instanceId)
@@ -864,7 +864,7 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
     }
     else
     {
-        m_instanceSaveByMapId[mapEntry->MapID] = state;
+        m_instanceSaveByMapId[mapEntry->ID] = state;
     }
 
     if (initPools)
@@ -1175,7 +1175,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
     if (!warn)
     {
         MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapid, difficulty);
-        if (!mapDiff || !mapDiff->resetTime)
+        if (!mapDiff || !mapDiff->RaidDuration)
         {
             sLog.outError("MapPersistentStateManager::ResetOrWarnAll: not valid difficulty or no reset delay for map %d", mapid);
             return;

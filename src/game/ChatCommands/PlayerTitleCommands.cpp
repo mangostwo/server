@@ -60,7 +60,7 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
         if (titleInfo)
         {
             int loc = GetSessionDbcLocale();
-            std::string name = titleInfo->name[loc];
+            std::string name = titleInfo->Name_lang[loc];
             if (name.empty())
             {
                 continue;
@@ -76,7 +76,7 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
                         continue;
                     }
 
-                    name = titleInfo->name[loc];
+                    name = titleInfo->Name_lang[loc];
                     if (name.empty())
                     {
                         continue;
@@ -93,7 +93,7 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
             {
                 char const* knownStr = target && target->HasTitle(titleInfo) ? GetMangosString(LANG_KNOWN) : "";
 
-                char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->bit_index
+                char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->Mask_ID
                                         ? GetMangosString(LANG_ACTIVE)
                                         : "";
 
@@ -103,11 +103,11 @@ bool ChatHandler::HandleLookupTitleCommand(char* args)
                 // send title in "id (idx:idx) - [namedlink locale]" format
                 if (m_session)
                 {
-                    PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->bit_index, id, titleNameStr, localeNames[loc], knownStr, activeStr);
+                    PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->Mask_ID, id, titleNameStr, localeNames[loc], knownStr, activeStr);
                 }
                 else
                 {
-                    PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, titleNameStr, localeNames[loc], knownStr, activeStr);
+                    PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->Mask_ID, titleNameStr, localeNames[loc], knownStr, activeStr);
                 }
 
                 ++counter;
@@ -163,7 +163,7 @@ bool ChatHandler::HandleTitlesAddCommand(char* args)
 
     char const* targetName = target->GetName();
     char titleNameStr[80];
-    snprintf(titleNameStr, 80, titleInfo->name[GetSessionDbcLocale()], targetName);
+    snprintf(titleNameStr, 80, titleInfo->Name_lang[GetSessionDbcLocale()], targetName);
 
     target->SetTitle(titleInfo);
     PSendSysMessage(LANG_TITLE_ADD_RES, id, titleNameStr, tNameLink.c_str());
@@ -215,7 +215,7 @@ bool ChatHandler::HandleTitlesRemoveCommand(char* args)
 
     char const* targetName = target->GetName();
     char titleNameStr[80];
-    snprintf(titleNameStr, 80, titleInfo->name[GetSessionDbcLocale()], targetName);
+    snprintf(titleNameStr, 80, titleInfo->Name_lang[GetSessionDbcLocale()], targetName);
 
     PSendSysMessage(LANG_TITLE_REMOVE_RES, id, titleNameStr, tNameLink.c_str());
 
@@ -260,7 +260,7 @@ bool ChatHandler::HandleTitlesSetMaskCommand(char* args)
     {
         if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(i))
         {
-            titles2 &= ~(uint64(1) << tEntry->bit_index);
+            titles2 &= ~(uint64(1) << tEntry->Mask_ID);
         }
     }
     titles &= ~titles2;                                     // remove nonexistent titles
@@ -295,13 +295,13 @@ bool ChatHandler::HandleCharacterTitlesCommand(char* args)
         CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(id);
         if (titleInfo && target->HasTitle(titleInfo))
         {
-            std::string name = titleInfo->name[loc];
+            std::string name = titleInfo->Name_lang[loc];
             if (name.empty())
             {
                 continue;
             }
 
-            char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->bit_index
+            char const* activeStr = target && target->GetUInt32Value(PLAYER_CHOSEN_TITLE) == titleInfo->Mask_ID
                                     ? GetMangosString(LANG_ACTIVE)
                                     : "";
 
@@ -311,11 +311,11 @@ bool ChatHandler::HandleCharacterTitlesCommand(char* args)
             // send title in "id (idx:idx) - [namedlink locale]" format
             if (m_session)
             {
-                PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->bit_index, id, titleNameStr, localeNames[loc], knownStr, activeStr);
+                PSendSysMessage(LANG_TITLE_LIST_CHAT, id, titleInfo->Mask_ID, id, titleNameStr, localeNames[loc], knownStr, activeStr);
             }
             else
             {
-                PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, name.c_str(), localeNames[loc], knownStr, activeStr);
+                PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->Mask_ID, name.c_str(), localeNames[loc], knownStr, activeStr);
             }
         }
     }
@@ -363,9 +363,9 @@ bool ChatHandler::HandleTitlesCurrentCommand(char* args)
     std::string tNameLink = GetNameLink(target);
 
     target->SetTitle(titleInfo);                            // to be sure that title now known
-    target->SetUInt32Value(PLAYER_CHOSEN_TITLE, titleInfo->bit_index);
+    target->SetUInt32Value(PLAYER_CHOSEN_TITLE, titleInfo->Mask_ID);
 
-    PSendSysMessage(LANG_TITLE_CURRENT_RES, id, titleInfo->name[GetSessionDbcLocale()], tNameLink.c_str());
+    PSendSysMessage(LANG_TITLE_CURRENT_RES, id, titleInfo->Name_lang[GetSessionDbcLocale()], tNameLink.c_str());
 
     return true;
 }

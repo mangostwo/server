@@ -1111,7 +1111,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
     {
         if (player->GetTransportInfo())
         {
-            *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+            *data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->SeatID[player->GetTransportInfo()->GetTransportSeat()]);
         }
         else
         {
@@ -1236,7 +1236,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     if (player->GetTransportInfo())                         // GROUP_UPDATE_FLAG_VEHICLE_SEAT
     {
-        data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->m_seatID[player->GetTransportInfo()->GetTransportSeat()]);
+        data << uint32(((Unit*)player->GetTransportInfo()->GetTransport())->GetVehicleInfo()->GetVehicleEntry()->SeatID[player->GetTransportInfo()->GetTransportSeat()]);
     }
 
     SendPacket(&data);

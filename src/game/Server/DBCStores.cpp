@@ -64,6 +64,7 @@ static WMOAreaInfoByTripple sWMOAreaInfoByTripple;
 
 DBCStorage <AchievementEntry> sAchievementStore(Achievementfmt);
 DBCStorage <AchievementCriteriaEntry> sAchievementCriteriaStore(AchievementCriteriafmt);
+DBCStorage <AchievementCategoryEntry> sAchievementCategoryStore(AchievementCategoryfmt);
 DBCStorage <AreaTriggerEntry> sAreaTriggerStore(AreaTriggerEntryfmt);
 DBCStorage <AuctionHouseEntry> sAuctionHouseStore(AuctionHouseEntryfmt);
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
@@ -82,6 +83,7 @@ DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt);
 DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
 DBCStorage <CurrencyTypesEntry> sCurrencyTypesStore(CurrencyTypesfmt);
+DBCStorage <CurrencyCategoryEntry> sCurrencyCategoryStore(CurrencyCategoryfmt);
 
 DBCStorage <DestructibleModelDataEntry> sDestructibleModelDataStore(DestructibleModelDataFmt);
 DBCStorage <DungeonEncounterEntry> sDungeonEncounterStore(DungeonEncounterfmt);
@@ -114,12 +116,13 @@ DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptf
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
+DBCStorage <HolidayNamesEntry>            sHolidayNamesStore(HolidayNamesfmt);
 
 DBCStorage <ItemEntry>                    sItemStore(Itemfmt);
 DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore(ItemBagFamilyfmt);
 DBCStorage <ItemClassEntry>               sItemClassStore(ItemClassfmt);
 // DBCStorage <ItemCondExtCostsEntry> sItemCondExtCostsStore(ItemCondExtCostsEntryfmt);
-// DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
+DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt);
 DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DBCStorage <ItemLimitCategoryEntry> sItemLimitCategoryStore(ItemLimitCategoryEntryfmt);
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
@@ -429,7 +432,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    const uint32 DBCFilesCount = 95;
+    const uint32 DBCFilesCount = 99;
 
     BarGoLink bar(DBCFilesCount);
 
@@ -446,18 +449,19 @@ void LoadDBCStores(const std::string& dataPath)
         if (AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
             // fill AreaId->DBC records
-            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(uint16(area->ID), area->exploreFlag));
+            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(uint16(area->ID), area->AreaBit));
 
             // fill MapId->DBC records ( skip sub zones and continents )
-            if (area->zone == 0 && area->mapid != 0 && area->mapid != 1 && area->mapid != 530 && area->mapid != 571)
+            if (area->ParentAreaID == 0 && area->ContinentID != 0 && area->ContinentID != 1 && area->ContinentID != 530 && area->ContinentID != 571)
             {
-                sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid, area->exploreFlag));
+                sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->ContinentID, area->AreaBit));
             }
         }
     }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementStore,         dbcPath, "Achievement.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementCriteriaStore, dbcPath, "Achievement_Criteria.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementCategoryStore, dbcPath, "Achievement_Category.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAreaTriggerStore,         dbcPath, "AreaTrigger.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAreaGroupStore,           dbcPath, "AreaGroup.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAuctionHouseStore,        dbcPath, "AuctionHouse.dbc");
@@ -477,6 +481,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureSpellDataStore,   dbcPath, "CreatureSpellData.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureTypeStore,        dbcPath, "CreatureType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCurrencyTypesStore,       dbcPath, "CurrencyTypes.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCurrencyCategoryStore,    dbcPath, "CurrencyCategory.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDestructibleModelDataStore, dbcPath, "DestructibleModelData.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDungeonEncounterStore,    dbcPath, "DungeonEncounter.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDurabilityCostsStore,     dbcPath, "DurabilityCosts.dbc");
@@ -487,9 +492,9 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sFactionStore.GetNumRows(); ++i)
     {
         FactionEntry const* faction = sFactionStore.LookupEntry(i);
-        if (faction && faction->team)
+        if (faction && faction->ParentFactionID)
         {
-            SimpleFactionsList& flist = sFactionTeamMap[faction->team];
+            SimpleFactionsList& flist = sFactionTeamMap[faction->ParentFactionID];
             flist.push_back(i);
         }
     }
@@ -515,10 +520,11 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sGtRegenHPPerSptStore,     dbcPath, "gtRegenHPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sGtRegenMPPerSptStore,     dbcPath, "gtRegenMPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sHolidaysStore,            dbcPath, "Holidays.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sHolidayNamesStore,        dbcPath, "HolidayNames.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemStore,                dbcPath, "Item.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemBagFamilyStore,       dbcPath, "ItemBagFamily.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemClassStore,           dbcPath, "ItemClass.dbc");
-    // LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDisplayInfoStore,     dbcPath,"ItemDisplayInfo.dbc");     -- not used currently
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemDisplayInfoStore,     dbcPath, "ItemDisplayInfo.dbc");
     // LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemCondExtCostsStore,    dbcPath,"ItemCondExtCosts.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemExtendedCostStore,    dbcPath, "ItemExtendedCost.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemLimitCategoryStore,   dbcPath, "ItemLimitCategory.dbc");
@@ -551,7 +557,7 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
     {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
-            if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
+            if (entry->RangeIndex > MAX_BATTLEGROUND_BRACKETS)
             {
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
             }
@@ -573,10 +579,10 @@ void LoadDBCStores(const std::string& dataPath)
             sSpellCategoryStore[spell->Category].insert(i);
         }
 
-        // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
+        // DBC not support uint64 fields but SpellEntry have SpellClassMask (was SpellFamilyFlags) mapped at 2 uint32 fields
         // uint32 field already converted to bigendian if need, but must be swapped for correct uint64 bigendian view
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
-        std::swap(*((uint32*)(&spell->SpellFamilyFlags)), *(((uint32*)(&spell->SpellFamilyFlags)) + 1));
+        std::swap(*((uint32*)(&spell->SpellClassMask)), *(((uint32*)(&spell->SpellClassMask)) + 1));
 #endif
     }
 
@@ -589,7 +595,7 @@ void LoadDBCStores(const std::string& dataPath)
             continue;
         }
 
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->Spell);
         if (spellInfo && (spellInfo->Attributes & (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_HIDDEN_CLIENTSIDE | SPELL_ATTR_HIDE_IN_COMBAT_LOG)) == (SPELL_ATTR_ABILITY | SPELL_ATTR_PASSIVE | SPELL_ATTR_HIDDEN_CLIENTSIDE | SPELL_ATTR_HIDE_IN_COMBAT_LOG))
         {
             for (unsigned int i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
@@ -600,12 +606,12 @@ void LoadDBCStores(const std::string& dataPath)
                     continue;
                 }
 
-                if (skillLine->skillId != cFamily->skillLine[0] && skillLine->skillId != cFamily->skillLine[1])
+                if (skillLine->SkillLine != cFamily->SkillLine[0] && skillLine->SkillLine != cFamily->SkillLine[1])
                 {
                     continue;
                 }
 
-                sPetFamilySpellsStore[i].insert(spellInfo->Id);
+                sPetFamilySpellsStore[i].insert(spellInfo->ID);
             }
         }
     }
@@ -634,9 +640,9 @@ void LoadDBCStores(const std::string& dataPath)
         }
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
         {
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i, j);
+                sTalentSpellPosMap[talentInfo->SpellRank[j]] = TalentSpellPos(i, j);
             }
         }
     }
@@ -667,7 +673,7 @@ void LoadDBCStores(const std::string& dataPath)
 
             }
 
-            sTalentTabPages[cls][talentTabInfo->tabpage] = talentTabId;
+            sTalentTabPages[cls][talentTabInfo->OrderIndex] = talentTabId;
         }
     }
 
@@ -678,7 +684,7 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
         {
-            sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID, entry->price);
+            sTaxiPathSetBySource[entry->FromTaxiNode][entry->ToTaxiNode] = TaxiPathBySourceAndDestination(entry->ID, entry->Cost);
         }
     }
     uint32 pathCount = sTaxiPathStore.GetNumRows();
@@ -692,9 +698,9 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
         {
-            if (pathLength[entry->path] < entry->index + 1)
+            if (pathLength[entry->PathID] < entry->NodeIndex + 1)
             {
-                pathLength[entry->path] = entry->index + 1;
+                pathLength[entry->PathID] = entry->NodeIndex + 1;
             }
         }
     }
@@ -709,7 +715,7 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
         {
-            sTaxiPathNodesByPath[entry->path].set(entry->index, entry);
+            sTaxiPathNodesByPath[entry->PathID].set(entry->NodeIndex, entry);
         }
     }
 
@@ -765,7 +771,7 @@ void LoadDBCStores(const std::string& dataPath)
             sTaxiNodesMask[field] |= submask;
 
             // old continent node (+ nodes virtually at old continents, check explicitly to avoid loading map files for zone info)
-            if (node->map_id < 2 || i == 82 || i == 83 || i == 93 || i == 94)
+            if (node->ContinentID < 2 || i == 82 || i == 83 || i == 93 || i == 94)
             {
                 sOldContinentsNodesMask[field] |= submask;
             }
@@ -788,7 +794,7 @@ void LoadDBCStores(const std::string& dataPath)
     {
         if (WMOAreaTableEntry const* entry = sWMOAreaTableStore.LookupEntry(i))
         {
-            sWMOAreaInfoByTripple.insert(WMOAreaInfoByTripple::value_type(WMOAreaTableTripple(entry->rootId, entry->adtId, entry->groupId), entry));
+            sWMOAreaInfoByTripple.insert(WMOAreaInfoByTripple::value_type(WMOAreaTableTripple(entry->WMOID, entry->NameSetID, entry->WMOGroupID), entry));
         }
     }
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sWorldMapOverlayStore,     dbcPath, "WorldMapOverlay.dbc");
@@ -866,7 +872,7 @@ char const* GetPetName(uint32 petfamily, uint32 dbclang)
     {
         return NULL;
     }
-    return pet_family->Name[dbclang] ? pet_family->Name[dbclang] : NULL;
+    return pet_family->Name_lang[dbclang] ? pet_family->Name_lang[dbclang] : NULL;
 }
 
 /**
@@ -981,7 +987,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
 
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
     {
-        return GetAreaEntryByAreaID(mapEntry->linked_zone);
+        return GetAreaEntryByAreaID(mapEntry->AreaTableID);
     }
 
     return NULL;
@@ -1015,7 +1021,7 @@ uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
 
     if (WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
     {
-        return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
+        return wma->DisplayMapID >= 0 ? wma->DisplayMapID : wma->MapID;
     }
 
     return mapid;
@@ -1055,7 +1061,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch && ch->ChannelID == channel_id)
+        if (ch && ch->ID == channel_id)
         {
             return ch;
         }
@@ -1080,7 +1086,7 @@ ChatChannelsEntry const* GetChannelEntryFor(const std::string& name)
         if (ch)
         {
             // need to remove %s from entryName if it exists before we match
-            std::string entryName(ch->pattern[0]);
+            std::string entryName(ch->Name_lang[0]);
             std::size_t removeString = entryName.find("%s");
 
             if (removeString != std::string::npos)
@@ -1136,12 +1142,12 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
         return false;
     }
 
-    if (itemEntry->categoryType != reqEntry->categoryType)
+    if (itemEntry->TotemCategoryType != reqEntry->TotemCategoryType)
     {
         return false;
     }
 
-    return (itemEntry->categoryMask & reqEntry->categoryMask) == reqEntry->categoryMask;
+    return (itemEntry->TotemCategoryMask & reqEntry->TotemCategoryMask) == reqEntry->TotemCategoryMask;
 }
 
 /**
@@ -1157,14 +1163,14 @@ bool Zone2MapCoordinates(float& x, float& y, uint32 zone)
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
 
     // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    if (!maEntry || maEntry->LocBottom == maEntry->LocTop || maEntry->LocRight == maEntry->LocLeft)
     {
         return false;
     }
 
     std::swap(x, y);                                        // at client map coords swapped
-    x = x * ((maEntry->x2 - maEntry->x1) / 100) + maEntry->x1;
-    y = y * ((maEntry->y2 - maEntry->y1) / 100) + maEntry->y1; // client y coord from top to down
+    x = x * ((maEntry->LocBottom - maEntry->LocTop) / 100) + maEntry->LocTop;
+    y = y * ((maEntry->LocRight - maEntry->LocLeft) / 100) + maEntry->LocLeft; // client y coord from top to down
 
     return true;
 }
@@ -1182,13 +1188,13 @@ bool Map2ZoneCoordinates(float& x, float& y, uint32 zone)
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
 
     // if not listed then map coordinates (instance)
-    if (!maEntry || maEntry->x2 == maEntry->x1 || maEntry->y2 == maEntry->y1)
+    if (!maEntry || maEntry->LocBottom == maEntry->LocTop || maEntry->LocRight == maEntry->LocLeft)
     {
         return false;
     }
 
-    x = (x - maEntry->x1) / ((maEntry->x2 - maEntry->x1) / 100);
-    y = (y - maEntry->y1) / ((maEntry->y2 - maEntry->y1) / 100); // client y coord from top to down
+    x = (x - maEntry->LocTop) / ((maEntry->LocBottom - maEntry->LocTop) / 100);
+    y = (y - maEntry->LocLeft) / ((maEntry->LocRight - maEntry->LocLeft) / 100); // client y coord from top to down
     std::swap(x, y);                                        // client have map coords swapped
 
     return true;
@@ -1214,19 +1220,19 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
         {
             // skip unrelated and too-high brackets
-            if (entry->mapId != mapid || entry->minLevel > level)
+            if (entry->MapID != mapid || entry->MinLevel > level)
             {
                 continue;
             }
 
             // exactly fit
-            if (entry->maxLevel >= level)
+            if (entry->MaxLevel >= level)
             {
                 return entry;
             }
 
             // remember for possible out-of-range case (search higher from existed)
-            if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
+            if (!maxEntry || maxEntry->MaxLevel < entry->MaxLevel)
             {
                 maxEntry = entry;
             }
@@ -1242,7 +1248,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
     {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
         {
-            if (entry->mapId == mapid && entry->GetBracketId() == id)
+            if (entry->MapID == mapid && entry->GetBracketId() == id)
             {
                 return entry;
             }
@@ -1275,16 +1281,16 @@ uint32 const* GetTalentTabPages(uint32 cls)
  */
 bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, float x, float y, float z, float delta)
 {
-    if (mapid != atEntry->mapid)
+    if (mapid != atEntry->ContinentID)
     {
         return false;
     }
 
-    if (atEntry->radius > 0)
+    if (atEntry->Radius > 0)
     {
         // if we have radius check it
-        float dist2 = (x - atEntry->x) * (x - atEntry->x) + (y - atEntry->y) * (y - atEntry->y) + (z - atEntry->z) * (z - atEntry->z);
-        if (dist2 > (atEntry->radius + delta) * (atEntry->radius + delta))
+        float dist2 = (x - atEntry->Pos_0) * (x - atEntry->Pos_0) + (y - atEntry->Pos_1) * (y - atEntry->Pos_1) + (z - atEntry->Pos_2) * (z - atEntry->Pos_2);
+        if (dist2 > (atEntry->Radius + delta) * (atEntry->Radius + delta))
         {
             return false;
         }
@@ -1297,23 +1303,23 @@ bool IsPointInAreaTriggerZone(AreaTriggerEntry const* atEntry, uint32 mapid, flo
         // is-in-cube check and we have to calculate only one point instead of 4
 
         // 2PI = 360, keep in mind that ingame orientation is counter-clockwise
-        double rotation = 2 * M_PI - atEntry->box_orientation;
+        double rotation = 2 * M_PI - atEntry->Box_yaw;
         double sinVal = sin(rotation);
         double cosVal = cos(rotation);
 
-        float playerBoxDistX = x - atEntry->x;
-        float playerBoxDistY = y - atEntry->y;
+        float playerBoxDistX = x - atEntry->Pos_0;
+        float playerBoxDistY = y - atEntry->Pos_1;
 
-        float rotPlayerX = float(atEntry->x + playerBoxDistX * cosVal - playerBoxDistY * sinVal);
-        float rotPlayerY = float(atEntry->y + playerBoxDistY * cosVal + playerBoxDistX * sinVal);
+        float rotPlayerX = float(atEntry->Pos_0 + playerBoxDistX * cosVal - playerBoxDistY * sinVal);
+        float rotPlayerY = float(atEntry->Pos_1 + playerBoxDistY * cosVal + playerBoxDistX * sinVal);
 
         // box edges are parallel to coordiante axis, so we can treat every dimension independently :D
-        float dz = z - atEntry->z;
-        float dx = rotPlayerX - atEntry->x;
-        float dy = rotPlayerY - atEntry->y;
-        if ((fabs(dx) > atEntry->box_x / 2 + delta) ||
-            (fabs(dy) > atEntry->box_y / 2 + delta) ||
-            (fabs(dz) > atEntry->box_z / 2 + delta))
+        float dz = z - atEntry->Pos_2;
+        float dx = rotPlayerX - atEntry->Pos_0;
+        float dy = rotPlayerY - atEntry->Pos_1;
+        if ((fabs(dx) > atEntry->Box_length / 2 + delta) ||
+            (fabs(dy) > atEntry->Box_width / 2 + delta) ||
+            (fabs(dz) > atEntry->Box_height / 2 + delta))
         {
             return false;
         }
@@ -1334,7 +1340,7 @@ uint32 GetCreatureModelRace(uint32 modelId)
     {
         if (CreatureDisplayInfoExtraEntry const* extraEntry = sCreatureDisplayInfoExtraStore.LookupEntry(displayEntry->ExtendedDisplayInfoID))
         {
-            return extraEntry->Race;
+            return extraEntry->DisplayRaceID;
         }
     }
     return 0;
@@ -1345,7 +1351,7 @@ float GetModelMidpoint(uint32 modelId)
 {
     if (CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(modelId))
     {
-        if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId))
+        if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelID))
         {
             return modelData->MountHeight;
         }

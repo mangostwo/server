@@ -378,7 +378,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport())
+    if ((!IsAlive() && zone && zone->Flags & AREA_FLAG_NEED_FLY) || GetTransport())
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
@@ -403,15 +403,15 @@ void Player::RepopAtGraveyard()
     // and don't show spirit healer location
     if (ClosestGrave)
     {
-        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
-        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
+        bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->Continent;
+        TeleportTo(ClosestGrave->Continent, ClosestGrave->LocX, ClosestGrave->LocY, ClosestGrave->LocZ, GetOrientation());
         if (IsDead())                                       // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
-            data << ClosestGrave->map_id;
-            data << ClosestGrave->x;
-            data << ClosestGrave->y;
-            data << ClosestGrave->z;
+            data << ClosestGrave->Continent;
+            data << ClosestGrave->LocX;
+            data << ClosestGrave->LocY;
+            data << ClosestGrave->LocZ;
             GetSession()->SendPacket(&data);
         }
         if (updateVisibility && IsInWorld())

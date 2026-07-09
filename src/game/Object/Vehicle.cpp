@@ -109,18 +109,18 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     // Initial fill of available seats for the vehicle
     for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
     {
-        if (uint32 seatId = vehicleEntry->m_seatID[i])
+        if (uint32 seatId = vehicleEntry->SeatID[i])
         {
             if (VehicleSeatEntry const* seatEntry = sVehicleSeatStore.LookupEntry(seatId))
             {
                 m_vehicleSeats.insert(VehicleSeatMap::value_type(i, seatEntry));
 
-                if (IsUsableSeatForCreature(seatEntry->m_flags))
+                if (IsUsableSeatForCreature(seatEntry->Flags))
                 {
                     m_creatureSeats |= 1 << i;
                 }
 
-                if (IsUsableSeatForPlayer(seatEntry->m_flags, seatEntry->m_flagsB))
+                if (IsUsableSeatForPlayer(seatEntry->Flags, seatEntry->FlagsB))
                 {
                     m_playerSeats |= 1 << i;
                 }
@@ -163,7 +163,7 @@ void VehicleInfo::Initialize()
     }
 
     // Initialize movement limitations
-    uint32 vehicleFlags = GetVehicleEntry()->m_flags;
+    uint32 vehicleFlags = GetVehicleEntry()->Flags;
     Unit* pVehicle = (Unit*)m_owner;
 
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
@@ -190,9 +190,9 @@ void VehicleInfo::Initialize()
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
-        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
+        if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->PowerDisplayID_0))
         {
-            pVehicle->SetPowerType(Powers(powerEntry->power));
+            pVehicle->SetPowerType(Powers(powerEntry->ActualType));
         }
     }
 
@@ -277,7 +277,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     init.Launch();
 
     // Apply passenger modifications
-    ApplySeatMods(passenger, seatEntry->m_flags);
+    ApplySeatMods(passenger, seatEntry->Flags);
 
 #ifdef ENABLE_ELUNA
     if (Eluna* e = passenger->GetEluna())
@@ -300,7 +300,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     DEBUG_LOG("VehicleInfo::SwitchSeat: passenger: %s try to switch to seat %u", passenger->GetGuidStr().c_str(), seat);
 
     // Switching seats is not possible
-    if (m_vehicleEntry->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+    if (m_vehicleEntry->Flags & VEHICLE_FLAG_DISABLE_SWITCH)
     {
         return;
     }
@@ -324,13 +324,13 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     MANGOS_ASSERT(seatEntry);
 
     // Switching seats is only allowed if this flag is set
-    if (~seatEntry->m_flags & SEAT_FLAG_CAN_SWITCH)
+    if (~seatEntry->Flags & SEAT_FLAG_CAN_SWITCH)
     {
         return;
     }
 
     // Remove passenger modifications of the old seat
-    RemoveSeatMods(passenger, seatEntry->m_flags);
+    RemoveSeatMods(passenger, seatEntry->Flags);
 
     // Set to new seat
     itr->second->SetTransportSeat(seat);
@@ -347,7 +347,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     MANGOS_ASSERT(seatEntry);
 
     // Apply passenger modifications of the new seat
-    ApplySeatMods(passenger, seatEntry->m_flags);
+    ApplySeatMods(passenger, seatEntry->Flags);
 }
 
 /*
@@ -408,7 +408,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     }
 
     // Remove passenger modifications
-    RemoveSeatMods(passenger, seatEntry->m_flags);
+    RemoveSeatMods(passenger, seatEntry->Flags);
 
 #ifdef ENABLE_ELUNA
     if (Eluna* e = passenger->GetEluna())
@@ -422,8 +422,8 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     {
         // TODO: Guesswork, but seems to be fairly near correct
         // Only if the passenger was on control seat? Also depending on some flags
-        if ((seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL) &&
-                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
+        if ((seatEntry->Flags & SEAT_FLAG_CAN_CONTROL) &&
+                !(m_vehicleEntry->Flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
             {

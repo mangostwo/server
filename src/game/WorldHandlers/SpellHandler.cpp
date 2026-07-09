@@ -193,8 +193,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         if (SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid))
         {
             // for implicit area/coord target spells
-            if (IsPointEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) ||
-                    IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])))
+            if (IsPointEffectTarget(Targets(spellInfo->ImplicitTargetA[EFFECT_INDEX_0])) ||
+                    IsAreaEffectTarget(Targets(spellInfo->ImplicitTargetA[EFFECT_INDEX_0])))
                 Spell::SendCastResult(_player, spellInfo, cast_count, SPELL_FAILED_NO_VALID_TARGETS);
             // for explicit target spells
             else
@@ -553,8 +553,8 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
             bool allow = false;
             for (int k = 0; k < MAX_EFFECT_INDEX; ++k)
             {
-                if (spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS ||
-                    spellInfo->EffectApplyAuraName[k] == SPELL_AURA_MOD_POSSESS_PET)
+                if (spellInfo->EffectAura[k] == SPELL_AURA_MOD_POSSESS ||
+                    spellInfo->EffectAura[k] == SPELL_AURA_MOD_POSSESS_PET)
                 {
                     allow = true;
                     break;
@@ -577,7 +577,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (IsChanneledSpell(spellInfo))
     {
         if (Spell* curSpell = _player->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            if (curSpell->m_spellInfo->Id == spellId)
+            if (curSpell->m_spellInfo->ID == spellId)
             {
                 _player->InterruptSpell(CURRENT_CHANNELED_SPELL);
             }

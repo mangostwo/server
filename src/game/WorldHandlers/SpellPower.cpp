@@ -145,19 +145,19 @@ void Spell::TakePower()
     }
 
     // health as power used
-    if (m_spellInfo->powerType == POWER_HEALTH)
+    if (m_spellInfo->PowerType == POWER_HEALTH)
     {
         m_caster->ModifyHealth(-(int32)m_powerCost);
         return;
     }
 
-    if (m_spellInfo->powerType >= MAX_POWERS)
+    if (m_spellInfo->PowerType >= MAX_POWERS)
     {
-        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
+        sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->PowerType);
         return;
     }
 
-    Powers powerType = Powers(m_spellInfo->powerType);
+    Powers powerType = Powers(m_spellInfo->PowerType);
 
     if (powerType == POWER_RUNE)
     {
@@ -246,7 +246,7 @@ void Spell::HandleThreatSpells()
         return;
     }
 
-    SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(m_spellInfo->Id);
+    SpellThreatEntry const* threatEntry = sSpellMgr.GetSpellThreatEntry(m_spellInfo->ID);
 
     if (!threatEntry || (!threatEntry->threat && threatEntry->ap_bonus == 0.0f))
     {
@@ -275,7 +275,7 @@ void Spell::HandleThreatSpells()
         // so abort when only some effects are negative.
         if ((m_negativeEffectMask & effectMask) != effectMask)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, is not clearly positive or negative, ignoring bonus threat", m_spellInfo->Id, sSpellMgr.GetSpellRank(m_spellInfo->Id));
+            DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u, rank %u, is not clearly positive or negative, ignoring bonus threat", m_spellInfo->ID, sSpellMgr.GetSpellRank(m_spellInfo->ID));
             return;
         }
         positive = false;
@@ -314,5 +314,5 @@ void Spell::HandleThreatSpells()
         }
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s %zu target(s)", m_spellInfo->Id, threat, positive ? "assisting" : "harming", m_UniqueTargetInfo.size());
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell %u added an additional %f threat for %s %zu target(s)", m_spellInfo->ID, threat, positive ? "assisting" : "harming", m_UniqueTargetInfo.size());
 }

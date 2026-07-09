@@ -119,10 +119,10 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
             continue;
         }
 
-        MANGOS_ASSERT(criteria->requiredType < ACHIEVEMENT_CRITERIA_TYPE_TOTAL && "Not updated ACHIEVEMENT_CRITERIA_TYPE_TOTAL?");
+        MANGOS_ASSERT(criteria->Type < ACHIEVEMENT_CRITERIA_TYPE_TOTAL && "Not updated ACHIEVEMENT_CRITERIA_TYPE_TOTAL?");
 
         // check if referredAchievement exists!
-        AchievementEntry const* achiev = sAchievementStore.LookupEntry(criteria->referredAchievement);
+        AchievementEntry const* achiev = sAchievementStore.LookupEntry(criteria->Achievement_ID);
         if (!achiev)
         {
             sLog.outDetail("Removed achievement-criteria %u, because referred achievement does not exist", entryId);
@@ -130,8 +130,8 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
             continue;
         }
 
-        m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
-        m_AchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
+        m_AchievementCriteriasByType[criteria->Type].push_back(criteria);
+        m_AchievementCriteriaListByAchievement[criteria->Achievement_ID].push_back(criteria);
         ++count;
     }
 
@@ -158,13 +158,13 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
         bar.step();
 
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(entryId);
-        if (!achievement || !achievement->refAchievement)
+        if (!achievement || !achievement->Shares_criteria)
         {
             continue;
         }
 
         // Check refAchievement exists
-        AchievementEntry const* refAchiev = sAchievementStore.LookupEntry(achievement->refAchievement);
+        AchievementEntry const* refAchiev = sAchievementStore.LookupEntry(achievement->Shares_criteria);
         if (!refAchiev)
         {
             sLog.outDetail("Removed achieviement %u, because referred achievement does not exist", entryId);
@@ -172,7 +172,7 @@ void AchievementGlobalMgr::LoadAchievementReferenceList()
             continue;
         }
 
-        m_AchievementListByReferencedId[achievement->refAchievement].push_back(achievement);
+        m_AchievementListByReferencedId[achievement->Shares_criteria].push_back(achievement);
         ++count;
     }
 
@@ -252,7 +252,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
             continue;
         }
 
-        switch (criteria->requiredType)
+        switch (criteria->Type)
         {
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
                 if (!criteria->win_bg.additionalRequirement1_type && !criteria->win_bg.additionalRequirement2_type)
@@ -264,7 +264,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
                 break;                                      // any cases
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST:
             {
-                AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
+                AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->Achievement_ID);
                 // Checked in LoadAchievementCriteriaList
 
                 // exist many achievements with this criteria, use at this moment hardcoded check to skil simple case
@@ -321,7 +321,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 
         if (!GetCriteriaRequirementSet(criteria))
         {
-            sLog.outErrorDb("Table `achievement_criteria_requirement` is missing expected data for `criteria_id` %u (type: %u) for achievement %u.", criteria->ID, criteria->requiredType, criteria->referredAchievement);
+            sLog.outErrorDb("Table `achievement_criteria_requirement` is missing expected data for `criteria_id` %u (type: %u) for achievement %u.", criteria->ID, criteria->Type, criteria->Achievement_ID);
         }
     }
 

@@ -105,7 +105,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
 
     WorldPacket data(isPetCastResult ? SMSG_PET_CAST_FAILED : SMSG_CAST_FAILED, (4 + 1 + 2));
     data << uint8(cast_count);                              // single cast or multi 2.3 (0/1)
-    data << uint32(spellInfo->Id);
+    data << uint32(spellInfo->ID);
     data << uint8(!IsPassiveSpell(spellInfo) ? result : SPELL_FAILED_DONT_REPORT); // do not report failed passive spells
     switch (result)
     {
@@ -117,7 +117,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
             break;
         case SPELL_FAILED_REQUIRES_AREA:                    // AreaTable.dbc id
             // hardcode areas limitation case
-            switch (spellInfo->Id)
+            switch (spellInfo->ID)
             {
                 case 41617:                                 // Cenarion Mana Salve
                 case 41619:                                 // Cenarion Healing Salve
@@ -147,9 +147,9 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
         case SPELL_FAILED_TOTEM_CATEGORY:
             for (int i = 0; i < MAX_SPELL_TOTEM_CATEGORIES; ++i)
             {
-                if (spellInfo->TotemCategory[i])
+                if (spellInfo->RequiredTotemCategoryID[i])
                 {
-                    data << uint32(spellInfo->TotemCategory[i]);// client needs only one id, not 2...
+                    data << uint32(spellInfo->RequiredTotemCategoryID[i]);// client needs only one id, not 2...
                 }
             }
             break;
@@ -157,7 +157,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS_MAINHAND:
         case SPELL_FAILED_EQUIPPED_ITEM_CLASS_OFFHAND:
             data << uint32(spellInfo->EquippedItemClass);
-            data << uint32(spellInfo->EquippedItemSubClassMask);
+            data << uint32(spellInfo->EquippedItemSubclass);
             break;
         case SPELL_FAILED_PREVENTED_BY_MECHANIC:
             data << uint32(0);                              // SpellMechanic.dbc id
@@ -166,7 +166,7 @@ void Spell::SendCastResult(Player* caster, SpellEntry const* spellInfo, uint8 ca
             data << uint32(0);                              // custom error id (see enum SpellCastResultCustom)
             break;
         case SPELL_FAILED_NEED_EXOTIC_AMMO:
-            data << uint32(spellInfo->EquippedItemSubClassMask);// seems correct...
+            data << uint32(spellInfo->EquippedItemSubclass);// seems correct...
             break;
         case SPELL_FAILED_REAGENTS:
             data << uint32(0);                              // item id
@@ -201,7 +201,7 @@ void Spell::SendSpellStart()
         return;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Sending SMSG_SPELL_START id=%u", m_spellInfo->Id);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Sending SMSG_SPELL_START id=%u", m_spellInfo->ID);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN2;
     if (IsRangedSpell())
@@ -209,7 +209,7 @@ void Spell::SendSpellStart()
         castFlags |= CAST_FLAG_AMMO;
     }
 
-    if (m_spellInfo->runeCostID)
+    if (m_spellInfo->RuneCostID)
     {
         castFlags |= CAST_FLAG_UNKNOWN19;
     }
@@ -226,7 +226,7 @@ void Spell::SendSpellStart()
 
     data << m_caster->GetPackGUID();
     data << uint8(m_cast_count);                            // pending spell cast
-    data << uint32(m_spellInfo->Id);                        // spellId
+    data << uint32(m_spellInfo->ID);                        // spellId
     data << uint32(castFlags);                              // cast flags
     data << uint32(m_timer);                                // delay?
 
@@ -281,7 +281,7 @@ void Spell::SendSpellGo()
         return;
     }
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Sending SMSG_SPELL_GO id=%u", m_spellInfo->Id);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Sending SMSG_SPELL_GO id=%u", m_spellInfo->ID);
 
     uint32 castFlags = CAST_FLAG_UNKNOWN9;
     if (IsRangedSpell())
@@ -289,7 +289,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_AMMO;                         // arrows/bullets visual
     }
 
-    if ((m_caster->GetTypeId() == TYPEID_PLAYER) && (m_caster->getClass() == CLASS_DEATH_KNIGHT) && m_spellInfo->runeCostID)
+    if ((m_caster->GetTypeId() == TYPEID_PLAYER) && (m_caster->getClass() == CLASS_DEATH_KNIGHT) && m_spellInfo->RuneCostID)
     {
         castFlags |= CAST_FLAG_UNKNOWN19;                   // same as in SMSG_SPELL_START
         castFlags |= CAST_FLAG_PREDICTED_POWER;             // makes cooldowns visible
@@ -314,7 +314,7 @@ void Spell::SendSpellGo()
 
     data << m_caster->GetPackGUID();
     data << uint8(m_cast_count);                            // pending spell cast?
-    data << uint32(m_spellInfo->Id);                        // spellId
+    data << uint32(m_spellInfo->ID);                        // spellId
     data << uint32(castFlags);                              // cast flags
     data << uint32(GameTime::GetGameTimeMS());              // timestamp
 
@@ -324,7 +324,7 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_PREDICTED_POWER)              // predicted power
     {
-        data << uint32(m_caster->GetPower((Powers)m_spellInfo->powerType));
+        data << uint32(m_caster->GetPower((Powers)m_spellInfo->PowerType));
     }
 
     if (castFlags & CAST_FLAG_PREDICTED_RUNES)              // predicted runes
@@ -431,12 +431,12 @@ void Spell::WriteAmmoToPacket(WorldPacket* data)
             {
                 if (ItemEntry const* itemEntry = sItemStore.LookupEntry(item_id))
                 {
-                    if (itemEntry->Class == ITEM_CLASS_WEAPON)
+                    if (itemEntry->ClassID == ITEM_CLASS_WEAPON)
                     {
-                        switch (itemEntry->SubClass)
+                        switch (itemEntry->SubclassID)
                         {
                             case ITEM_SUBCLASS_WEAPON_THROWN:
-                                ammoDisplayID = itemEntry->DisplayId;
+                                ammoDisplayID = itemEntry->DisplayInfoID;
                                 ammoInventoryType = itemEntry->InventoryType;
                                 break;
                             case ITEM_SUBCLASS_WEAPON_BOW:
@@ -544,7 +544,7 @@ void Spell::SendLogExecute()
         data << target->GetPackGUID();
     }
 
-    data << uint32(m_spellInfo->Id);
+    data << uint32(m_spellInfo->ID);
     uint32 count1 = 1;
     data << uint32(count1);                                 // count1 (effect count?)
     for (uint32 i = 0; i < count1; ++i)
@@ -687,14 +687,14 @@ void Spell::SendInterrupted(uint8 result)
     WorldPacket data(SMSG_SPELL_FAILURE, (8 + 4 + 1));
     data << m_caster->GetPackGUID();
     data << uint8(m_cast_count);
-    data << uint32(m_spellInfo->Id);
+    data << uint32(m_spellInfo->ID);
     data << uint8(result);
     m_caster->SendMessageToSet(&data, true);
 
     data.Initialize(SMSG_SPELL_FAILED_OTHER, (8 + 4));
     data << m_caster->GetPackGUID();
     data << uint8(m_cast_count);
-    data << uint32(m_spellInfo->Id);
+    data << uint32(m_spellInfo->ID);
     data << uint8(result);
     m_caster->SendMessageToSet(&data, true);
 }
@@ -733,26 +733,26 @@ void Spell::SendChannelUpdate(uint32 time)
                 // TODO - Requires more specials for target?
 
                 // Some possessed might want to despawn?
-                if (possessed->GetUInt32Value(UNIT_CREATED_BY_SPELL) == m_spellInfo->Id && possessed->GetTypeId() == TYPEID_UNIT)
+                if (possessed->GetUInt32Value(UNIT_CREATED_BY_SPELL) == m_spellInfo->ID && possessed->GetTypeId() == TYPEID_UNIT)
                 {
                     ((Creature*)possessed)->ForcedDespawn();
                 }
             }
         }
 
-        m_caster->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+        m_caster->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
 
         ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
         if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
         {
             if (Unit* target = sObjectAccessor.GetUnit(*m_caster, target_guid))
             {
-                target->RemoveAurasByCasterSpell(m_spellInfo->Id, m_caster->GetObjectGuid());
+                target->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
             }
         }
 
         // Only finish channeling when latest channeled spell finishes
-        if (m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != m_spellInfo->Id)
+        if (m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != m_spellInfo->ID)
         {
             return;
         }
@@ -779,7 +779,7 @@ void Spell::SendChannelStart(uint32 duration)
     // select dynobject created by first effect if any
     if (m_spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
     {
-        target = m_caster->GetDynObject(m_spellInfo->Id, EFFECT_INDEX_0);
+        target = m_caster->GetDynObject(m_spellInfo->ID, EFFECT_INDEX_0);
     }
     // select first not resisted target from target list for _0_ effect
     else if (!m_UniqueTargetInfo.empty())
@@ -808,7 +808,7 @@ void Spell::SendChannelStart(uint32 duration)
 
     WorldPacket data(MSG_CHANNEL_START, (8 + 4 + 4));
     data << m_caster->GetPackGUID();
-    data << uint32(m_spellInfo->Id);
+    data << uint32(m_spellInfo->ID);
     data << uint32(duration);
     m_caster->SendMessageToSet(&data, true);
 
@@ -819,7 +819,7 @@ void Spell::SendChannelStart(uint32 duration)
         m_caster->SetChannelObjectGuid(target->GetObjectGuid());
     }
 
-    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
+    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->ID);
 }
 
 /**

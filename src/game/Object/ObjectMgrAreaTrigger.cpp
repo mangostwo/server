@@ -180,7 +180,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
 {
     const MapEntry* mapEntry = sMapStore.LookupEntry(map_id);
-    if (!mapEntry || mapEntry->ghost_entrance_map < 0)
+    if (!mapEntry || mapEntry->CorpseMapID < 0)
     {
         return NULL;
     }
@@ -190,11 +190,11 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
     AreaTrigger const* compareTrigger = NULL;
     for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
     {
-        if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+        if (itr->second.target_mapId == uint32(mapEntry->CorpseMapID))
         {
             ghostTrigger.push_back(&itr->second);
             // First run, only consider AreaTrigger that teleport in the proper map
-            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->mapid == map_id)
+            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->ContinentID == map_id)
             {
                 if (itr->second.IsMinimal())
                 {

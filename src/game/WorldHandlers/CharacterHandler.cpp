@@ -311,19 +311,19 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
     }
 
     // prevent character creating Expansion race without Expansion account
-    if (raceEntry->expansion > Expansion())
+    if (raceEntry->Required_expansion > Expansion())
     {
         data << (uint8)CHAR_CREATE_EXPANSION;
-        sLog.outError("Expansion %u account:[%d] tried to Create character with expansion %u race (%u)", Expansion(), GetAccountId(), raceEntry->expansion, race_);
+        sLog.outError("Expansion %u account:[%d] tried to Create character with expansion %u race (%u)", Expansion(), GetAccountId(), raceEntry->Required_expansion, race_);
         SendPacket(&data);
         return;
     }
 
     // prevent character creating Expansion class without Expansion account
-    if (classEntry->expansion > Expansion())
+    if (classEntry->Required_expansion > Expansion())
     {
         data << (uint8)CHAR_CREATE_EXPANSION_CLASS;
-        sLog.outError("Expansion %u account:[%d] tried to Create character with expansion %u class (%u)", Expansion(), GetAccountId(), classEntry->expansion, class_);
+        sLog.outError("Expansion %u account:[%d] tried to Create character with expansion %u class (%u)", Expansion(), GetAccountId(), classEntry->Required_expansion, class_);
         SendPacket(&data);
         return;
     }
@@ -847,13 +847,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         // Class cinematic (Death Knight) takes precedence; fall back to the race intro
         if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(pCurrChar->getClass()))
         {
-            if (cEntry->CinematicSequence)
+            if (cEntry->CinematicSequenceID)
             {
-                cinematicSequenceId = cEntry->CinematicSequence;
+                cinematicSequenceId = cEntry->CinematicSequenceID;
             }
             else if (ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->getRace()))
             {
-                cinematicSequenceId = rEntry->CinematicSequence;
+                cinematicSequenceId = rEntry->CinematicSequenceID;
             }
         }
 

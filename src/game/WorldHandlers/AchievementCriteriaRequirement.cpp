@@ -42,7 +42,7 @@
 
 bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* criteria)
 {
-    switch (criteria->requiredType)
+    switch (criteria->Type)
     {
         case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
@@ -62,7 +62,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2:
             break;
         default:
-            sLog.outErrorDb("Table `achievement_criteria_requirement` have not supported data for criteria %u (Not supported as of its criteria type: %u), ignore.", criteria->ID, criteria->requiredType);
+            sLog.outErrorDb("Table `achievement_criteria_requirement` have not supported data for criteria %u (Not supported as of its criteria type: %u), ignore.", criteria->ID, criteria->Type);
             return false;
     }
 
@@ -79,7 +79,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!creature.id || !ObjectMgr::GetCreatureTemplate(creature.id))
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_CREATURE (%u) have nonexistent creature id in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, creature.id);
+                                criteria->ID, criteria->Type, requirementType, creature.id);
                 return false;
             }
             return true;
@@ -87,19 +87,19 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!classRace.class_id && !classRace.race_id)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_PLAYER_CLASS_RACE (%u) must have not 0 in one from value fields, ignore.",
-                                criteria->ID, criteria->requiredType, requirementType);
+                                criteria->ID, criteria->Type, requirementType);
                 return false;
             }
             if (classRace.class_id && ((1 << (classRace.class_id - 1)) & CLASSMASK_ALL_PLAYABLE) == 0)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_CREATURE (%u) have nonexistent class in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, classRace.class_id);
+                                criteria->ID, criteria->Type, requirementType, classRace.class_id);
                 return false;
             }
             if (classRace.race_id && ((1 << (classRace.race_id - 1)) & RACEMASK_ALL_PLAYABLE) == 0)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_CREATURE (%u) have nonexistent race in value2 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, classRace.race_id);
+                                criteria->ID, criteria->Type, requirementType, classRace.race_id);
                 return false;
             }
             return true;
@@ -107,7 +107,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (health.percent < 1 || health.percent > 100)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_PLAYER_LESS_HEALTH (%u) have wrong percent value in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, health.percent);
+                                criteria->ID, criteria->Type, requirementType, health.percent);
                 return false;
             }
             return true;
@@ -115,7 +115,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (player_dead.own_team_flag > 1)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_DEAD (%u) have wrong boolean value1 (%u).",
-                                criteria->ID, criteria->requiredType, requirementType, player_dead.own_team_flag);
+                                criteria->ID, criteria->Type, requirementType, player_dead.own_team_flag);
                 return false;
             }
             return true;
@@ -126,19 +126,19 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!spellEntry)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have wrong spell id in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id);
+                                criteria->ID, criteria->Type, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id);
                 return false;
             }
             if (aura.effect_idx >= MAX_EFFECT_INDEX)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have wrong spell effect index in value2 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.effect_idx);
+                                criteria->ID, criteria->Type, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.effect_idx);
                 return false;
             }
-            if (!spellEntry->EffectApplyAuraName[aura.effect_idx])
+            if (!spellEntry->EffectAura[aura.effect_idx])
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement %s (%u) have non-aura spell effect (ID: %u Effect: %u), ignore.",
-                                criteria->ID, criteria->requiredType, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id, aura.effect_idx);
+                                criteria->ID, criteria->Type, (requirementType == ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA ? "ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA" : "ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA"), requirementType, aura.spell_id, aura.effect_idx);
                 return false;
             }
             return true;
@@ -147,7 +147,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!GetAreaEntryByAreaID(area.id))
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA (%u) have wrong area id in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, area.id);
+                                criteria->ID, criteria->Type, requirementType, area.id);
                 return false;
             }
             return true;
@@ -155,7 +155,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (level.minlevel > STRONG_MAX_LEVEL)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_T_LEVEL (%u) have wrong minlevel in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, level.minlevel);
+                                criteria->ID, criteria->Type, requirementType, level.minlevel);
                 return false;
             }
             return true;
@@ -163,7 +163,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (gender.gender > GENDER_NONE)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_T_GENDER (%u) have wrong gender in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, gender.gender);
+                                criteria->ID, criteria->Type, requirementType, gender.gender);
                 return false;
             }
             return true;
@@ -171,7 +171,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (difficulty.difficulty >= MAX_DIFFICULTY)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY (%u) have wrong difficulty in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, difficulty.difficulty);
+                                criteria->ID, criteria->Type, requirementType, difficulty.difficulty);
                 return false;
             }
             return true;
@@ -179,7 +179,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (map_players.maxcount <= 0)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_MAP_PLAYER_COUNT (%u) have wrong max players count in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, map_players.maxcount);
+                                criteria->ID, criteria->Type, requirementType, map_players.maxcount);
                 return false;
             }
             return true;
@@ -187,7 +187,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (team.team != ALLIANCE && team.team != HORDE)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_T_TEAM (%u) have unknown team in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, team.team);
+                                criteria->ID, criteria->Type, requirementType, team.team);
                 return false;
             }
             return true;
@@ -195,7 +195,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (drunk.state >= MAX_DRUNKEN)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK (%u) have unknown drunken state in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, drunk.state);
+                                criteria->ID, criteria->Type, requirementType, drunk.state);
                 return false;
             }
             return true;
@@ -203,7 +203,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!sHolidaysStore.LookupEntry(holiday.id))
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY (%u) have unknown holiday in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, holiday.id);
+                                criteria->ID, criteria->Type, requirementType, holiday.id);
                 return false;
             }
             return true;
@@ -211,7 +211,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (equipped_item.item_quality >= MAX_ITEM_QUALITY)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPPED_ITEM_LVL (%u) have unknown quality state in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, equipped_item.item_quality);
+                                criteria->ID, criteria->Type, requirementType, equipped_item.item_quality);
                 return false;
             }
             return true;
@@ -221,13 +221,13 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             if (!titleInfo)
             {
                 sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_KNOWN_TITLE (%u) have unknown title_id in value1 (%u), ignore.",
-                                criteria->ID, criteria->requiredType, requirementType, known_title.title_id);
+                                criteria->ID, criteria->Type, requirementType, known_title.title_id);
                 return false;
             }
             return true;
         }
         default:
-            sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
+            sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->Type, requirementType);
             return false;
     }
 }
@@ -363,7 +363,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         {
             if (CharTitlesEntry const* titleInfo = sCharTitlesStore.LookupEntry(known_title.title_id))
             {
-                return source && source->HasTitle(titleInfo->bit_index);
+                return source && source->HasTitle(titleInfo->Mask_ID);
             }
 
             return false;

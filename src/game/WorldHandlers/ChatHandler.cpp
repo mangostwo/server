@@ -931,7 +931,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
         return;
     }
 
-    uint32 emote_id = em->textid;
+    uint32 emote_id = em->EmoteID;
 
     switch (emote_id)
     {

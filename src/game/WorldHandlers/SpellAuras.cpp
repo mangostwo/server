@@ -409,7 +409,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
     m_isPersistent(false), m_in_use(0), m_spellAuraHolder(holder)
 {
     MANGOS_ASSERT(target);
-    MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry(spellproto->Id) && "`info` must be pointer to sSpellStore element");
+    MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry(spellproto->ID) && "`info` must be pointer to sSpellStore element");
 
     m_currentBasePoints = currentBasePoints ? *currentBasePoints : spellproto->CalculateSimpleValue(eff);
 
@@ -432,17 +432,17 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
             {
                 for (int k = 0; k < 3; ++k)
                 {
-                    SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(item_rand_suffix->enchant_id[k]);
+                    SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(item_rand_suffix->Enchantment[k]);
                     if (pEnchant)
                     {
                         for (int t = 0; t < 3; ++t)
                         {
-                            if (pEnchant->spellid[t] != spellproto->Id)
+                            if (pEnchant->EffectArg[t] != spellproto->ID)
                             {
                                 continue;
                             }
 
-                            damage = uint32((item_rand_suffix->prefix[k] * castItem->GetItemSuffixFactor()) / 10000);
+                            damage = uint32((item_rand_suffix->AllocationPct[k] * castItem->GetItemSuffixFactor()) / 10000);
                             break;
                         }
                     }
@@ -458,16 +458,16 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
 
     damage *= holder->GetStackAmount();
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], spellproto->EffectImplicitTargetA[eff], damage);
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Aura: construct Spellid : %u, Aura : %u Target : %d Damage : %d", spellproto->ID, spellproto->EffectAura[eff], spellproto->ImplicitTargetA[eff], damage);
 
-    SetModifier(AuraType(spellproto->EffectApplyAuraName[eff]), damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff]);
+    SetModifier(AuraType(spellproto->EffectAura[eff]), damage, spellproto->EffectAuraPeriod[eff], spellproto->EffectMiscValue[eff]);
 
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
     // Apply periodic time mod
     if (modOwner && m_modifier.periodictime)
     {
-        modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_ACTIVATION_TIME, m_modifier.periodictime);
+        modOwner->ApplySpellMod(spellproto->ID, SPELLMOD_ACTIVATION_TIME, m_modifier.periodictime);
     }
 
     // Start periodic on next tick or at aura apply
@@ -493,7 +493,7 @@ AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* cu
     m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellproto->EffectRadiusIndex[m_effIndex]));
     if (Player* modOwner = caster_ptr->GetSpellModOwner())
     {
-        modOwner->ApplySpellMod(spellproto->Id, SPELLMOD_RADIUS, m_radius);
+        modOwner->ApplySpellMod(spellproto->ID, SPELLMOD_RADIUS, m_radius);
     }
 
     switch (spellproto->Effect[eff])
@@ -504,7 +504,7 @@ AreaAura::AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* cu
         case SPELL_EFFECT_APPLY_AREA_AURA_RAID:
             m_areaAuraType = AREA_AURA_RAID;
             // Light's Beacon not applied to caster itself (TODO: more generic check for another similar spell if any?)
-            if (target == caster_ptr && spellproto->Id == 53651)
+            if (target == caster_ptr && spellproto->ID == 53651)
             {
                 m_modifier.m_auraname = SPELL_AURA_NONE;
             }
@@ -603,7 +603,7 @@ Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* curr
     if (SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(triggeredSpellId))
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
-            if (triggeredSpellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_ENEMY)
+            if (triggeredSpellInfo->ImplicitTargetA[i] == TARGET_SINGLE_ENEMY)
             {
                 return new SingleEnemyTargetAura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
             }
@@ -819,7 +819,7 @@ void AreaAura::Update(uint32 diff)
                     continue;
                 }
 
-                Unit::SpellAuraHolderBounds spair = (*tIter)->GetSpellAuraHolderBounds(actualSpellInfo->Id);
+                Unit::SpellAuraHolderBounds spair = (*tIter)->GetSpellAuraHolderBounds(actualSpellInfo->ID);
 
                 // we need ignore present caster self applied are auras sometime
                 // in cases if this only auras applied for spell effect
@@ -883,7 +883,7 @@ void AreaAura::Update(uint32 diff)
                     actualBasePoints = actualSpellInfo->CalculateSimpleValue(m_effIndex);
                 }
 
-                SpellAuraHolder* holder = (*tIter)->GetSpellAuraHolder(actualSpellInfo->Id, GetCasterGuid());
+                SpellAuraHolder* holder = (*tIter)->GetSpellAuraHolder(actualSpellInfo->ID, GetCasterGuid());
 
                 bool addedToExisting = true;
                 if (!holder)
@@ -894,7 +894,7 @@ void AreaAura::Update(uint32 diff)
 
                 holder->SetAuraDuration(GetAuraDuration());
 
-                AreaAura* aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, holder, (*tIter), caster, NULL, GetSpellProto()->Id);
+                AreaAura* aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, holder, (*tIter), caster, NULL, GetSpellProto()->ID);
                 holder->AddAura(aur, m_effIndex);
 
                 if (addedToExisting)
@@ -1056,7 +1056,7 @@ void Aura::ApplyModifier(bool apply, bool Real)
  */
 bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
 {
-    return spell->IsFitToFamily(SpellFamily(GetSpellProto()->SpellFamilyName), GetAuraSpellClassMask());
+    return spell->IsFitToFamily(SpellFamily(GetSpellProto()->SpellClassSet), GetAuraSpellClassMask());
 }
 
 bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
@@ -1113,7 +1113,7 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 Even
     {
         // SpellFamilyName check is performed in SpellMgr::IsSpellProcEventCanTriggeredBy and it is done once for whole holder
         // note: SpellFamilyName is not checked if no spell_proc_event is defined
-        return mask.IsFitToFamilyMask(spell->SpellFamilyFlags);
+        return mask.IsFitToFamilyMask(spell->SpellClassMask);
     }
 }
 
@@ -1191,7 +1191,7 @@ struct ReapplyAffectedPassiveAurasHelper
 void Aura::ReapplyAffectedPassiveAuras()
 {
     // not reapply spell mods with charges (use original value because processed and at remove)
-    if (GetSpellProto()->procCharges)
+    if (GetSpellProto()->ProcCharges)
     {
         return;
     }
@@ -1247,7 +1247,7 @@ void Aura::TriggerSpell()
 
     SpellEntry const* triggeredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
     SpellEntry const* auraSpellInfo = GetSpellProto();
-    uint32 auraId = auraSpellInfo->Id;
+    uint32 auraId = auraSpellInfo->ID;
     Unit* target = GetTarget();
     Unit* triggerCaster = triggerTarget;
     WorldObject* triggerTargetObject = NULL;
@@ -1255,7 +1255,7 @@ void Aura::TriggerSpell()
     // specific code for cases with no trigger spell provided in field
     if (triggeredSpellInfo == NULL)
     {
-        switch (auraSpellInfo->SpellFamilyName)
+        switch (auraSpellInfo->SpellClassSet)
         {
             case SPELLFAMILY_GENERIC:
             {
@@ -2167,8 +2167,8 @@ void Aura::TriggerSpell()
                         for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                         {
                             SpellEntry const* spell = itr->second->GetSpellProto();
-                            if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-                                    (spell->SpellFamilyFlags & UI64LIT(0x0000000000000400)))
+                            if (spell->SpellClassSet == SPELLFAMILY_SHAMAN &&
+                                    (spell->SpellClassMask & UI64LIT(0x0000000000000400)))
                                 return;
                         }
                         triggerTarget->RemoveAurasDueToSpell(28820);
@@ -2705,7 +2705,7 @@ void Aura::PeriodicTick()
             }
 
             // SpellDamageBonus for magic spells
-            if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
+            if (spellProto->DefenseType == SPELL_DAMAGE_CLASS_NONE || spellProto->DefenseType == SPELL_DAMAGE_CLASS_MAGIC)
             {
                 pdamage = target->SpellDamageBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
             }
@@ -2727,7 +2727,7 @@ void Aura::PeriodicTick()
             }
 
             // Curse of Agony damage-per-tick calculation
-            if (spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000400)) && spellProto->SpellIconID == 544)
+            if (spellProto->SpellClassSet == SPELLFAMILY_WARLOCK && (spellProto->SpellClassMask & UI64LIT(0x0000000000000400)) && spellProto->SpellIconID == 544)
             {
                 // 1..4 ticks, 1/2 from normal tick damage
                 if (GetAuraTicks() <= 4)
@@ -2788,7 +2788,7 @@ void Aura::PeriodicTick()
             pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
 
             // Drain Soul (chance soul shard)
-            if (pCaster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellFamilyFlags & UI64LIT(0x0000000000004000))
+            if (pCaster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellClassSet == SPELLFAMILY_WARLOCK && spellProto->SpellClassMask & UI64LIT(0x0000000000004000))
             {
                 // Only from non-grey units
                 if (roll_chance_i(10) &&                    // 1-2 from drain with final and without glyph, 0-1 from damage
@@ -2875,7 +2875,7 @@ void Aura::PeriodicTick()
 
             pCaster->SendSpellNonMeleeDamageLog(target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, false, 0, isCrit);
 
-            float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
+            float multiplier = spellProto->EffectAmplitude[GetEffIndex()] > 0 ? spellProto->EffectAmplitude[GetEffIndex()] : 1;
 
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; // | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
@@ -2895,7 +2895,7 @@ void Aura::PeriodicTick()
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
                 {
                     if (Spell* spell = pCaster->GetCurrentSpell(CurrentSpellTypes(i)))
-                        if (spell->m_spellInfo->Id == GetId())
+                        if (spell->m_spellInfo->ID == GetId())
                         {
                             spell->cancel();
                         }
@@ -2935,7 +2935,7 @@ void Aura::PeriodicTick()
             {
 
                 // heal for caster damage (must be alive)
-                if (target != pCaster && spellProto->SpellVisual[0] == 163 && !pCaster->IsAlive())
+                if (target != pCaster && spellProto->SpellVisualID[0] == 163 && !pCaster->IsAlive())
                 {
                     return;
                 }
@@ -2954,7 +2954,7 @@ void Aura::PeriodicTick()
                     pdamage = amount;
 
                     // Wild Growth (1/7 - 6 + 2*ramainTicks) %
-                    if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellIconID == 2864)
+                    if (spellProto->SpellClassSet == SPELLFAMILY_DRUID && spellProto->SpellIconID == 2864)
                     {
                         int32 ticks = GetAuraMaxTicks();
                         int32 remainingTicks = ticks - GetAuraTicks();
@@ -3003,9 +3003,9 @@ void Aura::PeriodicTick()
                 target->GetHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
 
                 // heal for caster damage
-                if (target != pCaster && spellProto->SpellVisual[0] == 163)
+                if (target != pCaster && spellProto->SpellVisualID[0] == 163)
                 {
-                    uint32 dmg = spellProto->manaPerSecond;
+                    uint32 dmg = spellProto->ManaPerSecond;
                     if (pCaster->GetHealth() <= dmg && pCaster->GetTypeId() == TYPEID_PLAYER)
                     {
                         pCaster->RemoveAurasDueToSpell(GetId());
@@ -3029,7 +3029,7 @@ void Aura::PeriodicTick()
             // Apply Well Fed buffs from non-standard spells
             if (GetAuraTicks() == 10)
             {
-                switch (spellProto->Id)
+                switch (spellProto->ID)
                 {
                     case 24869: // Apple Bobber
                     case 61874: // Noblegarden Chocolate
@@ -3094,7 +3094,7 @@ void Aura::PeriodicTick()
 
             // Special case: draining x% of mana (up to a maximum of 2*x% of the caster's maximum mana)
             // It's mana percent cost spells, m_modifier.m_amount is percent drain from target
-            if (spellProto->ManaCostPercentage)
+            if (spellProto->ManaCostPct)
             {
                 // max value
                 uint32 maxmana = pCaster->GetMaxPower(power)  * pdamage * 2 / 100;
@@ -3122,7 +3122,7 @@ void Aura::PeriodicTick()
 
             if (pCaster->GetMaxPower(power) > 0)
             {
-                gain_multiplier = spellProto->EffectMultipleValue[GetEffIndex()];
+                gain_multiplier = spellProto->EffectAmplitude[GetEffIndex()];
 
                 if (Player* modOwner = pCaster->GetSpellModOwner())
                 {
@@ -3290,10 +3290,10 @@ void Aura::PeriodicTick()
 
             uint32 gain = uint32(-target->ModifyPower(powerType, -pdamage));
 
-            gain = uint32(gain * spellProto->EffectMultipleValue[GetEffIndex()]);
+            gain = uint32(gain * spellProto->EffectAmplitude[GetEffIndex()]);
 
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo(pCaster, target, spellProto->Id, SpellSchoolMask(spellProto->SchoolMask));
+            SpellNonMeleeDamage damageInfo(pCaster, target, spellProto->ID, SpellSchoolMask(spellProto->SchoolMask));
             pCaster->CalculateSpellDamage(&damageInfo, gain, spellProto);
 
             damageInfo.target->CalculateAbsorbResistBlock(pCaster, &damageInfo, spellProto);
@@ -3394,11 +3394,11 @@ void Aura::PeriodicDummyTick()
 {
     SpellEntry const* spell = GetSpellProto();
     Unit* target = GetTarget();
-    switch (spell->SpellFamilyName)
+    switch (spell->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
-            switch (spell->Id)
+            switch (spell->ID)
             {
                     // Forsaken Skills
                 case 7054:
@@ -3500,7 +3500,7 @@ void Aura::PeriodicDummyTick()
                     {
                         if (rand < i * (i + 1) / 2 * 5)
                         {
-                            target->CastSpell(target, spell->Id + i, true);
+                            target->CastSpell(target, spell->ID + i, true);
                             break;
                         }
                     }
@@ -3635,7 +3635,7 @@ void Aura::PeriodicDummyTick()
 
                     if (Unit* pCaster = GetCaster())
                     {
-                        pCaster->CastSpell(target, spell->Id == 49555 ? 49618 : 59809, true);
+                        pCaster->CastSpell(target, spell->ID == 49555 ? 49618 : 59809, true);
                     }
 
                     return;
@@ -3680,15 +3680,15 @@ void Aura::PeriodicDummyTick()
                     // This will summon a different npc entry on each location - each of those has individual movement patern
                     if (target->GetPositionZ() < 750.0f)
                     {
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][0], true, NULL, this);
+                        target->CastSpell(target, summonSpells[spell->ID - 53035][0], true, NULL, this);
                     }
                     else if (target->GetPositionX() > 500.0f)
                     {
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][1], true, NULL, this);
+                        target->CastSpell(target, summonSpells[spell->ID - 53035][1], true, NULL, this);
                     }
                     else
                     {
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][2], true, NULL, this);
+                        target->CastSpell(target, summonSpells[spell->ID - 53035][2], true, NULL, this);
                     }
 
                     return;
@@ -3870,7 +3870,7 @@ void Aura::PeriodicDummyTick()
                 {
                     // Sweep around
                     float newAngle = target->GetOrientation();
-                    if (spell->Id == 68875)
+                    if (spell->ID == 68875)
                     {
                         newAngle += 0.09f;
                     }
@@ -3893,7 +3893,7 @@ void Aura::PeriodicDummyTick()
             }
 
             // Drink (item drink spells)
-            if (GetEffIndex() > EFFECT_INDEX_0 && spell->EffectApplyAuraName[GetEffIndex()-1] == SPELL_AURA_MOD_POWER_REGEN)
+            if (GetEffIndex() > EFFECT_INDEX_0 && spell->EffectAura[GetEffIndex()-1] == SPELL_AURA_MOD_POWER_REGEN)
             {
                 if (target->GetTypeId() != TYPEID_PLAYER)
                 {
@@ -3932,7 +3932,7 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_MAGE:
         {
-            switch (spell->Id)
+            switch (spell->ID)
             {
                 case 55342:                       // Mirror Image
                 {
@@ -3953,7 +3953,7 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_DRUID:
         {
-            switch (spell->Id)
+            switch (spell->ID)
             {
                     // Frenzied Regeneration
                 case 22842:
@@ -3987,7 +3987,7 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_ROGUE:
         {
-            switch (spell->Id)
+            switch (spell->ID)
             {
                     // Killing Spree
                 case 51690:
@@ -4000,7 +4000,7 @@ void Aura::PeriodicDummyTick()
                     Spell::UnitList targets;
                     {
                         // eff_radius ==0
-                        float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->rangeIndex));
+                        float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->RangeIndex));
 
                         MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(target, target, radius);
                         MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(targets, u_check);
@@ -4028,12 +4028,12 @@ void Aura::PeriodicDummyTick()
         case SPELLFAMILY_HUNTER:
         {
             // Explosive Shot
-            if (spell->SpellFamilyFlags & UI64LIT(0x8000000000000000))
+            if (spell->SpellClassMask & UI64LIT(0x8000000000000000))
             {
                 target->CastCustomSpell(target, 53352, &m_modifier.m_amount, 0, 0, true, 0, this, GetCasterGuid());
                 return;
             }
-            switch (spell->Id)
+            switch (spell->ID)
             {
                     // Harpooner's Mark
                     // case 40084:
@@ -4045,7 +4045,7 @@ void Aura::PeriodicDummyTick()
                     Unit* victim = target->getVictim();
                     if (victim && victim->GetHealth() * 100 < victim->GetMaxHealth() * 35)
                     {
-                        target->CastSpell(target, spell->Id == 53511 ? 60096 : 60097, true, NULL, this);
+                        target->CastSpell(target, spell->ID == 53511 ? 60096 : 60097, true, NULL, this);
                     }
                     return;
                 }
@@ -4057,7 +4057,7 @@ void Aura::PeriodicDummyTick()
         case SPELLFAMILY_SHAMAN:
         {
             // Astral Shift
-            if (spell->Id == 52179)
+            if (spell->ID == 52179)
             {
                 // Periodic need for remove visual on stun/fear/silence lost
                 if (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
@@ -4071,7 +4071,7 @@ void Aura::PeriodicDummyTick()
         case SPELLFAMILY_DEATHKNIGHT:
         {
             // Death and Decay
-            if (spell->SpellFamilyFlags & UI64LIT(0x0000000000000020))
+            if (spell->SpellClassMask & UI64LIT(0x0000000000000020))
             {
                 if (Unit* caster = GetCaster())
                 {
@@ -4083,7 +4083,7 @@ void Aura::PeriodicDummyTick()
 //            if (spell->SpellFamilyFlags & UI64LIT(0x0000000000001000))
 //                return;
             // Chains of Ice
-            if (spell->SpellFamilyFlags & UI64LIT(0x0000400000000000))
+            if (spell->SpellClassMask & UI64LIT(0x0000400000000000))
             {
                 // Get 0 effect aura
                 Aura* slow = target->GetAura(GetId(), EFFECT_INDEX_0);
@@ -4121,7 +4121,7 @@ void Aura::PeriodicDummyTick()
 //            if (spell->SpellIconID == 30412)
 //                return;
             // Hysteria
-            if (spell->SpellFamilyFlags & UI64LIT(0x0000000020000000))
+            if (spell->SpellClassMask & UI64LIT(0x0000000020000000))
             {
                 // damage not expected to be show in logs, not any damage spell related to damage apply
                 uint32 deal = m_modifier.m_amount * target->GetMaxHealth() / 100;
@@ -4217,7 +4217,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_permanent(false), m_isRemovedOnShapeLost(true), m_deleted(false), m_in_use(0)
 {
     MANGOS_ASSERT(target);
-    MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry(spellproto->Id) && "`info` must be pointer to sSpellStore element");
+    MANGOS_ASSERT(spellproto && spellproto == sSpellStore.LookupEntry(spellproto->ID) && "`info` must be pointer to sSpellStore element");
 
     if (!caster)
     {
@@ -4234,10 +4234,10 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     m_isPassive      = IsPassiveSpell(spellproto);
     m_isDeathPersist = IsDeathPersistentSpell(spellproto);
     m_trackedAuraType= IsSingleTargetSpell(spellproto) ? TRACK_AURA_TYPE_SINGLE_TARGET : IsSpellHaveAura(spellproto, SPELL_AURA_CONTROL_VEHICLE) ? TRACK_AURA_TYPE_CONTROL_VEHICLE : TRACK_AURA_TYPE_NOT_TRACKED;
-    m_procCharges    = spellproto->procCharges;
+    m_procCharges    = spellproto->ProcCharges;
 
     m_isRemovedOnShapeLost = (GetCasterGuid() == m_target->GetObjectGuid() &&
-                              m_spellProto->Stances &&
+                              m_spellProto->ShapeshiftMask &&
                               !m_spellProto->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) &&
                               !m_spellProto->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT));
 
@@ -4259,7 +4259,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     }
 
     // some custom stack values at aura holder create
-    switch (m_spellProto->Id)
+    switch (m_spellProto->ID)
     {
             // some auras applied with max stack
         case 24575:                                         // Brittle Armor
@@ -4275,7 +4275,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 65294:                                         // Empowered
         case 71564:                                         // Deadly Precision
         case 74396:                                         // Fingers of Frost
-            m_stackAmount = m_spellProto->StackAmount;
+            m_stackAmount = m_spellProto->CumulativeAura;
             break;
     }
 
@@ -4452,7 +4452,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
         }
 
         // Enrage aura state
-        if (m_spellProto->Dispel == DISPEL_ENRAGE)
+        if (m_spellProto->DispelType == DISPEL_ENRAGE)
         {
             m_target->ModifyAuraState(AURA_STATE_ENRAGE, true);
         }
@@ -4531,7 +4531,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         // Update target aura state flag (at last aura remove)
         //*****************************************************
         // Enrage aura state
-        if (m_spellProto->Dispel == DISPEL_ENRAGE)
+        if (m_spellProto->DispelType == DISPEL_ENRAGE)
         {
             m_target->ModifyAuraState(AURA_STATE_ENRAGE, false);
         }
@@ -4558,8 +4558,8 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
         }
 
         uint32 removeState = 0;
-        ClassFamilyMask removeFamilyFlag = m_spellProto->SpellFamilyFlags;
-        switch (m_spellProto->SpellFamilyName)
+        ClassFamilyMask removeFamilyFlag = m_spellProto->SpellClassMask;
+        switch (m_spellProto->SpellClassSet)
         {
             case SPELLFAMILY_PALADIN:
                 if (IsSealSpell(m_spellProto))
@@ -4613,7 +4613,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             for (Unit::SpellAuraHolderMap::const_iterator i = holders.begin(); i != holders.end(); ++i)
             {
                 SpellEntry const* auraSpellInfo = (*i).second->GetSpellProto();
-                if (auraSpellInfo->IsFitToFamily(SpellFamily(m_spellProto->SpellFamilyName), removeFamilyFlag))
+                if (auraSpellInfo->IsFitToFamily(SpellFamily(m_spellProto->SpellClassSet), removeFamilyFlag))
                 {
                     found = true;
                     break;
@@ -4646,7 +4646,7 @@ void SpellAuraHolder::CleanupTriggeredSpells()
 {
     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
-        if (!m_spellProto->EffectApplyAuraName[i])
+        if (!m_spellProto->EffectAura[i])
         {
             continue;
         }
@@ -4670,8 +4670,8 @@ void SpellAuraHolder::CleanupTriggeredSpells()
 
         // needed for spell 43680, maybe others
         // TODO: is there a spell flag, which can solve this in a more sophisticated way?
-        if (m_spellProto->EffectApplyAuraName[i] == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
-            GetSpellDuration(m_spellProto) == int32(m_spellProto->EffectAmplitude[i]))
+        if (m_spellProto->EffectAura[i] == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
+            GetSpellDuration(m_spellProto) == int32(m_spellProto->EffectAuraPeriod[i]))
             {
                 continue;
             }
@@ -4688,7 +4688,7 @@ void SpellAuraHolder::CleanupTriggeredSpells()
  */
 bool SpellAuraHolder::ModStackAmount(int32 num)
 {
-    uint32 protoStackAmount = m_spellProto->StackAmount;
+    uint32 protoStackAmount = m_spellProto->CumulativeAura;
 
     // Can`t mod
     if (!protoStackAmount)
@@ -4795,13 +4795,13 @@ bool SpellAuraHolder::IsWeaponBuffCoexistableWith(SpellAuraHolder const* ref) co
     }
 
     // Exclude Non-generic Buffs [ie: Runeforging] and Executioner-Enchant
-    if (GetSpellProto()->SpellFamilyName != SPELLFAMILY_GENERIC || GetId() == 42976)
+    if (GetSpellProto()->SpellClassSet != SPELLFAMILY_GENERIC || GetId() == 42976)
     {
         return false;
     }
 
     // Exclude Stackable Buffs [ie: Blood Reserve]
-    if (GetSpellProto()->StackAmount)
+    if (GetSpellProto()->CumulativeAura)
     {
         return false;
     }
@@ -4839,7 +4839,7 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
 {
     bool totemAura = caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->IsTotem();
 
-    if (m_spellProto->procFlags)
+    if (m_spellProto->ProcTypeMask)
     {
         return true;
     }
@@ -4915,7 +4915,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     uint32 spellId3 = 0;
     uint32 spellId4 = 0;
 
-    switch (GetSpellProto()->SpellFamilyName)
+    switch (GetSpellProto()->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
@@ -5109,7 +5109,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 for (Unit::AuraList::const_iterator i = PeriodicDamage.begin(); i != PeriodicDamage.end(); ++i)
                 {
                     if ((*i)->GetCasterGuid() == GetCasterGuid() &&
-                            (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR &&
+                            (*i)->GetSpellProto()->SpellClassSet == SPELLFAMILY_WARRIOR &&
                             (*i)->GetSpellProto()->Mechanic == MECHANIC_BLEED)
                         return;
                 }
@@ -5122,7 +5122,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         case SPELLFAMILY_WARLOCK:
         {
             // Fear (non stacking)
-            if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000040000000000))
+            if (m_spellProto->SpellClassMask & UI64LIT(0x0000040000000000))
             {
                 if (!apply)
                 {
@@ -5137,7 +5137,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     {
                         SpellEntry const* dummyEntry = (*itr)->GetSpellProto();
                         // Improved Fear
-                        if (dummyEntry->SpellFamilyName == SPELLFAMILY_WARLOCK && dummyEntry->SpellIconID == 98)
+                        if (dummyEntry->SpellClassSet == SPELLFAMILY_WARLOCK && dummyEntry->SpellIconID == 98)
                         {
                             cast_at_remove = true;
                             switch ((*itr)->GetModifier()->m_amount)
@@ -5183,7 +5183,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         case SPELLFAMILY_PRIEST:
         {
             // Shadow Word: Pain (need visual check fro skip improvement talent) or Vampiric Touch
-            if ((m_spellProto->SpellIconID == 234 && m_spellProto->SpellVisual[0]) || m_spellProto->SpellIconID == 2213)
+            if ((m_spellProto->SpellIconID == 234 && m_spellProto->SpellVisualID[0]) || m_spellProto->SpellIconID == 2213)
             {
                 if (!apply && m_removeMode == AURA_REMOVE_BY_DISPEL)
                 {
@@ -5197,7 +5197,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     for (Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                     {
                         // Shadow Affinity
-                        if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST
+                        if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_PRIEST
                                 && (*itr)->GetSpellProto()->SpellIconID == 178)
                         {
                             // custom cast code
@@ -5213,7 +5213,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
             }
             // Power Word: Shield
-            else if (apply && m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000001) && m_spellProto->Mechanic == MECHANIC_SHIELD)
+            else if (apply && m_spellProto->SpellClassMask & UI64LIT(0x0000000000000001) && m_spellProto->Mechanic == MECHANIC_SHIELD)
             {
                 Unit* caster = GetCaster();
                 if (!caster)
@@ -5244,8 +5244,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         {
                             SpellEntry const* dummyEntry = (*itr)->GetSpellProto();
                             // Body and Soul (talent ranks)
-                            if (dummyEntry->SpellFamilyName == SPELLFAMILY_PRIEST && dummyEntry->SpellIconID == 2218 &&
-                                    dummyEntry->SpellVisual[0] == 0)
+                            if (dummyEntry->SpellClassSet == SPELLFAMILY_PRIEST && dummyEntry->SpellIconID == 2218 &&
+                                    dummyEntry->SpellVisualID[0] == 0)
                             {
                                 chance = (*itr)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
                                 break;
@@ -5292,7 +5292,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_ROGUE:
             // Sprint (skip non player casted spells by category)
-            if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000040) && GetSpellProto()->Category == 44)
+            if (GetSpellProto()->SpellClassMask & UI64LIT(0x0000000000000040) && GetSpellProto()->Category == 44)
             {
                 if (!apply || m_target->HasAura(58039))     // Glyph of Blurred Speed
                 {
@@ -5384,7 +5384,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
                 default:
                     // Freezing Trap Effect
-                    if (m_spellProto->SpellFamilyFlags & UI64LIT(0x0000000000000008))
+                    if (m_spellProto->SpellClassMask & UI64LIT(0x0000000000000008))
                     {
                         if (!apply)
                         {
@@ -5426,7 +5426,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_PALADIN:
         {
-            if (m_spellProto->Id == 31884)                  // Avenging Wrath
+            if (m_spellProto->ID == 31884)                  // Avenging Wrath
             {
                 if (!apply)
                 {
@@ -5466,13 +5466,13 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 return;
             }
 
-            if (GetSpellSpecific(m_spellProto->Id) != SPELL_AURA)
+            if (GetSpellSpecific(m_spellProto->ID) != SPELL_AURA)
             {
                 return;
             }
 
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
-            if ((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000008)) == 0)
+            if ((GetSpellProto()->SpellClassMask & UI64LIT(0x0000000000000008)) == 0)
                 spellId1 = 63531;                           // placeholder for talent spell mods
             // Improved Concentration Aura (auras bonus)
             spellId2 = 63510;                               // placeholder for talent spell mods
@@ -5543,7 +5543,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             for (Unit::AuraList::const_iterator itr = bloodAuras.begin(); itr != bloodAuras.end(); ++itr)
                             {
                                 // skip same icon
-                                if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT &&
+                                if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DEATHKNIGHT &&
                                         (*itr)->GetSpellProto()->SpellIconID == 2636)
                                 {
                                     heal_pct = (*itr)->GetModifier()->m_amount;
@@ -5574,7 +5574,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             for (Unit::AuraList::const_iterator itr = unholyAuras.begin(); itr != unholyAuras.end(); ++itr)
                             {
                                 // skip same icon
-                                if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT &&
+                                if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DEATHKNIGHT &&
                                         (*itr)->GetSpellProto()->SpellIconID == 2633)
                                 {
                                     power_pct = (*itr)->GetModifier()->m_amount;
@@ -5600,7 +5600,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             for (Unit::AuraList::const_iterator itr = frostAuras.begin(); itr != frostAuras.end(); ++itr)
                             {
                                 // skip same icon
-                                if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT &&
+                                if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DEATHKNIGHT &&
                                         (*itr)->GetSpellProto()->SpellIconID == 2632)
                                 {
                                     stamina_pct = (*itr)->GetModifier()->m_amount;
@@ -5633,7 +5633,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             for (Unit::AuraList::const_iterator itr = unholyAuras.begin(); itr != unholyAuras.end(); ++itr)
                             {
                                 // skip same icon
-                                if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT &&
+                                if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_DEATHKNIGHT &&
                                         (*itr)->GetSpellProto()->SpellIconID == 2633)
                                 {
                                     power_pct = (*itr)->GetModifier()->m_amount;
@@ -5814,8 +5814,8 @@ void SpellAuraHolder::Update(uint32 diff)
         {
             if (Unit* caster = GetCaster())
             {
-                Powers powertype = Powers(GetSpellProto()->powerType);
-                int32 manaPerSecond = GetSpellProto()->manaPerSecond + GetSpellProto()->manaPerSecondPerLevel * caster->getLevel();
+                Powers powertype = Powers(GetSpellProto()->PowerType);
+                int32 manaPerSecond = GetSpellProto()->ManaPerSecond + GetSpellProto()->ManaPerSecondPerLevel * caster->getLevel();
                 m_timeCla = 1 * IN_MILLISECONDS;
 
                 if (manaPerSecond)
@@ -5855,7 +5855,7 @@ void SpellAuraHolder::Update(uint32 diff)
         if (caster->GetChannelObjectGuid() == m_target->GetObjectGuid())
         {
             // Get spell range
-            float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));
+            float max_range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->RangeIndex));
 
             if (Player* modOwner = caster->GetSpellModOwner())
             {
@@ -6046,7 +6046,7 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
         if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
         {
             caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
-            caster->RemoveAurasDueToSpell(GetSpellProto()->Id);
+            caster->RemoveAurasDueToSpell(GetSpellProto()->ID);
         }
         else if (caster)
         {
@@ -6058,7 +6058,7 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
                 scTarget.erase(find);
                 if (Unit* vehicle = caster->GetMap()->GetUnit(vehicleGuid))
                 {
-                    vehicle->RemoveAurasDueToSpell(GetSpellProto()->Id, NULL, AURA_REMOVE_BY_DEFAULT);
+                    vehicle->RemoveAurasDueToSpell(GetSpellProto()->ID, NULL, AURA_REMOVE_BY_DEFAULT);
                 }
             }
         }

@@ -82,7 +82,7 @@ void ChatHandler::ShowAchievementCriteriaListHelper(AchievementCriteriaEntry con
         ss << " = " << target->GetAchievementMgr().GetCriteriaProgressCounter(criEntry);
     }
 
-    if (achEntry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (achEntry->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         ss << GetMangosString(LANG_COUNTER);
     }
@@ -166,7 +166,7 @@ bool ChatHandler::HandleAchievementAddCommand(char* args)
     }
 
     AchievementEntry const* achEntry = sAchievementStore.LookupEntry(achId);
-    if (!achEntry || achEntry->flags & ACHIEVEMENT_FLAG_COUNTER)
+    if (!achEntry || achEntry->Flags & ACHIEVEMENT_FLAG_COUNTER)
     {
         PSendSysMessage(LANG_ACHIEVEMENT_NOT_EXIST, achId);
         SetSentErrorMessage(true);
@@ -267,7 +267,7 @@ bool ChatHandler::HandleAchievementCriteriaAddCommand(char* args)
         return false;
     }
 
-    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->referredAchievement);
+    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->Achievement_ID);
     if (!achEntry)
     {
         return false;
@@ -346,7 +346,7 @@ bool ChatHandler::HandleAchievementCriteriaRemoveCommand(char* args)
         return false;
     }
 
-    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->referredAchievement);
+    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->Achievement_ID);
     if (!achEntry)
     {
         return false;

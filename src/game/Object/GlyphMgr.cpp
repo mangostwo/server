@@ -34,9 +34,9 @@ void GlyphMgr::InitGlyphsForLevel()
     for (uint32 i = 0; i < sGlyphSlotStore.GetNumRows(); ++i)
     {
         if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(i))
-            if (gs->Order)
+            if (gs->Tooltip)
             {
-                m_owner->SetGlyphSlot(gs->Order - 1, gs->Id);
+                m_owner->SetGlyphSlot(gs->Tooltip - 1, gs->Id);
             }
     }
 
@@ -76,12 +76,12 @@ void GlyphMgr::ApplyGlyph(uint8 slot, bool apply)
         {
             if (apply)
             {
-                m_owner->CastSpell(m_owner, gp->SpellId, true);
+                m_owner->CastSpell(m_owner, gp->SpellID, true);
                 m_owner->SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, glyph);
             }
             else
             {
-                m_owner->RemoveAurasDueToSpell(gp->SpellId);
+                m_owner->RemoveAurasDueToSpell(gp->SpellID);
                 m_owner->SetUInt32Value(PLAYER_FIELD_GLYPHS_1 + slot, 0);
             }
         }
@@ -129,9 +129,9 @@ void GlyphMgr::Load(QueryResult* result)
             continue;
         }
 
-        if (gp->TypeFlags != gs->TypeFlags)
+        if (gp->GlyphSlotFlags != gs->Type)
         {
-            sLog.outError("Player %s has glyph with typeflags %u in slot with typeflags %u, removing.", m_owner->GetName(), gp->TypeFlags, gs->TypeFlags);
+            sLog.outError("Player %s has glyph with typeflags %u in slot with typeflags %u, removing.", m_owner->GetName(), gp->GlyphSlotFlags, gs->Type);
             CharacterDatabase.PExecute("DELETE FROM `character_glyphs` WHERE `slot` = %u AND `spec` = %u AND `guid` = %u", slot, spec, m_owner->GetGUIDLow());
             continue;
         }

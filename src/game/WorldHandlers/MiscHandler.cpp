@@ -314,7 +314,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
         std::string aname;
         if (AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(pzoneid))
         {
-            aname = areaEntry->area_name[GetSessionDbcLocale()];
+            aname = areaEntry->AreaName_lang[GetSessionDbcLocale()];
         }
 
         bool s_show = true;
@@ -805,7 +805,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
         do
         {
             // most often fast case
-            if (instance_map == targetMapEntry->MapID)
+            if (instance_map == targetMapEntry->ID)
             {
                 break;
             }
@@ -1800,7 +1800,7 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
     DEBUG_LOG("WORLD: Received opcode CMSG_HEARTH_AND_RESURRECT");
 
     AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
-    if (!atEntry || !(atEntry->flags & AREA_FLAG_CAN_HEARTH_AND_RES))
+    if (!atEntry || !(atEntry->Flags & AREA_FLAG_CAN_HEARTH_AND_RES))
     {
         return;
     }

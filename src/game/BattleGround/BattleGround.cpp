@@ -1616,7 +1616,7 @@ bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScor
 void BattleGround::SetBracket(PvPDifficultyEntry const* bracketEntry)
 {
     m_BracketId  = bracketEntry->GetBracketId();
-    SetLevelRange(bracketEntry->minLevel, bracketEntry->maxLevel);
+    SetLevelRange(bracketEntry->MinLevel, bracketEntry->MaxLevel);
 }
 
 /// <summary>

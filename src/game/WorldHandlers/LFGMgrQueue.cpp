@@ -95,7 +95,7 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         for (std::set<uint32>::iterator it = dungeons.begin(); it != dungeons.end(); ++it)
         {
             LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*it);
-            switch (dungeon->typeID)
+            switch (dungeon->TypeID)
             {
                 case LFG_TYPE_RANDOM_DUNGEON:
                     if (dungeons.size() > 1)
@@ -138,14 +138,14 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
 
             if (dungeon)
             {
-                uint32 group = dungeon->groupID;
+                uint32 group = dungeon->Group_ID;
 
                 for (uint32 id = 0; id < sLfgDungeonsStore.GetNumRows(); ++id)
                 {
                     LfgDungeonsEntry const* dungeonList = sLfgDungeonsStore.LookupEntry(id);
                     if (dungeonList)
                     {
-                        if (dungeonList->groupID == group)
+                        if (dungeonList->Group_ID == group)
                         {
                             dungeons.insert(dungeonList->ID); // adding to set
                         }

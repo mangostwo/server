@@ -328,7 +328,7 @@ uint32 Quest::XPValue(Player* pPlayer) const
         // not possible to reward XP when baseLevel does not exist in dbc
         if (const QuestXPLevel* pXPData = sQuestXPLevelStore.LookupEntry(baseLevel))
         {
-            uint32 rawXP = xpMultiplier * pXPData->xpIndex[RewXPId] / 10;
+            uint32 rawXP = xpMultiplier * pXPData->Difficulty[RewXPId] / 10;
 
             // round values
             if (rawXP > 1000)
@@ -402,7 +402,7 @@ uint32 Quest::CalculateRewardHonor(uint32 level) const
         {
             return 0;
         }
-        uint32 i_honor = uint32(tc->Value * GetRewHonorMultiplier() * 0.1f);
+        uint32 i_honor = uint32(tc->Data * GetRewHonorMultiplier() * 0.1f);
         honor = i_honor + GetRewHonorAddition();
     }
 

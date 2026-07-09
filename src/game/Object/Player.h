@@ -3799,7 +3799,7 @@ class Player : public Unit
         bool HasTitle(uint32 bitIndex) const;
 
         // Check if the player has a specific title (overloaded)
-        bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }
+        bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->Mask_ID); }
 
         // Set the player's title
         void SetTitle(CharTitlesEntry const* title, bool lost = false);

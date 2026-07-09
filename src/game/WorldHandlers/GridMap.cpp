@@ -766,29 +766,29 @@ GridMapLiquidStatus GridMap::getLiquidStatus(float x, float y, float z, uint8 Re
     {
         if (LiquidTypeEntry const* liquidEntry = sLiquidTypeStore.LookupEntry(m_liquidEntry[idx]))
         {
-            entry = liquidEntry->Id;
+            entry = liquidEntry->ID;
             type &= MAP_LIQUID_TYPE_DARK_WATER;
-            uint32 liqTypeIdx = liquidEntry->Type;
+            uint32 liqTypeIdx = liquidEntry->SoundBank;
             if (entry < 21)
             {
                 // only basic liquid stored in maps actualy so in some case we need to override type depend on area
                 // actualy only Hyjal Mount and Coilfang raid be overrided here
                 if (AreaTableEntry const* area = sAreaStore.LookupEntry(getArea(x, y)))
                 {
-                    uint32 overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
-                    if (!overrideLiquid && area->zone)
+                    uint32 overrideLiquid = area->LiquidTypeID[liquidEntry->SoundBank];
+                    if (!overrideLiquid && area->ParentAreaID)
                     {
-                        area = GetAreaEntryByAreaID(area->zone);
+                        area = GetAreaEntryByAreaID(area->ParentAreaID);
                         if (area)
                         {
-                            overrideLiquid = area->LiquidTypeOverride[liquidEntry->Type];
+                            overrideLiquid = area->LiquidTypeID[liquidEntry->SoundBank];
                         }
                     }
 
                     if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
                     {
                         entry = overrideLiquid;
-                        liqTypeIdx = liq->Type;
+                        liqTypeIdx = liq->SoundBank;
                     }
                 }
             }
@@ -1180,11 +1180,11 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, Ar
 
     if (wmoEntry && atEntry)
     {
-        if (atEntry->flags & AREA_FLAG_OUTSIDE)
+        if (atEntry->Flags & AREA_FLAG_OUTSIDE)
         {
             return true;
         }
-        if (atEntry->flags & AREA_FLAG_INSIDE)
+        if (atEntry->Flags & AREA_FLAG_INSIDE)
         {
             return false;
         }
@@ -1230,9 +1230,9 @@ bool TerrainInfo::IsOutdoors(float x, float y, float z) const
     WMOAreaTableEntry const* wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
     if (wmoEntry)
     {
-        DEBUG_LOG("Got WMOAreaTableEntry! flag %u, areaid %u", wmoEntry->Flags, wmoEntry->areaId);
+        DEBUG_LOG("Got WMOAreaTableEntry! flag %u, areaid %u", wmoEntry->Flags, wmoEntry->AreaTableID);
 
-        atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+        atEntry = GetAreaEntryByAreaID(wmoEntry->AreaTableID);
     }
 
     return IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
@@ -1294,14 +1294,14 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
         wmoEntry = GetWMOAreaTableEntryByTripple(rootId, adtId, groupId);
         if (wmoEntry)
         {
-            atEntry = GetAreaEntryByAreaID(wmoEntry->areaId);
+            atEntry = GetAreaEntryByAreaID(wmoEntry->AreaTableID);
         }
     }
 
     uint16 areaflag;
     if (atEntry)
     {
-        areaflag = atEntry->exploreFlag;
+        areaflag = atEntry->AreaBit;
     }
     else
     {
@@ -1425,27 +1425,27 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z, uint
                 uint32 liquidFlagType = 0;
                 if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(liquid_type))
                 {
-                    liquidFlagType = liq->Type;
+                    liquidFlagType = liq->SoundBank;
                 }
 
                 if (liquid_type && liquid_type < 21)
                 {
                     if (AreaTableEntry const* area = GetAreaEntryByAreaFlagAndMap(GetAreaFlag(x, y, z), GetMapId()))
                     {
-                        uint32 overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
-                        if (!overrideLiquid && area->zone)
+                        uint32 overrideLiquid = area->LiquidTypeID[liquidFlagType];
+                        if (!overrideLiquid && area->ParentAreaID)
                         {
-                            area = GetAreaEntryByAreaID(area->zone);
+                            area = GetAreaEntryByAreaID(area->ParentAreaID);
                             if (area)
                             {
-                                overrideLiquid = area->LiquidTypeOverride[liquidFlagType];
+                                overrideLiquid = area->LiquidTypeID[liquidFlagType];
                             }
                         }
 
                         if (LiquidTypeEntry const* liq = sLiquidTypeStore.LookupEntry(overrideLiquid))
                         {
                             liquid_type = overrideLiquid;
-                            liquidFlagType = liq->Type;
+                            liquidFlagType = liq->SoundBank;
                         }
                     }
                 }
@@ -1651,7 +1651,7 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y)
 
             // load VMAPs for current map/grid...
             const MapEntry* i_mapEntry = sMapStore.LookupEntry(m_mapId);
-            const char* mapName = i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
+            const char* mapName = i_mapEntry ? i_mapEntry->MapName_lang[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 
             int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath() + "vmaps").c_str(),  m_mapId, x, y);
             switch (vmapLoadResult)
@@ -1836,7 +1836,7 @@ uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
     if (entry)
     {
-        return (entry->zone != 0) ? entry->zone : entry->ID;
+        return (entry->ParentAreaID != 0) ? entry->ParentAreaID : entry->ID;
     }
     else
     {
@@ -1857,5 +1857,5 @@ void TerrainManager::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, 
     AreaTableEntry const* entry = GetAreaEntryByAreaFlagAndMap(areaflag, map_id);
 
     areaid = entry ? entry->ID : 0;
-    zoneid = entry ? ((entry->zone != 0) ? entry->zone : entry->ID) : 0;
+    zoneid = entry ? ((entry->ParentAreaID != 0) ? entry->ParentAreaID : entry->ID) : 0;
 }

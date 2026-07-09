@@ -301,7 +301,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!inCombat)
             {
                 // ignore attacking spells, and allow only self/around spells
-                if (!IsPositiveSpell(spellInfo->Id))
+                if (!IsPositiveSpell(spellInfo->ID))
                 {
                     continue;
                 }
@@ -313,7 +313,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 {
                     // allow only spell without spell cost or with spell cost but not duration limit
                     int32 duration = GetSpellDuration(spellInfo);
-                    if ((spellInfo->manaCost || spellInfo->ManaCostPercentage || spellInfo->manaPerSecond) && duration > 0)
+                    if ((spellInfo->ManaCost || spellInfo->ManaCostPct || spellInfo->ManaPerSecond) && duration > 0)
                     {
                         continue;
                     }
@@ -396,7 +396,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 }
             }
 
-            m_creature->AddCreatureSpellCooldown(spell->m_spellInfo->Id);
+            m_creature->AddCreatureSpellCooldown(spell->m_spellInfo->ID);
 
             spell->prepare(&targets);
         }

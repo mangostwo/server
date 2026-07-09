@@ -168,8 +168,8 @@ ItemRewards LFGMgr::GetDungeonItemRewards(uint32 dungeonId, DungeonTypes type)
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
     if (dungeon)
     {
-        uint32 minLevel = dungeon->minLevel;
-        uint32 maxLevel = dungeon->maxLevel;
+        uint32 minLevel = dungeon->MinLevel;
+        uint32 maxLevel = dungeon->MaxLevel;
         uint32 avgLevel = (minLevel+maxLevel)/2; // otherwise there are issues
 
         DungeonFinderItemsMap const& itemBuffer = sObjectMgr.GetDungeonFinderItemsMap();
@@ -196,28 +196,28 @@ DungeonTypes LFGMgr::GetDungeonType(uint32 dungeonId)
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonId);
     if (dungeon)
     {
-        switch (dungeon->expansionLevel)
+        switch (dungeon->ExpansionLevel)
         {
             case 0:
                 return DUNGEON_CLASSIC;
             case 1:
             {
-                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                if (dungeon->Difficulty == DUNGEON_DIFFICULTY_NORMAL)
                 {
                     return DUNGEON_TBC;
                 }
-                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                else if (dungeon->Difficulty == DUNGEON_DIFFICULTY_HEROIC)
                 {
                     return DUNGEON_TBC_HEROIC;
                 }
             }
             case 2:
             {
-                if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                if (dungeon->Difficulty == DUNGEON_DIFFICULTY_NORMAL)
                 {
                     return DUNGEON_WOTLK;
                 }
-                else if (dungeon->difficulty == DUNGEON_DIFFICULTY_HEROIC)
+                else if (dungeon->Difficulty == DUNGEON_DIFFICULTY_HEROIC)
                 {
                     return DUNGEON_WOTLK_HEROIC;
                 }
@@ -306,10 +306,10 @@ dungeonEntries LFGMgr::FindRandomDungeonsForPlayer(uint32 level, uint8 expansion
         LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(id);
         if (dungeon)
         {
-            if ( (dungeon->typeID == LFG_TYPE_RANDOM_DUNGEON)
-                || (IsSeasonal(dungeon->flags) && IsSeasonActive(dungeon->ID)) )
-                if ((uint8)dungeon->expansionLevel <= expansion && dungeon->minLevel <= level
-                    && dungeon->maxLevel >= level)
+            if ( (dungeon->TypeID == LFG_TYPE_RANDOM_DUNGEON)
+                || (IsSeasonal(dungeon->Flags) && IsSeasonActive(dungeon->ID)) )
+                if ((uint8)dungeon->ExpansionLevel <= expansion && dungeon->MinLevel <= level
+                    && dungeon->MaxLevel >= level)
                     randomDungeons[dungeon->ID] = dungeon->Entry();
         }
     }
@@ -330,27 +330,27 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
         {
             uint32 forbiddenReason = 0;
 
-            if ((uint8)dungeon->expansionLevel > expansion)
+            if ((uint8)dungeon->ExpansionLevel > expansion)
             {
                 forbiddenReason = (uint32)LFG_FORBIDDEN_EXPANSION;
             }
-            else if (dungeon->typeID == LFG_TYPE_RAID)
+            else if (dungeon->TypeID == LFG_TYPE_RAID)
             {
                 forbiddenReason = (uint32)LFG_FORBIDDEN_RAID;
             }
-            else if (dungeon->minLevel > level)
+            else if (dungeon->MinLevel > level)
             {
                 forbiddenReason = (uint32)LFG_FORBIDDEN_LOW_LEVEL;
             }
-            else if (dungeon->maxLevel < level)
+            else if (dungeon->MaxLevel < level)
             {
                 forbiddenReason = (uint32)LFG_FORBIDDEN_HIGH_LEVEL;
             }
-            else if (IsSeasonal(dungeon->flags) && !IsSeasonActive(dungeon->ID)) // check pointers/function args
+            else if (IsSeasonal(dungeon->Flags) && !IsSeasonActive(dungeon->ID)) // check pointers/function args
             {
                 forbiddenReason = (uint32)LFG_FORBIDDEN_NOT_IN_SEASON;
             }
-            else if (DungeonFinderRequirements const* req = sObjectMgr.GetDungeonFinderRequirements((uint32)dungeon->mapID, dungeon->difficulty))
+            else if (DungeonFinderRequirements const* req = sObjectMgr.GetDungeonFinderRequirements((uint32)dungeon->MapID, dungeon->Difficulty))
             {
                 if (req->minItemLevel && (plr->GetEquipGearScore(false,false) < req->minItemLevel))
                 {
@@ -420,7 +420,7 @@ void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
     if (dungeon)
     {
         // atm we're just handling DUNGEON_DIFFICULTY_NORMAL
-        if (dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL)
+        if (dungeon->Difficulty == DUNGEON_DIFFICULTY_NORMAL)
         {
             information->neededTanks = NORMAL_TANK_OR_HEALER_COUNT - tankCount;
             information->neededHealers = NORMAL_TANK_OR_HEALER_COUNT - healCount;

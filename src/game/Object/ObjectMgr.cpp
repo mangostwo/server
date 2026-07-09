@@ -619,7 +619,7 @@ void ObjectMgr::LoadInstanceTemplate()
             if (parentEntry->IsContinent())
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
-                                parentEntry->MapID, temp->map);
+                                parentEntry->ID, temp->map);
                 const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }
@@ -1970,7 +1970,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             Unit::SpellAuraHolderMap const& auras = player->GetSpellAuraHolderMap();
             for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {
-                if ((itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY)) && itr->second->GetSpellProto()->SpellVisual[0] == 3580)
+                if ((itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY)) && itr->second->GetSpellProto()->SpellVisualID[0] == 3580)
                 {
                     return true;
                 }
@@ -1986,7 +1986,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             WorldObject const* searcher = source ? source : player;
             if (AreaTableEntry const* pAreaEntry = GetAreaEntryByAreaID(searcher->GetAreaId()))
             {
-                if ((!m_value1 || (pAreaEntry->flags & m_value1)) && (!m_value2 || !(pAreaEntry->flags & m_value2)))
+                if ((!m_value1 || (pAreaEntry->Flags & m_value1)) && (!m_value2 || !(pAreaEntry->Flags & m_value2)))
                 {
                     return true;
                 }
@@ -2108,25 +2108,25 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 }
 
                 // doesn't have skill
-                if (!player->HasSkill(skillInfo->skillId))
+                if (!player->HasSkill(skillInfo->SkillLine))
                 {
                     return false;
                 }
 
                 // doesn't match class
-                if (skillInfo->classmask && (skillInfo->classmask & player->getClassMask()) == 0)
+                if (skillInfo->ClassMask && (skillInfo->ClassMask & player->getClassMask()) == 0)
                 {
                     return false;
                 }
 
                 // doesn't match race
-                if (skillInfo->racemask && (skillInfo->racemask & player->getRaceMask()) == 0)
+                if (skillInfo->RaceMask && (skillInfo->RaceMask & player->getRaceMask()) == 0)
                 {
                     return false;
                 }
 
                 // skill level too low
-                if (skillInfo->min_value > player->GetSkillValue(skillInfo->skillId))
+                if (skillInfo->TrivialSkillLineRankLow > player->GetSkillValue(skillInfo->SkillLine))
                 {
                     return false;
                 }
@@ -2174,7 +2174,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             DungeonEncounterEntry const* dbcEntry1 = sDungeonEncounterStore.LookupEntry(m_value1);
             DungeonEncounterEntry const* dbcEntry2 = sDungeonEncounterStore.LookupEntry(m_value2);
             // Check that on proper map
-            if (dbcEntry1->mapId != map->GetId())
+            if (dbcEntry1->MapID != map->GetId())
             {
                 sLog.outErrorDb("CONDITION_COMPLETED_ENCOUNTER (entry %u, DungeonEncounterEntry %u) is used on wrong map (used on Map %u) by %s", m_entry, m_value1, player->GetMapId(), player->GetGuidStr().c_str());
                 return false;
@@ -2189,7 +2189,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                 dbcEntry2 = NULL;
             }
 
-            return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->encounterIndex : 0) | (dbcEntry2 ? 1 << dbcEntry2->encounterIndex : 0));
+            return completedEncounterMask & ((dbcEntry1 ? 1 << dbcEntry1->Bit : 0) | (dbcEntry2 ? 1 << dbcEntry2->Bit : 0));
         }
         case CONDITION_SOURCE_AURA:
         {
@@ -2707,7 +2707,7 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
                 sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has an unknown DungeonEncounter entry %u defined (in value2), skipping.", entry, condition, value2);
                 return false;
             }
-            if (dbcEntry2 && dbcEntry1->mapId != dbcEntry2->mapId)
+            if (dbcEntry2 && dbcEntry1->MapID != dbcEntry2->MapID)
             {
                 sLog.outErrorDb("Completed Encounter condition (entry %u, type %u) has different mapIds for both encounters, skipping.", entry, condition);
                 return false;
@@ -2836,12 +2836,12 @@ bool PlayerCondition::CanBeUsedWithoutPlayer(uint16 entry)
  */
 SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
 {
-    switch (pSkill->categoryId)
+    switch (pSkill->CategoryID)
     {
         case SKILL_CATEGORY_LANGUAGES:
             return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
-            if (pSkill->id != SKILL_FIST_WEAPONS)
+            if (pSkill->ID != SKILL_FIST_WEAPONS)
             {
                 return SKILL_RANGE_LEVEL;
             }
@@ -2851,7 +2851,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
             }
         case SKILL_CATEGORY_ARMOR:
         case SKILL_CATEGORY_CLASS:
-            if (pSkill->id != SKILL_LOCKPICKING)
+            if (pSkill->ID != SKILL_LOCKPICKING)
             {
                 return SKILL_RANGE_MONO;
             }
@@ -2862,7 +2862,7 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
         case SKILL_CATEGORY_SECONDARY:
         case SKILL_CATEGORY_PROFESSION:
             // not set skills for professions and racial abilities
-            if (IsProfessionSkill(pSkill->id))
+            if (IsProfessionSkill(pSkill->ID))
             {
                 return SKILL_RANGE_RANK;
             }

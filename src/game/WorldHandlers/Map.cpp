@@ -1811,15 +1811,15 @@ uint32 Map::GetMaxPlayers() const
 {
     if (MapDifficultyEntry const* mapDiff = GetMapDifficulty())
     {
-        if (mapDiff->maxPlayers || IsRegularDifficulty())   // Normal case (expect that regular difficulty always have correct maxplayers)
+        if (mapDiff->MaxPlayers || IsRegularDifficulty())   // Normal case (expect that regular difficulty always have correct maxplayers)
         {
-            return mapDiff->maxPlayers;
+            return mapDiff->MaxPlayers;
         }
         else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
         {
             // The heroic entry exists, so we don't have to check anything, simply return normal max players
             MapDifficultyEntry const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
-            return normalDiff ? normalDiff->maxPlayers : 0;
+            return normalDiff ? normalDiff->MaxPlayers : 0;
         }
     }
     else                                                    // I'd rather ASSERT(false);
@@ -1866,7 +1866,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
  */
 const char* Map::GetMapName() const
 {
-    return i_mapEntry ? i_mapEntry->name[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
+    return i_mapEntry ? i_mapEntry->MapName_lang[sWorld.GetDefaultDbcLocale()] : "UNNAMEDMAP\x0";
 }
 
 /**

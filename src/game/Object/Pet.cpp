@@ -130,7 +130,7 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
 
             // lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
-            if (!mapEntry || (mapEntry->map_type != MAP_ARENA && mapEntry->map_type != MAP_BATTLEGROUND))
+            if (!mapEntry || (mapEntry->InstanceType != MAP_ARENA && mapEntry->InstanceType != MAP_BATTLEGROUND))
             {
                 ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);
             }
@@ -565,7 +565,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     if (CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->Family))
     {
-        SetName(cFamily->Name[sWorld.GetDefaultDbcLocale()]);
+        SetName(cFamily->Name_lang[sWorld.GetDefaultDbcLocale()]);
     }
     else
     {
@@ -645,20 +645,20 @@ bool Pet::InitStatsForLevel(uint32 petlevel, Unit* owner)
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
 
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->Family);
-    if (cFamily && cFamily->minScale > 0.0f && getPetType() == HUNTER_PET)
+    if (cFamily && cFamily->MinScale > 0.0f && getPetType() == HUNTER_PET)
     {
         float scale;
-        if (getLevel() >= cFamily->maxScaleLevel)
+        if (getLevel() >= cFamily->MaxScaleLevel)
         {
-            scale = cFamily->maxScale;
+            scale = cFamily->MaxScale;
         }
-        else if (getLevel() <= cFamily->minScaleLevel)
+        else if (getLevel() <= cFamily->MinScaleLevel)
         {
-            scale = cFamily->minScale;
+            scale = cFamily->MinScale;
         }
         else
         {
-            scale = cFamily->minScale + float(getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
+            scale = cFamily->MinScale + float(getLevel() - cFamily->MinScaleLevel) / cFamily->MaxScaleLevel * (cFamily->MaxScale - cFamily->MinScale);
         }
 
         SetObjectScale(scale);
@@ -850,7 +850,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
         return false;
     }
 
-    uint32 diet = cFamily->petFoodMask;
+    uint32 diet = cFamily->PetFoodMask;
     uint32 FoodMask = 1 << (item->FoodType - 1);
     return diet & FoodMask;
 }
@@ -1078,7 +1078,7 @@ void Pet::CastOwnerTalentAuras()
 
             if (seTalent)
             {
-                switch (seTalent->Id)
+                switch (seTalent->ID)
                 {
                     case 34455: // Ferocious Inspiration Rank 1
                         CastSpell(this, 75593, true); // Ferocious Inspiration 1%

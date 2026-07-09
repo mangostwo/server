@@ -91,7 +91,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
 {
     MANGOS_ASSERT(mapEntry);
 
-    DEBUG_LOG("SendTransferAbortedByLockStatus: Called for %s on map %u, LockAreaStatus %u, miscRequirement %u)", GetGuidStr().c_str(), mapEntry->MapID, lockStatus, miscRequirement);
+    DEBUG_LOG("SendTransferAbortedByLockStatus: Called for %s on map %u, LockAreaStatus %u, miscRequirement %u)", GetGuidStr().c_str(), mapEntry->ID, lockStatus, miscRequirement);
 
     switch (lockStatus)
     {
@@ -99,55 +99,55 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
             GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED), miscRequirement);
             break;
         case AREA_LOCKSTATUS_ZONE_IN_COMBAT:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_ZONE_IN_COMBAT);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_ZONE_IN_COMBAT);
             break;
         case AREA_LOCKSTATUS_INSTANCE_IS_FULL:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_MAX_PLAYERS);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_MAX_PLAYERS);
             break;
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
-            if (mapEntry->MapID == 269)                     // Exception for Black Morass
+            if (mapEntry->ID == 269)                     // Exception for Black Morass
             {
                 GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
                 break;
             }
             else if (mapEntry->IsContinent())               // do not report anything for quest areatrigge
             {
-                DEBUG_LOG("SendTransferAbortedByLockStatus: LockAreaStatus %u, do not teleport, no message sent (mapId %u)", lockStatus, mapEntry->MapID);
+                DEBUG_LOG("SendTransferAbortedByLockStatus: LockAreaStatus %u, do not teleport, no message sent (mapId %u)", lockStatus, mapEntry->ID);
                 break;
             }
             // No break here!
             [[fallthrough]];
         case AREA_LOCKSTATUS_MISSING_ITEM:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_DIFFICULTY, GetDifficulty(mapEntry->IsRaid()));
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_DIFFICULTY, GetDifficulty(mapEntry->IsRaid()));
             break;
         case AREA_LOCKSTATUS_MISSING_DIFFICULTY:
         {
             Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_DIFFICULTY, difficulty > RAID_DIFFICULTY_10MAN_HEROIC ? RAID_DIFFICULTY_10MAN_HEROIC : difficulty);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_DIFFICULTY, difficulty > RAID_DIFFICULTY_10MAN_HEROIC ? RAID_DIFFICULTY_10MAN_HEROIC : difficulty);
             break;
         }
         case AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_INSUF_EXPAN_LVL, miscRequirement);
-            if (sObjectMgr.GetMapEntranceTrigger(mapEntry->MapID))
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_INSUF_EXPAN_LVL, miscRequirement);
+            if (sObjectMgr.GetMapEntranceTrigger(mapEntry->ID))
             {
                 GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), sObjectMgr.GetItemPrototype(miscRequirement)->Name1);
             }
             break;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_MAP_NOT_ALLOWED);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_MAP_NOT_ALLOWED);
             break;
         case AREA_LOCKSTATUS_RAID_LOCKED:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_NEED_GROUP);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_NEED_GROUP);
             break;
         case AREA_LOCKSTATUS_UNKNOWN_ERROR:
-            GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_ERROR);
+            GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_ERROR);
             break;
         case AREA_LOCKSTATUS_OK:
-            sLog.outError("SendTransferAbortedByLockStatus: LockAreaStatus AREA_LOCKSTATUS_OK received for %s (mapId %u)", GetGuidStr().c_str(), mapEntry->MapID);
+            sLog.outError("SendTransferAbortedByLockStatus: LockAreaStatus AREA_LOCKSTATUS_OK received for %s (mapId %u)", GetGuidStr().c_str(), mapEntry->ID);
             MANGOS_ASSERT(false);
             break;
         default:
-            sLog.outError("SendTransfertAbortedByLockstatus: unhandled LockAreaStatus %u, when %s attempts to enter in map %u", lockStatus, GetGuidStr().c_str(), mapEntry->MapID);
+            sLog.outError("SendTransfertAbortedByLockstatus: unhandled LockAreaStatus %u, when %s attempts to enter in map %u", lockStatus, GetGuidStr().c_str(), mapEntry->ID);
             break;
     }
 }

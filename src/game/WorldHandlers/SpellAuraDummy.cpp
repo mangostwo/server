@@ -73,7 +73,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT APPLY
     if (apply)
     {
-        switch (GetSpellProto()->SpellFamilyName)
+        switch (GetSpellProto()->SpellClassSet)
         {
             case SPELLFAMILY_GENERIC:
             {
@@ -457,7 +457,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
 
                 // Overpower
-                if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0000000000000004))
+                if (GetSpellProto()->SpellClassMask & UI64LIT(0x0000000000000004))
                 {
                     // Must be casting target
                     if (!target->IsNonMeleeSpellCasted(false))
@@ -475,9 +475,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     for (Unit::AuraList::const_iterator itr = modifierAuras.begin(); itr != modifierAuras.end(); ++itr)
                     {
                         // Unrelenting Assault
-                        if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && (*itr)->GetSpellProto()->SpellIconID == 2775)
+                        if ((*itr)->GetSpellProto()->SpellClassSet == SPELLFAMILY_WARRIOR && (*itr)->GetSpellProto()->SpellIconID == 2775)
                         {
-                            switch ((*itr)->GetSpellProto()->Id)
+                            switch ((*itr)->GetSpellProto()->ID)
                             {
                                 case 46859:                 // Unrelenting Assault, rank 1
                                     target->CastSpell(target, 64849, true, NULL, (*itr));
@@ -517,7 +517,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
 
                 // Earth Shield
-                if ((GetSpellProto()->SpellFamilyFlags & UI64LIT(0x40000000000)))
+                if ((GetSpellProto()->SpellClassMask & UI64LIT(0x40000000000)))
                 {
                     // prevent double apply bonuses
                     if (target->GetTypeId() != TYPEID_PLAYER || !((Player*)target)->GetSession()->PlayerLoading())
@@ -878,7 +878,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 AreaTableEntry const* area = GetAreaEntryByAreaID(target->GetAreaId());
 
                 // Dalaran restricted flight zone (recheck before apply unmount)
-                if (area && target->GetTypeId() == TYPEID_PLAYER && (area->flags & AREA_FLAG_CANNOT_FLY) &&
+                if (area && target->GetTypeId() == TYPEID_PLAYER && (area->Flags & AREA_FLAG_CANNOT_FLY) &&
                         ((Player*)target)->IsFreeFlying() && !((Player*)target)->isGameMaster())
                 {
                     target->CastSpell(target, 58601, true); // Remove Flight Auras (also triggered Parachute (45472))
@@ -935,7 +935,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
 
         // Living Bomb
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_MAGE && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x2000000000000)))
+        if (GetSpellProto()->SpellClassSet == SPELLFAMILY_MAGE && (GetSpellProto()->SpellClassMask & UI64LIT(0x2000000000000)))
         {
             if (m_removeMode == AURA_REMOVE_BY_EXPIRE || m_removeMode == AURA_REMOVE_BY_DISPEL)
             {
@@ -947,7 +947,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // AT APPLY & REMOVE
-    switch (GetSpellProto()->SpellFamilyName)
+    switch (GetSpellProto()->SpellClassSet)
     {
         case SPELLFAMILY_GENERIC:
         {
@@ -1218,7 +1218,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         case SPELLFAMILY_WARLOCK:
         {
             // Haunt
-            if (GetSpellProto()->SpellIconID == 3172 && (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x0004000000000000)))
+            if (GetSpellProto()->SpellIconID == 3172 && (GetSpellProto()->SpellClassMask & UI64LIT(0x0004000000000000)))
             {
                 // NOTE: for avoid use additional field damage stored in dummy value (replace unused 100%
                 if (apply)
@@ -1279,7 +1279,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
 
             // Lifebloom
-            if (GetSpellProto()->SpellFamilyFlags & UI64LIT(0x1000000000))
+            if (GetSpellProto()->SpellClassMask & UI64LIT(0x1000000000))
             {
                 if (apply)
                 {
@@ -1309,7 +1309,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         if (Unit* caster = GetCaster())
                         {
-                            int32 returnmana = (GetSpellProto()->ManaCostPercentage * caster->GetCreateMana() / 100) * GetStackAmount() / 2;
+                            int32 returnmana = (GetSpellProto()->ManaCostPct * caster->GetCreateMana() / 100) * GetStackAmount() / 2;
                             caster->CastCustomSpell(caster, 64372, &returnmana, NULL, NULL, true, NULL, this, GetCasterGuid());
                         }
                     }
