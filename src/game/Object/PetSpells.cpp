@@ -840,7 +840,7 @@ bool Pet::resetTalents(bool no_cost)
         }
 
         // unlearn only talents for pets family talent type
-        if (!((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask))
+        if (!((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask))
         {
             continue;
         }

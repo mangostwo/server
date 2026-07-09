@@ -752,7 +752,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
         // init cost data and apply mods
         for (uint32 i = 0; i < RUNE_DEATH; ++i)
         {
-            runeCost[i] = runeCostMod > 0 ? src->RuneCost[i] : 0;
+            runeCost[i] = runeCostMod > 0 ? src->Blood[i] : 0;
         }
 
         runeCost[RUNE_DEATH] = 0;                           // calculated later
@@ -829,7 +829,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
     if (take)
     {
         // you can gain some runic power when use runes
-        float rp = float(src->runePowerGain);
+        float rp = float(src->RunicPower);
         rp *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME);
         plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
     }

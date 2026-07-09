@@ -836,7 +836,7 @@ bool ChatHandler::HandleLearnAllMyPetTalentsCommand(char* /*args*/)
         }
 
         // prevent learn talent for different family (cheating)
-        if (((1 << pet_family->petTalentType) & talentTabInfo->petTalentMask) == 0)
+        if (((1 << pet_family->petTalentType) & talentTabInfo->PetTalentMask) == 0)
         {
             continue;
         }

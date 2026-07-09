@@ -1218,7 +1218,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 bool matchFound = false;
                 for (int j = 0; j < MAX_WORLD_MAP_OVERLAY_AREA_IDX; ++j)
                 {
-                    uint32 area_id = worldOverlayEntry->areatableID[j];
+                    uint32 area_id = worldOverlayEntry->AreaID[j];
                     if (!area_id)                           // array have 0 only in empty tail
                     {
                         break;

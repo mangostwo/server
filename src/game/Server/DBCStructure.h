@@ -542,7 +542,7 @@ struct AreaGroupEntry
 {
     uint32  AreaGroupId;                                    // 0        m_ID
     uint32  AreaId[6];                                      // 1-6      m_areaID
-    uint32  nextGroup;                                      // 7        m_nextAreaID
+    uint32  NextAreaID;                                      // 7        m_nextAreaID
 };
 
 /**
@@ -584,7 +584,7 @@ struct AuctionHouseEntry
 struct BankBagSlotPricesEntry
 {
     uint32  ID;                                             // 0        m_ID - ID of the Bank Bag Slot in the DBC.
-    uint32  price;                                          // 1        m_Cost - Price of the Bank Bag Slot.
+    uint32  Cost;                                          // 1        m_Cost - Price of the Bank Bag Slot.
 };
 
 struct BarberShopStyleEntry
@@ -805,7 +805,7 @@ struct CreatureModelDataEntry
 struct CreatureDisplayInfoExtraEntry
 {
     uint32      DisplayExtraId;                             // 0        m_ID CreatureDisplayInfoEntry::m_extendedDisplayInfoID
-    uint32      Race;                                       // 1        m_DisplayRaceID - Race to which it's applicable.
+    uint32      DisplayRaceID;                                       // 1        m_DisplayRaceID - DisplayRaceID to which it's applicable.
     // uint32    Gender;                                    // 2        m_DisplaySexID
     // uint32    SkinColor;                                 // 3        m_SkinID
     // uint32    FaceType;                                  // 4        m_FaceID
@@ -921,8 +921,8 @@ struct DungeonEncounterEntry
 */
 struct DurabilityCostsEntry
 {
-    uint32    Itemlvl;                                      // 0        m_ID - ID in DBC.
-    uint32    multiplier[29];                               // 1-29     m_weaponSubClassCost m_armorSubClassCost
+    uint32    ID;                                      // 0        m_ID - ID in DBC.
+    uint32    WeaponSubClassCost[29];                               // 1-29     m_weaponSubClassCost m_armorSubClassCost
 };
 
 /**
@@ -1123,8 +1123,8 @@ struct GlyphPropertiesEntry
 struct GlyphSlotEntry
 {
     uint32  Id;                                             //          m_id
-    uint32  TypeFlags;                                      //          m_type
-    uint32  Order;                                          //          m_tooltip
+    uint32  Type;                                      //          m_type
+    uint32  Tooltip;                                          //          m_tooltip
 };
 
 // All Gt* DBC store data for 100 levels, some by 100 per class/race
@@ -1134,7 +1134,7 @@ struct GlyphSlotEntry
 
 struct GtBarberShopCostBaseEntry
 {
-    float   cost;
+    float   Data;
 };
 
 struct GtCombatRatingsEntry
@@ -1144,7 +1144,7 @@ struct GtCombatRatingsEntry
 
 struct GtChanceToMeleeCritBaseEntry
 {
-    float    base;
+    float    Data;
 };
 
 struct GtChanceToMeleeCritEntry
@@ -1154,7 +1154,7 @@ struct GtChanceToMeleeCritEntry
 
 struct GtChanceToSpellCritBaseEntry
 {
-    float    base;
+    float    Data;
 };
 
 struct GtChanceToSpellCritEntry
@@ -1437,7 +1437,7 @@ struct MailTemplateEntry
     uint32      ID;                                         // 0        m_ID
     // char*       subject[16];                             // 1-16     m_subject_lang
     // 17 string flags
-    char*       content[16];                                // 18-33    m_body_lang
+    char*       Body_lang[16];                                // 18-33    m_body_lang
 };
 
 /**
@@ -1563,17 +1563,17 @@ struct QuestSortEntry
 
 struct QuestXPLevel
 {
-    uint32      questLevel;                                 // 0        m_ID
-    uint32      xpIndex[10];                                // 1-10     m_difficulty[10]
+    uint32      ID;                                 // 0        m_ID
+    uint32      Difficulty[10];                                // 1-10     m_difficulty[10]
 };
 
 struct RandomPropertiesPointsEntry
 {
     // uint32  Id;                                          // 0        m_ID
-    uint32    itemLevel;                                    // 1        m_ItemLevel
-    uint32    EpicPropertiesPoints[5];                      // 2-6      m_Epic
-    uint32    RarePropertiesPoints[5];                      // 7-11     m_Superior
-    uint32    UncommonPropertiesPoints[5];                  // 12-16    m_Good
+    uint32    ID;                                    // 1        m_ItemLevel
+    uint32    Epic[5];                      // 2-6      m_Epic
+    uint32    Superior[5];                      // 7-11     m_Superior
+    uint32    Good[5];                  // 12-16    m_Good
 };
 
 struct ScalingStatDistributionEntry
@@ -2153,7 +2153,7 @@ struct SpellEntry
 struct SpellCastTimesEntry
 {
     uint32    ID;                                           // 0        m_ID
-    int32     CastTime;                                     // 1        m_base
+    int32     Base;                                     // 1        m_base
     // float     CastTimePerLevel;                          // 2        m_perLevel
     // int32     MinCastTime;                               // 3        m_minimum
 };
@@ -2198,11 +2198,11 @@ struct SpellRangeEntry
 struct SpellRuneCostEntry
 {
     uint32  ID;                                             // 0        m_ID
-    uint32  RuneCost[3];                                    // 1-3      m_blood m_unholy m_frost (0=blood, 1=frost, 2=unholy)
-    uint32  runePowerGain;                                  // 4        m_runicPower
+    uint32  Blood[3];                                    // 1-3      m_blood m_unholy m_frost (0=blood, 1=frost, 2=unholy)
+    uint32  RunicPower;                                  // 4        m_runicPower
 
-    bool NoRuneCost() const { return RuneCost[0] == 0 && RuneCost[1] == 0 && RuneCost[2] == 0; }
-    bool NoRunicPowerGain() const { return runePowerGain == 0; }
+    bool NoRuneCost() const { return Blood[0] == 0 && Blood[1] == 0 && Blood[2] == 0; }
+    bool NoRunicPowerGain() const { return RunicPower == 0; }
 };
 
 /**
@@ -2328,14 +2328,14 @@ struct TalentEntry
 */
 struct TalentTabEntry
 {
-    uint32  TalentTabID;                                    // 0        m_ID
+    uint32  ID;                                    // 0        m_ID
     // char* name[16];                                      // 1-16     m_name_lang
     // uint32  nameFlags;                                   // 17 string flags
     // unit32  spellicon;                                   // 18       m_spellIconID
     // 19       m_raceMask
     uint32  ClassMask;                                      // 20       m_classMask
-    uint32  petTalentMask;                                  // 21       m_petTalentMask
-    uint32  tabpage;                                        // 22       m_orderIndex
+    uint32  PetTalentMask;                                  // 21       m_petTalentMask
+    uint32  OrderIndex;                                        // 22       m_orderIndex
     // char* internalname;                                  // 23       m_backgroundFile
 };
 
@@ -2397,7 +2397,7 @@ struct TaxiPathNodeEntry
 struct TeamContributionPoints
 {
     // uint32    Entry;                                     // 0        m_ID
-    float     Value;                                        // 1        m_data
+    float     Data;                                        // 1        m_data
 };
 
 struct TotemCategoryEntry
@@ -2405,8 +2405,8 @@ struct TotemCategoryEntry
     uint32    ID;                                           // 0        m_ID
     // char*   name[16];                                    // 1-16     m_name_lang
     // 17 string flags
-    uint32    categoryType;                                 // 18       m_totemCategoryType (one for specialization)
-    uint32    categoryMask;                                 // 19       m_totemCategoryMask (compatibility mask for same type: different for totems, compatible from high to low for rods)
+    uint32    TotemCategoryType;                                 // 18       m_totemCategoryType (one for specialization)
+    uint32    TotemCategoryMask;                                 // 19       m_totemCategoryMask (compatibility mask for same type: different for totems, compatible from high to low for rods)
 };
 
 #define MAX_VEHICLE_SEAT 8
@@ -2554,7 +2554,7 @@ struct WorldMapOverlayEntry
 {
     uint32    ID;                                           // 0        m_ID
     // uint32    worldMapAreaId;                            // 1        m_mapAreaID (WorldMapArea.dbc)
-    uint32    areatableID[MAX_WORLD_MAP_OVERLAY_AREA_IDX];  // 2-5      m_areaID
+    uint32    AreaID[MAX_WORLD_MAP_OVERLAY_AREA_IDX];  // 2-5      m_areaID
     // 6        m_mapPointX
     // 7        m_mapPointY
     // char* internal_name                                  // 8        m_textureName

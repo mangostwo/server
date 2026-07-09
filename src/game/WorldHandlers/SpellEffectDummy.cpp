@@ -1498,7 +1498,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                         if (const SpellCastTimesEntry* pCastTime = sSpellCastTimesStore.LookupEntry(pSpell->CastingTimeIndex))
                         {
-                            creatureTarget->ForcedDespawn(pCastTime->CastTime + 1);
+                            creatureTarget->ForcedDespawn(pCastTime->Base + 1);
                         }
                     }
                     return;

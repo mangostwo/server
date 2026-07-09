@@ -227,7 +227,7 @@ float Player::GetMeleeCritFromAgility()
         return 0.0f;
     }
 
-    float crit = critBase->base + GetStat(STAT_AGILITY) * critRatio->ratio;
+    float crit = critBase->Data + GetStat(STAT_AGILITY) * critRatio->ratio;
     return crit * 100.0f;
 }
 
@@ -306,7 +306,7 @@ float Player::GetSpellCritFromIntellect()
         return 0.0f;
     }
 
-    float crit = critBase->base + GetStat(STAT_INTELLECT) * critRatio->ratio;
+    float crit = critBase->Data + GetStat(STAT_INTELLECT) * critRatio->ratio;
     return crit * 100.0f;
 }
 

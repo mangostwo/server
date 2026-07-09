@@ -217,11 +217,11 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
     switch (itemProto->Quality)
     {
         case ITEM_QUALITY_UNCOMMON:
-            return randomProperty->UncommonPropertiesPoints[suffixFactor];
+            return randomProperty->Good[suffixFactor];
         case ITEM_QUALITY_RARE:
-            return randomProperty->RarePropertiesPoints[suffixFactor];
+            return randomProperty->Superior[suffixFactor];
         case ITEM_QUALITY_EPIC:
-            return randomProperty->EpicPropertiesPoints[suffixFactor];
+            return randomProperty->Epic[suffixFactor];
         case ITEM_QUALITY_LEGENDARY:
         case ITEM_QUALITY_ARTIFACT:
             return 0;                                       // not have random properties
