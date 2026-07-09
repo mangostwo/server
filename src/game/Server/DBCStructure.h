@@ -1524,12 +1524,12 @@ struct OverrideSpellDataEntry
 
 struct PowerDisplayEntry
 {
-    uint32 id;                                              // 0        m_ID
-    uint32 power;                                           // 1        m_power
-    // uint32 unk1                                          // 2
-    // float unk2                                           // 3
-    // float unk3                                           // 4
-    // float unk4                                           // 5
+    uint32 ID;                                              // 0        m_ID (was id)
+    uint32 ActualType;                                      // 1        m_actualType (was power)
+    // char* GlobalStringBaseTag;                           // 2        m_globalStringBaseTag - server-unused ('x')
+    // uint8 Red;                                           // 3        m_red   - server-unused ('X', 1 byte)
+    // uint8 Green;                                          // 4        m_green - server-unused ('X', 1 byte)
+    // uint8 Blue;                                           // 5        m_blue  - server-unused ('X', 1 byte)
 };
 
 struct PvPDifficultyEntry

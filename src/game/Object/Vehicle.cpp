@@ -192,7 +192,7 @@ void VehicleInfo::Initialize()
     {
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
         {
-            pVehicle->SetPowerType(Powers(powerEntry->power));
+            pVehicle->SetPowerType(Powers(powerEntry->ActualType));
         }
     }
 
