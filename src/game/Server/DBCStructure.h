@@ -862,7 +862,6 @@ struct CreatureTypeEntry
     // uint32    no_expirience;                             // 18       m_flags
 };
 
-/* not used
 struct CurrencyCategoryEntry
 {
     uint32    ID;                                           // 0        m_ID
@@ -870,7 +869,6 @@ struct CurrencyCategoryEntry
     char*   Name[16];                                       // 2-17     m_name_lang
     //                                                      // 18 string flags
 };
-*/
 
 struct CurrencyTypesEntry
 {
@@ -1194,14 +1192,12 @@ struct GtRegenMPPerSptEntry
                                                             // 17 string flags
 };*/
 
-/* no used
 struct HolidayNamesEntry
 {
     uint32 ID;                                              // 0        m_ID this is NOT holiday id
     // char*     name[16]                                   // 1-16     m_name_lang
                                                             // 17 string flags
 };
-*/
 
 struct HolidaysEntry
 {

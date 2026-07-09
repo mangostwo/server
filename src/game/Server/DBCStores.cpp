@@ -64,6 +64,7 @@ static WMOAreaInfoByTripple sWMOAreaInfoByTripple;
 
 DBCStorage <AchievementEntry> sAchievementStore(Achievementfmt);
 DBCStorage <AchievementCriteriaEntry> sAchievementCriteriaStore(AchievementCriteriafmt);
+DBCStorage <AchievementCategoryEntry> sAchievementCategoryStore(AchievementCategoryfmt);
 DBCStorage <AreaTriggerEntry> sAreaTriggerStore(AreaTriggerEntryfmt);
 DBCStorage <AuctionHouseEntry> sAuctionHouseStore(AuctionHouseEntryfmt);
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
@@ -82,6 +83,7 @@ DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 DBCStorage <CreatureSpellDataEntry> sCreatureSpellDataStore(CreatureSpellDatafmt);
 DBCStorage <CreatureTypeEntry> sCreatureTypeStore(CreatureTypefmt);
 DBCStorage <CurrencyTypesEntry> sCurrencyTypesStore(CurrencyTypesfmt);
+DBCStorage <CurrencyCategoryEntry> sCurrencyCategoryStore(CurrencyCategoryfmt);
 
 DBCStorage <DestructibleModelDataEntry> sDestructibleModelDataStore(DestructibleModelDataFmt);
 DBCStorage <DungeonEncounterEntry> sDungeonEncounterStore(DungeonEncounterfmt);
@@ -114,12 +116,13 @@ DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptf
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 
 DBCStorage <HolidaysEntry>                sHolidaysStore(Holidaysfmt);
+DBCStorage <HolidayNamesEntry>            sHolidayNamesStore(HolidayNamesfmt);
 
 DBCStorage <ItemEntry>                    sItemStore(Itemfmt);
 DBCStorage <ItemBagFamilyEntry>           sItemBagFamilyStore(ItemBagFamilyfmt);
 DBCStorage <ItemClassEntry>               sItemClassStore(ItemClassfmt);
 // DBCStorage <ItemCondExtCostsEntry> sItemCondExtCostsStore(ItemCondExtCostsEntryfmt);
-// DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
+DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt);
 DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DBCStorage <ItemLimitCategoryEntry> sItemLimitCategoryStore(ItemLimitCategoryEntryfmt);
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
@@ -429,7 +432,7 @@ void LoadDBCStores(const std::string& dataPath)
         exit(1);
     }
 
-    const uint32 DBCFilesCount = 95;
+    const uint32 DBCFilesCount = 99;
 
     BarGoLink bar(DBCFilesCount);
 
@@ -458,6 +461,7 @@ void LoadDBCStores(const std::string& dataPath)
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementStore,         dbcPath, "Achievement.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementCriteriaStore, dbcPath, "Achievement_Criteria.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAchievementCategoryStore, dbcPath, "Achievement_Category.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAreaTriggerStore,         dbcPath, "AreaTrigger.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAreaGroupStore,           dbcPath, "AreaGroup.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAuctionHouseStore,        dbcPath, "AuctionHouse.dbc");
@@ -477,6 +481,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureSpellDataStore,   dbcPath, "CreatureSpellData.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCreatureTypeStore,        dbcPath, "CreatureType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCurrencyTypesStore,       dbcPath, "CurrencyTypes.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCurrencyCategoryStore,    dbcPath, "CurrencyCategory.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDestructibleModelDataStore, dbcPath, "DestructibleModelData.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDungeonEncounterStore,    dbcPath, "DungeonEncounter.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sDurabilityCostsStore,     dbcPath, "DurabilityCosts.dbc");
@@ -515,10 +520,11 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sGtRegenHPPerSptStore,     dbcPath, "gtRegenHPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sGtRegenMPPerSptStore,     dbcPath, "gtRegenMPPerSpt.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sHolidaysStore,            dbcPath, "Holidays.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sHolidayNamesStore,        dbcPath, "HolidayNames.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemStore,                dbcPath, "Item.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemBagFamilyStore,       dbcPath, "ItemBagFamily.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemClassStore,           dbcPath, "ItemClass.dbc");
-    // LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemDisplayInfoStore,     dbcPath,"ItemDisplayInfo.dbc");     -- not used currently
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemDisplayInfoStore,     dbcPath, "ItemDisplayInfo.dbc");
     // LoadDBC(availableDbcLocales,bar,bad_dbc_files,sItemCondExtCostsStore,    dbcPath,"ItemCondExtCosts.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemExtendedCostStore,    dbcPath, "ItemExtendedCost.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemLimitCategoryStore,   dbcPath, "ItemLimitCategory.dbc");
