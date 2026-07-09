@@ -267,7 +267,7 @@ bool ChatHandler::HandleAchievementCriteriaAddCommand(char* args)
         return false;
     }
 
-    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->referredAchievement);
+    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->Achievement_ID);
     if (!achEntry)
     {
         return false;
@@ -346,7 +346,7 @@ bool ChatHandler::HandleAchievementCriteriaRemoveCommand(char* args)
         return false;
     }
 
-    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->referredAchievement);
+    AchievementEntry const* achEntry = sAchievementStore.LookupEntry(criEntry->Achievement_ID);
     if (!achEntry)
     {
         return false;

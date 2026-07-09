@@ -54,22 +54,22 @@ Channel::Channel(const std::string& name, uint32 channel_id)
     ChatChannelsEntry const* ch = GetChannelEntryFor(channel_id);
     if (ch)                                                 // it's built-in channel
     {
-        channel_id = ch->ChannelID;                         // built-in channel
+        channel_id = ch->ID;                         // built-in channel
         m_announce = false;                                 // no join/leave announces
 
         m_flags |= CHANNEL_FLAG_GENERAL;                    // for all built-in channels
 
-        if (ch->flags & CHANNEL_DBC_FLAG_TRADE)             // for trade channel
+        if (ch->Flags & CHANNEL_DBC_FLAG_TRADE)             // for trade channel
         {
             m_flags |= CHANNEL_FLAG_TRADE;
         }
 
-        if (ch->flags & CHANNEL_DBC_FLAG_CITY_ONLY2)        // for city only channels
+        if (ch->Flags & CHANNEL_DBC_FLAG_CITY_ONLY2)        // for city only channels
         {
             m_flags |= CHANNEL_FLAG_CITY;
         }
 
-        if (ch->flags & CHANNEL_DBC_FLAG_LFG)               // for LFG channel
+        if (ch->Flags & CHANNEL_DBC_FLAG_LFG)               // for LFG channel
         {
             m_flags |= CHANNEL_FLAG_LFG;
         }

@@ -77,8 +77,8 @@ struct AchievementCategoryEntry
 struct AchievementCriteriaEntry
 {
     uint32  ID;                                             // 0        m_ID
-    uint32  referredAchievement;                            // 1        m_achievement_id
-    uint32  requiredType;                                   // 2        m_type
+    uint32  Achievement_ID;                            // 1        m_achievement_id
+    uint32  Type;                                   // 2        m_type
     union
     {
         // ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE          = 0
@@ -512,7 +512,7 @@ struct AchievementCriteriaEntry
         }
 
         // in case raw.value == timedCriteriaMiscId in timedCriteriaMiscId stored spellid/itemids for cast/use, so repeating aura start at first cast/use until fails
-        return requiredType == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST || raw.value != timedCriteriaMiscId;
+        return Type == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST || raw.value != timedCriteriaMiscId;
     }
 };
 
@@ -670,13 +670,13 @@ struct CharTitlesEntry
 */
 struct ChatChannelsEntry
 {
-    uint32  ChannelID;                                      // 0        m_ID - ID of the Channel in DBC.
-    uint32  flags;                                          // 1        m_flags - Flags indicating the type of channel (trading, guid recruitment, ...).
+    uint32  ID;                                      // 0        m_ID - ID of the Channel in DBC.
+    uint32  Flags;                                          // 1        m_flags - Flags indicating the type of channel (trading, guid recruitment, ...).
     // 2        m_factionGroup
-    const char*   pattern[16];                              // 3-18     m_name_lang
-    // 19 string flags
+    const char*   Name_lang[16];                              // 3-18     m_name_lang
+    // 19 string Flags
     // char*       name[16];                                // 20-35    m_shortcut_lang
-    // 36 string flags
+    // 36 string Flags
 };
 
 /**

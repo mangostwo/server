@@ -124,7 +124,7 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
     {
         AchievementCriteriaEntry const* achievementCriteria = (*i);
 
-        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->Achievement_ID);
         // Checked in LoadAchievementCriteriaList
 
         // don't update already completed criteria
@@ -276,7 +276,7 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
             progress.changed = false;
             progress.timedCriteriaFailed = false;
 
-            AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
+            AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->Achievement_ID);
             // Checked in LoadAchievementCriteriaList
 
             // A failed achievement will be removed on next tick - TODO: Possible that timer 2 is reseted
@@ -428,7 +428,7 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
             continue;
         }
 
-        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->Achievement_ID);
         // Checked in LoadAchievementCriteriaList
 
         if ((achievement->Faction == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
@@ -442,7 +442,7 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         }
 
         // Only the Quest-Complete Timed Achievements need the groupcheck, so this check is only needed here
-        if (achievementCriteria->requiredType == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST && GetPlayer()->GetGroup())
+        if (achievementCriteria->Type == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST && GetPlayer()->GetGroup())
         {
             continue;
         }
@@ -500,7 +500,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
 
         // Possible failed achievement criteria found
         AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(iter->first);
-        AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->Achievement_ID);
         // Checked in LoadAchievementCriteriaList
 
         // Send Fail for failed criterias
@@ -542,7 +542,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     {
         AchievementCriteriaEntry const* achievementCriteria = *itr;
 
-        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->Achievement_ID);
         // Checked in LoadAchievementCriteriaList
 
         if ((achievement->Faction == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
@@ -647,7 +647,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         continue;
                     }
 
-                    switch (achievementCriteria->referredAchievement)
+                    switch (achievementCriteria->Achievement_ID)
                     {
                         case 161:                           // AB, Overcome a 500 resource disadvantage
                         {
@@ -1664,7 +1664,7 @@ uint32 AchievementMgr::GetCriteriaProgressCounter(AchievementCriteriaEntry const
 uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement)
 {
     uint32 resultValue = 0;
-    switch (achievementCriteria->requiredType)
+    switch (achievementCriteria->Type)
     {
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
             resultValue = achievementCriteria->win_bg.winCount;
