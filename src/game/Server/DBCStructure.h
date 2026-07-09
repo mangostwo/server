@@ -68,7 +68,7 @@ struct AchievementEntry
 struct AchievementCategoryEntry
 {
     uint32    ID;                                           // 0        m_ID
-    uint32    parentCategory;                               // 1        m_parent -1 for main category
+    uint32    Parent;                               // 1        m_parent -1 for main category
     // char *name[16];                                      // 2-17     m_name_lang
     // uint32 name_flags;                                   // 18 string flags
     // uint32    sortOrder;                                 // 19       m_ui_order
@@ -865,8 +865,8 @@ struct CreatureTypeEntry
 struct CurrencyCategoryEntry
 {
     uint32    ID;                                           // 0        m_ID
-    uint32    Unk1;                                         // 1        m_flags 0 for known categories and 3 for unknown one (3.0.9)
-    char*   Name[16];                                       // 2-17     m_name_lang
+    uint32    Flags;                                         // 1        m_flags 0 for known categories and 3 for unknown one (3.0.9)
+    char*   Name_lang[16];                                       // 2-17     m_name_lang
     //                                                      // 18 string flags
 };
 
