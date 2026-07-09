@@ -34,7 +34,7 @@ const char AuctionHouseEntryfmt[] = "niiixxxxxxxxxxxxxxxxx";
 const char BankBagSlotPricesEntryfmt[] = "ni";
 const char BarberShopStyleEntryfmt[] = "nixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiii";
 const char BattlemasterListEntryfmt[] = "niiiiiiiiixssssssssssssssssxiiii";
-const char CharStartOutfitEntryfmt[] = "diiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+const char CharStartOutfitEntryfmt[] = "dbbbbiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char CharTitlesEntryfmt[] = "nxssssssssssssssssxxxxxxxxxxxxxxxxxxi";
 const char ChatChannelsEntryfmt[] = "iixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 // ChatChannelsEntryfmt, index not used (more compact store)
