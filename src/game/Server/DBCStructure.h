@@ -1390,7 +1390,7 @@ struct LiquidTypeEntry
     uint32 ID;                                              // 0
     char* Name;                                            // 1        m_Name - liquid name string (opaque-now-typed: was skipped 'x')
     //uint32 Flags;                                         // 2 Water: 1|2|4|8, Magma: 8|16|32|64, Slime: 2|64|256, WMO Ocean: 1|2|4|8|512
-    uint32 Type;                                            // 3 0: Water, 1: Ocean, 2: Magma, 3: Slime
+    uint32 SoundBank;                                       // 3 client/dbd/TC name; mangos liquid-type semantic: 0 Water 1 Ocean 2 Magma 3 Slime
     //uint32 SoundId;                                       // 4 Reference to SoundEntries.dbc
     uint32 SpellID;                                         // 5 Reference to Spell.dbc
     //float MaxDarkenDepth;                                 // 6 Only oceans got values here!
