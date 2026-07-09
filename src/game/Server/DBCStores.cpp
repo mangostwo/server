@@ -579,10 +579,10 @@ void LoadDBCStores(const std::string& dataPath)
             sSpellCategoryStore[spell->Category].insert(i);
         }
 
-        // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
+        // DBC not support uint64 fields but SpellEntry have SpellClassMask (was SpellFamilyFlags) mapped at 2 uint32 fields
         // uint32 field already converted to bigendian if need, but must be swapped for correct uint64 bigendian view
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
-        std::swap(*((uint32*)(&spell->SpellFamilyFlags)), *(((uint32*)(&spell->SpellFamilyFlags)) + 1));
+        std::swap(*((uint32*)(&spell->SpellClassMask)), *(((uint32*)(&spell->SpellClassMask)) + 1));
 #endif
     }
 
