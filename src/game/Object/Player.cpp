@@ -1573,7 +1573,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket* p_data)
 
         *p_data << uint32(proto->DisplayInfoID);
         *p_data << uint8(proto->InventoryType);
-        *p_data << uint32(enchant ? enchant->aura_id : 0);
+        *p_data << uint32(enchant ? enchant->ItemVisual : 0);
     }
 
     *p_data << uint32(0);                                   // first bag display id
@@ -3785,10 +3785,10 @@ void Player::InitDataForForm(bool reapplyMods)
     ShapeshiftForm form = GetShapeshiftForm();
 
     SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(form);
-    if (ssEntry && ssEntry->attackSpeed)
+    if (ssEntry && ssEntry->CombatRoundTime)
     {
-        SetAttackTime(BASE_ATTACK, ssEntry->attackSpeed);
-        SetAttackTime(OFF_ATTACK, ssEntry->attackSpeed);
+        SetAttackTime(BASE_ATTACK, ssEntry->CombatRoundTime);
+        SetAttackTime(OFF_ATTACK, ssEntry->CombatRoundTime);
         SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
     }
     else
@@ -4804,8 +4804,8 @@ bool Player::HasTitle(uint32 bitIndex) const
 
 void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 {
-    uint32 fieldIndexOffset = title->bit_index / 32;
-    uint32 flag = 1 << (title->bit_index % 32);
+    uint32 fieldIndexOffset = title->Mask_ID / 32;
+    uint32 flag = 1 << (title->Mask_ID % 32);
 
     if (lost)
     {
@@ -4827,7 +4827,7 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
     }
 
     WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
-    data << uint32(title->bit_index);
+    data << uint32(title->Mask_ID);
     data << uint32(lost ? 0 : 1);                           // 1 - earned, 0 - lost
     GetSession()->SendPacket(&data);
 }
@@ -5203,7 +5203,7 @@ InventoryResult Player::CanEquipUniqueItem(Item* pItem, uint8 eslot, uint32 limi
             continue;
         }
 
-        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->GemID);
+        ItemPrototype const* pGem = ObjectMgr::GetItemPrototype(enchantEntry->SrcItemID);
         if (!pGem)
         {
             continue;
@@ -5353,7 +5353,7 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
 {
     if (PlayerTalent const* talent = GetKnownTalentById(talentId))
     {
-        return sSpellStore.LookupEntry(talent->talentEntry->RankID[talent->currentRank]);
+        return sSpellStore.LookupEntry(talent->talentEntry->SpellRank[talent->currentRank]);
     }
     else
     {

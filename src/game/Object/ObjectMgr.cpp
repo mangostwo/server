@@ -619,7 +619,7 @@ void ObjectMgr::LoadInstanceTemplate()
             if (parentEntry->IsContinent())
             {
                 sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: parent point to continent map id %u for instance template %d template, ignored, need be set only for non-continent parents!",
-                                parentEntry->MapID, temp->map);
+                                parentEntry->ID, temp->map);
                 const_cast<InstanceTemplate*>(temp)->parent = 0;
                 continue;
             }

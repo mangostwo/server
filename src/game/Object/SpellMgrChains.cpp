@@ -129,14 +129,14 @@ void SpellMgr::LoadSpellChains()
         }
 
         // not add ranks for 1 ranks talents (if exist non ranks spells then it will included in table data)
-        if (!talentInfo->RankID[1])
+        if (!talentInfo->SpellRank[1])
         {
             continue;
         }
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
         {
-            uint32 spell_id = talentInfo->RankID[j];
+            uint32 spell_id = talentInfo->SpellRank[j];
             if (!spell_id)
             {
                 continue;
@@ -149,8 +149,8 @@ void SpellMgr::LoadSpellChains()
             }
 
             SpellChainNode node;
-            node.prev  = (j > 0) ? talentInfo->RankID[j - 1] : 0;
-            node.first = talentInfo->RankID[0];
+            node.prev  = (j > 0) ? talentInfo->SpellRank[j - 1] : 0;
+            node.first = talentInfo->SpellRank[0];
             node.rank  = j + 1;
             node.req   = 0;
 
@@ -362,14 +362,14 @@ void SpellMgr::LoadSpellChains()
 
             if (TalentEntry const* talentEntry = sTalentStore.LookupEntry(pos->talent_id))
             {
-                if (node.first != talentEntry->RankID[0])
+                if (node.first != talentEntry->SpellRank[0])
                 {
                     sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong first rank spell.",
                                     spell_id, node.prev, node.first, node.rank, node.req);
                     continue;
                 }
 
-                if (node.rank > 1 && node.prev != talentEntry->RankID[node.rank - 1 - 1])
+                if (node.rank > 1 && node.prev != talentEntry->SpellRank[node.rank - 1 - 1])
                 {
                     sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong prev rank spell.",
                                     spell_id, node.prev, node.first, node.rank, node.req);

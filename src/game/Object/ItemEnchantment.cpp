@@ -142,7 +142,7 @@ bool Item::GemsFitSockets() const
 
         uint8 GemColor = 0;
 
-        uint32 gemid = enchantEntry->GemID;
+        uint32 gemid = enchantEntry->SrcItemID;
         if (gemid)
         {
             ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
@@ -178,7 +178,7 @@ uint8 Item::GetGemCountWithID(uint32 GemID) const
             continue;
         }
 
-        if (GemID == enchantEntry->GemID)
+        if (GemID == enchantEntry->SrcItemID)
         {
             ++count;
         }
@@ -203,7 +203,7 @@ uint8 Item::GetGemCountWithLimitCategory(uint32 limitCategory) const
             continue;
         }
 
-        ItemPrototype const* gemProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID);
+        ItemPrototype const* gemProto = ObjectMgr::GetItemPrototype(enchantEntry->SrcItemID);
         if (!gemProto)
         {
             continue;

@@ -337,7 +337,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                 {
                     if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]))
                     {
-                        if (iGemProto->ItemId == enchantEntry->GemID)
+                        if (iGemProto->ItemId == enchantEntry->SrcItemID)
                         {
                             _player->SendEquipError(EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED, itemTarget, NULL);
                             return;
@@ -363,7 +363,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                         if (OldEnchants[j])
                         {
                             if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]))
-                                if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID))
+                                if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->SrcItemID))
                                     if (iGemProto->ItemLimitCategory == jProto->ItemLimitCategory)
                                     {
                                         --limit_newcount;
@@ -380,7 +380,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                     else if (OldEnchants[j])
                     {
                         if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]))
-                            if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->GemID))
+                            if (ItemPrototype const* jProto = ObjectMgr::GetItemPrototype(enchantEntry->SrcItemID))
                                 if (iGemProto->ItemLimitCategory == jProto->ItemLimitCategory)
                                 {
                                     ++limit_newcount;

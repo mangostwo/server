@@ -635,7 +635,7 @@ void Spell::EffectApplyGlyph(SpellEffectIndex eff_idx)
         {
             if (GlyphSlotEntry const* gs = sGlyphSlotStore.LookupEntry(player->GetGlyphSlot(m_glyphIndex)))
             {
-                if (gp->TypeFlags != gs->Type)
+                if (gp->GlyphSlotFlags != gs->Type)
                 {
                     SendCastResult(SPELL_FAILED_INVALID_GLYPH);
                     return;                                 // glyph slot mismatch

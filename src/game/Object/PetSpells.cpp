@@ -491,7 +491,7 @@ bool Pet::addSpell(uint32 spell_id, ActiveStates active /*= ACT_DECIDE*/, PetSpe
             for (int i = 0; i < MAX_TALENT_RANK; ++i)
             {
                 // skip learning spell and no rank spell case
-                uint32 rankSpellId = talentInfo->RankID[i];
+                uint32 rankSpellId = talentInfo->SpellRank[i];
                 if (!rankSpellId || rankSpellId == spell_id)
                 {
                     continue;
@@ -832,7 +832,7 @@ bool Pet::resetTalents(bool no_cost)
 
         if (!talentInfo) continue;
 
-        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+        TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TabID);
 
         if (!talentTabInfo)
         {
@@ -847,9 +847,9 @@ bool Pet::resetTalents(bool no_cost)
 
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
         {
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                removeSpell(talentInfo->RankID[j], !IsPassiveSpell(talentInfo->RankID[j]), false);
+                removeSpell(talentInfo->SpellRank[j], !IsPassiveSpell(talentInfo->SpellRank[j]), false);
             }
         }
     }

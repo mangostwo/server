@@ -1419,7 +1419,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
             sLog.outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
             return SPELL_CAST_OK;
         }
-        actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
+        actAsShifted = !(shapeInfo->Flags & 1);            // shapeshift acts as normal form for spells
     }
 
     if (actAsShifted)
@@ -3349,9 +3349,9 @@ SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bo
 
     for (Difficulty diff = difficulty; diff >= REGULAR_DIFFICULTY; diff = GetPrevDifficulty(diff, isRaid))
     {
-        if (spellDiff->spellId[diff])
+        if (spellDiff->DifficultySpellID[diff])
         {
-            return sSpellStore.LookupEntry(spellDiff->spellId[diff]);
+            return sSpellStore.LookupEntry(spellDiff->DifficultySpellID[diff]);
         }
     }
 

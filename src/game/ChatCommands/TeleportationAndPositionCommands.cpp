@@ -678,7 +678,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
     }
 
     PSendSysMessage(LANG_MAP_POSITION,
-                    obj->GetMapId(), (mapEntry ? mapEntry->name[GetSessionDbcLocale()] : "<unknown>"),
+                    obj->GetMapId(), (mapEntry ? mapEntry->MapName_lang[GetSessionDbcLocale()] : "<unknown>"),
                     zone_id, (zoneEntry ? zoneEntry->area_name[GetSessionDbcLocale()] : "<unknown>"),
                     area_id, (areaEntry ? areaEntry->area_name[GetSessionDbcLocale()] : "<unknown>"),
                     obj->GetPhaseMask(),
@@ -692,7 +692,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
               (obj->GetTypeId() == TYPEID_PLAYER ? "GUID" : "Entry"), (obj->GetTypeId() == TYPEID_PLAYER ? obj->GetGUIDLow() : obj->GetEntry()));
 
     DEBUG_LOG(GetMangosString(LANG_MAP_POSITION),
-              obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
+              obj->GetMapId(), (mapEntry ? mapEntry->MapName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               obj->GetPhaseMask(),
@@ -1066,7 +1066,7 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     if (mapEntry->Instanceable())
     {
         PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->area_name[GetSessionDbcLocale()],
-                        mapEntry->MapID, mapEntry->name[GetSessionDbcLocale()]);
+                        mapEntry->ID, mapEntry->MapName_lang[GetSessionDbcLocale()]);
         SetSentErrorMessage(true);
         return false;
     }
@@ -1074,12 +1074,12 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     if (!Zone2MapCoordinates(x, y, zoneEntry->ID))
     {
         PSendSysMessage(LANG_INVALID_ZONE_MAP, areaEntry->ID, areaEntry->area_name[GetSessionDbcLocale()],
-                        mapEntry->MapID, mapEntry->name[GetSessionDbcLocale()]);
+                        mapEntry->ID, mapEntry->MapName_lang[GetSessionDbcLocale()]);
         SetSentErrorMessage(true);
         return false;
     }
 
-    return HandleGoHelper(_player, mapEntry->MapID, x, y);
+    return HandleGoHelper(_player, mapEntry->ID, x, y);
 }
 
 /**

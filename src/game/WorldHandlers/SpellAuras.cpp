@@ -437,7 +437,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBas
                     {
                         for (int t = 0; t < 3; ++t)
                         {
-                            if (pEnchant->spellid[t] != spellproto->Id)
+                            if (pEnchant->EffectArg[t] != spellproto->Id)
                             {
                                 continue;
                             }

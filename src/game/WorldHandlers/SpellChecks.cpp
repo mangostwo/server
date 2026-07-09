@@ -1053,7 +1053,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 uint32 glyphId = m_spellInfo->EffectMiscValue[i];
                 if (GlyphPropertiesEntry const* gp = sGlyphPropertiesStore.LookupEntry(glyphId))
                 {
-                    if (m_caster->HasAura(gp->SpellId))
+                    if (m_caster->HasAura(gp->SpellID))
                     {
                         return SPELL_FAILED_UNIQUE_GLYPH;
                     }
@@ -2719,7 +2719,7 @@ SpellCastResult Spell::CheckItems()
                     {
                         return SPELL_FAILED_ERROR;
                     }
-                    if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
+                    if (pEnchant->Flags & ENCHANTMENT_CAN_SOULBOUND)
                     {
                         return SPELL_FAILED_NOT_TRADEABLE;
                     }
@@ -2747,7 +2747,7 @@ SpellCastResult Spell::CheckItems()
                     {
                         return SPELL_FAILED_ERROR;
                     }
-                    if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
+                    if (pEnchant->Flags & ENCHANTMENT_CAN_SOULBOUND)
                     {
                         return SPELL_FAILED_NOT_TRADEABLE;
                     }

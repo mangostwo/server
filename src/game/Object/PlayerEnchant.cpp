@@ -126,7 +126,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
                     continue;
                 }
 
-                uint32 gemid = enchantEntry->GemID;
+                uint32 gemid = enchantEntry->SrcItemID;
                 if (!gemid)
                 {
                     continue;
@@ -222,7 +222,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
                 continue;
             }
 
-            uint32 condition = enchantEntry->EnchantmentCondition;
+            uint32 condition = enchantEntry->ConditionID;
             if (condition)
             {
                 // was enchant active with/without item?
@@ -274,7 +274,7 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
             }
 
             // only metagems to be (de)activated, so only enchants with condition
-            uint32 condition = enchantEntry->EnchantmentCondition;
+            uint32 condition = enchantEntry->ConditionID;
             if (condition)
             {
                 ApplyEnchantment(pItem, EnchantmentSlot(enchant_slot), apply);

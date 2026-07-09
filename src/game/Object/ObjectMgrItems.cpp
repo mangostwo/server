@@ -180,9 +180,9 @@ void ObjectMgr::LoadItemPrototypes()
 
         if (dbcitem)
         {
-            if (proto->Class != dbcitem->Class)
+            if (proto->Class != dbcitem->ClassID)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct class %u, must be %u (still using DB value).", i, proto->Class, dbcitem->Class);
+                sLog.outErrorDb("Item (Entry: %u) not correct class %u, must be %u (still using DB value).", i, proto->Class, dbcitem->ClassID);
                 // It safe let use Class from DB
             }
             /* disabled: have some strange wrong cases for Subclass values.
@@ -194,9 +194,9 @@ void ObjectMgr::LoadItemPrototypes()
             }
             */
 
-            if (proto->Unk0 != dbcitem->Unk0)
+            if (proto->Unk0 != dbcitem->SoundOverrideSubclassID)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->Unk0);
+                sLog.outErrorDb("Item (Entry: %u) not correct %i Unk0, must be %i (still using DB value).", i, proto->Unk0, dbcitem->SoundOverrideSubclassID);
                 // It safe let use Unk0 from DB
             }
 
@@ -212,15 +212,15 @@ void ObjectMgr::LoadItemPrototypes()
                 // It safe let use InventoryType from DB
             }
 
-            if (proto->DisplayInfoID != dbcitem->DisplayId)
+            if (proto->DisplayInfoID != dbcitem->DisplayInfoID)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %u display id, must be %u (using it).", i, proto->DisplayInfoID, dbcitem->DisplayId);
-                const_cast<ItemPrototype*>(proto)->DisplayInfoID = dbcitem->DisplayId;
+                sLog.outErrorDb("Item (Entry: %u) not correct %u display id, must be %u (using it).", i, proto->DisplayInfoID, dbcitem->DisplayInfoID);
+                const_cast<ItemPrototype*>(proto)->DisplayInfoID = dbcitem->DisplayInfoID;
             }
-            if (proto->Sheath != dbcitem->Sheath)
+            if (proto->Sheath != dbcitem->SheatheType)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %u sheath, must be %u  (using it).", i, proto->Sheath, dbcitem->Sheath);
-                const_cast<ItemPrototype*>(proto)->Sheath = dbcitem->Sheath;
+                sLog.outErrorDb("Item (Entry: %u) not correct %u sheath, must be %u  (using it).", i, proto->Sheath, dbcitem->SheatheType);
+                const_cast<ItemPrototype*>(proto)->Sheath = dbcitem->SheatheType;
             }
         }
         else
@@ -249,7 +249,7 @@ void ObjectMgr::LoadItemPrototypes()
         if (proto->Flags2 & ITEM_FLAG2_HORDE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(HORDE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_HORDE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_HORDE_ONLY);
 
@@ -260,7 +260,7 @@ void ObjectMgr::LoadItemPrototypes()
         else if (proto->Flags2 & ITEM_FLAG2_ALLIANCE_ONLY)
         {
             if (FactionEntry const* faction = sFactionStore.LookupEntry(ALLIANCE))
-                if ((proto->AllowableRace & faction->BaseRepRaceMask[0]) == 0)
+                if ((proto->AllowableRace & faction->ReputationRaceMask[0]) == 0)
                     sLog.outErrorDb("Item (Entry: %u) have in `AllowableRace` races (%u) only not compatible with ITEM_FLAG2_ALLIANCE_ONLY (%u) in Flags field, item any way will can't be equipped or use by this races.",
                                     i, proto->AllowableRace, ITEM_FLAG2_ALLIANCE_ONLY);
         }

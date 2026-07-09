@@ -539,7 +539,7 @@ bool Unit::haveOffhandWeapon() const
         uint32 ItemId = GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
         ItemEntry const* itemInfo = sItemStore.LookupEntry(ItemId);
 
-        if (itemInfo && itemInfo->Class == ITEM_CLASS_WEAPON)
+        if (itemInfo && itemInfo->ClassID == ITEM_CLASS_WEAPON)
         {
             return true;
         }
@@ -1935,7 +1935,7 @@ void Unit::HandleEmote(uint32 emote_id)
     }
     else if (EmotesEntry const* emoteEntry = sEmotesStore.LookupEntry(emote_id))
     {
-        if (emoteEntry->EmoteType)                          // 1,2 states, 0 command
+        if (emoteEntry->EmoteSpecProc)                          // 1,2 states, 0 command
         {
             HandleEmoteState(emote_id);
         }
@@ -4657,9 +4657,9 @@ uint32 Unit::GetCreatureType() const
     if (GetTypeId() == TYPEID_PLAYER)
     {
         SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
-        if (ssEntry && ssEntry->creatureType > 0)
+        if (ssEntry && ssEntry->CreatureType > 0)
         {
-            return ssEntry->creatureType;
+            return ssEntry->CreatureType;
         }
         else
         {

@@ -254,7 +254,7 @@ void SpellMgr::LoadPetDefaultSpells()
         PetDefaultSpellsEntry petDefSpells;
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
         {
-            petDefSpells.spellid[j] = spellDataEntry->spellId[j];
+            petDefSpells.spellid[j] = spellDataEntry->Spells[j];
         }
 
         if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))

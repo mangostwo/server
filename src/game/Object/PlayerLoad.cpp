@@ -1824,11 +1824,11 @@ void Player::_LoadTalents(QueryResult* result)
                 continue;
             }
 
-            TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TalentTab);
+            TalentTabEntry const* talentTabInfo = sTalentTabStore.LookupEntry(talentInfo->TabID);
 
             if (!talentTabInfo)
             {
-                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has invalid talentTabInfo: %u for talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentInfo->TalentTab, talentInfo->TalentID);
+                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has invalid talentTabInfo: %u for talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentInfo->TabID, talentInfo->ID);
                 CharacterDatabase.PExecute("DELETE FROM `character_talent` WHERE `talent_id` = '%u'", talent_id);
                 continue;
             }
@@ -1836,16 +1836,16 @@ void Player::_LoadTalents(QueryResult* result)
             // prevent load talent for different class (cheating)
             if ((getClassMask() & talentTabInfo->ClassMask) == 0)
             {
-                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has talent with ClassMask: %u , but Player's ClassMask is: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentTabInfo->ClassMask, getClassMask() , talentInfo->TalentID);
+                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has talent with ClassMask: %u , but Player's ClassMask is: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), talentTabInfo->ClassMask, getClassMask() , talentInfo->ID);
                 CharacterDatabase.PExecute("DELETE FROM `character_talent` WHERE `guid` = '%u' AND `talent_id` = '%u'", GetGUIDLow(), talent_id);
                 continue;
             }
 
             uint32 currentRank = fields[1].GetUInt32();
 
-            if (currentRank > MAX_TALENT_RANK || talentInfo->RankID[currentRank] == 0)
+            if (currentRank > MAX_TALENT_RANK || talentInfo->SpellRank[currentRank] == 0)
             {
-                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has invalid talent rank: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), currentRank, talentInfo->TalentID);
+                sLog.outError("Player::_LoadTalents:Player (GUID: %u) has invalid talent rank: %u , talentID: %u , this talent will be deleted from character_talent", GetGUIDLow(), currentRank, talentInfo->ID);
                 CharacterDatabase.PExecute("DELETE FROM `character_talent` WHERE `guid` = '%u' AND `talent_id` = '%u'", GetGUIDLow(), talent_id);
                 continue;
             }
@@ -1868,7 +1868,7 @@ void Player::_LoadTalents(QueryResult* result)
 
             if (m_activeSpec == spec)
             {
-                addSpell(talentInfo->RankID[currentRank], true, false, false, false);
+                addSpell(talentInfo->SpellRank[currentRank], true, false, false, false);
             }
             else
             {
@@ -1876,7 +1876,7 @@ void Player::_LoadTalents(QueryResult* result)
                 talent.currentRank = currentRank;
                 talent.talentEntry = talentInfo;
                 talent.state       = PLAYERSPELL_UNCHANGED;
-                m_talents[spec][talentInfo->TalentID] = talent;
+                m_talents[spec][talentInfo->ID] = talent;
             }
         }
         while (result->NextRow());

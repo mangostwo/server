@@ -86,7 +86,7 @@ class ReputationMgr
 
         FactionState const* GetState(FactionEntry const* factionEntry) const
         {
-            return factionEntry->reputationListID >= 0 ? GetState(factionEntry->reputationListID) : NULL;
+            return factionEntry->ReputationIndex >= 0 ? GetState(factionEntry->ReputationIndex) : NULL;
         }
 
         FactionState const* GetState(RepListID id) const

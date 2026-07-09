@@ -887,12 +887,12 @@ void Player::_HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEn
 
         for (int s = 0; s < 3; ++s)
         {
-            if (pSecondEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pSecondEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
             {
                 continue;
             }
 
-            SpellEntry const* combatEntry = sSpellStore.LookupEntry(pSecondEnchant->spellid[s]);
+            SpellEntry const* combatEntry = sSpellStore.LookupEntry(pSecondEnchant->EffectArg[s]);
             if (combatEntry && combatEntry->Dispel == DISPEL_POISON)
             {
                 CastSpell(Target, combatEntry, true, otherWeapon);
@@ -984,12 +984,12 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
         }
         for (int s = 0; s < 3; ++s)
         {
-            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+            if (pEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
             {
                 continue;
             }
 
-            uint32 proc_spell_id = pEnchant->spellid[s];
+            uint32 proc_spell_id = pEnchant->EffectArg[s];
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(proc_spell_id);
             if (!spellInfo)
             {
@@ -1002,7 +1002,7 @@ void Player::CastItemCombatSpell(Unit* Target, WeaponAttackType attType)
 
             float chance = ppmRate
                            ? GetPPMProcChance(proto->Delay, ppmRate)
-                           : pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
+                           : pEnchant->EffectPointsMin[s] != 0 ? float(pEnchant->EffectPointsMin[s]) : GetWeaponProcChance();
 
 
             ApplySpellMod(spellInfo->Id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
@@ -1108,15 +1108,15 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
 
         for (int s = 0; s < 3; ++s)
         {
-            if (pEnchant->type[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
+            if (pEnchant->Effect[s] != ITEM_ENCHANTMENT_TYPE_USE_SPELL)
             {
                 continue;
             }
 
-            SpellEntry const* spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(pEnchant->EffectArg[s]);
             if (!spellInfo)
             {
-                sLog.outError("Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                sLog.outError("Player::CastItemUseSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->EffectArg[s]);
                 continue;
             }
 

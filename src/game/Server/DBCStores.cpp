@@ -487,9 +487,9 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sFactionStore.GetNumRows(); ++i)
     {
         FactionEntry const* faction = sFactionStore.LookupEntry(i);
-        if (faction && faction->team)
+        if (faction && faction->ParentFactionID)
         {
-            SimpleFactionsList& flist = sFactionTeamMap[faction->team];
+            SimpleFactionsList& flist = sFactionTeamMap[faction->ParentFactionID];
             flist.push_back(i);
         }
     }
@@ -551,7 +551,7 @@ void LoadDBCStores(const std::string& dataPath)
     for (uint32 i = 0; i < sPvPDifficultyStore.GetNumRows(); ++i)
     {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
-            if (entry->bracketId > MAX_BATTLEGROUND_BRACKETS)
+            if (entry->RangeIndex > MAX_BATTLEGROUND_BRACKETS)
             {
                 MANGOS_ASSERT(false && "Need update MAX_BATTLEGROUND_BRACKETS by DBC data");
             }
@@ -634,9 +634,9 @@ void LoadDBCStores(const std::string& dataPath)
         }
         for (int j = 0; j < MAX_TALENT_RANK; ++j)
         {
-            if (talentInfo->RankID[j])
+            if (talentInfo->SpellRank[j])
             {
-                sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i, j);
+                sTalentSpellPosMap[talentInfo->SpellRank[j]] = TalentSpellPos(i, j);
             }
         }
     }
@@ -981,7 +981,7 @@ AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag, uint32 map_
 
     if (MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
     {
-        return GetAreaEntryByAreaID(mapEntry->linked_zone);
+        return GetAreaEntryByAreaID(mapEntry->AreaTableID);
     }
 
     return NULL;
@@ -1214,19 +1214,19 @@ PvPDifficultyEntry const* GetBattlegroundBracketByLevel(uint32 mapid, uint32 lev
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
         {
             // skip unrelated and too-high brackets
-            if (entry->mapId != mapid || entry->minLevel > level)
+            if (entry->MapID != mapid || entry->MinLevel > level)
             {
                 continue;
             }
 
             // exactly fit
-            if (entry->maxLevel >= level)
+            if (entry->MaxLevel >= level)
             {
                 return entry;
             }
 
             // remember for possible out-of-range case (search higher from existed)
-            if (!maxEntry || maxEntry->maxLevel < entry->maxLevel)
+            if (!maxEntry || maxEntry->MaxLevel < entry->MaxLevel)
             {
                 maxEntry = entry;
             }
@@ -1242,7 +1242,7 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
     {
         if (PvPDifficultyEntry const* entry = sPvPDifficultyStore.LookupEntry(i))
         {
-            if (entry->mapId == mapid && entry->GetBracketId() == id)
+            if (entry->MapID == mapid && entry->GetBracketId() == id)
             {
                 return entry;
             }

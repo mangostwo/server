@@ -570,7 +570,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffectIndex eff_idx)
         bool add_socket = false;
         for (int i = 0; i < 3; ++i)
         {
-            if (pEnchant->type[i] == ITEM_ENCHANTMENT_TYPE_PRISMATIC_SOCKET)
+            if (pEnchant->Effect[i] == ITEM_ENCHANTMENT_TYPE_PRISMATIC_SOCKET)
             {
                 add_socket = true;
                 break;

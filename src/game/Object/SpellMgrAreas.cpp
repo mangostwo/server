@@ -308,7 +308,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
     {
         uint32 v_map = GetVirtualMapForMapAndZone(map_id, zone_id);
         MapEntry const* mapEntry = sMapStore.LookupEntry(v_map);
-        if (!mapEntry || mapEntry->addon < 1 || !mapEntry->IsContinent())
+        if (!mapEntry || mapEntry->ExpansionID < 1 || !mapEntry->IsContinent())
         {
             return SPELL_FAILED_INCORRECT_AREA;
         }
