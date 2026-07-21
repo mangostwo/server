@@ -20,6 +20,8 @@
 # Build the mangos script library if enabled
 if(SCRIPT_LIB_SD3)
     add_subdirectory(SD3)
+    mangos_submodule_compat(mangosscript
+        "${CMAKE_SOURCE_DIR}/src/shared/Compat/sd3")
 endif()
 
 if(SCRIPT_LIB_ELUNA)

@@ -27,6 +27,8 @@
  * @brief Cohesion split of ScriptMgr.cpp -- database-script table loaders and spell-start gating.
  */
 
+#include <set>
+#include <mutex>
 #include "ScriptMgr.h"
 #include "Log.h"
 #include "ProgressBar.h"
@@ -44,7 +46,7 @@
  */
 ScriptChainMap const* ScriptMgr::GetScriptChainMap(DBScriptType type)
 {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, _guard, m_lock, NULL)
+    std::lock_guard<std::mutex> _guard(m_lock);
     if ((type != DBS_INTERNAL) && type < DBS_END)
     {
         return &m_dbScripts[type];
@@ -864,7 +866,7 @@ void ScriptMgr::LoadDbScripts(DBScriptType t)
     }
 
     {
-        ACE_GUARD(ACE_Thread_Mutex, _g, m_lock)
+        std::lock_guard<std::mutex> _g(m_lock);
         LoadScripts(t);
     }
 

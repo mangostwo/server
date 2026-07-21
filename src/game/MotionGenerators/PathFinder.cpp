@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "../recastnavigation/Detour/Include/DetourCommon.h"
 
 #include "MoveMap.h"

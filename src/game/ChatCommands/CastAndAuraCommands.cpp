@@ -32,6 +32,7 @@
  * - Spell effect testing and debugging
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "SpellAuras.h"

@@ -25,7 +25,11 @@
 #ifndef __MANGOS_LFGMGR_H
 #define __MANGOS_LFGMGR_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
+#include <string>
 #include "Policies/Singleton.h"
 #include "Group.h"
 #include <set>

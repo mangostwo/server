@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

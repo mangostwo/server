@@ -25,9 +25,10 @@
 #ifndef SQLPREPAREDSTATEMENTS_H
 #define SQLPREPAREDSTATEMENTS_H
 
-#include "Common/Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <sstream>
 #include "Utilities/Errors.h"
-#include <ace/TSS_T.h>
 #include <vector>
 #include <stdexcept>
 

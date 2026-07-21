@@ -42,7 +42,8 @@
 #ifndef _TRANSPORT_SYSTEM_H
 #define _TRANSPORT_SYSTEM_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
 #include "Object.h"
 
 class TransportInfo;

@@ -27,6 +27,7 @@
  * @brief Unit diminishing-returns tracking split out of Unit.cpp.
  */
 
+#include "Common/TimeConstants.h"
 #include "Unit.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -43,7 +44,6 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"

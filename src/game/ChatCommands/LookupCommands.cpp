@@ -33,6 +33,9 @@
  * - Spell and ability lookup
  */
 
+#include <string>
+#include <sstream>
+#include "Common/Locales.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "AccountMgr.h"

@@ -57,7 +57,13 @@
 #ifndef MANGOS_H_UNIT
 #define MANGOS_H_UNIT
 
-#include "Common.h"
+#include <utility>
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <cmath>
+#include <string>
+#include <map>
+#include <set>
 #include "Object.h"
 #include "Opcodes.h"
 #include "SpellAuraDefines.h"

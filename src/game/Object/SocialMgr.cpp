@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include "Common/ServerDefines.h"
+#include "PlayerRegistry.h"
 #include "SocialMgr.h"
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
@@ -267,7 +270,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
         return;
     }
 
-    Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
+    Player* pFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, friend_lowguid));
 
     Team team = player->GetTeam();
     AccountTypes security = player->GetSession()->GetSecurity();
@@ -397,7 +400,7 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket* packet)
         PlayerSocialMap::const_iterator itr2 = itr->second.m_playerSocialMap.find(guid);
         if (itr2 != itr->second.m_playerSocialMap.end() && (itr2->second.Flags & SOCIAL_FLAG_FRIEND))
         {
-            Player* pFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* pFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all

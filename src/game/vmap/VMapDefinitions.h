@@ -45,6 +45,8 @@ namespace VMAP
 }
 
 #ifndef NO_CORE_FUNCS
+#include <cassert>
+#include "Utilities/Errors.h"
 #include "Errors.h"
 #include "Log.h"
 #define ERROR_LOG(...) sLog.outError(__VA_ARGS__);

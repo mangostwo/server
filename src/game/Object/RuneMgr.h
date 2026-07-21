@@ -25,7 +25,8 @@
 #ifndef MANGOS_H_RUNEMGR
 #define MANGOS_H_RUNEMGR
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
 
 class Player;
 

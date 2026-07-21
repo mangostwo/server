@@ -27,6 +27,8 @@
  * @brief Cohesion split of SpellMgr.cpp -- spell target-position / bonus / elixir / threat / script-target loaders.
  */
 
+#include <set>
+#include <cmath>
 #include "SpellMgr.h"
 #include "SpellAuraDefines.h"
 #include "ObjectMgr.h"

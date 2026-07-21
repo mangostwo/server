@@ -25,7 +25,12 @@
 #ifndef MANGOS_H_OBJECT
 #define MANGOS_H_OBJECT
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <ctime>
+#include <vector>
 #include "ByteBuffer.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"

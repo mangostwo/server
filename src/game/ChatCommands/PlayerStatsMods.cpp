@@ -30,6 +30,7 @@
  *        and talent points. Same `ChatHandler` commands; no behaviour change.
  */
 
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"

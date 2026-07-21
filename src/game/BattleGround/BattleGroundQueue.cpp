@@ -30,7 +30,8 @@
  *        events. Same `BattleGroundQueue`/event classes; no behaviour change.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <algorithm>
 #include "SharedDefines.h"
 #include "Player.h"
 #include "BattleGroundMgr.h"
@@ -205,7 +206,6 @@ GroupQueueInfo* BattleGroundQueue::AddGroup(Player* leader, Group* grp, BattleGr
 
     // add players from group to ginfo
     {
-        // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
         if (grp)
         {
             for (GroupReference* itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -376,7 +376,6 @@ uint32 BattleGroundQueue::GetAverageQueueWaitTime(GroupQueueInfo* ginfo, BattleG
 void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
 {
     // Player *plr = sObjectMgr.GetPlayer(guid);
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
 
     int32 bracket_id = -1;                                  // signed for proper for-loop finish
     QueuedPlayersMap::iterator itr;
@@ -517,7 +516,6 @@ void BattleGroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
  */
 bool BattleGroundQueue::IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInstanceGuid, const uint32 removeTime)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> g(m_Lock);
     QueuedPlayersMap::const_iterator qItr = m_QueuedPlayers.find(pl_guid);
     return (qItr != m_QueuedPlayers.end()
             && qItr->second.GroupInfo->IsInvitedToBGInstanceGUID == bgInstanceGuid
@@ -536,7 +534,6 @@ bool BattleGroundQueue::IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInsta
  */
 bool BattleGroundQueue::GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> g(m_Lock);
     QueuedPlayersMap::const_iterator qItr = m_QueuedPlayers.find(guid);
     if (qItr == m_QueuedPlayers.end())
     {
@@ -951,7 +948,6 @@ should be called from BattleGround::RemovePlayer function in some cases
 */
 void BattleGroundQueue::Update(BattleGroundTypeId bgTypeId, BattleGroundBracketId bracket_id, ArenaType arenaType, bool isRated, uint32 arenaRating)
 {
-    // ACE_Guard<ACE_Recursive_Thread_Mutex> guard(m_Lock);
     // if no players in queue - do nothing
     if (m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_ALLIANCE].empty() &&
         m_QueuedGroups[bracket_id][BG_QUEUE_PREMADE_HORDE].empty() &&

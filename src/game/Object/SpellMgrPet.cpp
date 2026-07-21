@@ -27,6 +27,7 @@
  * @brief Cohesion split of SpellMgr.cpp -- pet aura / level-up spell map / default pet spell loaders.
  */
 
+#include "Utilities/Errors.h"
 #include "SpellMgr.h"
 #include "SpellAuraDefines.h"
 #include "ObjectMgr.h"

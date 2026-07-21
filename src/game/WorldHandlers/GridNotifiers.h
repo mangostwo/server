@@ -25,6 +25,9 @@
 #ifndef MANGOS_GRIDNOTIFIERS_H
 #define MANGOS_GRIDNOTIFIERS_H
 
+#include <set>
+#include <list>
+#include <vector>
 #include "ObjectGridLoader.h"
 #include "UpdateData.h"
 #include <iostream>

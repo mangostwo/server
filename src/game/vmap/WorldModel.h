@@ -25,6 +25,8 @@
 #ifndef MANGOS_H_WORLDMODEL
 #define MANGOS_H_WORLDMODEL
 
+#include <vector>
+#include <string>
 #include "Platform/Define.h"
 
 #include <G3D/Vector3.h>

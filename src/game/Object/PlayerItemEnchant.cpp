@@ -27,6 +27,7 @@
  * @brief Cohesion split of Player.cpp -- item duration + enchantment lifecycle and item packet senders.
  */
 
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Log.h"
 #include "Opcodes.h"

@@ -47,7 +47,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -291,7 +291,7 @@ void Spell::HandleThreatSpells()
             continue;
         }
 
-        Unit* target = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+        Unit* target = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
         if (!target)
         {
             continue;

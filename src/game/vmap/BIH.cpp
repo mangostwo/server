@@ -40,6 +40,8 @@
  * @see MapTree for the map tree using BIH
  */
 
+#include <vector>
+#include <algorithm>
 #include "BIH.h"
 
  /**

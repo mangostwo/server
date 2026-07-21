@@ -40,6 +40,7 @@
  * @see WorldModel for the model data
  */
 
+#include <string>
 #include "ModelInstance.h"
 #include "WorldModel.h"
 #include "MapTree.h"

@@ -38,7 +38,9 @@
  * for the requested object type.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Database/DatabaseImpl.h"

@@ -25,7 +25,7 @@
 #ifndef WORLD_PVP_ZM
 #define WORLD_PVP_ZM
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "OutdoorPvP.h"
 #include "Language.h"
 

@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <iterator>
+#include "Common/TimeConstants.h"
 #include "Util.h"
 #include "Timer.h"
 
@@ -29,8 +31,24 @@
 #include "RNGen.h"
 #include "Log/Log.h"
 
+// Socket headers for inet_pton/INET_ADDRSTRLEN. These used to arrive by accident,
+// dragged in transitively by the ACE includes buried in Common.h; naming them here
+// is what lets this file compile without it.
+#ifdef _WIN32
+#  include <winsock2.h>
+#  include <ws2tcpip.h>
+#else
+#  include <arpa/inet.h>
+#  include <netinet/in.h>
+#  include <sys/socket.h>
+#  include <unistd.h>          // getpid
+#endif
+
+#include <cstdarg>   // va_start/va_copy/va_end
 #include <iomanip>
+#include <sstream>
 #include <cctype>
+#include <cstdio>
 #include <cstring>
 #include <string>
 #include <charconv>   // for std::to_chars
@@ -250,7 +268,7 @@ std::string secsToTimeString(time_t timeInSecs, TimeFormat timeFormat, bool hour
     }
     else if (timeFormat == TimeFormat::Numeric)
     {
-        // add “0:” when hoursOnly requested
+        // add ï¿½0:ï¿½ when hoursOnly requested
         out += "0:";
     }
 
@@ -372,24 +390,26 @@ bool IsIPAddress(char const* ipaddress)
 
     // Let the big boys do it.
     // Drawback: all valid ip address formats are recognized e.g.: 12.23,121234,0xABCD)
-    return ACE_OS::inet_addr(ipaddress) != INADDR_NONE;
+    // inet_addr's INADDR_NONE sentinel also matches the legitimate broadcast
+    // address 255.255.255.255; inet_pton has no such ambiguity.
+    struct in_addr dummy;
+    return inet_pton(AF_INET, ipaddress, &dummy) == 1;
 }
 
-std::string GetAddressString(ACE_INET_Addr const& addr)
+std::string GetAddressString(uint32 ip, uint16 port)
 {
-    char buf[ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16];
-    addr.addr_to_string(buf, ACE_MAX_FULLY_QUALIFIED_NAME_LEN + 16);
+    char buf[INET_ADDRSTRLEN + 8];
+
+    snprintf(buf, sizeof(buf), "%u.%u.%u.%u:%u",
+             (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF,
+             unsigned(port));
+
     return buf;
 }
 
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask)
+bool IsIPAddrInNetwork(uint32 net, uint32 addr, uint32 subnetMask)
 {
-    uint32 mask = subnetMask.get_ip_address();
-    if ((net.get_ip_address() & mask) == (addr.get_ip_address() & mask))
-    {
-        return true;
-    }
-    return false;
+    return (net & subnetMask) == (addr & subnetMask);
 }
 
 /// create PID file

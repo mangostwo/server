@@ -25,6 +25,7 @@
 #ifndef SQLSTORAGE_IMPL_H
 #define SQLSTORAGE_IMPL_H
 
+#include <cassert>
 #include "Utilities/ProgressBar.h"
 #include "Log/Log.h"
 #include "DataStores/DBCFileLoader.h"

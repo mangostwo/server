@@ -41,6 +41,10 @@
  * @see GameEventMgr for the manager class
  */
 
+#include <map>
+#include <sstream>
+#include "Common/TimeConstants.h"
+#include <cmath>
 #include "GameEventMgr.h"
 #include "World.h"
 #include "ObjectMgr.h"

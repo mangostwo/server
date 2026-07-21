@@ -37,7 +37,10 @@
  * and filtered by language, distance, and other rules.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
 #include "Log.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"

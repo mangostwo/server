@@ -34,6 +34,7 @@
  * This is essential for network protocol handling in World of Warcraft.
  */
 
+#include <utility>
 #include "Platform/Define.h"
 #include <algorithm>
 

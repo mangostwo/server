@@ -32,6 +32,8 @@
  * - Talent modification
  */
 
+#include <string>
+#include "Common/Locales.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"

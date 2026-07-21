@@ -51,7 +51,11 @@
 #ifndef MANGOSSERVER_GAMEOBJECT_H
 #define MANGOSSERVER_GAMEOBJECT_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
+#include <string>
+#include <vector>
 #include "SharedDefines.h"
 #include "Object.h"
 #include "LootMgr.h"

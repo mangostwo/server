@@ -28,6 +28,8 @@
  *        Same classes; no behaviour change.
  */
 
+#include <cmath>
+#include "Utilities/MathDefines.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"

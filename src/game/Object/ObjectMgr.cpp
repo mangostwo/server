@@ -22,6 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <utility>
+#include <vector>
+#include <string>
+#include "Utilities/PackedValues.h"
+#include "Common/Locales.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "ObjectMgr.h"
 #include "LivingWorldAnchorPolicy.h"
 #include "MotionGenerators/MotionMaster.h"  // WAYPOINT_MOTION_TYPE
@@ -496,7 +506,7 @@ GameObjectInfo const* ObjectMgr::GetGameObjectInfo(uint32 id) { return sGOStorag
  * @param name The player name.
  * @return The matching player, or null if not found.
  */
-Player* ObjectMgr::GetPlayer(const char* name) { return sObjectAccessor.FindPlayerByName(name); }
+Player* ObjectMgr::GetPlayer(const char* name) { return sPlayerRegistry.FindByName(name); }
 
 /**
  * @brief Finds a player by GUID.
@@ -505,7 +515,7 @@ Player* ObjectMgr::GetPlayer(const char* name) { return sObjectAccessor.FindPlay
  * @param inWorld true to restrict the search to players currently in world.
  * @return The matching player, or null if not found.
  */
-Player* ObjectMgr::GetPlayer(ObjectGuid guid, bool inWorld /*=true*/) { return sObjectAccessor.FindPlayer(guid, inWorld); }
+Player* ObjectMgr::GetPlayer(ObjectGuid guid, bool inWorld /*=true*/) { return sPlayerRegistry.Find(guid, inWorld); }
 
 /**
  * @brief Gets static creature template data by entry id.
@@ -1278,7 +1288,7 @@ void ObjectMgr::LoadCorpses()
             continue;
         }
 
-        sObjectAccessor.AddCorpse(corpse);
+        sCorpseManager.Add(corpse);
 
         ++count;
     }

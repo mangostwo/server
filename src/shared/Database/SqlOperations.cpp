@@ -37,6 +37,8 @@
  * through the delay thread system for improved server performance.
  */
 
+#include <vector>
+#include "Utilities/Util.h"
 #include "SqlOperations.h"
 #include "SqlDelayThread.h"
 #include "DatabaseEnv.h"

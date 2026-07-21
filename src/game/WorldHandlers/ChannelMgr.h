@@ -25,7 +25,7 @@
 #ifndef MANGOSSERVER_CHANNELMGR_H
 #define MANGOSSERVER_CHANNELMGR_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "Channel.h"
 #include "Policies/Singleton.h"
 

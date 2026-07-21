@@ -43,7 +43,11 @@
  * @see WardenMac for macOS-specific implementation
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <cstring>
+#include <string>
+#include <sstream>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"

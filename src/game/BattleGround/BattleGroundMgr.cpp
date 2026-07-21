@@ -36,7 +36,11 @@
  * - Premade group matching
  */
 
-#include "Common.h"
+#include "Utilities/Util.h"
+#include "Platform/Define.h"
+#include <ctime>
+#include <vector>
+#include <map>
 #include "SharedDefines.h"
 #include "Player.h"
 #include "BattleGroundMgr.h"
@@ -227,12 +231,14 @@ void BattleGroundMgr::Update(uint32 diff)
     {
         std::vector<uint64> scheduled;
         {
-            // create mutex
-            // ACE_Guard<ACE_Thread_Mutex> guard(SchedulerLock);
+            // Unsynchronised: the lock that used to guard this was commented out
+            // upstream, on the assumption that battleground queue updates only ever
+            // run on the world thread. The mutex itself is now gone; if that
+            // assumption ever stops holding, this needs a real lock, not a revival
+            // of the commented-out one.
             // copy vector and clear the other
             scheduled = std::vector<uint64>(m_QueueUpdateScheduler);
             m_QueueUpdateScheduler.clear();
-            // release lock
         }
 
         for (uint8 i = 0; i < scheduled.size(); ++i)

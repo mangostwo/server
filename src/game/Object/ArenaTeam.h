@@ -25,7 +25,10 @@
 #ifndef MANGOSSERVER_ARENATEAM_H
 #define MANGOSSERVER_ARENATEAM_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
+#include <map>
+#include <list>
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 

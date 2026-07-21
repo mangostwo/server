@@ -39,6 +39,7 @@
  * players who can see the object.
  */
 
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"

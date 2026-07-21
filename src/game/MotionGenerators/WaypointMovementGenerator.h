@@ -31,6 +31,8 @@
  * packets for the players.
  */
 
+#include <sstream>
+#include "Common/TimeConstants.h"
 #include "MovementGenerator.h"
 #include "WaypointManager.h"
 #include "DBCStructure.h"

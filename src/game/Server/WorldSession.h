@@ -29,7 +29,15 @@
 #ifndef MANGOS_H_WORLDSESSION
 #define MANGOS_H_WORLDSESSION
 
-#include "Common.h"
+#include "LockedQueue/LockedQueue.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <list>
+#include <memory>
 #include "Auth/BigNumber.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
@@ -51,7 +59,10 @@ class Player;
 class Unit;
 class Warden;
 class WorldPacket;
-class WorldSocket;
+namespace proto
+{
+    class IClientLink;
+}
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
@@ -287,12 +298,20 @@ class WorldSession
         /**
          * @brief Constructor
          * @param id Session ID
-         * @param sock World socket
+         * @param link Abstract channel back to the client. Shared, so that a
+         *             session outliving its socket -- which is the normal case
+         *             when a player drops mid-tick -- sends into a disarmed link
+         *             instead of a freed one.
          * @param sec Account security level
          * @param mute_time Mute time
          * @param locale Locale
+         * @param sessionKey The account's session key. Passed in rather than read
+         *             back out of the transport: the world already fetched it to
+         *             verify the login, and Warden needs it here.
          */
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     AccountTypes sec, uint8 expansion, time_t mute_time,
+                     LocaleConstant locale, const BigNumber& sessionKey);
 
         /**
          * @brief Destructor
@@ -988,9 +1007,6 @@ class WorldSession
         void HandleSetActiveVoiceChannel(WorldPacket& recv_data);
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
-#ifdef ENABLE_PLAYERBOTS
-        void HandleBotPackets();
-#endif
 
         // for Warden
         uint16 GetClientBuild() const { return _build; }
@@ -1065,7 +1081,13 @@ class WorldSession
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
-        WorldSocket* m_Socket;
+        /// Channel back to the client. Null once the connection is gone; every
+        /// call on it is safe after teardown, so callers need only null-check.
+        std::shared_ptr<proto::IClientLink> m_link;
+
+        /// The account's session key, for Warden's HMAC. Owned here because it is
+        /// account data, not transport state.
+        BigNumber m_sessionKey;
         std::string m_Address;
 
         AccountTypes _security;
@@ -1089,7 +1111,7 @@ class WorldSession
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        ACE_Based::LockedQueue<WorldPacket*, ACE_Thread_Mutex> _recvQueue;
+        MaNGOS::LockedQueue<WorldPacket*> _recvQueue;
 };
 #endif
 /// @}

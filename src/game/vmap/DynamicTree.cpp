@@ -41,6 +41,7 @@
  * @see GameObjectModel for the model representation
  */
 
+#include "Utilities/Errors.h"
 #include "DynamicTree.h"
 #include "Log.h"
 #include "Timer.h"

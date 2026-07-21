@@ -25,6 +25,7 @@
 #ifndef _VMAPMANAGER2_H
 #define _VMAPMANAGER2_H
 
+#include <string>
 #include "IVMapManager.h"
 #include "Utilities/UnorderedMapSet.h"
 #include "Platform/Define.h"

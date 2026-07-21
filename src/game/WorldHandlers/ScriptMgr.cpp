@@ -43,6 +43,8 @@
  * @see ScriptedInstance for instance script base
  */
 
+#include <set>
+#include "Utilities/Errors.h"
 #include "ScriptMgr.h"
 #include "Policies/Singleton.h"
 #include "Log.h"
@@ -76,7 +78,8 @@
 
 INSTANTIATE_SINGLETON_1(ScriptMgr);
 
-ScriptMgr::ScriptMgr() : m_scheduledScripts(0), m_lock(0)
+// std::mutex is default-constructed; the 0 was ACE_Thread_Mutex's argument.
+ScriptMgr::ScriptMgr() : m_scheduledScripts(0), m_lock()
 {
     m_dbScripts.resize(DBS_END);
 

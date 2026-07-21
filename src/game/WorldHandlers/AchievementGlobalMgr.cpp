@@ -27,7 +27,10 @@
  * @brief Cohesion split of AchievementMgr.cpp -- AchievementGlobalMgr lookups and loaders.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <string>
 #include "AchievementMgr.h"
 #include "DBCStores.h"
 #include "ObjectMgr.h"

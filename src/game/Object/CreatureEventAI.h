@@ -25,7 +25,10 @@
 #ifndef MANGOS_CREATURE_EAI_H
 #define MANGOS_CREATURE_EAI_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <vector>
+#include <list>
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Unit.h"

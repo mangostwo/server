@@ -27,6 +27,7 @@
  * @brief Cohesion split of SpellMgr.cpp -- spell proc-event and proc item-enchant loaders.
  */
 
+#include <set>
 #include "SpellMgr.h"
 #include "SpellAuraDefines.h"
 #include "Unit.h"

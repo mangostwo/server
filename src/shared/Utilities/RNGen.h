@@ -27,53 +27,67 @@
 
 #include <random>
 
-#include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
 #include "Platform/Define.h"
 
 class RNGen
 {
-public:
-    RNGen()
-    {
-        std::random_device rd;
-        gen_.seed(rd());
-    }
+    public:
+        RNGen()
+        {
+            std::random_device rd;
+            gen_.seed(rd());
+        }
 
-    int32 rand_i(int32 min, int32 max)
-    {
-        std::uniform_int_distribution<int32> dist{min, max};
-        return dist(gen_);
-    }
+        int32 rand_i(int32 min, int32 max)
+        {
+            std::uniform_int_distribution<int32> dist{min, max};
+            return dist(gen_);
+        }
 
-    uint32 rand_u(uint32 min, uint32 max)
-    {
-        std::uniform_int_distribution<uint32> dist{min, max};
-        return dist(gen_);
-    }
+        uint32 rand_u(uint32 min, uint32 max)
+        {
+            std::uniform_int_distribution<uint32> dist{min, max};
+            return dist(gen_);
+        }
 
-    uint32 rand()
-    {
-        std::uniform_int_distribution<uint32> dist;
-        return dist(gen_);
-    }
+        uint32 rand()
+        {
+            std::uniform_int_distribution<uint32> dist;
+            return dist(gen_);
+        }
 
-    float rand_f(float min, float max)
-    {
-        std::uniform_real_distribution<float> dist{min, max};
-        return dist(gen_);
-    }
+        float rand_f(float min, float max)
+        {
+            std::uniform_real_distribution<float> dist{min, max};
+            return dist(gen_);
+        }
 
-    double rand_d(double min, double max)
-    {
-        std::uniform_real_distribution<double> dist{min, max};
-        return dist(gen_);
-    }
+        double rand_d(double min, double max)
+        {
+            std::uniform_real_distribution<double> dist{min, max};
+            return dist(gen_);
+        }
 
-private:
-    std::mt19937 gen_;
+    private:
+        std::mt19937 gen_;
 };
 
-typedef ACE_TSS_Singleton<RNGen, ACE_SYNCH_MUTEX> RNG;
+/**
+ * @brief Per-thread access to an RNGen.
+ *
+ * std::mt19937 is not thread-safe, so every thread gets its own generator (each
+ * seeded independently from std::random_device). A genuine thread_local needs no
+ * mutex on the access path — and these are called from the world and map-update
+ * threads on every roll.
+ */
+class RNG
+{
+    public:
+        static RNGen* instance()
+        {
+            thread_local RNGen generator;
+            return &generator;
+        }
+};
 
 #endif

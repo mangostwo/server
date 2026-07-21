@@ -32,6 +32,9 @@
  * - Mail attachment management
  */
 
+#include <utility>
+#include <list>
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "Mail.h"

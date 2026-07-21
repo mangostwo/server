@@ -30,6 +30,11 @@
  *        dismount cheats. Same `ChatHandler` commands; no behaviour change.
  */
 
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -58,7 +63,7 @@ bool ChatHandler::HandleReviveCommand(char* args)
     }
     else // will resurrected at login without corpse
     {
-        sObjectAccessor.ConvertCorpseForPlayer(target_guid);
+        sCorpseManager.ConvertCorpseForPlayer(target_guid);
     }
 
     return true;
@@ -295,7 +300,7 @@ bool ChatHandler::HandleSaveCommand(char* /*args*/)
  */
 bool ChatHandler::HandleSaveAllCommand(char* /*args*/)
 {
-    sObjectAccessor.SaveAllPlayers();
+    sPlayerRegistry.SaveAll();
     SendSysMessage(LANG_PLAYERS_SAVED);
     return true;
 }

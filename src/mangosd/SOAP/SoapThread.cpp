@@ -22,9 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include "Common/ServerDefines.h"
 #include "SoapThread.h"
 
 #include "AccountMgr.h"
+#include "DatabaseEnv.h"
 #include "Log.h"
 #include "World.h"
 
@@ -35,6 +38,11 @@
  */
 void SoapThread(const std::string& host, uint16 port)
 {
+    // Commands are forwarded to the world thread, but the per-request auth
+    // checks (GetId/CheckPassword/GetSecurity) query LoginDatabase right here,
+    // on this thread.
+    DbThreadGuard dbThread(&LoginDatabase);
+
     struct soap soap;
     soap_init(&soap);
     soap_set_imode(&soap, SOAP_C_UTFSTRING);

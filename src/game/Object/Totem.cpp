@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "ObjectLookup.h"
 #include "Totem.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -250,7 +252,7 @@ Unit* Totem::GetOwner()
 {
     if (ObjectGuid ownerGuid = GetOwnerGuid())
     {
-        return sObjectAccessor.GetUnit(*this, ownerGuid);
+        return ObjectLookup::GetUnit(*this, ownerGuid);
     }
 
     return NULL;

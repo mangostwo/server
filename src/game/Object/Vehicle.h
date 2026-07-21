@@ -42,7 +42,8 @@
 #ifndef MANGOSSERVER_VEHICLE_H
 #define MANGOSSERVER_VEHICLE_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <map>
 #include "TransportSystem.h"
 
 class Unit;

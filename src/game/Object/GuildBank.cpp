@@ -29,11 +29,16 @@
  *        bank event logging. Same `Guild` class; no behaviour change.
  */
 
+#include <utility>
+#include <string>
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Common/ServerDefines.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Player.h"
 #include "Item.h"
 #include "World.h"
@@ -130,7 +135,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
         if (!player)
         {
             continue;
@@ -171,7 +176,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec cons
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
         if (!player)
         {
             continue;

@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <string>
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "MoveSpline.h"
 #include <sstream>
 #include "Log.h"

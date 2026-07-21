@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <utility>
+#include <set>
+#include "Utilities/Errors.h"
 #include "GridMap.h"
 #include "Log.h"
 #include "World.h"

@@ -30,6 +30,12 @@
  *        change.
  */
 
+#include <list>
+#include <map>
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -54,7 +60,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -70,7 +76,6 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
-#include "revision_data.h"
 #include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
@@ -1146,7 +1151,7 @@ void Player::LoadCorpse()
 {
     if (IsAlive())
     {
-        sObjectAccessor.ConvertCorpseForPlayer(GetObjectGuid());
+        sCorpseManager.ConvertCorpseForPlayer(GetObjectGuid());
     }
     else
     {

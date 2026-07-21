@@ -29,7 +29,8 @@
 #ifndef MANGOS_H_WEATHER
 #define MANGOS_H_WEATHER
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
 #include "SharedDefines.h"
 #include "Timer.h"
 #include "Util.h"

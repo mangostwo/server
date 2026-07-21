@@ -22,10 +22,13 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sstream>
+#include "Common/TimeConstants.h"
+#include "Utilities/Errors.h"
 #include "Corpse.h"
 #include "Player.h"
 #include "UpdateMask.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "ObjectGuid.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
@@ -70,7 +73,7 @@ void Corpse::AddToWorld()
     ///- Register the corpse for guid lookup
     if (!IsInWorld())
     {
-        sObjectAccessor.AddObject(this);
+        sCorpseManager.AddObject(this);
     }
 
     Object::AddToWorld();
@@ -84,7 +87,7 @@ void Corpse::RemoveFromWorld()
     ///- Remove the corpse from the accessor
     if (IsInWorld())
     {
-        sObjectAccessor.RemoveObject(this);
+        sCorpseManager.RemoveObject(this);
     }
 
     Object::RemoveFromWorld();

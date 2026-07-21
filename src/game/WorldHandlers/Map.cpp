@@ -41,6 +41,12 @@
  * including loading terrain data, spawning objects, and cleanup.
  */
 
+#include <cmath>
+#include <set>
+#include "Utilities/Util.h"
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "Map.h"
 #include "MapManager.h"
 #include "Player.h"
@@ -51,7 +57,8 @@
 #include "InstanceData.h"
 #include "GridNotifiersImpl.h"
 #include "Transports.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "ObjectMgr.h"
 #include "World.h"
 #include "ScriptMgr.h"
@@ -542,7 +549,7 @@ void Map::RemoveFromGrid(Creature* obj, NGridType* grid, Cell const& cell)
  */
 void Map::DeleteFromWorld(Player* pl)
 {
-    sObjectAccessor.RemoveObject(pl);
+    sPlayerRegistry.Remove(pl);
     delete pl;
 }
 
@@ -643,7 +650,7 @@ bool Map::EnsureGridLoaded(const Cell& cell)
         }
 
         // Add resurrectable corpses to world object list in grid
-        sObjectAccessor.AddCorpsesToGrid(GridPair(cell.GridX(), cell.GridY()), (*grid)(cell.CellX(), cell.CellY()), this);
+        sCorpseManager.AddCorpsesToGrid(GridPair(cell.GridX(), cell.GridY()), (*grid)(cell.CellX(), cell.CellY()), this);
         return true;
     }
 
@@ -3019,7 +3026,7 @@ void Map::ScriptsProcess()
  */
 Player* Map::GetPlayer(ObjectGuid guid)
 {
-    Player* plr = sObjectAccessor.FindPlayer(guid);         // return only in world players
+    Player* plr = sPlayerRegistry.Find(guid);         // return only in world players
     return plr && plr->GetMap() == this ? plr : NULL;
 }
 
@@ -3052,7 +3059,7 @@ Pet* Map::GetPet(ObjectGuid guid)
  */
 Corpse* Map::GetCorpse(ObjectGuid guid)
 {
-    Corpse* ret = sObjectAccessor.GetCorpseInMap(guid, GetId());
+    Corpse* ret = sCorpseManager.FindInMap(guid, GetId());
     return ret && ret->GetInstanceId() == GetInstanceId() ? ret : NULL;
 }
 

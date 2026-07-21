@@ -33,6 +33,8 @@
  * - Holiday and seasonal event management
  */
 
+#include <string>
+#include "Common/TimeConstants.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "GameEventMgr.h"

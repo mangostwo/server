@@ -25,62 +25,41 @@
 #ifndef LOCKEDQUEUE_H
 #define LOCKEDQUEUE_H
 
-#include <ace/Guard_T.h>
-#include <ace/Thread_Mutex.h>
+#include <queue>
 #include <deque>
-#include <assert.h>
-#include "Utilities/Errors.h"
+#include <mutex>
 
-namespace ACE_Based
+namespace MaNGOS
 {
-    template < class T, class LockType, typename StorageType = std::deque<T> >
     /**
-     * @brief
+     * @brief A simple thread-safe FIFO queue.
      *
+     * The former lock template parameter is gone: the queue owns a std::mutex
+     * and serialises itself, so call sites name only the element (and optionally the
+     * backing container) type.
+     *
+     * @tparam T           Element type.
+     * @tparam StorageType Underlying container (deque by default).
      */
+    template <class T, typename StorageType = std::deque<T> >
     class LockedQueue
     {
-            LockType _lock; /**< Lock access to the queue. */
-            StorageType _queue; /**< Storage backing the queue. */
-
         public:
 
-            /**
-             * @brief Create a LockedQueue.
-             *
-             */
-            LockedQueue() : _lock(), _queue()
-            {
-            }
+            LockedQueue() = default;
+            virtual ~LockedQueue() = default;
 
-            /**
-             * @brief Destroy a LockedQueue.
-             *
-             */
-            virtual ~LockedQueue()
-            {
-            }
-
-            /**
-             * @brief Adds an item to the queue.
-             *
-             * @param item
-             */
+            /// Append an item to the back of the queue.
             void add(const T& item)
             {
-                ACE_GUARD (LockType, g, this->_lock);
+                std::lock_guard<std::mutex> guard(_lock);
                 _queue.push_back(item);
             }
 
-            /**
-             * @brief Gets the next result in the queue, if any.
-             *
-             * @param result
-             * @return bool
-             */
+            /// Pop the front item into @p result. Returns false if the queue is empty.
             bool next(T& result)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                std::lock_guard<std::mutex> guard(_lock);
 
                 if (_queue.empty())
                 {
@@ -93,55 +72,50 @@ namespace ACE_Based
                 return true;
             }
 
-            template<class Checker>
             /**
-             * @brief Pops the first queued item the checker accepts.
+             * @brief Pop the front item only if @p check accepts it.
              *
-             * Walks from the front of the queue and returns the first item
-             * for which @c check.Process(item) returns true. Items the
-             * checker rejects are left in place at their original positions;
-             * this preserves FIFO order within each accepted class while
-             * allowing a caller that owns one classification to make
-             * progress without being blocked by a head-of-queue item that
-             * belongs to another classification (e.g. a Map worker draining
-             * thread-safe packets while a thread-unsafe packet sits at the
-             * head of the same queue, awaiting the World thread).
-             *
-             * @param result Out parameter; receives the popped item on success.
-             * @param check Functor with bool Process(const T&). Invoked under
-             *              the queue lock.
-             * @return true if an accepted item was popped into @c result;
-             *         false if the queue is empty or no item satisfied the
-             *         checker.
+             * Returns false — leaving the item queued — if the queue is empty or the
+             * checker rejects it.
              */
+            template<class Checker>
             bool next(T& result, Checker& check)
             {
-                ACE_GUARD_RETURN(LockType, g, this->_lock, false);
+                std::lock_guard<std::mutex> guard(_lock);
 
-                for (typename StorageType::iterator it = _queue.begin(); it != _queue.end(); ++it)
+                if (_queue.empty())
                 {
-                    if (check.Process(*it))
-                    {
-                        result = *it;
-                        _queue.erase(it);
-                        return true;
-                    }
+                    return false;
                 }
 
-                return false;
+                result = _queue.front();
+                if (!check.Process(result))
+                {
+                    return false;
+                }
+
+                _queue.pop_front();
+                return true;
             }
 
-
-            /**
-             * @brief Checks if we're empty or not with locks held
-             *
-             * @return bool
-             */
+            /// True when the queue holds no elements (lock held).
             bool empty()
             {
-                ACE_GUARD_RETURN (LockType, g, this->_lock, false);
+                std::lock_guard<std::mutex> guard(_lock);
                 return _queue.empty();
             }
+
+            /// Number of elements currently queued (lock held).
+            size_t size()
+            {
+                std::lock_guard<std::mutex> guard(_lock);
+                return _queue.size();
+            }
+
+        private:
+
+            std::mutex  _lock;   ///< Serialises access to the queue
+            StorageType _queue;  ///< Storage backing the queue
     };
 }
 #endif

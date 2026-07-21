@@ -25,6 +25,7 @@
 #ifndef MANGOS_PATH_FINDER_H
 #define MANGOS_PATH_FINDER_H
 
+#include <algorithm>
 #include "DetourNavMesh.h"
 #include "DetourNavMeshQuery.h"
 

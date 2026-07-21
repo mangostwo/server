@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <utility>
+#include <set>
+#include <algorithm>
 #include "WaypointManager.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"

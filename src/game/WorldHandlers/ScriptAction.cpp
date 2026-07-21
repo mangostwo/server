@@ -27,6 +27,12 @@
  * @brief Cohesion split of ScriptMgr.cpp -- the ScriptAction runtime DB-script-command executor (HandleScriptStep et al.).
  */
 
+#include <utility>
+#include <vector>
+#include "Utilities/Util.h"
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include "CorpseManager.h"
 #include "ScriptMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -71,7 +77,7 @@ bool ScriptAction::GetScriptCommandObject(const ObjectGuid guid, bool includeIte
             resultObject = m_map->GetGameObject(guid);
             break;
         case HIGHGUID_CORPSE:
-            resultObject = sObjectAccessor.FindCorpse(guid);
+            resultObject = sCorpseManager.Find(guid);
             break;
         case HIGHGUID_ITEM:
             // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM

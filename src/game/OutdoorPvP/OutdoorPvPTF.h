@@ -25,7 +25,9 @@
 #ifndef WORLD_PVP_TF
 #define WORLD_PVP_TF
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <list>
 #include "OutdoorPvP.h"
 #include "Language.h"
 

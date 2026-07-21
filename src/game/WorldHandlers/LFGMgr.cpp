@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <set>
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
@@ -30,7 +31,7 @@
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ObjectMgr.h"
 #include "SharedDefines.h"
 #include "WorldSession.h"
@@ -639,8 +640,8 @@ bool LFGMgr::MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo)
     roleMap::iterator it2 = groupTwo->currentRoles.begin();
 
     // now we find the players from the maps
-    Player* pPlayer1 = sObjectAccessor.FindPlayer(it1->first);
-    Player* pPlayer2 = sObjectAccessor.FindPlayer(it2->first);
+    Player* pPlayer1 = sPlayerRegistry.Find(it1->first);
+    Player* pPlayer2 = sPlayerRegistry.Find(it2->first);
 
     // todo: disable this if a config option is set
     if (pPlayer1->GetTeamId() == pPlayer2->GetTeamId())
@@ -702,7 +703,7 @@ void LFGMgr::SendQueueStatus()
         {
             for (roleMap::iterator rItr = queueInfo->currentRoles.begin(); rItr != queueInfo->currentRoles.end(); ++rItr)
             {
-                if (Player* pPlayer = sObjectAccessor.FindPlayer(rItr->first))
+                if (Player* pPlayer = sPlayerRegistry.Find(rItr->first))
                 {
                     uint32 dungeonId = *queueInfo->dungeonList.begin();
 

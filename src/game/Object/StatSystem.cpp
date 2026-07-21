@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
 #include "Unit.h"
 #include "Player.h"
 #include "Pet.h"

@@ -33,7 +33,13 @@
  * - AI and path debugging
  */
 
-#include "Common.h"
+#include "OpcodeTable.h"
+#include "Platform/Define.h"
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+#include <sstream>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Player.h"
@@ -290,7 +296,7 @@ bool ChatHandler::HandleDebugRecvOpcodeCommand(char* /*args*/)
     }
     stream.close();
 
-    DEBUG_LOG("Queued opcode %u, %s", data->GetOpcode(), data->GetOpcodeName());
+    DEBUG_LOG("Queued opcode %u, %s", data->GetOpcode(), LookupOpcodeName(data->GetOpcode()));
 
     m_session->QueuePacket(data);
 
@@ -403,7 +409,7 @@ bool ChatHandler::HandleDebugSendOpcodeCommand(char* /*args*/)
     }
     stream.close();
 
-    DEBUG_LOG("Sending opcode %u, %s", data.GetOpcode(), data.GetOpcodeName());
+    DEBUG_LOG("Sending opcode %u, %s", data.GetOpcode(), LookupOpcodeName(data.GetOpcode()));
 
     data.hexlike();
     unit->ToPlayer()->SendDirectMessage(&data);

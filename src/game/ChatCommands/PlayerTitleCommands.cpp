@@ -22,9 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include "Common/Locales.h"
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
+// Player and the DBC stores used to arrive through World.h, which includes
+// Player.h only under #ifdef ENABLE_ELUNA -- so this file did not compile in a
+// build with Eluna disabled. Ask for what it uses.
+#include "DBCStores.h"
+#include "Player.h"
 
 
 bool ChatHandler::HandleLookupTitleCommand(char* args)

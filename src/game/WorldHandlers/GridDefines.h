@@ -25,7 +25,9 @@
 #ifndef MANGOS_GRIDDEFINES_H
 #define MANGOS_GRIDDEFINES_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
 #include "GameSystem/NGrid.h"
 #include <cmath>
 
@@ -237,7 +239,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float c)
     {
-        return finite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
+        return std::isfinite(c) && (std::fabs(c) <= MAP_HALFSIZE - 0.5);
     }
 
     /**
@@ -264,7 +266,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float x, float y, float z)
     {
-        return IsValidMapCoord(x, y) && finite(z);
+        return IsValidMapCoord(x, y) && std::isfinite(z);
     }
 
     /**
@@ -279,7 +281,7 @@ namespace MaNGOS
      */
     inline bool IsValidMapCoord(float x, float y, float z, float o)
     {
-        return IsValidMapCoord(x, y, z) && finite(o);
+        return IsValidMapCoord(x, y, z) && std::isfinite(o);
     }
 }
 #endif

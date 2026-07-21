@@ -47,7 +47,12 @@
 #ifndef MANGOSSERVER_CREATURE_H
 #define MANGOSSERVER_CREATURE_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <map>
 #include "Unit.h"
 #include "UpdateMask.h"
 #include "ItemPrototype.h"

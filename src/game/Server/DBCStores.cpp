@@ -22,6 +22,19 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <utility>
+#include <cstddef>
+#include <set>
+#include <list>
+#include <vector>
+#include <string>
+#include <sstream>
+#include "Utilities/PackedValues.h"
+#include "Common/Locales.h"
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "DBCStores.h"
 #include "Policies/Singleton.h"
 #include "Log.h"

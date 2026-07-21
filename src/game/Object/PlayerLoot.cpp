@@ -51,7 +51,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "CorpseManager.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -67,7 +67,6 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
-#include "revision_data.h"
 #include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
@@ -113,7 +112,7 @@ void Player::RemovedInsignia(Player* looterPlr)
 
     // We have to convert player corpse to bones, not to be able to resurrect there
     // SpawnCorpseBones isn't handy, 'cos it saves player while he in BG
-    Corpse* bones = sObjectAccessor.ConvertCorpseForPlayer(GetObjectGuid(), true);
+    Corpse* bones = sCorpseManager.ConvertCorpseForPlayer(GetObjectGuid(), true);
     if (!bones)
     {
         return;

@@ -25,7 +25,7 @@
 #ifndef MANGOS_H_GLYPHMGR
 #define MANGOS_H_GLYPHMGR
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "SharedDefines.h"                                  // MAX_GLYPH_SLOT_INDEX, MAX_TALENT_SPEC_COUNT
 
 class Player;

@@ -25,8 +25,8 @@
 #ifndef MANGOS_GRID_H
 #define MANGOS_GRID_H
 
+#include <set>
 #include "Platform/Define.h"
-#include "Policies/ThreadingModel.h"
 #include "TypeContainer.h"
 #include "TypeContainerVisitor.h"
 

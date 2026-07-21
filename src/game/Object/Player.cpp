@@ -22,6 +22,13 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include <sstream>
+#include "Utilities/PackedValues.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -46,7 +53,8 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -62,7 +70,6 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
-#include "revision_data.h"
 #include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
@@ -1737,7 +1744,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // The player was ported to another map and looses the duel immediately.
     // We have to perform this check before the teleport, otherwise the
-    // ObjectAccessor won't find the flag.
+    // the player registry will not find the flag.
     if (duel && GetMapId() != mapid)
         if (GetMap()->GetGameObject(GetGuidValue(PLAYER_DUEL_ARBITER)))
         {
@@ -2019,7 +2026,7 @@ void Player::ProcessDelayedOperations()
 void Player::AddToWorld()
 {
     ///- Do not add/remove the player from the object storage
-    ///- It will crash when updating the ObjectAccessor
+    ///- It will crash when updating the player registry
     ///- The player should only be added when logging in
     Unit::AddToWorld();
 
@@ -2046,7 +2053,7 @@ void Player::RemoveFromWorld()
     }
 
     ///- Do not add/remove the player from the object storage
-    ///- It will crash when updating the ObjectAccessor
+    ///- It will crash when updating the player registry
     ///- The player should only be removed when logging out
     if (IsInWorld())
     {
@@ -2942,7 +2949,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
     // bones will be deleted by corpse/bones deleting thread shortly
-    sObjectAccessor.ConvertCorpseForPlayer(playerguid);
+    sCorpseManager.ConvertCorpseForPlayer(playerguid);
 
     // remove from guild
     if (uint32 guildId = GetGuildIdFromDB(playerguid))
@@ -3097,7 +3104,7 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                 do
                 {
                     Field* fieldsFriend = resultFriend->Fetch();
-                    if (Player* sFriend = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, fieldsFriend[0].GetUInt32())))
+                    if (Player* sFriend = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, fieldsFriend[0].GetUInt32())))
                     {
                         if (sFriend->IsInWorld())
                         {
@@ -5555,7 +5562,7 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             }
             if ((typemask & TYPEMASK_PLAYER) && IsInWorld())
             {
-                return sObjectAccessor.FindPlayer(guid);
+                return sPlayerRegistry.Find(guid);
             }
             break;
         case HIGHGUID_GAMEOBJECT:

@@ -34,7 +34,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <string>
 #include "SharedDefines.h"
 #include "Policies/Singleton.h"
 #include "ObjectGuid.h"

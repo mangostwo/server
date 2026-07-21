@@ -47,7 +47,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -100,7 +100,7 @@ void Spell::cancel()
             {
                 if (ihit->missCondition == SPELL_MISS_NONE)
                 {
-                    Unit* unit = m_caster->GetObjectGuid() == (*ihit).targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+                    Unit* unit = m_caster->GetObjectGuid() == (*ihit).targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
                     if (unit && unit->IsAlive())
                     {
                         unit->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
@@ -839,7 +839,7 @@ void Spell::update(uint32 difftime)
                                 continue;
                             }
 
-                            Unit* unit = m_caster->GetObjectGuid() == target.targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, target.targetGUID);
+                            Unit* unit = m_caster->GetObjectGuid() == target.targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, target.targetGUID);
                             if (unit == NULL)
                             {
                                 continue;
@@ -912,7 +912,7 @@ void Spell::finish(bool ok)
             if (ihit->missCondition == SPELL_MISS_NONE)
             {
                 // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : sObjectAccessor.GetUnit(*m_caster, ihit->targetGUID);
+                Unit* unit = m_caster->GetObjectGuid() == ihit->targetGUID ? m_caster : ObjectLookup::GetUnit(*m_caster, ihit->targetGUID);
                 if (unit && unit->IsAlive())
                 {
                     SpellEntry const* auraSpellInfo = (*i)->GetSpellProto();

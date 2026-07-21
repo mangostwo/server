@@ -25,7 +25,8 @@
 #ifndef _LINKEDLIST
 #define _LINKEDLIST
 
-#include "Common.h"
+#include <iterator>
+#include "Platform/Define.h"
 
 //============================================
 class LinkedListHead;

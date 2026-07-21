@@ -38,7 +38,7 @@
  * and manage spell cancellation.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "DBCStores.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"

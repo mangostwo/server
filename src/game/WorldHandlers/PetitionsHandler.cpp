@@ -38,7 +38,10 @@
  * turned in to create a guild or arena team.
  */
 
-#include "Common.h"
+#include "PlayerRegistry.h"
+#include "Platform/Define.h"
+#include <string>
+#include <sstream>
 #include "Language.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -720,7 +723,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket& recv_data)
     recv_data >> petitionGuid;                              // petition guid
     recv_data >> playerGuid;                                // player guid
 
-    Player* player = sObjectAccessor.FindPlayer(playerGuid);
+    Player* player = sPlayerRegistry.Find(playerGuid);
 
     if (!player)
     {

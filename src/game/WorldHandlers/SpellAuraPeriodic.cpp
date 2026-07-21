@@ -28,7 +28,8 @@
  *        Same Aura/SpellAuraHolder classes; no behaviour change.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cmath>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -44,7 +45,6 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"

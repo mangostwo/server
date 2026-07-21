@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <list>
+#include "Utilities/Errors.h"
 #include "CreatureAI.h"
 #include "Creature.h"
 #include "DBCStores.h"

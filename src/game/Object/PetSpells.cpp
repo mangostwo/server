@@ -29,6 +29,9 @@
  *        Same `Pet` class; no behaviour change.
  */
 
+#include <sstream>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
 #include "Pet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

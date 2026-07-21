@@ -40,6 +40,8 @@
  * @see VMapManager2 for the VMap system
  */
 
+#include <string>
+#include "Utilities/UnorderedMapSet.h"
 #include "VMapFactory.h"
 #include "VMapManager2.h"
 #include "VMapDefinitions.h"

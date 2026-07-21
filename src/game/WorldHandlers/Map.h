@@ -51,11 +51,14 @@
 #ifndef MANGOS_MAP_H
 #define MANGOS_MAP_H
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include <ctime>
+#include <vector>
+#include <map>
+#include <set>
 #include "Platform/Define.h"
-#include "Policies/ThreadingModel.h"
-#include <ace/RW_Thread_Mutex.h>
-#include <ace/Thread_Mutex.h>
+#include <mutex>
+#include <shared_mutex>
 
 #include "DBCStructure.h"
 #include "GridDefines.h"

@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include "Utilities/Errors.h"
 #include "spline.h"
 #include <sstream>
 #include <G3D/Matrix4.h>

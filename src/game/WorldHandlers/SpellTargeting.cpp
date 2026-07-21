@@ -28,6 +28,11 @@
  *        Same `Spell` class; no behaviour change.
  */
 
+#include <cmath>
+#include <iterator>
+#include <list>
+#include "Utilities/MathDefines.h"
+#include <algorithm>
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -47,7 +52,8 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -1373,7 +1379,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                pTarget = sObjectAccessor.GetUnit(*m_caster, ((Player*)m_caster)->GetSelectionGuid());
+                pTarget = ObjectLookup::GetUnit(*m_caster, ((Player*)m_caster)->GetSelectionGuid());
             }
             else if (m_targets.getUnitTarget())
             {
@@ -1527,7 +1533,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                                         break;
                                     case TYPEID_CORPSE:
                                         m_targets.setCorpseTarget((Corpse*)result);
-                                        if (Player* owner = sObjectAccessor.FindPlayer(((Corpse*)result)->GetOwnerGuid()))
+                                        if (Player* owner = sPlayerRegistry.Find(((Corpse*)result)->GetOwnerGuid()))
                                         {
                                             targetUnitMap.push_back(owner);
                                         }
@@ -1603,7 +1609,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     {
                         if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
                         {
-                            if (Player* owner = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
+                            if (Player* owner = sPlayerRegistry.Find(corpse->GetOwnerGuid()))
                             {
                                 targetUnitMap.push_back(owner);
                             }
@@ -1678,7 +1684,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     {
                         if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
                         {
-                            if (Player* owner = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
+                            if (Player* owner = sPlayerRegistry.Find(corpse->GetOwnerGuid()))
                             {
                                 targetUnitMap.push_back(owner);
                             }

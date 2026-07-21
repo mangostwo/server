@@ -44,6 +44,7 @@
  * @see IVMapManager for the interface
  */
 
+#include <string>
 #include "VMapFactory.h"
 #include "VMapManager2.h"
 

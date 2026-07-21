@@ -27,6 +27,8 @@
  * @brief Cohesion split of SpellMgr.cpp -- spell rank-chain and learn-skill / learn-spell loaders.
  */
 
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
 #include "SpellMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

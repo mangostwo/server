@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <set>
+#include <string>
+#include "Common/TimeConstants.h"
+#include "PlayerRegistry.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -809,7 +813,7 @@ void Guild::BroadcastToGuild(WorldSession* session, const std::string& msg, uint
 
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* pl = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* pl = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
         if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
         {
@@ -843,7 +847,7 @@ void Guild::BroadcastToOfficers(WorldSession* session, const std::string& msg, u
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, CHAT_MSG_OFFICER, msg.c_str(), Language(language), session->GetPlayer()->GetChatTag(), session->GetPlayer()->GetObjectGuid(), session->GetPlayer()->GetName());
 
-        Player* pl = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* pl = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
 
         if (pl && pl->GetSession() && HasRankRight(pl->GetRank(), GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetObjectGuid()))
         {
@@ -861,7 +865,7 @@ void Guild::BroadcastPacket(WorldPacket* packet)
 {
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+        Player* player = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
         if (player)
         {
             player->GetSession()->SendPacket(packet);
@@ -881,7 +885,7 @@ void Guild::BroadcastPacketToRank(WorldPacket* packet, uint32 rankId)
     {
         if (itr->second.RankId == rankId)
         {
-            Player* player = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first));
+            Player* player = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first));
             if (player)
             {
                 player->GetSession()->SendPacket(packet);
@@ -996,7 +1000,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
     }
     for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if (Player* pl = sObjectAccessor.FindPlayer(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
+        if (Player* pl = sPlayerRegistry.Find(ObjectGuid(HIGHGUID_PLAYER, itr->first)))
         {
             data << pl->GetObjectGuid();
             data << uint8(1);

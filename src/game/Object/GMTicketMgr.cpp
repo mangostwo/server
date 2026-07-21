@@ -22,7 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <ctime>
+#include <string>
 #include "Database/DatabaseEnv.h"
 #include "SQLStorages.h"
 #include "GMTicketMgr.h"

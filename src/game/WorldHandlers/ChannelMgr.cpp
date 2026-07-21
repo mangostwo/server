@@ -39,6 +39,8 @@
  * @see ChannelMgr for the manager interface
  */
 
+#include <string>
+#include <mutex>
 #include "ChannelMgr.h"
 #include "Policies/Singleton.h"
 #include "World.h"

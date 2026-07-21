@@ -29,6 +29,7 @@
  *        checks and duration upkeep. Same `Item` class; no behaviour change.
  */
 
+#include <sstream>
 #include "Item.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"

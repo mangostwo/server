@@ -29,6 +29,8 @@
  *        `GameObject` class; no behaviour change.
  */
 
+#include <list>
+#include "Utilities/Errors.h"
 #include "GameObject.h"
 #include "G3D/Quat.h"
 #include "QuestDef.h"

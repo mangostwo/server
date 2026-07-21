@@ -44,6 +44,7 @@
  *   }
  */
 
+#include <string>
 #include <stdio.h>
 
 #include "ProgressBar.h"

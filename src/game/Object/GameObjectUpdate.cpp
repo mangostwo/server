@@ -29,6 +29,7 @@
  *        `GameObject` class; no behaviour change.
  */
 
+#include "Common/TimeConstants.h"
 #include "GameObject.h"
 #include "G3D/Quat.h"
 #include "QuestDef.h"

@@ -40,9 +40,12 @@
 #ifndef MANGOS_MASS_MAIL_MGR_H
 #define MANGOS_MASS_MAIL_MGR_H
 
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
 #include <memory>
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <list>
 #include "Mail.h"
 #include "Policies/Singleton.h"
 

@@ -39,13 +39,15 @@
  * determine how items are distributed among party members.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cmath>
+#include <vector>
 #include "WorldPacket.h"
 #include "Log.h"
 #include "Corpse.h"
 #include "GameObject.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ObjectGuid.h"
 #include "WorldSession.h"
 #include "LootMgr.h"
@@ -664,7 +666,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Player* target = sObjectAccessor.FindPlayer(target_playerguid);
+    Player* target = sPlayerRegistry.Find(target_playerguid);
     if (!target)
     {
         return;

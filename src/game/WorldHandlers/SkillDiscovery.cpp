@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <set>
+#include <list>
+#include <sstream>
+#include "Utilities/UnorderedMapSet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ProgressBar.h"

@@ -25,9 +25,22 @@
 #ifndef MANGOS_H_MAPTREE
 #define MANGOS_H_MAPTREE
 
+#include <string>
 #include "Platform/Define.h"
 #include "Utilities/UnorderedMapSet.h"
 #include "BIH.h"
+
+// TEMPORARY -- and deliberately here rather than where it is used.
+//
+// Movemap-Generator/MapBuilder.cpp uses INT_MAX and INT_MIN. It never included
+// <climits>; the macros arrived transitively through the ACE headers this tree
+// no longer has. MapBuilder.cpp lives in the Extractor_projects submodule, which
+// is shared with the upstream project, so fixing it there would fork a file that
+// is not ours to fork. It includes this header, so the include lands here and
+// reaches it by the same transitivity that used to carry it.
+//
+// Remove this once Extractor_projects includes <climits> for itself.
+#include <climits>
 
 namespace VMAP
 {

@@ -27,6 +27,9 @@
  * @brief Cohesion split of Chat.cpp -- chat shift-link validation.
  */
 
+#include <string>
+#include <sstream>
+#include "Common/Locales.h"
 #include "Chat.h"
 #include "Log.h"
 #include "World.h"

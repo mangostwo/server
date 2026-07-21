@@ -30,6 +30,7 @@
  *        world-state updates. Same `BattleGround` class; no behaviour change.
  */
 
+#include <string>
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"

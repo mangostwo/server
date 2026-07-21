@@ -25,7 +25,12 @@
 #ifndef MANGOS_OBJECT_GUID_H
 #define MANGOS_OBJECT_GUID_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <set>
+#include <list>
 #include "ByteBuffer.h"
 
 #include <functional>

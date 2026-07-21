@@ -37,6 +37,12 @@
  * with other players using the in-game currency.
  */
 
+#include <vector>
+#include <string>
+#include <sstream>
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Common/ServerDefines.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"

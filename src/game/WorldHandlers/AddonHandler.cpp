@@ -43,6 +43,7 @@
  * it only classifies them for the client's information.
  */
 
+#include <string>
 #include <zlib.h>
 #include "AddonHandler.h"
 #include "Database/DatabaseEnv.h"

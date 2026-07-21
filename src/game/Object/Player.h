@@ -51,7 +51,19 @@
 #ifndef MANGOS_H_PLAYER
 #define MANGOS_H_PLAYER
 
-#include "Common.h"
+#include <utility>
+#include <queue>
+#include "Common/ServerDefines.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
+#include <map>
+#include <set>
+#include <list>
+#include <sstream>
+#include <memory>
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Item.h"

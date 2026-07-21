@@ -40,9 +40,11 @@
  * @see AccountMgr for the singleton interface
  */
 
+#include <string>
+#include "Common/ServerDefines.h"
 #include "AccountMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ObjectGuid.h"
 #include "Player.h"
 #include "Policies/Singleton.h"
@@ -198,7 +200,7 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
             ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, guidlo);
 
             // kick if player currently
-            sObjectAccessor.KickPlayer(guid);
+            sPlayerRegistry.Kick(guid);
             Player::DeleteFromDB(guid, accid, false);       // no need to update realm characters
         }
         while (result->NextRow());

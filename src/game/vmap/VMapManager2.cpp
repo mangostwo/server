@@ -41,6 +41,7 @@
  * @see MapTree for individual map spatial index
  */
 
+#include <utility>
 #include <iomanip>
 #include <string>
 #include <sstream>

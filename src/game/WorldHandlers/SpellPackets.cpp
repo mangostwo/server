@@ -47,7 +47,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -745,7 +745,7 @@ void Spell::SendChannelUpdate(uint32 time)
         ObjectGuid target_guid = m_caster->GetChannelObjectGuid();
         if (target_guid != m_caster->GetObjectGuid() && target_guid.IsUnit())
         {
-            if (Unit* target = sObjectAccessor.GetUnit(*m_caster, target_guid))
+            if (Unit* target = ObjectLookup::GetUnit(*m_caster, target_guid))
             {
                 target->RemoveAurasByCasterSpell(m_spellInfo->ID, m_caster->GetObjectGuid());
             }
@@ -789,7 +789,7 @@ void Spell::SendChannelStart(uint32 duration)
             if ((itr->effectMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
                 itr->targetGUID != m_caster->GetObjectGuid())
             {
-                target = sObjectAccessor.GetUnit(*m_caster, itr->targetGUID);
+                target = ObjectLookup::GetUnit(*m_caster, itr->targetGUID);
                 break;
             }
         }

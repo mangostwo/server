@@ -41,13 +41,14 @@
  * @see ThreatContainer for threat list management
  */
 
+#include "Utilities/Errors.h"
 #include "ThreatManager.h"
 #include "Unit.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "Map.h"
 #include "Player.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "UnitEvents.h"
 
 //==============================================================
@@ -210,7 +211,7 @@ void HostileReference::updateOnlineStatus()
 
     if (!isValid())
     {
-        if (Unit* target = sObjectAccessor.GetUnit(*getSourceUnit(), getUnitGuid()))
+        if (Unit* target = ObjectLookup::GetUnit(*getSourceUnit(), getUnitGuid()))
         {
             link(target, getSource());
         }

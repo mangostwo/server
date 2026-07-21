@@ -27,6 +27,8 @@
  * @brief Cohesion split of ObjectMgr.cpp -- gameobject spawn loading and grid placement.
  */
 
+#include <map>
+#include "Utilities/PackedValues.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

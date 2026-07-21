@@ -22,6 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <sstream>
+#include "Utilities/Util.h"
+#include "Utilities/MathDefines.h"
+#include "Utilities/Errors.h"
 #include <ctime>
 
 #include "WaypointMovementGenerator.h"

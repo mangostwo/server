@@ -46,6 +46,7 @@
 #ifndef MANGOS_H_BATTLEGROUNDWS
 #define MANGOS_H_BATTLEGROUNDWS
 
+#include "Common/TimeConstants.h"
 #include "BattleGround.h"
 
 #define BG_WS_MAX_TEAM_SCORE      3

@@ -30,6 +30,7 @@
  *        up automatically; ObjectMgr.h is unchanged.
  */
 
+#include <list>
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Policies/Singleton.h"

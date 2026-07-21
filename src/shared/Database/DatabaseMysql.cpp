@@ -42,6 +42,8 @@
 
 #ifndef DO_POSTGRESQL
 
+#include <string>
+#include "Utilities/Errors.h"
 #include "Utilities/Util.h"
 #include "Policies/Singleton.h"
 #include "Platform/Define.h"
@@ -106,13 +108,13 @@ DatabaseMysql::DatabaseMysql()
         if (mysql_library_init(-1, NULL, NULL))
         {
             sLog.outError("Could not initialize MySQL client library\n");
-            ACE_OS::exit();
+            std::exit(1);
         }
         if (!mysql_thread_safe())
         {
             sLog.outError("FATAL ERROR: Used MySQL library isn't thread-safe.");
             Log::WaitBeforeContinueIfNeed();
-            ACE_OS::exit();
+            std::exit(1);
         }
     }
 }

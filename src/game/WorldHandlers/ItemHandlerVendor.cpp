@@ -30,7 +30,8 @@
  *        behaviour change.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cmath>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"

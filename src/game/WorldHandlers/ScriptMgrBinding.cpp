@@ -27,6 +27,8 @@
  * @brief Cohesion split of ScriptMgr.cpp -- script-name and binding registry helpers.
  */
 
+#include <set>
+#include <algorithm>
 #include "ScriptMgr.h"
 #include "Log.h"
 #include "ProgressBar.h"

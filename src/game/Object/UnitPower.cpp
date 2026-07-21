@@ -43,7 +43,6 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"

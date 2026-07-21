@@ -26,7 +26,11 @@
 #define MANGOS_CALENDAR_H
 
 #include "Policies/Singleton.h"
-#include "Common.h"
+#include "Platform/Define.h"
+#include <ctime>
+#include <string>
+#include <map>
+#include <list>
 #include "ObjectGuid.h"
 #include "SharedDefines.h"
 

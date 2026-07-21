@@ -27,6 +27,9 @@
  * @brief Cohesion split of ObjectMgr.cpp -- localized-string table loaders (creature / gossip-menu-item / point-of-interest / page-text / gossip-text / gameobject locales).
  */
 
+#include <string>
+#include "Utilities/PackedValues.h"
+#include "Common/Locales.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

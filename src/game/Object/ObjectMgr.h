@@ -25,7 +25,15 @@
 #ifndef MANGOS_H_OBJECTMGR
 #define MANGOS_H_OBJECTMGR
 
-#include "Common.h"
+#include <utility>
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include "Utilities/PackedValues.h"
+#include <vector>
+#include <set>
+#include <list>
 #include "Log.h"
 #include "Object.h"
 #include "Bag.h"
@@ -41,7 +49,6 @@
 #include "MapPersistentStateMgr.h"
 #include "ObjectGuid.h"
 #include "Policies/Singleton.h"
-#include "ObjectAccessor.h"
 
 #include <string>
 #include <map>
@@ -130,7 +137,7 @@ typedef UNORDERED_MAP < uint32/*(mapid,spawnMode) pair*/, CellObjectGuidsMap > M
 #define MAX_CREATURE_AI_TEXT_STRING_ID (-1000000)
 // Anything below MAX_CREATURE_AI_TEXT_STRING_ID is handled by the external script lib
 
-static_assert(MAX_DB_SCRIPT_STRING_ID < ACE_INT32_MAX, "Must scope with int32 range");
+static_assert(MAX_DB_SCRIPT_STRING_ID < INT32_MAX, "Must scope with int32 range");
 
 struct MangosStringLocale
 {
@@ -774,8 +781,8 @@ class ObjectMgr
 
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
-        static Player* GetPlayer(const char* name);                                 ///< Wrapper for ObjectAccessor::FindPlayerByName
-        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for ObjectAccessor::FindPlayer
+        static Player* GetPlayer(const char* name);                                 ///< Wrapper for PlayerRegistry::FindByName
+        static Player* GetPlayer(ObjectGuid guid, bool inWorld = true);             ///< Wrapper for PlayerRegistry::Find
         static CreatureInfo const* GetCreatureTemplate(uint32 id);                  ///< Wrapper for sCreatureStorage.LookupEntry
         static CreatureModelInfo const* GetCreatureModelInfo(uint32 modelid);       ///< Wrapper for sCreatureModelStorage.LookupEntry
         static EquipmentInfo const* GetEquipmentInfo(uint32 entry);                 ///< Wrapper for sEquipmentStorage.LookupEntry

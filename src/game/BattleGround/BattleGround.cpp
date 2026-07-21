@@ -36,6 +36,10 @@
  * - Creature and game object spawning
  */
 
+#include <cmath>
+#include <string>
+#include "Common/TimeConstants.h"
+#include "PlayerRegistry.h"
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
@@ -229,7 +233,7 @@ void BattleGround::BroadcastWorker(Do& _do)
 {
     for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
-        if (Player* plr = sObjectAccessor.FindPlayer(itr->first))
+        if (Player* plr = sPlayerRegistry.Find(itr->first))
         {
             _do(plr);
         }

@@ -29,6 +29,10 @@
  *        DB version loading. Same `World` class; no behaviour change.
  */
 
+#include <cmath>
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"

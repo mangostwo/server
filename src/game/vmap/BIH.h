@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_BIH
 #define MANGOS_H_BIH
 
+#include <utility>
 #include <G3D/Vector3.h>
 #include <G3D/Ray.h>
 #include <G3D/AABox.h>

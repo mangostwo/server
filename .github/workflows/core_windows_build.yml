@@ -1,28 +1,33 @@
 name: Windows Build (MSVC)
 
+on:
+  push:
+    branches: [ master, devel ]
+  pull_request:
+    branches: [ master ]
+
 permissions:
   contents: read
 
-on:
-  push:
-    branches: [ master , devel ]
-  pull_request:
-    branches: [ master ]
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: windows-2022
-    strategy:
-      fail-fast: false
+
+    env:
+      BUILD_DIR: ${{ github.workspace }}\..\build-msvc
+      CCACHE_DIR: ${{ github.workspace }}\..\ccache
+      SCCACHE_DIR: ${{ github.workspace }}\..\sccache
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 1
-
 
       - name: Cache OpenSSL
         id: cache-openssl
@@ -31,72 +36,60 @@ jobs:
           path: |
             C:\Program Files\OpenSSL
             C:\Program Files\OpenSSL-Win64
-          key: ${{ runner.os }}-openssl-full
+          key: ${{ runner.os }}-openssl-3
 
-
-      - name: Install full OpenSSL (developer)
+      - name: Install OpenSSL
         if: steps.cache-openssl.outputs.cache-hit != 'true'
-        shell: powershell
-        run: |
-          Write-Host "Installing latest full OpenSSL for development..."
-          choco upgrade openssl -y --no-progress
-          $ver = & openssl version
-          Write-Host "Installed OpenSSL version: $ver"
+        run: choco upgrade openssl -y --no-progress
 
-
-      - name: Setup Windows 10 SDK
-        uses: GuillaumeFalourd/setup-windows10-sdk-action@v2
-        with:
-          sdk-version: 22621
-
-
-      - name: Configure OpenSSL environment
+      - name: Locate OpenSSL
         shell: bash
         run: |
-          if [ -d "C:/Program Files/OpenSSL/lib/VC" ]; then
-            echo "OPENSSL_ROOT_DIR=C:/Program Files/OpenSSL" >> $GITHUB_ENV
-            echo "OPENSSL_INCLUDE_DIR=C:/Program Files/OpenSSL/include" >> $GITHUB_ENV
-            echo "OPENSSL_CRYPTO_LIBRARY=C:/Program Files/OpenSSL/lib/VC/libcrypto64MT.lib" >> $GITHUB_ENV
-            echo "OPENSSL_SSL_LIBRARY=C:/Program Files/OpenSSL/lib/VC/libssl64MT.lib" >> $GITHUB_ENV
-          elif [ -d "C:/Program Files/OpenSSL-Win64/lib/VC" ]; then
-            echo "OPENSSL_ROOT_DIR=C:/Program Files/OpenSSL-Win64" >> $GITHUB_ENV
-            echo "OPENSSL_INCLUDE_DIR=C:/Program Files/OpenSSL-Win64/include" >> $GITHUB_ENV
-            echo "OPENSSL_CRYPTO_LIBRARY=C:/Program Files/OpenSSL-Win64/lib/VC/libcrypto64MT.lib" >> $GITHUB_ENV
-            echo "OPENSSL_SSL_LIBRARY=C:/Program Files/OpenSSL-Win64/lib/VC/libssl64MT.lib" >> $GITHUB_ENV
+          for root in "C:/Program Files/OpenSSL" "C:/Program Files/OpenSSL-Win64"; do
+            if [ -d "$root/lib/VC" ]; then
+              echo "OPENSSL_ROOT_DIR=$root" >> $GITHUB_ENV
+              break
+            fi
+          done
+
+      - name: Setup MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Compiler cache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          variant: sccache
+          key: windows-msvc
+          max-size: 500M
+
+      - name: Configure
+        shell: bash
+        run: >
+          cmake -S . -B "$BUILD_DIR" -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX="$BUILD_DIR/install"
+          -DCMAKE_C_COMPILER_LAUNCHER=sccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -DBUILD_TOOLS=1
+          -DBUILD_MANGOSD=1
+          -DBUILD_REALMD=1
+          -DSOAP=1
+          -DSCRIPT_LIB_ELUNA=1
+          -DSCRIPT_LIB_SD3=1
+          -DUSE_STORMLIB=1
+          -DPCH=1
+
+      - name: Build
+        shell: bash
+        run: cmake --build "$BUILD_DIR" --parallel
+
+      - name: Verify the working tree is clean
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::the build modified the source tree"
+            git status --porcelain
+            exit 1
           fi
-
-
-      - name: Cache CMake build
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: ${{ runner.os }}-cmake-${{ hashFiles('**/CMakeLists.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-cmake-
-
-
-      - name: Configure CMake project
-        shell: bash
-        run: |
-          mkdir -p build && cd build
-          cmake .. \
-            -G "Visual Studio 17 2022" \
-            -A x64 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DOPENSSL_USE_STATIC_LIBS=TRUE \
-            -DBUILD_TOOLS=1 \
-            -DBUILD_MANGOSD=1 \
-            -DBUILD_REALMD=1 \
-            -DSOAP=1 \
-            -DSCRIPT_LIB_ELUNA=1 \
-            -DSCRIPT_LIB_SD3=1 \
-            -DPLAYERBOTS=0 \
-            -DUSE_STORMLIB=1 \
-            -DPCH=0
-
-
-      - name: Build project
-        shell: bash
-        run: |
-          cd build
-          cmake --build . --config Release --parallel

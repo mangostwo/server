@@ -25,7 +25,7 @@
 #ifndef MANGOS_SKILLDISCOVERY_H
 #define MANGOS_SKILLDISCOVERY_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 
 class Player;
 

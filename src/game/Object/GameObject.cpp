@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sstream>
+#include <cmath>
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #include "GameObject.h"
 #include "G3D/Quat.h"
 #include "QuestDef.h"
@@ -162,7 +166,7 @@ void GameObject::RemoveFromWorld()
         // Remove GO from owner
         if (ObjectGuid owner_guid = GetOwnerGuid())
         {
-            if (Unit* owner = sObjectAccessor.GetUnit(*this, owner_guid))
+            if (Unit* owner = ObjectLookup::GetUnit(*this, owner_guid))
             {
                 owner->RemoveGameObject(this, false);
             }
@@ -615,7 +619,7 @@ bool GameObject::IsTransport() const
  */
 Unit* GameObject::GetOwner() const
 {
-    return sObjectAccessor.GetUnit(*this, GetOwnerGuid());
+    return ObjectLookup::GetUnit(*this, GetOwnerGuid());
 }
 
 /**
@@ -1397,7 +1401,7 @@ void GameObject::StopGroupLoot()
  */
 Player* GameObject::GetOriginalLootRecipient() const
 {
-    return m_lootRecipientGuid ? sObjectAccessor.FindPlayer(m_lootRecipientGuid) : NULL;
+    return m_lootRecipientGuid ? sPlayerRegistry.Find(m_lootRecipientGuid) : NULL;
 }
 
 /**

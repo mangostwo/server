@@ -22,6 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cassert>
+#include <string>
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Threading/Threading.h"
+#include "Utilities/Errors.h"
 #include "DatabaseEnv.h"
 #include "Config/Config.h"
 #include "Database/SqlOperations.h"
@@ -214,8 +220,8 @@ void Database::InitDelayThread()
 
     // New delay thread for delay execute
     m_threadBody = CreateDelayThread();              // will deleted at m_delayThread delete
-    m_TransStorage = new ACE_TSS<Database::TransHelper>();
-    m_delayThread = new ACE_Based::Thread(m_threadBody);
+    m_TransStorage = new DBTransHelperTSS();
+    m_delayThread = new MaNGOS::Thread(m_threadBody);
 }
 
 void Database::HaltDelayThread()
@@ -713,8 +719,9 @@ SqlStatement Database::CreateStatement(SqlStatementID& index, const char* fmt)
         // count input parameters
         int nParams = std::count(szFmt.begin(), szFmt.end(), '?');
         // find existing or add a new record in registry
+        // std::lock_guard is unconditionally holding the mutex once constructed,
+        // so the old ACE_Guard::locked() assertion has nothing left to check.
         LOCK_GUARD _guard(m_stmtGuard);
-        MANGOS_ASSERT(_guard.locked());
         PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.find(szFmt);
         if (iter == m_stmtRegistry.end())
         {
@@ -741,7 +748,6 @@ std::string Database::GetStmtString(const int stmtId) const
     }
 
     LOCK_GUARD _guard(m_stmtGuard);
-    if (_guard.locked())
     {
         PreparedStmtRegistry::const_iterator iter_last = m_stmtRegistry.end();
         for (PreparedStmtRegistry::const_iterator iter = m_stmtRegistry.begin(); iter != iter_last; ++iter)

@@ -29,6 +29,12 @@
  *        behaviour change.
  */
 
+#include <map>
+#include <vector>
+#include <string>
+#include <sstream>
+#include "Utilities/PackedValues.h"
+#include <algorithm>
 #include "ObjectMgr.h"
 #include "LivingWorldAnchorPolicy.h"
 #include "MotionGenerators/MotionMaster.h"

@@ -20,6 +20,10 @@
 # Build the mangos shared library
 add_subdirectory(shared)
 
+# The world protocol. Sits between shared and game: it links shared, game links
+# it, and it never links back up.
+add_subdirectory(proto)
+
 add_subdirectory(genrev)
 
 # Needs to link against mangos_world.lib
@@ -39,6 +43,17 @@ endif()
 # Build the mangos realm authentication server
 if(BUILD_REALMD)
     add_subdirectory(realmd)
+
+    # Upstream realmd passes the *file* ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h
+    # to target_include_directories, where a directory belongs. The Visual Studio
+    # generator happens to hand the target's own binary directory to the resource
+    # compiler anyway, so it built; Ninja does not, and VersionInfo.rc then fails
+    # to find the header it includes. The submodule is not modified here, so the
+    # directory is added from outside. Remove once upstream fixes the path.
+    if(WIN32)
+        target_include_directories(realmd
+            PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/realmd")
+    endif()
 endif()
 
 # If we want the tools for map/vmap/mmap extraction
@@ -53,4 +68,8 @@ if (BUILD_MANGOSD OR BUILD_REALMD)
         STRING(REPLACE ".lib" ".dll" MYSQL_LIB_DLL ${MYSQL_LIB_DLL})
         install(FILES ${MYSQL_LIB_DIR}/${MYSQL_LIB_DLL} DESTINATION ${BIN_DIR})
     endif()
+endif()
+
+if(WITH_TESTS)
+    add_subdirectory(tests)
 endif()

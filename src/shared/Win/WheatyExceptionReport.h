@@ -27,12 +27,13 @@
 
 #include <dbghelp.h>
 
-#if _MSC_VER < 1400
-#   define countof(array)   (sizeof(array) / sizeof(array[0]))
-#else
-#   include <stdlib.h>
-#   define countof  _countof
-#endif                                                      // _MSC_VER < 1400
+// countof comes from Platform/Define.h as a constexpr function template. This
+// header used to define it as a macro (guarded on _MSC_VER < 1400, i.e. Visual
+// Studio 2005), and a macro wins over any declaration that follows it -- so in
+// any translation unit that reached this header first, the expansion landed in
+// the middle of Define.h's template and broke the parse. The compiler it was
+// written for predates the minimum this tree supports by twenty years.
+#include "Platform/Define.h"
 
 enum BasicType                                              // Stolen from CVCONST.H in the DIA 2.0 SDK
 {

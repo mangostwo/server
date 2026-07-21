@@ -39,6 +39,8 @@
  * @see GuildMgr for the manager singleton interface
  */
 
+#include <string>
+#include <mutex>
 #include "GuildMgr.h"
 #include "Guild.h"
 #include "Log.h"

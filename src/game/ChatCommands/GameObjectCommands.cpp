@@ -33,6 +33,11 @@
  * - Game object database management
  */
 
+#include <cmath>
+#include <string>
+#include <sstream>
+#include "Common/Locales.h"
+#include "ObjectLookup.h"
 #include "Chat.h"
 #include "G3D/Quat.h"
 #include "MapManager.h"
@@ -145,7 +150,7 @@ bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 
     if (ObjectGuid ownerGuid = obj->GetOwnerGuid())
     {
-        Unit* owner = sObjectAccessor.GetUnit(*m_session->GetPlayer(), ownerGuid);
+        Unit* owner = ObjectLookup::GetUnit(*m_session->GetPlayer(), ownerGuid);
         if (!owner || !ownerGuid.IsPlayer())
         {
             PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, obj->GetGUIDLow(), ownerGuid.GetString().c_str());

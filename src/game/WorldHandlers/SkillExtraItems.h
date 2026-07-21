@@ -25,7 +25,7 @@
 #ifndef MANGOS_SKILL_EXTRA_ITEMS_H
 #define MANGOS_SKILL_EXTRA_ITEMS_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 
 // predef classes used in functions
 class Player;

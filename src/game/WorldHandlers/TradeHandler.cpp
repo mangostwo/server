@@ -22,11 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -699,7 +700,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Player* pOther = sObjectAccessor.FindPlayer(otherGuid);
+    Player* pOther = sPlayerRegistry.Find(otherGuid);
 
     if (!pOther)
     {
