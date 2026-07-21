@@ -25,9 +25,11 @@
 #ifndef _AUTH_HMACSHA1_H
 #define _AUTH_HMACSHA1_H
 
-#include "Common/Common.h"
-#include <openssl/hmac.h>
-#include <openssl/sha.h>
+#include "Platform/Define.h"
+#include "Utilities/Errors.h"
+#include <openssl/evp.h>
+#include <openssl/sha.h>       // SHA_DIGEST_LENGTH
+#include <string>
 
 class BigNumber;
 
@@ -42,59 +44,74 @@ class BigNumber;
  */
 class HMACSHA1
 {
-public:
-    /**
-     * @brief Constructor with seed initialization
-     * @param len Length of the seed
-     * @param seed Pointer to seed data
-     */
-    HMACSHA1(uint32 len, uint8 *seed);
-    /**
-     * @brief Destructor
-     */
-    ~HMACSHA1();
-    /**
-     * @brief Update hash with a BigNumber
-     * @param bn BigNumber to add to hash
-     */
-    void UpdateBigNumber(BigNumber *bn);
-    /**
-     * @brief Update hash with raw data
-     * @param data Pointer to data
-     * @param length Length of data
-     */
-    void UpdateData(const uint8 *data, int length);
-    /**
-     * @brief Update hash with string data
-     * @param str String to add to hash
-     */
-    void UpdateData(const std::string &str);
-    /**
-     * @brief Finalize the hash computation
-     */
-    void Finalize();
-    /**
-     * @brief Compute hash for a BigNumber
-     * @param bn BigNumber to hash
-     * @return Pointer to digest buffer
-     */
-    uint8 *ComputeHash(BigNumber *bn);
-    /**
-     * @brief Get the computed digest
-     * @return Pointer to digest buffer
-     */
-    uint8 *GetDigest() { return (uint8*)m_digest; }
-    /**
-     * @brief Get the digest length
-     * @return SHA_DIGEST_LENGTH (20 bytes)
-     */
-    int GetLength() { return SHA_DIGEST_LENGTH; }
-private:
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-    HMAC_CTX m_ctx; /**< OpenSSL HMAC context (pre-1.1.0) */
-#else
-    HMAC_CTX* m_ctx; /**< OpenSSL HMAC context (1.1.0+) */
-#endif
-    uint8 m_digest[SHA_DIGEST_LENGTH]; /**< Computed hash digest */
+    public:
+        /**
+         * @brief Constructor with seed initialization
+         * @param len Length of the seed
+         * @param seed Pointer to seed data
+         */
+        HMACSHA1(uint32 len, uint8 *seed);
+
+        /**
+         * @brief Destructor
+         */
+        ~HMACSHA1();
+
+        // The MAC context is owned; copying would double-free it.
+        HMACSHA1(const HMACSHA1&) = delete;
+        HMACSHA1& operator=(const HMACSHA1&) = delete;
+
+        /**
+         * @brief Update hash with a BigNumber
+         * @param bn BigNumber to add to hash
+         */
+        void UpdateBigNumber(BigNumber *bn);
+
+        /**
+         * @brief Update hash with raw data
+         * @param data Pointer to data
+         * @param length Length of data
+         */
+        void UpdateData(const uint8 *data, int length);
+
+        /**
+         * @brief Update hash with string data
+         * @param str String to add to hash
+         */
+        void UpdateData(const std::string &str);
+
+        /**
+         * @brief Finalize the hash computation
+         */
+        void Finalize();
+
+        /**
+         * @brief Compute hash for a BigNumber
+         * @param bn BigNumber to hash
+         * @return Pointer to digest buffer
+         */
+        uint8 *ComputeHash(BigNumber *bn);
+
+        /**
+         * @brief Get the computed digest
+         * @return Pointer to digest buffer
+         */
+        uint8 *GetDigest()
+        {
+            return (uint8*)m_digest;
+        }
+
+        /**
+         * @brief Get the digest length
+         * @return SHA_DIGEST_LENGTH (20 bytes)
+         */
+        int GetLength()
+        {
+            return SHA_DIGEST_LENGTH;
+        }
+
+    private:
+        EVP_MAC_CTX* m_ctx; /**< OpenSSL HMAC context */
+        uint8 m_digest[SHA_DIGEST_LENGTH]; /**< Computed hash digest */
 };
 #endif

@@ -41,7 +41,10 @@
 #ifndef CREATURE_LINKING_MGR_H
 #define CREATURE_LINKING_MGR_H
 
-#include "Common.h"
+#include <utility>
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <map>
 #include "Policies/Singleton.h"
 #include "ObjectGuid.h"
 #include <functional>

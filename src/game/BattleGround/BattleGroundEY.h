@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_BATTLEGROUNDEY
 #define MANGOS_H_BATTLEGROUNDEY
 
+#include "Common/TimeConstants.h"
 #include "Language.h"
 
 class BattleGround;

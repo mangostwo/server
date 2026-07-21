@@ -30,7 +30,9 @@
  *        save/use/delete. Same `WorldSession` handlers; no behaviour change.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
@@ -44,8 +46,6 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "UpdateMask.h"
-#include "Auth/md5.h"
-#include "ObjectAccessor.h"
 #include "Group.h"
 #include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"

@@ -27,6 +27,7 @@
  * @brief Cohesion split of Chat.cpp -- command help display.
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "WorldSession.h"

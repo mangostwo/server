@@ -28,6 +28,7 @@
  *        player / charter / pet name validation.
  */
 
+#include <string>
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

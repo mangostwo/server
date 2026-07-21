@@ -48,7 +48,10 @@
  * - CMSG_GUILD_BANK: Guild bank operations
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "PlayerRegistry.h"
+#include "Platform/Define.h"
+#include <string>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
@@ -140,7 +143,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     if (normalizePlayerName(Invitedname))
     {
-        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
+        player = sPlayerRegistry.FindByName(Invitedname.c_str());
     }
 
     if (!player)

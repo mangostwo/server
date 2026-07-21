@@ -41,7 +41,9 @@
  * Group operations require proper permission checks and state validation.
  */
 
-#include "Common.h"
+#include "PlayerRegistry.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -1127,7 +1129,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
-    Player* player = sObjectAccessor.FindPlayer(guid, false);
+    Player* player = sPlayerRegistry.Find(guid, false);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);

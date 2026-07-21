@@ -27,7 +27,7 @@
 #define _AUTH_SARC4_H
 
 #include <openssl/evp.h>
-#include "Common/Common.h"
+#include "Platform/Define.h"
 #include "OpenSSLProvider.h"
 
 /**

@@ -47,8 +47,11 @@
  * - CMSG_SET_PLAYER_DECLARED_NAME: Set player name
  */
 
+#include "Common/ServerDefines.h"
+#include "OpcodeTable.h"
 #include <zlib.h>
-#include "Common.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Database/DatabaseImpl.h"
@@ -67,7 +70,8 @@
 #include "LootMgr.h"
 #include "Chat.h"
 #include "ScriptMgr.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #include "Object.h"
 #include "BattleGround/BattleGround.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -209,7 +213,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
     data << uint32(clientcount);                            // clientcount place holder, online count
 
     uint32 count = 0;
-    sObjectAccessor.DoForAllPlayers([&](Player* pl)->void
+    sPlayerRegistry.ForEach([&](Player* pl)->void
     {
         ++count;
 
@@ -519,7 +523,7 @@ void WorldSession::HandleSetTargetOpcode(WorldPacket& recv_data)
     _player->SetTargetGuid(guid);
 
     // update reputation list if need
-    Unit* unit = sObjectAccessor.GetUnit(*_player, guid);   // can select group members at diff maps
+    Unit* unit = ObjectLookup::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
     {
         return;
@@ -544,7 +548,7 @@ void WorldSession::HandleSetSelectionOpcode(WorldPacket& recv_data)
     _player->SetSelectionGuid(guid);
 
     // update reputation list if need
-    Unit* unit = sObjectAccessor.GetUnit(*_player, guid);   // can select group members at diff maps
+    Unit* unit = ObjectLookup::GetUnit(*_player, guid);   // can select group members at diff maps
     if (!unit)
     {
         return;
@@ -1349,7 +1353,7 @@ void WorldSession::GmResurrectHandler(WorldPacket &msg)
 /****************************************/
 void WorldSession::LevelCheatHandler(WorldPacket &msg)
 {
-    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+    DEBUG_LOG("WORLD: Received %s message from account %d:", LookupOpcodeName(msg.GetOpcode()), GetAccountId());
 
     /* Check that we have permission to perform the function */
     if (GetSecurity() > SEC_PLAYER)
@@ -1398,7 +1402,7 @@ void WorldSession::BootMeHandler(WorldPacket& msg)
 /****************************************/
 void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
 {
-    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+    DEBUG_LOG("WORLD: Received %s message from account %d:", LookupOpcodeName(msg.GetOpcode()), GetAccountId());
 
     /* Check that we have permission to perform the function */
     if (GetSecurity() > SEC_PLAYER)
@@ -1460,7 +1464,7 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
 /****************************************/
 void WorldSession::SetMoneyHandler(WorldPacket &msg)
 {
-    DEBUG_LOG("WORLD: Received %s message from account %d:", msg.GetOpcodeName(), GetAccountId());
+    DEBUG_LOG("WORLD: Received %s message from account %d:", LookupOpcodeName(msg.GetOpcode()), GetAccountId());
     if (GetSecurity() > SEC_PLAYER)
     {
         Player *pPlayer = GetPlayer();

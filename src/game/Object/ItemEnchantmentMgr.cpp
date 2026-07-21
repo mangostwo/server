@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Utilities/UnorderedMapSet.h"
 #include <stdlib.h>
 #include <functional>
 #include "ItemEnchantmentMgr.h"

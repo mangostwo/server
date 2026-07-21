@@ -41,6 +41,12 @@
  * @see Channel for channel chat
  */
 
+#include <string>
+#include "Common/Locales.h"
+#include <cmath>
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
+#include "ObjectLookup.h"
 #include "Chat.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -1573,7 +1579,7 @@ Unit* ChatHandler::getSelectedUnit()
     }
 
     // can be selected player at another map
-    return sObjectAccessor.GetUnit(*m_session->GetPlayer(), guid);
+    return ObjectLookup::GetUnit(*m_session->GetPlayer(), guid);
 }
 
 /**

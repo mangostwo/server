@@ -25,7 +25,10 @@
 #ifndef SQLSTORAGE_H
 #define SQLSTORAGE_H
 
-#include "Common/Common.h"
+#include <utility>
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <map>
 #include "Database/DatabaseEnv.h"
 #include "DataStores/DBCFileLoader.h"
 

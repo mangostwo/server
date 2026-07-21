@@ -25,7 +25,8 @@
 #ifndef WORLD_PVP_HP
 #define WORLD_PVP_HP
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <list>
 #include "OutdoorPvP.h"
 #include "Language.h"
 

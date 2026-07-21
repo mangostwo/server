@@ -40,6 +40,9 @@
  * @see GroupModel for grouped triangles
  */
 
+#include <cmath>
+#include <vector>
+#include <string>
 #include "WorldModel.h"
 #include "VMapDefinitions.h"
 #include "MapTree.h"

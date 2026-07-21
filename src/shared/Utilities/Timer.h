@@ -25,7 +25,7 @@
 #ifndef MANGOS_TIMER_H
 #define MANGOS_TIMER_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "Duration.h"
 #include <ctime>
 

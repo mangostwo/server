@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Common/TimeConstants.h"
 #include "SpellCooldownMgr.h"
 #include "Player.h"
 #include "Log.h"

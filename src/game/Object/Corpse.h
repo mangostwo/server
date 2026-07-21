@@ -42,13 +42,14 @@
  *
  * @see Corpse for the main corpse implementation
  * @see Player for player death handling
- * @see ObjectAccessor for corpse registry
+ * @see CorpseManager for the corpse registry and lifecycle
  */
 
 #ifndef MANGOSSERVER_CORPSE_H
 #define MANGOSSERVER_CORPSE_H
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <ctime>
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"

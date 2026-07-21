@@ -25,7 +25,7 @@
 #ifndef MANGOSSERVER_TYPEDEFS_H
 #define MANGOSSERVER_TYPEDEFS_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 
 namespace G3D
 {

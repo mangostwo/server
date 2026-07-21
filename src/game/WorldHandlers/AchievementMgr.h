@@ -24,7 +24,13 @@
 #ifndef __MANGOS_ACHIEVEMENTMGR_H
 #define __MANGOS_ACHIEVEMENTMGR_H
 
-#include "Common.h"
+#include <utility>
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <ctime>
+#include <vector>
+#include <set>
+#include <list>
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "DBCEnums.h"

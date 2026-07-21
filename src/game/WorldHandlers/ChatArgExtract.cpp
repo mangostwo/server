@@ -27,6 +27,7 @@
  * @brief Cohesion split of Chat.cpp -- command argument and shift-link extraction helpers.
  */
 
+#include <string>
 #include "Chat.h"
 #include "Language.h"
 #include "ObjectMgr.h"

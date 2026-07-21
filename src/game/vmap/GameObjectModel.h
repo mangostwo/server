@@ -25,6 +25,7 @@
 #ifndef MANGOSSERVER_GAMEOBJECTMODEL_H
 #define MANGOSSERVER_GAMEOBJECTMODEL_H
 
+#include <string>
 #include "Platform/Define.h"
 
 #include <G3D/Matrix3.h>

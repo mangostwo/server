@@ -42,6 +42,7 @@
  * @see Map for grid management
  */
 
+#include <set>
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -49,7 +50,7 @@
 #include "Item.h"
 #include "Map.h"
 #include "Transports.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "CreatureAI.h"
 
@@ -116,7 +117,7 @@ void VisibleNotifier::Notify()
                 continue;
             }
 
-            if (Player* plr = sObjectAccessor.FindPlayer(*iter))
+            if (Player* plr = sPlayerRegistry.Find(*iter))
             {
                 plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
             }
@@ -288,7 +289,7 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
         return false;
     }
 
-    Player* owner = sObjectAccessor.FindPlayer(u->GetOwnerGuid());
+    Player* owner = sPlayerRegistry.Find(u->GetOwnerGuid());
 
     if (!owner || i_fobj->IsFriendlyTo(owner))
     {

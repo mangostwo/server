@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <sstream>
+#include "Utilities/Errors.h"
 #include "MotionMaster.h"
 #include "ConfusedMovementGenerator.h"
 #include "FleeingMovementGenerator.h"

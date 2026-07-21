@@ -25,7 +25,6 @@
 #if !defined(DATABASEENV_H)
 #define DATABASEENV_H
 
-#include "Common/Common.h"
 #include "Log/Log.h"
 #include "Utilities/Errors.h"
 

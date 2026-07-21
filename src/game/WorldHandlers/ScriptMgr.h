@@ -25,12 +25,17 @@
 #ifndef MANGOS_H_SCRIPTMGR
 #define MANGOS_H_SCRIPTMGR
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
 #include "ObjectGuid.h"
 #include "DBCEnums.h"
-#include <ace/Atomic_Op.h>
-#include <ace/Thread_Mutex.h>
-#include <ace/Guard_T.h>
+#include <atomic>
+#include <mutex>
+#include <shared_mutex>
 
 struct AreaTriggerEntry;
 struct SpellEntry;
@@ -724,12 +729,15 @@ class ScriptMgr
         DBScripts          m_dbScripts;
 #ifdef _DEBUG
         // mutex allowing to reload the script binding table; TODO just do it AWAY from any map update, e.g. right after sessions update
-        ACE_RW_Thread_Mutex m_bindMutex;
+        std::shared_mutex m_bindMutex;
 #endif /* _DEBUG */
         // atomic op counter for active scripts amount
-        ACE_Atomic_Op<ACE_Thread_Mutex, long> m_scheduledScripts;
-        char __cache_guard[1024];
-        ACE_Thread_Mutex m_lock;
+        std::atomic<long> m_scheduledScripts;
+
+        // Kept off the counter's cache line. Was a 1024-byte char array named
+        // __cache_guard -- a reserved identifier, since any name containing a
+        // double underscore belongs to the implementation.
+        alignas(64) std::mutex m_lock;
 };
 
 // Starters for events

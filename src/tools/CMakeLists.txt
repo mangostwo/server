@@ -19,6 +19,17 @@
 
 add_subdirectory(Extractor_projects)
 
+# Extractor_projects is an untouched submodule; see cmake/SubmoduleCompat.cmake.
+# It needs the old Auth/md5.h, and it uses std::thread without ever declaring the
+# dependency -- that linked before only because ACE dragged pthread in.
+foreach(_extractor map-extractor vmap-extractor mmap-extractor)
+    if(TARGET ${_extractor})
+        mangos_submodule_compat(${_extractor}
+            "${CMAKE_SOURCE_DIR}/src/shared/Compat/extractors")
+        target_link_libraries(${_extractor} PRIVATE Threads::Threads)
+    endif()
+endforeach()
+
 # Used for install targets
 set(TOOLS_DIR "tools")
 

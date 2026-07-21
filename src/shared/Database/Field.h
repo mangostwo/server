@@ -25,7 +25,9 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include "Common/Common.h"
+#include "Platform/Define.h"
+#include <cstdlib>
+#include <string>
 #include <mysql.h>
 
 /**

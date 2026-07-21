@@ -42,13 +42,16 @@
 
 #include "HMACSHA1.h"
 #include "WardenKeyGeneration.h"
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <list>
+#include <sstream>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "ByteBuffer.h"
-#include <openssl/md5.h>
+#include "Auth/Md5.h"
 #include "Database/DatabaseEnv.h"
 #include "World.h"
 #include "Player.h"
@@ -125,10 +128,10 @@ ClientWardenModule* WardenWin::GetModuleForClient()
     memcpy(mod->Key, Module.ModuleKey, 16);
 
     // md5 hash
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, mod->CompressedData, length);
-    MD5_Final((uint8*)&mod->Id, &ctx);
+    Md5Hash md5;
+    md5.UpdateData(mod->CompressedData, length);
+    md5.Finalize();
+    memcpy(&mod->Id, md5.GetDigest(), Md5Hash::DigestLength);
 
     return mod;
 }

@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_UPDATEMASK
 #define MANGOS_H_UPDATEMASK
 
+#include "Utilities/Errors.h"
 #include "UpdateFields.h"
 #include "Errors.h"
 

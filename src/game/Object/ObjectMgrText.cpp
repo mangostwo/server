@@ -27,6 +27,8 @@
  * @brief Cohesion split of ObjectMgr.cpp -- page-text and gossip-text table loaders.
  */
 
+#include <set>
+#include <sstream>
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

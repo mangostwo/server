@@ -22,7 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <sstream>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -38,7 +40,6 @@
 #include "Log.h"
 #include "Guild.h"
 #include "GuildMgr.h"
-#include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "MassMailMgr.h"
 #include "ScriptMgr.h"

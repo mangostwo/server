@@ -28,6 +28,7 @@
  *        name/rights management. Same `Guild` class; no behaviour change.
  */
 
+#include <string>
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Database/DatabaseEnv.h"

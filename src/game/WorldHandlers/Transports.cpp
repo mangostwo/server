@@ -22,7 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cmath>
+#include <string>
+#include <vector>
+#include <set>
 
 #include "Transports.h"
 #include "MapManager.h"

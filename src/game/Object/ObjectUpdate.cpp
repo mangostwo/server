@@ -28,6 +28,7 @@
  *        Same classes; no behaviour change.
  */
 
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"

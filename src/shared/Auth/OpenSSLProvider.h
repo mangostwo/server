@@ -34,7 +34,7 @@
 #ifndef _AUTH_OPENSSL_PROVIDER_H
 #define _AUTH_OPENSSL_PROVIDER_H
 
-#include "Common/Common.h"
+#include <string>
 #include <openssl/evp.h>
 
 /**

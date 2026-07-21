@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include <map>
+#include <string>
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"

@@ -25,7 +25,9 @@
 #ifndef MANGOS_H_GUILDMGR
 #define MANGOS_H_GUILDMGR
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <string>
 #include "Policies/Singleton.h"
 
 #include <mutex>

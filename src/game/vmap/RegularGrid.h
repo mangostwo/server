@@ -25,6 +25,8 @@
 #ifndef MANGOS_H_REGULAR_GRID
 #define MANGOS_H_REGULAR_GRID
 
+#include <cmath>
+#include "Utilities/Errors.h"
 #include <G3D/Ray.h>
 #include <G3D/AABox.h>
 #include <G3D/Table.h>

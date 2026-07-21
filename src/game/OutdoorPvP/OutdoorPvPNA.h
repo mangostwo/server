@@ -25,7 +25,9 @@
 #ifndef WORLD_PVP_NA
 #define WORLD_PVP_NA
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <list>
+#include <queue>
 #include "OutdoorPvP.h"
 #include "Language.h"
 

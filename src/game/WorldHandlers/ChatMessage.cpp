@@ -27,6 +27,10 @@
  * @brief Cohesion split of Chat.cpp -- system-message output helpers and chat-packet builder.
  */
 
+#include <string>
+#include "Utilities/Util.h"
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
 #include "Chat.h"
 #include "Language.h"
 #include "WorldPacket.h"

@@ -42,6 +42,17 @@
  * @ingroup world
  */
 
+#include <set>
+#include <vector>
+#include <string>
+#include <atomic>
+#include "Common/Locales.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
+#include "PlayerRegistry.h"
+#include "CorpseManager.h"
 #include "World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
@@ -117,7 +128,7 @@ extern void LoadGameObjectModelList();
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
 
-ACE_Atomic_Op<ACE_Thread_Mutex, uint32> World::m_worldLoopCounter = 0;
+std::atomic<uint32> World::m_worldLoopCounter{0};
 
 float World::m_MaxVisibleDistanceOnContinents = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_MaxVisibleDistanceInInstances  = DEFAULT_VISIBILITY_INSTANCE;
@@ -942,9 +953,6 @@ void World::SetInitialWorldSettings()
     }
 #endif
 
-#ifdef ENABLE_PLAYERBOTS
-    sPlayerbotAIConfig.Initialize();
-#endif
 
     showFooter();
 
@@ -970,18 +978,6 @@ void World::showFooter()
     modules_.insert("      ScriptDev3 (SD3) : Enabled");
 #endif
 
-    // PLAYERBOTS can be included or excluded but also disabled via mangos.conf
-#ifdef ENABLE_PLAYERBOTS
-    bool playerBotActive = sConfig.GetBoolDefault("PlayerbotAI.DisableBots", true);
-    if (playerBotActive)
-    {
-        modules_.insert("            PlayerBots : Disabled");
-    }
-    else
-    {
-        modules_.insert("            PlayerBots : Enabled");
-    }
-#endif
 
     // Remote Access can be activated / deactivated via mangos.conf
     bool raActive = sConfig.GetBoolDefault("Ra.Enable", false);
@@ -1249,7 +1245,7 @@ void World::Update(uint32 diff)
     {
         m_timers[WUPDATE_CORPSES].Reset();
 
-        sObjectAccessor.RemoveOldCorpses();
+        sCorpseManager.RemoveOldCorpses();
     }
 
     ///- Process Game events when necessary
@@ -1605,7 +1601,7 @@ void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode)
     {
         if (!(options & SHUTDOWN_MASK_IDLE) || GetActiveAndQueuedSessionCount() == 0)
         {
-                sObjectAccessor.SaveAllPlayers();        // save all players.
+                sPlayerRegistry.SaveAll();        // save all players.
                 m_stopEvent = true;                                // exist code already set
         }
         else

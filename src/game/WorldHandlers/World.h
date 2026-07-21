@@ -29,7 +29,16 @@
 #ifndef MANGOS_H_WORLD
 #define MANGOS_H_WORLD
 
-#include "Common.h"
+#include "LockedQueue/LockedQueue.h"
+#include "Common/ServerDefines.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <atomic>
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <vector>
 #include "Utilities/Util.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
@@ -52,7 +61,6 @@ class WorldSession;
 class Player;
 class SqlResultQueue;
 class QueryResult;
-class WorldSocket;
 
 // ServerMessages.dbc
 enum ServerMessageType
@@ -504,7 +512,7 @@ typedef UNORDERED_MAP<uint32, WorldSession*> SessionMap;
 class World
 {
     public:
-        static ACE_Atomic_Op<ACE_Thread_Mutex, uint32> m_worldLoopCounter;
+        static std::atomic<uint32> m_worldLoopCounter;
 
         World();
         ~World();
@@ -773,7 +781,7 @@ class World
         static uint32 m_visibility_observer_sweep_interval;
 
         // CLI command holder to be thread safe
-        ACE_Based::LockedQueue<CliCommandHolder*, ACE_Thread_Mutex> cliCmdQueue;
+        MaNGOS::LockedQueue<CliCommandHolder*> cliCmdQueue;
 
         // next daily quests reset time
         time_t m_NextDailyQuestReset;
@@ -786,7 +794,7 @@ class World
 
         // sessions that are added async
         void AddSession_(WorldSession* s);
-        ACE_Based::LockedQueue<WorldSession*, ACE_Thread_Mutex> addSessQueue;
+        MaNGOS::LockedQueue<WorldSession*> addSessQueue;
 
         // used versions
         std::string m_DBVersion;

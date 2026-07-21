@@ -47,7 +47,10 @@
  * - CMSG_BUY_STABLE_SLOT: Buy stable slot
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cmath>
+#include <string>
+#include <algorithm>
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"

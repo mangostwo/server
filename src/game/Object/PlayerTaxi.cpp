@@ -29,6 +29,7 @@
  *        flight-path lookup. Same `PlayerTaxi` class; no behaviour change.
  */
 
+#include <string>
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -39,7 +40,6 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "DBCStores.h"
 #include "MapManager.h"
 #include <sstream>

@@ -25,7 +25,7 @@
 #ifndef MANGOSSERVER_WORLDPACKET_H
 #define MANGOSSERVER_WORLDPACKET_H
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "ByteBuffer.h"
 #include "Opcodes.h"
 
@@ -86,12 +86,10 @@ class WorldPacket : public ByteBuffer
          * @param opcode
          */
         void SetOpcode(uint16 opcode) { m_opcode = opcode; }
-        /**
-         * @brief
-         *
-         * @return const char
-         */
-        inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
+        // Deliberately no GetOpcodeName() here. The opcode-name table belongs to
+        // the protocol/game layer, and having this convenience accessor in a
+        // shared header made shared depend on game just to format a log line.
+        // Callers use LookupOpcodeName(pkt.GetOpcode()) instead.
 
     protected:
         uint16 m_opcode; /**< TODO */

@@ -41,7 +41,8 @@
  * and distribute rewards.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
 #include "Log.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -51,7 +52,7 @@
 #include "Player.h"
 #include "GossipDef.h"
 #include "QuestDef.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "ScriptMgr.h"
 #include "Group.h"
 #ifdef ENABLE_ELUNA
@@ -191,7 +192,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode(WorldPacket& recv_data)
             return;
         }
 
-        if (Player* pPlayer = sObjectAccessor.FindPlayer(_player->GetDividerGuid()))
+        if (Player* pPlayer = sPlayerRegistry.Find(_player->GetDividerGuid()))
         {
             pPlayer->SendPushToPartyResponse(_player, QUEST_PARTY_MSG_ACCEPT_QUEST);
             _player->ClearDividerGuid();
@@ -509,7 +510,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
             return;
         }
 
-        Player* pOriginalPlayer = sObjectAccessor.FindPlayer(_player->GetDividerGuid());
+        Player* pOriginalPlayer = sPlayerRegistry.Find(_player->GetDividerGuid());
 
         if (!pOriginalPlayer)
         {
@@ -673,7 +674,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 
     DEBUG_LOG("WORLD: Received opcode MSG_QUEST_PUSH_RESULT");
 
-    if (Player* pPlayer = sObjectAccessor.FindPlayer(_player->GetDividerGuid()))
+    if (Player* pPlayer = sPlayerRegistry.Find(_player->GetDividerGuid()))
     {
         WorldPacket data(MSG_QUEST_PUSH_RESULT, (8 + 1));
         data << ObjectGuid(guid);

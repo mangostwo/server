@@ -28,19 +28,19 @@ set(SRC_GRP_AUTH
   Auth/BigNumber.h
   Auth/HMACSHA1.cpp
   Auth/HMACSHA1.h
+  Auth/Md5.h
   Auth/OpenSSLProvider.cpp
   Auth/OpenSSLProvider.h
   Auth/Sha1.cpp
   Auth/Sha1.h
   Auth/WardenKeyGeneration.h
-  Auth/md5.c
-  Auth/md5.h
 )
 source_group("Auth" FILES ${SRC_GRP_AUTH})
 
 set(SRC_GRP_COMMON
-  Common/Common.cpp
-  Common/Common.h
+  Common/Locales.cpp
+  Common/Locales.h
+  Common/TimeConstants.h
   Common/ServerDefines.h
   Common/GitRevision.cpp
   Common/GitRevision.h
@@ -115,10 +115,9 @@ set(SRC_GRP_LOG
 source_group("Log" FILES ${SRC_GRP_LOG})
 
 set(SRC_GRP_THREAD
-  Threading/DelayExecutor.cpp
-  Threading/DelayExecutor.h
   Threading/Threading.cpp
   Threading/Threading.h
+  Threading/ThreadLocalStore.h
 )
 source_group("Threading" FILES ${SRC_GRP_THREAD})
 
@@ -128,12 +127,39 @@ set(SRC_GRP_PLATFORM
 )
 source_group("Platform" FILES ${SRC_GRP_PLATFORM})
 
+# Shared networking engine. The backends self-collapse on the platforms they do not
+# serve (IocpServer is #ifdef _WIN32, the reactor is #ifndef _WIN32), so they can all
+# be listed unconditionally. io_uring is the exception: it needs liburing, so it is
+# only compiled when the option above resolved.
+set(SRC_GRP_NET
+  net/BindAddress.cpp
+  net/BindAddress.hpp
+  net/FlowControl.hpp
+  net/ISession.hpp
+  net/SendQueue.hpp
+  net/Server.hpp
+  net/iocp/IocpServer.cpp
+  net/iocp/IocpServer.hpp
+  net/reactor/Connection.hpp
+  net/reactor/EpollPoller.cpp
+  net/reactor/EpollPoller.hpp
+  net/reactor/KqueuePoller.cpp
+  net/reactor/KqueuePoller.hpp
+  net/reactor/Poller.hpp
+  net/reactor/PollerFactory.cpp
+  net/reactor/ReactorServer.cpp
+  net/reactor/ReactorServer.hpp
+)
+if(MANGOS_USE_IO_URING)
+  list(APPEND SRC_GRP_NET
+    net/uring/UringServer.cpp
+    net/uring/UringServer.hpp
+  )
+endif()
+source_group("net" FILES ${SRC_GRP_NET})
+
 set(SRC_GRP_POLICIES
-  Policies/CreationPolicy.h
-  Policies/ObjectLifeTime.cpp
-  Policies/ObjectLifeTime.h
   Policies/Singleton.h
-  Policies/ThreadingModel.h
 )
 source_group("Policies" FILES ${SRC_GRP_POLICIES})
 
@@ -156,10 +182,14 @@ set(SRC_GRP_UTILITIES
   Utilities/ByteBuffer.cpp
   Utilities/ByteBuffer.h
   Utilities/Errors.h
+  Utilities/MathDefines.h
+  Utilities/PackedValues.h
   Utilities/ProgressBar.cpp
   Utilities/ProgressBar.h
   Utilities/ProgressBarRender.h
   Utilities/RNGen.h
+  Utilities/ScheduledExit.cpp
+  Utilities/ScheduledExit.h
   Utilities/Timer.h
   Utilities/Util.cpp
   Utilities/Util.h
@@ -210,6 +240,7 @@ add_library(shared STATIC
     ${SRC_GRP_GAMESYSTEM}
     ${SRC_GRP_LOCKQ}
     ${SRC_GRP_LOG}
+    ${SRC_GRP_NET}
     ${SRC_GRP_THREAD}
     ${SRC_GRP_PLATFORM}
     ${SRC_GRP_POLICIES}
@@ -237,11 +268,25 @@ target_compile_definitions(shared
 
 target_link_libraries(shared
     PUBLIC
-        ace
+        # PUBLIC, and required: shared uses std::thread directly now (the console
+        # writer, Threading, the net workers). ACE used to drag pthread in as a
+        # side effect, so nothing declared the dependency -- which only showed up
+        # in the extractors, the one consumer that does not also ask for threads
+        # on its own.
+        Threads::Threads
         utf8
         MySQL::MySQL
         ${CMAKE_DL_LIBS}
-        OpenSSL::Crypto
-        OpenSSL::SSL
+        mangos_openssl
         $<$<BOOL:${WIN32}>:dbghelp>
+        # Winsock + the AcceptEx/GetAcceptExSockaddrs extensions used by IocpServer.
+        $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<BOOL:${WIN32}>:mswsock>
+        $<$<BOOL:${MANGOS_USE_IO_URING}>:${URING_LIBRARY}>
+    PRIVATE
+        mangos_openssl_strict
 )
+
+if(MANGOS_USE_IO_URING)
+    target_include_directories(shared PUBLIC ${URING_INCLUDE_DIR})
+endif()

@@ -39,6 +39,8 @@
  * where teams compete to control them and generate resources toward victory.
  */
 
+#include <vector>
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"

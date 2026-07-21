@@ -26,6 +26,7 @@
     \ingroup world
 */
 
+#include "Common/TimeConstants.h"
 #include "Weather.h"
 #include "Player.h"
 #include "ProgressBar.h"

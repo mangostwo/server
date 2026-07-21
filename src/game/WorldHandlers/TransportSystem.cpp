@@ -33,6 +33,8 @@
  * - Abstract storage of passengers (added by BoardPassenger, UnboardPassenger)
  */
 
+#include <cmath>
+#include "Utilities/Errors.h"
 #include "TransportSystem.h"
 #include "Unit.h"
 #include "Vehicle.h"

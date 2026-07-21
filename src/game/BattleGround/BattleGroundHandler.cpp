@@ -34,7 +34,7 @@
  * - Join/Leave battleground operations
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"

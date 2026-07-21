@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <list>
 #include "OutdoorPvPHP.h"
 #include "WorldPacket.h"
 #include "World.h"

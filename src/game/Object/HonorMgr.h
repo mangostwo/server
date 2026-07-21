@@ -25,7 +25,8 @@
 #ifndef MANGOS_H_HONORMGR
 #define MANGOS_H_HONORMGR
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <ctime>
 
 class Player;
 class Unit;

@@ -29,6 +29,10 @@
  *        methods. Same `Player` class; no behaviour change.
  */
 
+#include <string>
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
@@ -53,7 +57,6 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "ObjectMgr.h"
-#include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"

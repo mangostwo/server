@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_TILEASSEMBLER
 #define MANGOS_H_TILEASSEMBLER
 
+#include <string>
 #include <G3D/Vector3.h>
 #include <G3D/Matrix3.h>
 #include <map>

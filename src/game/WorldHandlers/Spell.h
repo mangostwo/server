@@ -47,7 +47,14 @@
 #ifndef MANGOS_H_SPELL
 #define MANGOS_H_SPELL
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <ctime>
+#include <string>
+#include <vector>
+#include <map>
+#include <list>
 #include "GridDefines.h"
 #include "SharedDefines.h"
 #include "DBCEnums.h"

@@ -25,6 +25,9 @@
 #ifndef DBCSTORE_H
 #define DBCSTORE_H
 
+#include <cassert>
+#include <list>
+#include <map>
 #include "DBCFileLoader.h"
 
 template<class T>

@@ -40,6 +40,7 @@
  * @see BIH for the spatial index structure
  */
 
+#include "Utilities/Errors.h"
 #include "MapTree.h"
 #include "ModelInstance.h"
 #include "VMapManager2.h"

@@ -39,6 +39,8 @@
  * @see Map for the owning map instance
  */
 
+#include <string>
+#include "Utilities/Errors.h"
 #include "InstanceData.h"
 #include "Database/DatabaseEnv.h"
 #include "Map.h"

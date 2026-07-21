@@ -27,6 +27,7 @@
  * @brief Cohesion split of SpellMgr.cpp -- spell-area requirement and skill-line / skill-race-class map loaders.
  */
 
+#include "Common/TimeConstants.h"
 #include "SpellMgr.h"
 #include "SpellAuraDefines.h"
 #include "ObjectMgr.h"

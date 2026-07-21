@@ -123,8 +123,14 @@ msbuild.cmd
 /src/tools/Extractor_Binaries/*.exe
 
 # Skip Git Revision created file
-/src/shared/revision_data.h
 
 
 # File generated during compile
 /dep/libmpq/compile
+
+# Compiler caches. CCACHE_DIR/SCCACHE_DIR in the CI workflows point outside the
+# checkout, which is the actual fix; this is a safety net, because the cache
+# action picks its own directory if it does not honour those. Without it the
+# "working tree is clean" guard fails on the cache rather than on a real change.
+.ccache/
+.sccache/

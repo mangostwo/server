@@ -33,6 +33,10 @@
  * - Quest and achievement lists
  */
 
+#include <string>
+#include <sstream>
+#include "Common/Locales.h"
+#include "PlayerRegistry.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
@@ -453,7 +457,7 @@ bool ChatHandler::HandleListItemCommand(char* args)
 //    PSendSysMessage("Online Players (Limit %u):", limit);
 //    PSendSysMessage("===========================================");
 //
-//    sObjectAccessor.DoForAllPlayers([&](Player* player)
+//    sPlayerRegistry.ForEach([&](Player* player)
 //    {
 //        if (count >= limit)
 //        {

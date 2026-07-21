@@ -22,6 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <list>
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "Unit.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -38,7 +44,8 @@
 #include "Group.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
+#include "ObjectLookup.h"
 #include "CreatureAI.h"
 #include "TemporarySummon.h"
 #include "Formulas.h"
@@ -3244,7 +3251,7 @@ Unit* Unit::GetOwner() const
 {
     if (ObjectGuid ownerid = GetOwnerGuid())
     {
-        return sObjectAccessor.GetUnit(*this, ownerid);
+        return ObjectLookup::GetUnit(*this, ownerid);
     }
     return NULL;
 }
@@ -3258,7 +3265,7 @@ Unit* Unit::GetCharmer() const
 {
     if (ObjectGuid charmerid = GetCharmerGuid())
     {
-        return sObjectAccessor.GetUnit(*this, charmerid);
+        return ObjectLookup::GetUnit(*this, charmerid);
     }
     return NULL;
 }
@@ -3288,7 +3295,7 @@ Player* Unit::GetCharmerOrOwnerPlayerOrPlayerItself()
     ObjectGuid guid = GetCharmerOrOwnerGuid();
     if (guid.IsPlayer())
     {
-        return sObjectAccessor.FindPlayer(guid);
+        return sPlayerRegistry.Find(guid);
     }
 
     return GetTypeId() == TYPEID_PLAYER ? (Player*)this : NULL;
@@ -3304,7 +3311,7 @@ Player const* Unit::GetCharmerOrOwnerPlayerOrPlayerItself() const
     ObjectGuid guid = GetCharmerOrOwnerGuid();
     if (guid.IsPlayer())
     {
-        return sObjectAccessor.FindPlayer(guid);
+        return sPlayerRegistry.Find(guid);
     }
 
     return GetTypeId() == TYPEID_PLAYER ? (Player const*)this : NULL;
@@ -3373,7 +3380,7 @@ Unit* Unit::GetCharm() const
 {
     if (ObjectGuid charm_guid = GetCharmGuid())
     {
-        if (Unit* pet = sObjectAccessor.GetUnit(*this, charm_guid))
+        if (Unit* pet = ObjectLookup::GetUnit(*this, charm_guid))
         {
             return pet;
         }

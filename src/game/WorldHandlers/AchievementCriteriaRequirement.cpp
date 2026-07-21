@@ -27,7 +27,9 @@
  * @brief Cohesion split of AchievementMgr.cpp -- AchievementCriteriaRequirement[Set] validation and criterion gating.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include <ctime>
 #include "AchievementMgr.h"
 #include "DBCStores.h"
 #include "Player.h"

@@ -33,6 +33,9 @@
  * - NPC path assignment
  */
 
+#include <list>
+#include <string>
+#include "Common/TimeConstants.h"
 #include "Chat.h"
 #include "Language.h"
 #include "PointMovementGenerator.h"

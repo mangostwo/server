@@ -22,11 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
 #include "World.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "Database/DatabaseEnv.h"
 #include "GridNotifiers.h"
 #include "CellImpl.h"
@@ -149,7 +149,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
 Unit* DynamicObject::GetCaster() const
 {
     // can be not found in some cases
-    return sObjectAccessor.GetUnit(*this, GetCasterGuid());
+    return ObjectLookup::GetUnit(*this, GetCasterGuid());
 }
 
 /**

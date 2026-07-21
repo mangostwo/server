@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include "PlayerRegistry.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "Log.h"
@@ -100,7 +102,7 @@ void WorldSession::HandleArenaTeamInviteOpcode(WorldPacket& recv_data)
             return;
         }
 
-        player = sObjectAccessor.FindPlayerByName(Invitedname.c_str());
+        player = sPlayerRegistry.FindByName(Invitedname.c_str());
     }
 
     if (!player)

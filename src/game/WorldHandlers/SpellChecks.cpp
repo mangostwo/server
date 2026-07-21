@@ -28,6 +28,7 @@
  *        Same `Spell` class; no behaviour change.
  */
 
+#include "Utilities/MathDefines.h"
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -47,7 +48,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -1347,7 +1348,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (Corpse* corpse = m_caster->GetMap()->GetCorpse(m_targets.getCorpseTargetGuid()))
                     {
-                        if (Player* owner = sObjectAccessor.FindPlayer(corpse->GetOwnerGuid()))
+                        if (Player* owner = sPlayerRegistry.Find(corpse->GetOwnerGuid()))
                         {
                             if (owner->HasAuraType(SPELL_AURA_PREVENT_RESURRECTION))
                             {

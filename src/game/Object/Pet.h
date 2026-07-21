@@ -52,7 +52,12 @@
 #ifndef MANGOSSERVER_PET_H
 #define MANGOSSERVER_PET_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
+#include <ctime>
+#include <vector>
 #include "ObjectGuid.h"
 #include "Creature.h"
 #include "Unit.h"

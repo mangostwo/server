@@ -25,12 +25,11 @@
 #ifndef _AUTH_SHA1_H
 #define _AUTH_SHA1_H
 
-#include "Common/Common.h"
-#include <openssl/sha.h>
-#include <openssl/crypto.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-#  include <openssl/provider.h>
-#endif
+#include "Platform/Define.h"
+#include "Utilities/Errors.h"
+#include <openssl/evp.h>
+#include <openssl/sha.h>       // SHA_DIGEST_LENGTH
+#include <string>
 
 class BigNumber;
 
@@ -52,6 +51,18 @@ class Sha1Hash
          * @brief Destructor
          */
         ~Sha1Hash();
+
+        /**
+         * @brief Copy constructor - duplicates the digest context
+         *
+         * Value semantics are load-bearing: realmd passes a finalized
+         * Sha1Hash to AuthSocket::SendProof() by value.
+         */
+        Sha1Hash(const Sha1Hash& other);
+        /**
+         * @brief Copy assignment - duplicates the digest context
+         */
+        Sha1Hash& operator=(const Sha1Hash& other);
 
         /**
          * @brief Update hash with multiple BigNumbers (variadic)
@@ -93,7 +104,7 @@ class Sha1Hash
         int GetLength(void) { return SHA_DIGEST_LENGTH; };
 
     private:
-        SHA_CTX mC; /**< OpenSSL SHA-1 context */
+        EVP_MD_CTX* mC; /**< OpenSSL SHA-1 context */
         uint8 mDigest[SHA_DIGEST_LENGTH]{ 0 }; /**< Computed hash digest */
 };
 #endif

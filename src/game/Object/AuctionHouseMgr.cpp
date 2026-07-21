@@ -22,6 +22,13 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <map>
+#include <vector>
+#include <string>
+#include <sstream>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
+#include "Utilities/Errors.h"
 #include "AuctionHouseMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "SQLStorages.h"

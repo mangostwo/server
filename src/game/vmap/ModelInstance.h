@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_MODELINSTANCE
 #define MANGOS_H_MODELINSTANCE
 
+#include <string>
 #include "Platform/Define.h"
 
 #include <G3D/Matrix3.h>

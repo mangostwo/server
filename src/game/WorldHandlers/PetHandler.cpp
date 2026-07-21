@@ -40,7 +40,9 @@
  * Pet actions are validated and synchronized with the owner.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "ObjectMgr.h"

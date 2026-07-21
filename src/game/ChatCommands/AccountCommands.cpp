@@ -35,6 +35,8 @@
  * - Account properties modification (addons, GM level, password)
  */
 
+#include <string>
+#include "Common/ServerDefines.h"
 #include "World.h"
 #include "Chat.h"
 #include "AccountMgr.h"

@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include <sstream>
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "Calendar.h"
 #include "Guild.h"
 #include "Mail.h"

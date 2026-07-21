@@ -22,11 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Player.h"
+#include "Map.h"
+#include "Utilities/Util.h"
+#include "Utilities/MathDefines.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "MapManager.h"
 #include "FleeingMovementGenerator.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
 #include "PathFinder.h"
@@ -88,7 +93,7 @@ template<class T>
 bool FleeingMovementGenerator<T>::_getPoint(T& owner, float& x, float& y, float& z)
 {
     float dist_from_caster, angle_to_caster;
-    if (Unit* fright = sObjectAccessor.GetUnit(owner, i_frightGuid))
+    if (Unit* fright = ObjectLookup::GetUnit(owner, i_frightGuid))
     {
         dist_from_caster = fright->GetDistance(&owner);
         if (dist_from_caster > 0.2f)

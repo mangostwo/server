@@ -1,31 +1,48 @@
 name: Docker Build
+
 on:
   push:
-      branches: [ master , devel ]
+    branches: [ master, devel ]
   pull_request:
-      branches: [ master ]
+    branches: [ master ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout Submodules
-        shell: bash
-        run: |
-          git submodule init && git submodule update
+          submodules: recursive
+          fetch-depth: 1
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      - name: Build Mangosd Docker image
-        run: |
-          docker build -t mangosd:latest -f dockercontainer/DockerFile-mangosd .
+      - name: Build mangosd image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: extra/docker/DockerFile-mangosd
+          tags: mangosd:latest
+          push: false
+          cache-from: type=gha,scope=mangosd
+          cache-to: type=gha,scope=mangosd,mode=max
 
-      - name: Build Realmd Docker image
-        run: |
-          docker build -t realmd:latest -f dockercontainer/DockerFile-realmd .
+      - name: Build realmd image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: extra/docker/DockerFile-realmd
+          tags: realmd:latest
+          push: false
+          cache-from: type=gha,scope=realmd
+          cache-to: type=gha,scope=realmd,mode=max

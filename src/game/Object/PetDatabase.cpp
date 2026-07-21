@@ -29,6 +29,7 @@
  *        change.
  */
 
+#include <sstream>
 #include "Pet.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"

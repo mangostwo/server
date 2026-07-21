@@ -30,7 +30,7 @@
  *        change.
  */
 
-#include "Common.h"
+#include "Platform/Define.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"

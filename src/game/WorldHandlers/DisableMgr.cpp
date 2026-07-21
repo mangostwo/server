@@ -36,6 +36,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <set>
+#include <map>
+#include "Utilities/Errors.h"
 #include "DisableMgr.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvPMgr.h"

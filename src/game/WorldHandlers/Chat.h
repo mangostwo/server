@@ -25,7 +25,13 @@
 #ifndef MANGOSSERVER_CHAT_H
 #define MANGOSSERVER_CHAT_H
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include "Common/Locales.h"
+#include <cstring>
+#include <ctime>
+#include <string>
+#include <list>
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 #include "Language.h"

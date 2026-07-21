@@ -33,6 +33,8 @@
  * - Creature database management
  */
 
+#include <string>
+#include "ObjectLookup.h"
 #include "Chat.h"
 #include "Language.h"
 #include "World.h"
@@ -1109,7 +1111,7 @@ bool ChatHandler::HandleNpcNameCommand(char* /*args*/)
         return true;
     }
 
-    Creature* pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {
@@ -1164,7 +1166,7 @@ bool ChatHandler::HandleNpcSubNameCommand(char* /*args*/)
         return true;
     }
 
-    Creature* pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {
@@ -1303,7 +1305,7 @@ namespace
         }
 
         // Creature/pet object-store lookup only. Avoid Map::GetUnit because its
-        // player path uses ObjectAccessor rather than the map object store.
+        // player path uses the global player registry rather than the map object store.
         return watched->GetMap()->GetAnyTypeCreature(guid);
     }
 
@@ -1556,7 +1558,7 @@ bool ChatHandler::HandleNpcAddWeaponCommand(char* /*args*/)
         return true;
     }
 
-    Creature *pCreature = sObjectAccessor.GetCreature(*m_session->GetPlayer(), guid);
+    Creature *pCreature = ObjectLookup::GetCreature(*m_session->GetPlayer(), guid);
 
     if (!pCreature)
     {

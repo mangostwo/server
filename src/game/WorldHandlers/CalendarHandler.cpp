@@ -22,7 +22,13 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "Utilities/Errors.h"
+#include "PlayerRegistry.h"
+#include "Platform/Define.h"
+#include "Utilities/PackedValues.h"
+#include <ctime>
+#include <string>
+#include <set>
 #include "Log.h"
 #include "Player.h"
 #include "WorldPacket.h"
@@ -492,7 +498,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
 
     recv_data >> eventId >> inviteId >> name >> isPreInvite >> isGuildEvent;
 
-    if (Player* player = sObjectAccessor.FindPlayerByName(name.c_str()))
+    if (Player* player = sPlayerRegistry.FindByName(name.c_str()))
     {
         // Invitee is online
         inviteeGuid = player->GetObjectGuid();

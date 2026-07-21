@@ -42,6 +42,9 @@
  * @see MapTree for the resulting map tree
  */
 
+#include <utility>
+#include <map>
+#include <string>
 #include "TileAssembler.h"
 #include "MapTree.h"
 #include "BIH.h"

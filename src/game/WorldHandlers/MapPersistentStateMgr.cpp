@@ -43,6 +43,15 @@
  * @see MapPersistentState for individual instance state
  */
 
+#include <utility>
+#include <set>
+#include <map>
+#include <string>
+#include <sstream>
+#include "Utilities/PackedValues.h"
+#include "Common/TimeConstants.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "MapPersistentStateMgr.h"
 
 #include "SQLStorages.h"

@@ -27,6 +27,7 @@
  * @brief Cohesion split of Creature.cpp -- creature spell-cooldown management.
  */
 
+#include "Common/TimeConstants.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "SpellMgr.h"

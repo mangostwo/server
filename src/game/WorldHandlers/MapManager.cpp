@@ -44,6 +44,10 @@
  * @see Map for individual map implementation
  */
 
+#include <cassert>
+#include <functional>
+#include <mutex>
+#include "Utilities/Errors.h"
 #include "MapManager.h"
 #include "MapPersistentStateMgr.h"
 #include "Policies/Singleton.h"
@@ -60,9 +64,7 @@
 #include "ElunaConfig.h"
 #endif /* ENABLE_ELUNA */
 
-#define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ACE_Recursive_Thread_Mutex>
-INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
-INSTANTIATE_CLASS_MUTEX(MapManager, ACE_Recursive_Thread_Mutex);
+INSTANTIATE_SINGLETON_1(MapManager);
 
 MapManager::MapManager()
     : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_UINT32_INTERVAL_GRIDCLEAN)), m_lock()
@@ -164,7 +166,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
 /// @param id - MapId of the to be created map. @param obj WorldObject for which the map is to be created. Must be player for Instancable maps.
 Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
 {
-    ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, NULL)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
 
     Map* m = NULL;
 
@@ -188,7 +190,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     else
     {
         // create regular non-instanceable map
-        m = FindMap(id);
+        m = FindMapLocked(id, 0);
         if (m == NULL)
         {
             m = new WorldMap(id, i_gridCleanUpDelay);
@@ -214,7 +216,7 @@ Map* MapManager::CreateBgMap(uint32 mapid, BattleGround* bg)
 {
     sTerrainMgr.LoadTerrain(mapid);
 
-    ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, NULL)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
     return CreateBattleGroundMap(mapid, sObjectMgr.GenerateInstanceLowGuid(), bg);
 }
 
@@ -227,8 +229,25 @@ Map* MapManager::CreateBgMap(uint32 mapid, BattleGround* bg)
  */
 Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
 {
-    ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, NULL)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
+    return FindMapLocked(mapid, instanceId);
+}
 
+/**
+ * @brief FindMap's body, for callers that already hold m_lock.
+ *
+ * Splitting the lock out of the lookup is what allowed m_lock to stop being
+ * recursive. CreateMap takes the lock and then reaches FindMap through
+ * CreateInstance, so with a single locking FindMap the mutex had to tolerate
+ * reentry -- and a recursive mutex tolerates every other accidental reentry too,
+ * including the ones that are real deadlocks waiting to be discovered.
+ *
+ * @param mapid The map id.
+ * @param instanceId The instance id.
+ * @return Map* The loaded map, or null if not found.
+ */
+Map* MapManager::FindMapLocked(uint32 mapid, uint32 instanceId) const
+{
     MapMapType::const_iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter == i_maps.end())
     {
@@ -253,7 +272,7 @@ Map* MapManager::FindMap(uint32 mapid, uint32 instanceId) const
  */
 void MapManager::DeleteInstance(uint32 mapid, uint32 instanceId)
 {
-    ACE_GUARD(LOCK_TYPE, _guard, m_lock)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
 
     MapMapType::iterator iter = i_maps.find(MapID(mapid, instanceId));
     if (iter != i_maps.end())
@@ -404,7 +423,7 @@ uint32 MapManager::GetNumInstances()
 {
     uint32 ret = 0;
 
-    ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, ret)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
         Map* map = itr->second;
@@ -426,7 +445,7 @@ uint32 MapManager::GetNumPlayersInInstances()
 {
     uint32 ret = 0;
 
-    ACE_GUARD_RETURN(LOCK_TYPE, _guard, m_lock, ret)
+    std::lock_guard<LOCK_TYPE> guard(m_lock);
     for (MapMapType::iterator itr = i_maps.begin(); itr != i_maps.end(); ++itr)
     {
         Map* map = itr->second;
@@ -453,14 +472,14 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
         // find existing bg map for player
         NewInstanceId = player->GetBattleGroundId();
         MANGOS_ASSERT(NewInstanceId);
-        map = FindMap(id, NewInstanceId);
+        map = FindMapLocked(id, NewInstanceId);
         MANGOS_ASSERT(map);
     }
     else if (DungeonPersistentState* pSave = player->GetBoundInstanceSaveForSelfOrGroup(id))
     {
         // solo/perm/group
         NewInstanceId = pSave->GetInstanceId();
-        map = FindMap(id, NewInstanceId);
+        map = FindMapLocked(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
         {

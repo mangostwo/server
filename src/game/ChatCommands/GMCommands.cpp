@@ -32,6 +32,11 @@
  * - General purpose administrative utilities
  */
 
+#include <utility>
+#include <list>
+#include <string>
+#include "Common/ServerDefines.h"
+#include "PlayerRegistry.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"
@@ -358,7 +363,7 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
 bool ChatHandler::HandleGMListIngameCommand(char* /*args*/)
 {
     std::list< std::pair<std::string, bool> > names;
-    sObjectAccessor.DoForAllPlayers([&names, this](Player *player)
+    sPlayerRegistry.ForEach([&names, this](Player *player)
     {
         AccountTypes security = player->GetSession()->GetSecurity();
         if ((player->isGameMaster() || (security > SEC_PLAYER && security <= (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_GM_LIST))) &&

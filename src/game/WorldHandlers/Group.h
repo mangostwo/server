@@ -52,7 +52,12 @@
 #ifndef MANGOSSERVER_GROUP_H
 #define MANGOSSERVER_GROUP_H
 
-#include "Common.h"
+#include "Utilities/UnorderedMapSet.h"
+#include "Platform/Define.h"
+#include <cstring>
+#include <string>
+#include <set>
+#include <list>
 #include "ObjectGuid.h"
 #include "GroupReference.h"
 #include "GroupRefManager.h"

@@ -22,11 +22,21 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdint>
+#include <string>
 #include "Config/Config.h"
 #include "PosixDaemon.h"
 #include <cstdio>
 #include <iostream>
 #include <fstream>
+
+// POSIX process control: fork/setsid/chdir/umask/getpid/alarm/pause and the
+// signal constants. These used to arrive by accident through the ACE headers
+// buried in Common.h; naming them is what lets this file build without it.
+#include <csignal>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 pid_t parent_pid = 0, sid = 0;
 

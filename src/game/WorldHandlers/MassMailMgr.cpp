@@ -47,6 +47,8 @@
  * @see MailDraft for the mail content template
  */
 
+#include <sstream>
+#include "Common/TimeConstants.h"
 #include "MassMailMgr.h"
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"

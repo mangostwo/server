@@ -33,6 +33,7 @@
  * - Quest and NPC data reloads
  */
 
+#include "Common/ServerDefines.h"
 #include "Chat.h"
 #include "Language.h"
 #include "SpellMgr.h"

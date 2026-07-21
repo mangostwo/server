@@ -42,7 +42,15 @@
  * @see Spell for spell casting
  */
 
-#include "Common.h"
+#include <iterator>
+#include "Utilities/Errors.h"
+#include "Platform/Define.h"
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include <cstdlib>
+#include <map>
+#include <set>
+#include <list>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -58,7 +66,7 @@
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "Policies/Singleton.h"
 #include "Totem.h"
 #include "Creature.h"
@@ -576,7 +584,7 @@ SingleEnemyTargetAura::~SingleEnemyTargetAura()
  */
 Unit* SingleEnemyTargetAura::GetTriggerTarget() const
 {
-    return sObjectAccessor.GetUnit(*(m_spellAuraHolder->GetTarget()), m_castersTargetGuid);
+    return ObjectLookup::GetUnit(*(m_spellAuraHolder->GetTarget()), m_castersTargetGuid);
 }
 
 /**
@@ -4771,7 +4779,7 @@ Unit* SpellAuraHolder::GetCaster() const
         return m_target;
     }
 
-    return sObjectAccessor.GetUnit(*m_target, m_casterGuid);// player will search at any maps
+    return ObjectLookup::GetUnit(*m_target, m_casterGuid);// player will search at any maps
 }
 
 /**

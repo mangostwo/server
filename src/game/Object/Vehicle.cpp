@@ -37,8 +37,9 @@
  * - Internal helper to control the available seats of a vehicle
  */
 
+#include "Utilities/Errors.h"
 #include "Vehicle.h"
-#include "Common.h"
+#include "Platform/Define.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
 #include "Log.h"

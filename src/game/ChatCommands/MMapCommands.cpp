@@ -32,6 +32,7 @@
  * - Path generation and verification
  */
 
+#include <list>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"

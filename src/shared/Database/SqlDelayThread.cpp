@@ -32,6 +32,7 @@
  * improving server responsiveness.
  */
 
+#include "Threading/Threading.h"
 #include "Database/SqlDelayThread.h"
 #include "Database/SqlOperations.h"
 #include "DatabaseEnv.h"
@@ -74,14 +75,16 @@ SqlDelayThread::~SqlDelayThread()
  * database's configured ping interval.
  *
  * @note This method is called when the thread starts. It should not
- * be called directly - use ACE_Based::Thread::Start() instead.
+ * be called directly - use MaNGOS::Thread::Start() instead.
  */
 void SqlDelayThread::run()
 {
-#ifndef DO_POSTGRESQL
-    // Initialize MySQL thread-local data for this thread
-    mysql_thread_init();
-#endif
+    // Register this thread with the client library through the Database
+    // interface. It used to call mysql_thread_init()/_end() directly, under an
+    // #ifndef DO_POSTGRESQL -- hard-wiring one backend into a class that is
+    // otherwise backend-agnostic, and duplicating the very hooks the base class
+    // exists to provide.
+    DbThreadGuard dbThread(m_dbEngine);
 
     const uint32 loopSleepms = 10; /**< Sleep interval between processing cycles in milliseconds */
 
@@ -94,7 +97,7 @@ void SqlDelayThread::run()
     {
         // if the running state gets turned off while sleeping
         // empty the queue before exiting
-        ACE_Based::Thread::Sleep(loopSleepms);
+        MaNGOS::Thread::Sleep(loopSleepms);
 
         ProcessRequests();
 
@@ -105,12 +108,6 @@ void SqlDelayThread::run()
             m_dbEngine->Ping();
         }
     }
-
-#ifndef DO_POSTGRESQL
-    // Clean up MySQL thread-local data
-    mysql_thread_end();
-#endif
-
 }
 
 /**

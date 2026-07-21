@@ -27,6 +27,7 @@
  * @brief Cohesion split of Player.cpp -- inventory/equip slot lookup accessors.
  */
 
+#include "Utilities/Errors.h"
 #include "Player.h"
 
 void Player::SetVirtualItemSlot(uint8 i, Item* item)

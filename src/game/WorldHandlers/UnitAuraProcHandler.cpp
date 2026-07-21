@@ -22,7 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include "ObjectLookup.h"
+#include "Platform/Define.h"
+#include "Utilities/MathDefines.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
@@ -942,7 +944,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                             target = getVictim();
                             if (!target)
                             {
-                                target = sObjectAccessor.GetUnit(*this, ((Player*)this)->GetSelectionGuid());
+                                target = ObjectLookup::GetUnit(*this, ((Player*)this)->GetSelectionGuid());
                                 if (!target)
                                 {
                                     return SPELL_AURA_PROC_FAILED;

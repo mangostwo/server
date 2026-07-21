@@ -28,6 +28,7 @@
  *        Same `Spell` class; no behaviour change.
  */
 
+#include <cmath>
 #include "Spell.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
@@ -47,7 +48,7 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "ObjectAccessor.h"
+#include "ObjectLookup.h"
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -637,7 +638,7 @@ void Spell::AddUnitTarget(Unit* pVictim, SpellEffectIndex effIndex)
  */
 void Spell::AddUnitTarget(ObjectGuid unitGuid, SpellEffectIndex effIndex)
 {
-    if (Unit* unit = m_caster->GetObjectGuid() == unitGuid ? m_caster : sObjectAccessor.GetUnit(*m_caster, unitGuid))
+    if (Unit* unit = m_caster->GetObjectGuid() == unitGuid ? m_caster : ObjectLookup::GetUnit(*m_caster, unitGuid))
     {
         AddUnitTarget(unit, effIndex);
     }

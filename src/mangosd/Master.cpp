@@ -1,0 +1,355 @@
+/**
+ * MaNGOS is a full featured server for World of Warcraft, supporting
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ *
+ * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * World of Warcraft, and all World of Warcraft or Warcraft art, images,
+ * and lore are copyrighted by Blizzard Entertainment, Inc.
+ */
+
+#include "Master.h"
+
+#include "AntiFreezeService.h"
+#include "CliService.h"
+#include "RASession.h"
+
+#include "Config/Config.h"
+#include "DBCStores.h"
+#include "Database/DatabaseEnv.h"
+#include "Log.h"
+#include "MapManager.h"
+#include "Server/WorldNetwork.h"
+#include "Timer.h"
+#include "World.h"
+
+#ifdef ENABLE_SOAP
+#include "SOAP/SoapService.h"
+#include <thread>
+#endif
+
+#ifdef _WIN32
+#include "ServiceWin32.h"
+extern int m_ServiceStatus;
+#else
+#include "PosixDaemon.h"
+#endif
+
+#include <chrono>
+#include <string>
+#include <thread>
+#include <vector>
+
+/// Shortest interval between two world ticks, in milliseconds.
+#ifndef WORLD_SLEEP_CONST
+#define WORLD_SLEEP_CONST 50
+#endif
+
+extern uint32 realmID;
+
+namespace
+{
+    /**
+     * @brief Open one database and verify its schema version.
+     *
+     * @param db          The database to open.
+     * @param label       Name used in log messages.
+     * @param infoKey     Config key holding the connection string.
+     * @param countKey    Config key holding the extra connection count.
+     * @param versionKind Which schema this database is expected to carry.
+     * @return false if the database could not be opened or is the wrong version.
+     */
+    bool OpenDatabase(Database& db, const char* label, const char* infoKey,
+                      const char* countKey, DatabaseTypes versionKind)
+    {
+        const std::string info = sConfig.GetStringDefault(infoKey, "");
+        if (info.empty())
+        {
+            sLog.outError("%s database not specified in the configuration file", label);
+            return false;
+        }
+
+        const int connections = sConfig.GetIntDefault(countKey, 1);
+        sLog.outString("%s database total connections: %i", label, connections + 1);
+
+        if (!db.Initialize(info.c_str(), connections))
+        {
+            sLog.outError("Cannot connect to the %s database", label);
+            return false;
+        }
+
+        return db.CheckDatabaseVersion(versionKind);
+    }
+}
+
+Master::Master()
+{
+}
+
+Master::~Master()
+{
+}
+
+bool Master::StartDatabases()
+{
+    // Opened in order, and unwound in reverse on failure. The predecessor
+    // repeated the whole unwind at each of eight failure points, which is how a
+    // missed HaltDelayThread() hides: every new early return has to remember the
+    // full list of everything opened so far.
+    if (!OpenDatabase(WorldDatabase, "World", "WorldDatabaseInfo",
+                      "WorldDatabaseConnections", DATABASE_WORLD))
+    {
+        WorldDatabase.HaltDelayThread();
+        return false;
+    }
+
+    if (!OpenDatabase(CharacterDatabase, "Character", "CharacterDatabaseInfo",
+                      "CharacterDatabaseConnections", DATABASE_CHARACTER))
+    {
+        CharacterDatabase.HaltDelayThread();
+        WorldDatabase.HaltDelayThread();
+        return false;
+    }
+
+    if (!OpenDatabase(LoginDatabase, "Login", "LoginDatabaseInfo",
+                      "LoginDatabaseConnections", DATABASE_REALMD))
+    {
+        LoginDatabase.HaltDelayThread();
+        CharacterDatabase.HaltDelayThread();
+        WorldDatabase.HaltDelayThread();
+        return false;
+    }
+
+    realmID = sConfig.GetIntDefault("RealmID", 0);
+    if (!realmID)
+    {
+        sLog.outError("Realm ID not defined in the configuration file");
+        StopDatabases();
+        return false;
+    }
+
+    sLog.outString("Realm running as realm ID %u", realmID);
+    return true;
+}
+
+void Master::StopDatabases()
+{
+    LoginDatabase.HaltDelayThread();
+    CharacterDatabase.HaltDelayThread();
+    WorldDatabase.HaltDelayThread();
+}
+
+void Master::ClearOnlineAccounts()
+{
+    // Reset the online flags for this realm only: another realm sharing the same
+    // login database may be up, and its sessions are none of our business.
+    LoginDatabase.PExecute(
+        "UPDATE `account` SET `active_realm_id` = 0 WHERE `active_realm_id` = '%u'",
+        realmID);
+
+    CharacterDatabase.Execute("UPDATE `characters` SET `online` = 0 WHERE `online` <> 0");
+
+    CharacterDatabase.Execute("DELETE FROM `character_battleground_data`");
+
+    CharacterDatabase.Execute(
+        "UPDATE `groups` SET `leaderGuid` = (SELECT `guid` FROM `group_member` "
+        "WHERE `group_member`.`groupId` = `groups`.`groupId` ORDER BY `memberFlags` DESC LIMIT 1) "
+        "WHERE `leaderGuid` NOT IN (SELECT `memberGuid` FROM `group_member` "
+        "WHERE `group_member`.`groupId` = `groups`.`groupId`)");
+}
+
+void Master::StartServices()
+{
+    // Remote administration, over the same networking engine the world uses.
+    if (sConfig.GetBoolDefault("Ra.Enable", false))
+    {
+        m_services.push_back(std::unique_ptr<IService>(new RaService(
+            uint16(sConfig.GetIntDefault("Ra.Port", 3443)),
+            sConfig.GetStringDefault("Ra.IP", "0.0.0.0"))));
+    }
+
+#ifdef ENABLE_SOAP
+    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+    {
+        m_services.push_back(std::unique_ptr<IService>(new SoapService(
+            sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"),
+            uint16(sConfig.GetIntDefault("SOAP.Port", 7878)))));
+    }
+#else
+    if (sConfig.GetBoolDefault("SOAP.Enabled", false))
+    {
+        sLog.outError("SOAP is enabled in the configuration but was not compiled in; ignoring.");
+    }
+#endif
+
+    // Watchdog. Disabled unless MaxCoreStuckTime is set.
+    m_services.push_back(std::unique_ptr<IService>(new AntiFreezeService(
+        1000 * uint32(sConfig.GetIntDefault("MaxCoreStuckTime", 0)))));
+
+    // Console last, so its prompt lands after every other start-up line.
+#ifdef _WIN32
+    const bool consoleWanted = sConfig.GetBoolDefault("Console.Enable", true)
+                            && m_ServiceStatus == -1;   // no console in service mode
+#else
+    const bool consoleWanted = sConfig.GetBoolDefault("Console.Enable", true);
+#endif
+    if (consoleWanted)
+    {
+        m_services.push_back(std::unique_ptr<IService>(
+            new CliService(sConfig.GetBoolDefault("Console.BeepAtStart", true))));
+    }
+
+    for (auto& service : m_services)
+    {
+        service->Start();
+    }
+}
+
+void Master::StopServices()
+{
+    // Ask everything to wind down first, then wait. Doing this in one pass per
+    // service would serialise the timeouts: the total would be the sum of every
+    // service's shutdown rather than the longest one.
+    for (auto& service : m_services)
+    {
+        service->RequestStop();
+    }
+
+    for (auto itr = m_services.rbegin(); itr != m_services.rend(); ++itr)
+    {
+        sLog.outString("[shutdown] stopping %s", (*itr)->Name());
+        (*itr)->Join();
+    }
+
+    m_services.clear();
+}
+
+void Master::WorldLoop()
+{
+    sLog.outString("World updater started (%dms minimum update interval)",
+                   WORLD_SLEEP_CONST);
+
+    uint32 previous = getMSTime();
+
+    while (!World::IsStopped())
+    {
+        // Read by the freeze watchdog to tell a busy server from a wedged one.
+        ++World::m_worldLoopCounter;
+
+        const uint32 current = getMSTime();
+        sWorld.Update(getMSTimeDiff(previous, current));
+        previous = current;
+
+        const uint32 spent = getMSTimeDiff(current, getMSTime());
+        if (spent < WORLD_SLEEP_CONST)
+        {
+            std::this_thread::sleep_for(
+                std::chrono::milliseconds(WORLD_SLEEP_CONST - spent));
+        }
+
+#ifdef _WIN32
+        if (m_ServiceStatus == 0)               // service stopped
+        {
+            World::StopNow(SHUTDOWN_EXIT_CODE);
+        }
+        while (m_ServiceStatus == 2)            // service paused
+        {
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+#endif
+    }
+
+    sLog.outString("World updater stopped.");
+}
+
+void Master::ShutdownWorld()
+{
+    // Strict order, and it matters: players must be saved before their sessions
+    // are drained, sessions must be drained before the listener goes away, and
+    // the listener must be gone before the maps they live on are unloaded.
+    sLog.outString("[shutdown] saving and kicking all players");
+    sWorld.KickAll();
+
+    sLog.outString("[shutdown] draining remaining sessions");
+    sWorld.UpdateSessions(1);
+
+    sLog.outString("[shutdown] stopping the world listener");
+    sWorldNetwork.Stop();
+
+    sLog.outString("[shutdown] unloading maps");
+    sMapMgr.UnloadAll();
+}
+
+int Master::Run()
+{
+    if (!StartDatabases())
+    {
+        return 1;
+    }
+
+    ClearOnlineAccounts();
+
+    sWorld.SetInitialWorldSettings();
+
+#ifndef _WIN32
+    detachDaemon();
+#endif
+
+    // Publish this realm's flags and the client builds it accepts.
+    const uint8 recommendedOrNew =
+        sWorld.getConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW)
+            ? REALM_FLAG_NEW_PLAYERS : REALM_FLAG_RECOMMENDED;
+    const uint8 realmStatus =
+        sWorld.getConfig(CONFIG_BOOL_REALM_RECOMMENDED_OR_NEW_ENABLED)
+            ? recommendedOrNew : uint8(REALM_FLAG_NONE);
+
+    std::string builds = AcceptableClientBuildsListStr();
+    LoginDatabase.escape_string(builds);
+    LoginDatabase.DirectPExecute(
+        "UPDATE `realmlist` SET `realmflags` = %u, `population` = 0, "
+        "`realmbuilds` = '%s' WHERE `id` = '%u'",
+        realmStatus, builds.c_str(), realmID);
+
+    // Async transactions are forbidden during start-up; enable them only now
+    // that the world is fully loaded.
+    WorldDatabase.ThreadStart();
+    CharacterDatabase.AllowAsyncTransactions();
+    WorldDatabase.AllowAsyncTransactions();
+    LoginDatabase.AllowAsyncTransactions();
+
+    if (!sWorldNetwork.Start(uint16(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD)),
+                             sConfig.GetStringDefault("BindIP", "0.0.0.0")))
+    {
+        StopDatabases();
+        return 1;
+    }
+
+    StartServices();
+
+    WorldLoop();
+
+    ShutdownWorld();
+    StopServices();
+
+    ClearOnlineAccounts();
+    StopDatabases();
+
+    WorldDatabase.ThreadEnd();
+
+    sLog.outString("Halting process...");
+    return World::GetExitCode();
+}

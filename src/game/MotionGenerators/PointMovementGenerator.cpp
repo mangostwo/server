@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Player.h"
+#include "Map.h"
 #include "PointMovementGenerator.h"
 #include "Errors.h"
 #include "Creature.h"

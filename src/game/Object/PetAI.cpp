@@ -22,13 +22,16 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <utility>
+#include <vector>
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
 #include "PetAI.h"
 #include "Errors.h"
 #include "Pet.h"
 #include "Player.h"
 #include "DBCStores.h"
 #include "Spell.h"
-#include "ObjectAccessor.h"
 #include "SpellMgr.h"
 #include "Creature.h"
 #include "World.h"

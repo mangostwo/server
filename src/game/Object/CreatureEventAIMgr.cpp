@@ -22,7 +22,12 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#include "Common.h"
+#include <utility>
+#include <cmath>
+#include "Platform/Define.h"
+#include <cstring>
+#include <set>
+#include <algorithm>
 #include "Database/DatabaseEnv.h"
 #include "SQLStorages.h"
 #include "CreatureEventAI.h"

@@ -33,6 +33,8 @@
  * - Location saving and loading
  */
 
+#include <cmath>
+#include <string>
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "World.h"

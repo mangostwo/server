@@ -43,6 +43,9 @@
  * @see MailHandler for network opcode handling
  */
 
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Utilities/Errors.h"
 #include "Mail.h"
 #include "Log.h"
 #include "ObjectGuid.h"

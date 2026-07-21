@@ -25,14 +25,34 @@
 #ifndef MANGOS_H_UTIL
 #define MANGOS_H_UTIL
 
-#include "Common/Common.h"
-#include <ace/INET_Addr.h>
+#include "Common/TimeConstants.h"
+#include "Platform/Define.h"
 
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <cctype>
+#include <cstring>
+#include <ctime>
 #include <functional>
+
+/**
+ * @brief strdup() built on operator new[].
+ *
+ * The result MUST be released with delete[], never free(). That asymmetry is the
+ * whole reason this exists rather than plain strdup: the buffers it returns are
+ * owned by code that frees with delete[].
+ *
+ * @param source NUL-terminated string to copy. Must not be null.
+ * @return A new[]-allocated copy.
+ */
+inline char* mangos_strdup(const char* source)
+{
+    const size_t len = std::strlen(source) + 1;
+    char* dest = new char[len];
+    std::memcpy(dest, source, len);
+    return dest;
+}
 
 enum class TimeFormat : uint8
 {
@@ -903,10 +923,10 @@ std::string vutf8format(const char* str, va_list* ap);
 bool IsIPAddress(char const* ipaddress);
 
 /// Checks if address belongs to the a network with specified submask
-bool IsIPAddrInNetwork(ACE_INET_Addr const& net, ACE_INET_Addr const& addr, ACE_INET_Addr const& subnetMask);
+bool IsIPAddrInNetwork(uint32 net, uint32 addr, uint32 subnetMask);
 
-/// Transforms ACE_INET_Addr address into string format "dotted_ip:port"
-std::string GetAddressString(ACE_INET_Addr const& addr);
+/// Transforms a host-order IPv4 address into "dotted_ip:port"
+std::string GetAddressString(uint32 ip, uint16 port);
 
 /**
  * @brief

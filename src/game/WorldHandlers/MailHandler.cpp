@@ -40,6 +40,9 @@
  * and item attachments.
  */
 
+#include <string>
+#include "Common/TimeConstants.h"
+#include "Common/ServerDefines.h"
 #include "Mail.h"
 #include "Language.h"
 #include "Log.h"

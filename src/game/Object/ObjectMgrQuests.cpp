@@ -27,6 +27,9 @@
  * @brief Cohesion split of ObjectMgr.cpp -- quest template and locale loaders.
  */
 
+#include <map>
+#include <string>
+#include "Common/Locales.h"
 #include "ObjectMgr.h"
 #include "LivingWorldAnchorPolicy.h"
 #include "MotionGenerators/MotionMaster.h"  // WAYPOINT_MOTION_TYPE

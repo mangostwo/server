@@ -40,6 +40,7 @@
  * towers, and graveyards competing for resource control and ultimate victory.
  */
 
+#include "Utilities/Errors.h"
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundAV.h"

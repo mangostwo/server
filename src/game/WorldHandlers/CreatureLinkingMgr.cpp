@@ -41,6 +41,8 @@
  * @see CreatureLinkingMgr for the manager class
  */
 
+#include <cmath>
+#include "Utilities/MathDefines.h"
 #include "CreatureLinkingMgr.h"
 #include "Policies/Singleton.h"
 #include "ProgressBar.h"

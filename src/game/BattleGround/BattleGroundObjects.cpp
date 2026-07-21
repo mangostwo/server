@@ -30,6 +30,7 @@
  *        behaviour change.
  */
 
+#include "Utilities/PackedValues.h"
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"

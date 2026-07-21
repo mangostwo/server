@@ -28,6 +28,10 @@
  *        Same classes; no behaviour change.
  */
 
+#include <cmath>
+#include "Common/TimeConstants.h"
+#include "Utilities/MathDefines.h"
+#include "Utilities/Errors.h"
 #include "Object.h"
 #include "SharedDefines.h"
 #include "WorldPacket.h"
@@ -804,6 +808,10 @@ void WorldObject::SetActiveObjectState(bool active)
  *
  * Returns the Eluna scripting engine instance for this object's map.
  */
+#ifdef ENABLE_ELUNA
+// The declaration in Object.h is inside #ifdef ENABLE_ELUNA; this definition was
+// not, so a build with Eluna disabled tried to define a member that does not
+// exist, returning a type that does not exist either.
 Eluna* WorldObject::GetEluna() const
 {
     if (IsInWorld())
@@ -813,3 +821,4 @@ Eluna* WorldObject::GetEluna() const
 
     return nullptr;
 }
+#endif /* ENABLE_ELUNA */

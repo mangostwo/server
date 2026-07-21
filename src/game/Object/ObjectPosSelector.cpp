@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cmath>
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include "Utilities/Errors.h"
 #include "ObjectPosSelector.h"
 #include "Object.h"
 

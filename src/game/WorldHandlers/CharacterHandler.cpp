@@ -39,7 +39,10 @@
  * appearance customization, and starting location setup.
  */
 
-#include "Common.h"
+#include "Common/ServerDefines.h"
+#include "Platform/Define.h"
+#include <string>
+#include <memory>
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "SharedDefines.h"
@@ -53,8 +56,7 @@
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "UpdateMask.h"
-#include "Auth/md5.h"
-#include "ObjectAccessor.h"
+#include "PlayerRegistry.h"
 #include "Group.h"
 #include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
@@ -916,7 +918,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
     }
 
-    sObjectAccessor.AddObject(pCurrChar);
+    sPlayerRegistry.Add(pCurrChar);
     // DEBUG_LOG("Player %s added to Map.",pCurrChar->GetName());
 
     pCurrChar->SendInitialPacketsAfterAddToMap();

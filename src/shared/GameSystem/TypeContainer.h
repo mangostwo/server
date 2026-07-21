@@ -32,6 +32,8 @@
  * Refactored for C++11 by H0zen
  */
 
+#include <cassert>
+#include <utility>
 #include <cstddef>
 #include <tuple>
 #include <unordered_map>

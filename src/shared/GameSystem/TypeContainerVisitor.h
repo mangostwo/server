@@ -32,6 +32,7 @@
  * to overload its types as a visit method is called.
  */
 
+#include <utility>
 #include "TypeContainer.h"
 
 template<class VISITOR, class CONTAINER>

@@ -25,6 +25,7 @@
 #ifndef MANGOS_FACTORY_HOLDER
 #define MANGOS_FACTORY_HOLDER
 
+#include <string>
 #include "Platform/Define.h"
 #include "Utilities/TypeList.h"
 #include "ObjectRegistry.h"

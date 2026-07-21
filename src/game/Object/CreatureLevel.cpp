@@ -27,6 +27,8 @@
  * @brief Cohesion split of Creature.cpp -- creature level selection and elite-rank stat modifiers.
  */
 
+#include "Utilities/Util.h"
+#include <algorithm>
 #include "Creature.h"
 #include "World.h"
 #include "ObjectMgr.h"

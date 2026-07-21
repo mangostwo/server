@@ -29,6 +29,10 @@
  *        no behaviour change.
  */
 
+#include <cmath>
+#include "Utilities/MathDefines.h"
+#include "Utilities/Errors.h"
+#include "PlayerRegistry.h"
 #include "GameObject.h"
 #include "G3D/Quat.h"
 #include "QuestDef.h"
@@ -679,7 +683,7 @@ void GameObject::Use(Unit* user)
 
             Player* player = (Player*)user;
 
-            Player* targetPlayer = sObjectAccessor.FindPlayer(player->GetSelectionGuid());
+            Player* targetPlayer = sPlayerRegistry.Find(player->GetSelectionGuid());
 
             // accept only use by player from same group for caster except caster itself
             if (!targetPlayer || targetPlayer == player || !targetPlayer->IsInSameGroupWith(player))

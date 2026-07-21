@@ -31,6 +31,7 @@
  * transform) off the world and map-update threads.
  */
 
+#include "Threading/Threading.h"
 #include "ConsoleLogWriter.h"
 
 #include <cstdio>
@@ -42,7 +43,7 @@ ConsoleLogWriter::ConsoleLogWriter()
 
 void ConsoleLogWriter::Enqueue(ConsoleLogRecord& rec)
 {
-    if (m_depth.value() >= MAX_CONSOLE_QUEUE)
+    if (m_depth.load(std::memory_order_relaxed) >= MAX_CONSOLE_QUEUE)
     {
         ++m_dropped;
         return;
@@ -57,7 +58,7 @@ void ConsoleLogWriter::run()
     {
         if (!DrainOnce())
         {
-            ACE_Based::Thread::Sleep(5);
+            MaNGOS::Thread::Sleep(5);
         }
     }
     // Authoritative final drain: runs on the writer thread while wait()
@@ -69,7 +70,7 @@ bool ConsoleLogWriter::DrainOnce()
 {
     bool didWork = false;
 
-    long dropped = m_dropped.value();
+    long dropped = m_dropped.load(std::memory_order_relaxed);
     if (dropped > 0)
     {
         m_dropped -= dropped;

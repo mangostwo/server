@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_VMAPFACTORY
 #define MANGOS_H_VMAPFACTORY
 
+#include <string>
 #include "IVMapManager.h"
 
 /**
