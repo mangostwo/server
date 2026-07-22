@@ -41,6 +41,7 @@
 #include "net/ISession.hpp"
 #include "net/SendQueue.hpp"
 #include <atomic>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -94,6 +95,7 @@ static_assert(offsetof(SendOv,   type) == sizeof(OVERLAPPED), "SendOv layout");
 
 // ── Per-connection context ────────────────────────────────────────────────────
 struct ConnCtx;
+class IocpServer;
 
 // Lifetime-safe handle the session uses to send from any thread (e.g. the world
 // update thread). While armed it forwards to ConnCtx::enqueue; disarm() (called
@@ -130,10 +132,34 @@ struct ConnCtx {
     std::atomic<long> refs{1};
     std::atomic<bool> dead{false};
 
+    // Serialises this connection's session callbacks. IOCP places no ordering on the
+    // completions for one handle, so without this a recv-data completion (onData) and
+    // a concurrent send- or error-completion (which can reach onClose) for the same
+    // ctx could run on two workers at once -- a data race on the session's state and a
+    // teardown racing a live delivery. The reactor/io_uring backends inherit this from
+    // their single I/O thread; here the worker takes it around the dispatch, never
+    // across the release() that may free the ctx.
+    std::mutex cb;
+
+    // Serialises the Winsock calls on `sock` (WSARecv/WSASend/closesocket). Winsock
+    // forbids concurrent calls on one socket, and shutdown closes sockets while workers
+    // may still be posting I/O -- this makes every such call mutually exclusive and lets
+    // close() run idempotently from teardown, a world-thread requestClose, and stop().
+    std::mutex sockMu;
+
+    // The owning server. When the last ref drops, release() hands the ctx to
+    // owner->removeAndDelete(), which erases it from m_conns under m_connsMu and only then
+    // deletes it. A stop() scan holds m_connsMu and touches only ctxs still in the set, and
+    // each is erased before it is deleted, so the scan never sees freed memory -- which is
+    // what makes an empty m_conns true I/O quiescence. Set once in handleAccept().
+    IocpServer* owner{nullptr};
+
     explicit ConnCtx(const SessionFactory& factory) : session(factory()) {}
 
     void addRef()  { refs.fetch_add(1, std::memory_order_relaxed); }
-    void release() { if (refs.fetch_sub(1, std::memory_order_acq_rel) == 1) delete this; }
+    // Out of line: the last release routes through owner->removeAndDelete(), which needs
+    // the (here still-incomplete) IocpServer definition.
+    void release();
 
     // Append bytes to the outbound buffer and start a write if none is in flight.
     // Thread-safe; callable from any thread.
@@ -168,6 +194,7 @@ public:
 private:
     HANDLE   m_iocp{nullptr};
     SOCKET   m_listen{INVALID_SOCKET};
+    std::mutex m_listenMu;   // serialises AcceptEx / SO_UPDATE_ACCEPT_CONTEXT / close on m_listen
     SessionFactory m_factory;
 
     LPFN_ACCEPTEX               m_fnAcceptEx{nullptr};
@@ -180,9 +207,21 @@ private:
     static constexpr int PENDING_ACCEPTS = 4;
     static constexpr ULONG_PTR SHUTDOWN_KEY = ~(ULONG_PTR)0;
 
-    // Tracks live connections for cleanup on shutdown
+    // Tracks live connections. A ConnCtx is inserted in handleAccept() and removed by
+    // removeAndDelete() (from ConnCtx::release()) only when its last reference drops, so an
+    // empty m_conns means every connection's overlapped I/O has completed -- the true
+    // quiescence that stop() waits on before it joins the workers and tears the port down.
     std::mutex                             m_connsMu;
+    std::condition_variable                m_connsCv;   // signalled when a ConnCtx is freed
     std::unordered_set<ConnCtx*>           m_conns;
+
+    // Posted-but-not-yet-completed AcceptEx operations. m_conns only tracks adopted
+    // connections, so shutdown also waits for this to reach 0 before joining the workers,
+    // otherwise a still-pending (or cancelled-but-undequeued) accept leaks its AcceptOv.
+    std::atomic<int>                       m_pendingAccepts{0};
+
+    friend struct ConnCtx;                      // ConnCtx::release() calls removeAndDelete
+    void removeAndDelete(ConnCtx* ctx);         // erase from m_conns (locked) + notify + delete
 
     void workerThread();
     void postAccept();
