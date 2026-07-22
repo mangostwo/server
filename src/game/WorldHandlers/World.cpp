@@ -85,7 +85,9 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
-#include "VMapFactory.h"
+#include "terrain/FusedTerrain.hpp"
+#include "terrain/GoModelStore.hpp"
+#include "LineOfSightExemptions.h"
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
@@ -123,7 +125,6 @@
 
 INSTANTIATE_SINGLETON_1(World);
 
-extern void LoadGameObjectModelList();
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -229,7 +230,7 @@ World::~World()
         delete session;
     }
 
-    VMAP::VMapFactory::clear();
+    LineOfSightExemptions::Clear();
     MMAP::MMapFactory::clear();
 }
 
@@ -354,12 +355,12 @@ void World::SetInitialWorldSettings()
     ///- Initialize config settings
     LoadConfigSettings();
 
-    ///- Initialize VMapManager function pointers (to untangle game/collision circular deps)
-    if (VMAP::VMapManager2* vmmgr2 = dynamic_cast<VMAP::VMapManager2*>(VMAP::VMapFactory::createOrGetVMapManager()))
-    {
-        //vmmgr2->GetLiquidFlagsPtr = &GetLiquidFlags;
-        vmmgr2->IsVMAPDisabledForPtr = &DisableMgr::IsVMAPDisabledFor;
-    }
+    ///- Point the terrain engine at the baked tiles. Nothing else tells it where they
+    ///  are, and without this every height, liquid and sight query answers "no data"
+    ///  while the server otherwise starts perfectly.
+    world::terrain::FusedTerrain::SetTileDir(m_dataPath + "tiles");
+    world::terrain::GoModelStore::Instance().SetDirectory(m_dataPath + "gomodels");
+
 
     ///- Check the existence of the map files for all races start areas.
     if (!MapManager::ExistMapAndVMap(0, -6240.32f, 331.033f) ||                     // Dwarf/ Gnome
@@ -374,7 +375,7 @@ void World::SetInitialWorldSettings()
             (m_configUint32Values[CONFIG_UINT32_EXPANSION] >= EXPANSION_WOTLK &&
               !MapManager::ExistMapAndVMap(609, 2355.84f, -5664.77f)))              // Death Knight
     {
-        sLog.outError("Correct *.map files not found in path '%smaps' or *.vmtree/*.vmtile files in '%svmaps'. Please place *.map and vmap files in appropriate directories or correct the DataDir value in the mangosd.conf file.", m_dataPath.c_str(), m_dataPath.c_str());
+        sLog.outError("Terrain tiles not found in '%stiles'. Run mangos-extractor against a 3.3.5a client, or correct the DataDir value in mangosd.conf.", m_dataPath.c_str());
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
@@ -455,10 +456,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Game Object Templates...");     // must be after LoadPageTexts
     sObjectMgr.LoadGameobjectInfo();
-
-    sLog.outString("Loading GameObject models...");
-    LoadGameObjectModelList();
-    sLog.outString();
 
     sLog.outString("Loading Spell Chain Data...");
     sSpellMgr.LoadSpellChains();

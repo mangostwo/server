@@ -236,7 +236,7 @@ namespace Movement
      */
     void MoveSplineInit::SetFacing(float angle)
     {
-        args.facing.angle = G3D::wrap(angle, 0.f, (float)G3D::twoPi());
+        args.facing.angle = Geometry::wrap(angle, 0.f, (float)Geometry::twoPi());
         args.flags.EnableFacingAngle();
     }
 }

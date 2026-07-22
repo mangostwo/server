@@ -114,8 +114,9 @@ Compatibility target is **3.3.5a only**; do **not** introduce 4.x/Cata or later-
 
 - **Database changes go in the separate `mangostwo/database` repo**, not here — as transactional, idempotent
   `Rel##_##_###_*.sql` migrations that chain via `db_version`.
-- Clone/update **recursively**: `dep`, `src/realmd`, `src/modules/{SD3,Eluna}`, `src/tools/Extractor_projects`
-  and `extra/win` are submodules. Never shallow-update a submodule to a non-tip pinned SHA.
+- Clone/update **recursively**: `dep`, `src/realmd`, `src/modules/{SD3,Eluna}` and `extra/win` are submodules. Never shallow-update a submodule to a non-tip pinned SHA.
+- Client data is baked by `src/tools/extractor` (`mangos-extractor`) into `<DataDir>/tiles`,
+  `<DataDir>/gomodels` and `<DataDir>/dbc`. It always builds; there is no vmap or .map step.
 - Less-obvious locations: scripting in `src/modules/` (Eluna = Lua, SD3 = C++). The `src/game/` tree is under
   an ongoing **decomp cohesion-split** (large classes like `Player`/`ObjectMgr` are being broken into
   topical `*.cpp` files, e.g. `PlayerDuel.cpp`, `ObjectMgrCreatures.cpp`); locate code by symbol/string, not a

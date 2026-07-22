@@ -78,6 +78,15 @@ class DBCFileLoader
         bool Load(const char* filename, const char* fmt);
 
         /**
+         * @brief Load a DBC image already in memory
+         * @param bytes Raw WDBC image
+         * @param size Length of the image in bytes
+         * @param fmt Format string describing field types
+         * @return True on success, false on failure
+         */
+        bool LoadFromMemory(const void* bytes, size_t size, const char* fmt);
+
+        /**
          * @brief Represents a single record in the DBC file
          *
          * Record provides access to individual fields within a DBC record,

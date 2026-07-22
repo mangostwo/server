@@ -33,6 +33,15 @@ set(SRC_GRP_TESTS
     TestHarness.h
     BigNumberTest.cpp
     ByteBufferTest.cpp
+    ClientParserTest.cpp
+    TerrainModelTest.cpp
+    TileSerializerTest.cpp
+    NavBinningTest.cpp
+    DynamicCollisionTest.cpp
+    # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
+    # database globals that only mangosd defines. These two know nothing of it.
+    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
@@ -43,10 +52,15 @@ source_group("tests" FILES ${SRC_GRP_TESTS})
 
 add_executable(mangos_tests ${SRC_GRP_TESTS})
 
+target_include_directories(mangos_tests
+    PRIVATE ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers)
+
 target_link_libraries(mangos_tests
     PRIVATE
         proto
         shared
+        extractor_client
+        extractor_data
         Threads::Threads
         mangos_openssl_strict
 )

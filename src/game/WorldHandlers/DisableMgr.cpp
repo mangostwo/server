@@ -254,28 +254,28 @@ void LoadDisables()
                 switch (mapEntry->InstanceType)
                 {
                     case MAP_COMMON:
-                        if (flags & VMAP::VMAP_DISABLE_AREAFLAG)
+                        if (flags & COLLISION_DISABLE_AREAFLAG)
                             sLog.outDebug("Areaflag disabled for world map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LIQUIDSTATUS)
+                        if (flags & COLLISION_DISABLE_LIQUIDSTATUS)
                             sLog.outDebug("Liquid status disabled for world map %u.", entry);
                         break;
                     case MAP_INSTANCE:
                     case MAP_RAID:
-                        if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                        if (flags & COLLISION_DISABLE_HEIGHT)
                             sLog.outDebug("Height disabled for instance map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LOS)
+                        if (flags & COLLISION_DISABLE_LOS)
                             sLog.outDebug("LoS disabled for instance map %u.", entry);
                         break;
                     case MAP_BATTLEGROUND:
-                        if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                        if (flags & COLLISION_DISABLE_HEIGHT)
                             sLog.outDebug("Height disabled for battleground map %u.", entry);
-                        if (flags & VMAP::VMAP_DISABLE_LOS)
+                        if (flags & COLLISION_DISABLE_LOS)
                             sLog.outDebug("LoS disabled for battleground map %u.", entry);
                         break;
                     //case MAP_ARENA: [-ZERO]
-                    //    if (flags & VMAP::VMAP_DISABLE_HEIGHT)
+                    //    if (flags & COLLISION_DISABLE_HEIGHT)
                     //        TC_LOG_INFO("misc", "Height disabled for arena map %u.", entry);
-                    //    if (flags & VMAP::VMAP_DISABLE_LOS)
+                    //    if (flags & COLLISION_DISABLE_LOS)
                     //        TC_LOG_INFO("misc", "LoS disabled for arena map %u.", entry);
                     //    break;
                     default:

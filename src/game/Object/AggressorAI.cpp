@@ -26,7 +26,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "SharedDefines.h"
-#include "VMapFactory.h"
 #include "World.h"
 #include "DBCStores.h"
 #include "Map.h"

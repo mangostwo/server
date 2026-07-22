@@ -372,7 +372,7 @@ bool MapManager::ExistMapAndVMap(uint32 mapid, float x, float y)
     int gx = 63 - p.x_coord;
     int gy = 63 - p.y_coord;
 
-    return GridMap::ExistMap(mapid, gx, gy) && GridMap::ExistVMap(mapid, gx, gy);
+    return TerrainInfo::ExistTile(mapid, gx, gy);
 }
 
 /**

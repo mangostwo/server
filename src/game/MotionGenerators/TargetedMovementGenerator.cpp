@@ -92,7 +92,7 @@ void TargetedMovementGeneratorMedium<T, D>::_setTargetLocation(T& owner, bool up
     else
     {
         // the destination has not changed, we just need to refresh the path (usually speed change)
-        G3D::Vector3 end = i_path->getEndPosition();
+        Geometry::Vector3 end = i_path->getEndPosition();
         x = end.x;
         y = end.y;
         z = end.z;
@@ -188,7 +188,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (i_recheckDistance.Passed())
     {
         i_recheckDistance.Reset(this->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE ? 50 : 100);
-        G3D::Vector3 dest = owner.movespline->FinalDestination();
+        Geometry::Vector3 dest = owner.movespline->FinalDestination();
         targetMoved = RequiresNewPosition(owner, dest.x, dest.y, dest.z);
     }
 
