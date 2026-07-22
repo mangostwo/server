@@ -163,6 +163,14 @@ public:
     ~OpenSSLProviderManager();
 
     /**
+     * @brief The one manager for the process
+     *
+     * Providers are global to the library, so loading them per object costs an
+     * OpenSSL-wide lock on every construction and buys nothing.
+     */
+    static OpenSSLProviderManager& Instance();
+
+    /**
      * @brief Check if providers are successfully loaded
      * @return true if both providers loaded successfully
      */

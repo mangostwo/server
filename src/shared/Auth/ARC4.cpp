@@ -55,8 +55,8 @@
 ARC4::ARC4(uint8 len) : m_cipherContext()
 {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    // Provider management is now handled by OpenSSLProviderManager
-    if (!m_providerManager.IsInitialized())
+    // RC4 lives in the legacy provider, so it has to be loaded before EVP_rc4().
+    if (!OpenSSLProviderManager::Instance().IsInitialized())
     {
         sLog.outError("ARC4: Failed to initialize OpenSSL providers");
         return;
@@ -88,8 +88,8 @@ ARC4::ARC4(uint8 len) : m_cipherContext()
 ARC4::ARC4(uint8 *seed, uint8 len) : m_cipherContext()
 {
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    // Provider management is now handled by OpenSSLProviderManager
-    if (!m_providerManager.IsInitialized())
+    // RC4 lives in the legacy provider, so it has to be loaded before EVP_rc4().
+    if (!OpenSSLProviderManager::Instance().IsInitialized())
     {
         sLog.outError("ARC4: Failed to initialize OpenSSL providers");
         return;

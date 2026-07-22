@@ -305,10 +305,7 @@ int main(int argc, char** argv)
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    // RAII provider management - automatically handles cleanup
-    OpenSSLProviderManager providerManager;
-
-    if (!providerManager.IsInitialized())
+    if (!OpenSSLProviderManager::Instance().IsInitialized())
     {
         Log::WaitBeforeContinueIfNeed();
         return 0;

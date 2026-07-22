@@ -30,7 +30,6 @@
 #include "Common/ServerDefines.h"
 #include "WorldGateway.h"
 
-#include "AddonHandler.h"
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "Log/Log.h"
@@ -274,15 +273,9 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     // AddSession answers the client itself, with either AUTH_OK or a queue
     // position. The cipher was armed before we were called, so that reply goes
     // out encrypted -- which is the one ordering constraint across this seam.
+    // AddSession also answers the addon block, via SendAddonsInfo() over the
+    // list ReadAddonsInfo() just parsed -- so nothing more is owed here.
     sWorld.AddSession(session);
-
-    // Reply to the addon block, if the registry produced one.
-    addonPacket.rpos(0);
-    WorldPacket addonResponse;
-    if (sAddOnHandler.BuildAddonPacket(&addonPacket, &addonResponse))
-    {
-        link->SendPacket(addonResponse);
-    }
 
     return id;
 }

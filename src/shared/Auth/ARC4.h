@@ -66,9 +66,6 @@ class ARC4
          */
         void UpdateData(int len, uint8 *data);
     private:
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-        OpenSSLProviderManager m_providerManager;  /**< RAII provider management */
-#endif
         OpenSSLCipherContext m_cipherContext;        /**< RAII cipher context */
 };
 

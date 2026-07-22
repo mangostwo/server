@@ -126,11 +126,9 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
             break;
         }
         case AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION:
+            // miscRequirement is the expansion number here, not an item id, so
+            // there is no item to name -- TRANSFER_ABORT_INSUF_EXPAN_LVL says it.
             GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_INSUF_EXPAN_LVL, miscRequirement);
-            if (sObjectMgr.GetMapEntranceTrigger(mapEntry->ID))
-            {
-                GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), sObjectMgr.GetItemPrototype(miscRequirement)->Name1);
-            }
             break;
         case AREA_LOCKSTATUS_NOT_ALLOWED:
             GetSession()->SendTransferAborted(mapEntry->ID, TRANSFER_ABORT_MAP_NOT_ALLOWED);
