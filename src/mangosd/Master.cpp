@@ -29,6 +29,7 @@
 #include "RASession.h"
 
 #include "Config/Config.h"
+#include "Console/ConsoleUI.h"
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
@@ -166,7 +167,7 @@ void Master::ClearOnlineAccounts()
     CharacterDatabase.Execute("DELETE FROM `character_battleground_data`");
 
     CharacterDatabase.Execute(
-        "UPDATE `groups` SET `leaderGuid` = (SELECT `guid` FROM `group_member` "
+        "UPDATE `groups` SET `leaderGuid` = (SELECT `memberGuid` FROM `group_member` "
         "WHERE `group_member`.`groupId` = `groups`.`groupId` ORDER BY `memberFlags` DESC LIMIT 1) "
         "WHERE `leaderGuid` NOT IN (SELECT `memberGuid` FROM `group_member` "
         "WHERE `group_member`.`groupId` = `groups`.`groupId`)");
@@ -238,12 +239,41 @@ void Master::StopServices()
     m_services.clear();
 }
 
+void Master::PublishConsoleStatus(uint32 diff)
+{
+    MaNGOS::Console::ConsoleUI& ui = MaNGOS::Console::ConsoleUI::Instance();
+    if (!ui.Active())
+    {
+        return;
+    }
+
+    const uint32 uptime = sWorld.GetUptime();
+    char buf[64];
+
+    snprintf(buf, sizeof(buf), "%u / %u", sWorld.GetActiveSessionCount(),
+             sWorld.GetPlayerAmountLimit());
+    ui.SetStatus(0, "Players", buf);
+
+    ui.SetStatus(1, "Queue", std::to_string(sWorld.GetQueuedSessionCount()),
+                 sWorld.GetQueuedSessionCount() ? MaNGOS::Console::STYLE_WARN
+                                                : MaNGOS::Console::STYLE_NORMAL);
+
+    snprintf(buf, sizeof(buf), "%u ms", diff);
+    ui.SetStatus(2, "Diff", buf, diff > WORLD_SLEEP_CONST ? MaNGOS::Console::STYLE_WARN
+                                                          : MaNGOS::Console::STYLE_SUCCESS);
+
+    snprintf(buf, sizeof(buf), "%ud %02u:%02u:%02u", uptime / 86400,
+             (uptime / 3600) % 24, (uptime / 60) % 60, uptime % 60);
+    ui.SetStatus(3, "Uptime", buf);
+}
+
 void Master::WorldLoop()
 {
     sLog.outString("World updater started (%dms minimum update interval)",
                    WORLD_SLEEP_CONST);
 
     uint32 previous = getMSTime();
+    uint32 lastStatus = 0;
 
     while (!World::IsStopped())
     {
@@ -255,6 +285,13 @@ void Master::WorldLoop()
         previous = current;
 
         const uint32 spent = getMSTimeDiff(current, getMSTime());
+
+        if (getMSTimeDiff(lastStatus, current) >= 1000)
+        {
+            lastStatus = current;
+            PublishConsoleStatus(spent);
+        }
+
         if (spent < WORLD_SLEEP_CONST)
         {
             std::this_thread::sleep_for(

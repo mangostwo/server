@@ -133,6 +133,19 @@ enum Color
 const int Color_count = int(WHITE) + 1; /**< Total number of available colors **/
 
 /**
+ * @brief Severity of a line, and the index into the configured colour table
+ */
+enum LogType
+{
+    LogNormal = 0,
+    LogDetails,
+    LogDebug,
+    LogError
+};
+
+const int LogType_count = int(LogError) + 1; /**< Size of the colour table */
+
+/**
  * @brief One formatted console line handed to the off-thread writer
  *
  * Producers format text (time prefix + body, WITHOUT the trailing newline) and
@@ -143,11 +156,12 @@ struct ConsoleLogRecord
 {
     std::string text; /**< Formatted line WITHOUT the trailing newline; the writer appends '\n' after ResetColor */
     Color color; /**< Color to apply when applyColor is set */
+    LogType type; /**< Severity, kept alongside the colour so the full-screen console can theme independently of the configured palette */
     bool applyColor; /**< Whether to wrap the write in SetColor/ResetColor */
     bool toStdout; /**< true => stdout, false => stderr */
     bool isRaw; /**< Raw passthrough: write text verbatim with NO color and NO appended newline (used for progress-bar redraws, which carry their own '\r'/'\n' and must not be reformatted) */
 
-    ConsoleLogRecord() : color(WHITE), applyColor(false), toStdout(true), isRaw(false) {}
+    ConsoleLogRecord() : color(WHITE), type(LogNormal), applyColor(false), toStdout(true), isRaw(false) {}
 };
 
 /**
@@ -514,12 +528,12 @@ class Log : public MaNGOS::Singleton<Log>
          *        color and whether color applies.
          *
          * @param toStdout true => stdout, false => stderr
-         * @param color
+         * @param type severity; selects the colour from m_colors
          * @param applyColor
          * @param fmt
          * @param ap
          */
-        void ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* fmt, va_list* ap);
+        void ConsoleEmit(bool toStdout, LogType type, bool applyColor, const char* fmt, va_list* ap);
 
         /// Emit a blank console line (time prefix + newline) via the writer / fallback.
         void ConsoleEmitBlank(bool toStdout);

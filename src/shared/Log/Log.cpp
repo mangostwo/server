@@ -100,16 +100,6 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "db_scripts",          "LogFilter_DbScripts",          true  },
 };
 
-enum LogType
-{
-    LogNormal = 0,
-    LogDetails,
-    LogDebug,
-    LogError
-};
-
-const int LogType_count = int(LogError) + 1;
-
 /**
  * @brief Construct the Log singleton
  *
@@ -392,8 +382,10 @@ std::string Log::ConsoleTimePrefix() const
     return std::string(buf);
 }
 
-void Log::ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* fmt, va_list* ap)
+void Log::ConsoleEmit(bool toStdout, LogType type, bool applyColor, const char* fmt, va_list* ap)
 {
+    const Color color = m_colors[type];
+
     // Record text carries NO trailing newline: the newline is emitted after
     // ResetColor (here and in ConsoleLogWriter::Emit) so the line terminator
     // stays OUTSIDE the color span, byte-matching the legacy ordering
@@ -408,6 +400,7 @@ void Log::ConsoleEmit(bool toStdout, Color color, bool applyColor, const char* f
         ConsoleLogRecord rec;
         rec.text = std::move(body);
         rec.color = color;
+        rec.type = type;
         rec.applyColor = applyColor;
         rec.toStdout = toStdout;
         m_consoleBody->Enqueue(rec);
@@ -729,7 +722,7 @@ void Log::outString(const char* str, ...)
     va_list ap;
 
     va_start(ap, str);
-    ConsoleEmit(true, m_colors[LogNormal], m_colored, str, &ap);
+    ConsoleEmit(true, LogNormal, m_colored, str, &ap);
     va_end(ap);
 
     if (logfile)
@@ -754,7 +747,7 @@ void Log::outError(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -800,7 +793,7 @@ void Log::outErrorDb(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -865,7 +858,7 @@ void Log::outErrorEluna(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -928,7 +921,7 @@ void Log::outErrorEventAI(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)
@@ -969,7 +962,7 @@ void Log::outBasic(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -996,7 +989,7 @@ void Log::outDetail(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1025,7 +1018,7 @@ void Log::outDebug(const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDebug], m_colored, str, &ap);
+        ConsoleEmit(true, LogDebug, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1054,7 +1047,7 @@ void Log::outCommand(uint32 account, const char* str, ...)
     {
         va_list ap;
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogDetails], m_colored, str, &ap);
+        ConsoleEmit(true, LogDetails, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1120,7 +1113,7 @@ void Log::outWarden(const char* str, ...)
         va_list ap;
 
         va_start(ap, str);
-        ConsoleEmit(true, m_colors[LogNormal], m_colored, str, &ap);
+        ConsoleEmit(true, LogNormal, m_colored, str, &ap);
         va_end(ap);
     }
 
@@ -1197,7 +1190,7 @@ void Log::outErrorScriptLib(const char* err, ...)
     va_list ap;
 
     va_start(ap, err);
-    ConsoleEmit(false, m_colors[LogError], m_colored, err, &ap);
+    ConsoleEmit(false, LogError, m_colored, err, &ap);
     va_end(ap);
 
     if (logfile)

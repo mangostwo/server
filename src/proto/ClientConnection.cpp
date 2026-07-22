@@ -108,13 +108,25 @@ namespace proto
             return std::vector<uint8_t>();
         }
 
-        for (size_t i = 0; i < packets.size(); ++i)
+        // A short read anywhere below unwinds onto a network worker thread, where
+        // nothing else would catch it and the process would abort. Dropping the
+        // peer has to be the worst a malformed packet can do.
+        try
         {
-            if (!HandlePacket(std::move(packets[i])))
+            for (size_t i = 0; i < packets.size(); ++i)
             {
-                Close();
-                break;
+                if (!HandlePacket(std::move(packets[i])))
+                {
+                    Close();
+                    break;
+                }
             }
+        }
+        catch (ByteBufferException&)
+        {
+            sLog.outError("proto: short read handling packet from %s, dropping",
+                          m_address.c_str());
+            Close();
         }
 
         // Everything this class sends goes through SendPacket() (and therefore the

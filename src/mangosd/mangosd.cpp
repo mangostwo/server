@@ -59,6 +59,7 @@
 #include "Config/Config.h"
 #include "GitRevision.h"
 #include "ProgressBar.h"
+#include "Console/ConsoleUI.h"
 #include "Log.h"
 #include "SystemConfig.h"
 #include "AuctionHouseBot.h"
@@ -182,6 +183,13 @@ static void MangosBarConsoleSink(char const* bytes, size_t len)
     sLog.ConsoleEmitRaw(std::string(bytes, len));
 }
 
+/// Progress-bar sink for the full-screen console: it draws its own bar, so it
+/// wants the percentage, not a redraw. -1 means the bar finished.
+static void MangosBarProgressSink(int percent)
+{
+    MaNGOS::Console::ConsoleUI::Instance().SetProgress(percent);
+}
+
 /// Launch the mangos server
 int main(int argc, char** argv)
 {
@@ -297,10 +305,7 @@ int main(int argc, char** argv)
     DETAIL_LOG("Using SSL version: %s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
-    // RAII provider management - automatically handles cleanup
-    OpenSSLProviderManager providerManager;
-
-    if (!providerManager.IsInitialized())
+    if (!OpenSSLProviderManager::Instance().IsInitialized())
     {
         Log::WaitBeforeContinueIfNeed();
         return 0;
@@ -316,6 +321,11 @@ int main(int argc, char** argv)
 
     ///- Set progress bars show mode
     BarGoLink::SetOutputState(sConfig.GetBoolDefault("ShowProgressBars", true));
+
+    // Serialise the bar through the console writer instead of letting it write
+    // straight to stdout from the loading thread: two owners of stdout is what
+    // shreds the start-up log, with bar redraws landing inside log lines.
+    BarGoLink::SetConsoleSink(&MangosBarConsoleSink);
 
     /// worldd PID file creation
     std::string pidfile = sConfig.GetStringDefault("PidFile", "");
@@ -337,6 +347,22 @@ int main(int argc, char** argv)
     // covered, and after the fallible init above so an early return never leaves
     // a writer thread running into stdio teardown.
     sLog.StartConsoleThread();
+
+    // Only now: until the writer thread exists, console emits take the
+    // synchronous path and would write straight over the full-screen frame.
+    if (sConfig.GetBoolDefault("Console.FullScreen", true) &&
+        MaNGOS::Console::ConsoleUI::Instance().Start("MaNGOS Two", "WotLK 3.3.5a"))
+    {
+        MaNGOS::Console::ConsoleUI::Instance().SetHeaderRight(
+            std::string("realm ") + std::to_string(realmID));
+        MaNGOS::Console::ConsoleUI::Instance().SetHint(
+            "PgUp/PgDn scroll \xC2\xB7 Ctrl+L redraw");
+        MaNGOS::Console::ConsoleUI::Instance().SetKeyEcho(
+            sConfig.GetBoolDefault("Console.DebugKeys", false));
+        MaNGOS::Console::ConsoleUI::Instance().SetScrollback(
+            uint32(sConfig.GetIntDefault("Console.Scrollback", 20000)));
+        BarGoLink::SetProgressSink(&MangosBarProgressSink);
+    }
 
     ///- Catch termination signals
     hook_signals();
@@ -375,6 +401,9 @@ int main(int argc, char** argv)
     // so nothing can race the writer's deletion. The remaining main-thread lines
     // drain through it before it joins; "Bye!" then takes the synchronous path.
     sLog.StopConsoleThread();
+
+    // After the writer is joined, so no repaint can race the terminal restore.
+    MaNGOS::Console::ConsoleUI::Instance().Stop();
 
     sLog.outString("Bye!");
 

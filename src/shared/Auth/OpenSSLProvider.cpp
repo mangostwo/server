@@ -169,6 +169,12 @@ OpenSSLProviderManager::OpenSSLProviderManager()
     }
 }
 
+OpenSSLProviderManager& OpenSSLProviderManager::Instance()
+{
+    static OpenSSLProviderManager instance;
+    return instance;
+}
+
 /**
  * Logs provider shutdown when the OpenSSL provider manager is destroyed.
  */

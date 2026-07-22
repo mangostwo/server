@@ -1437,7 +1437,9 @@ void ObjectMgr::LoadQuestPOI()
 }
 
 
-static char SERVER_SIDE_SPELL[] = "MaNGOS server-side spell";
+// const, so the storage field can only ever be given a copy: SQLStorageBase::Free()
+// delete[]s every string field, and pointing one at this array frees static memory.
+static const char SERVER_SIDE_SPELL[] = "MaNGOS server-side spell";
 
 struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStorage>
 {
@@ -1458,7 +1460,7 @@ struct SQLSpellLoader : public SQLStorageLoaderBase<SQLSpellLoader, SQLHashStora
     {
         if (field_pos == LOADED_SPELLDBC_FIELD_POS_SPELLNAME_0)
         {
-            dst = SERVER_SIDE_SPELL;
+            dst = mangos_strdup(SERVER_SIDE_SPELL);
         }
         else
         {
