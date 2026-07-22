@@ -59,7 +59,6 @@
 #include "MapPersistentStateMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "VMapFactory.h"
 #include "MovementGenerator.h"
 #include "movement/MoveSplineInit.h"
 #include "movement/MoveSpline.h"
@@ -6647,7 +6646,7 @@ void Unit::ScheduleAINotify(uint32 delay)
  */
 void Unit::OnRelocated()
 {
-    // switch to use G3D::Vector3 is good idea, maybe
+    // switch to use Geometry::Vector3 is good idea, maybe
     float dx = m_last_notified_position.x - GetPositionX();
     float dy = m_last_notified_position.y - GetPositionY();
     float dz = m_last_notified_position.z - GetPositionZ();

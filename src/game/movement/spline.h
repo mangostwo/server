@@ -29,7 +29,7 @@
 #include <string>
 #include "Utilities/Errors.h"
 #include "typedefs.h"
-#include <G3D/Vector3.h>
+#include "Geometry/Vector3.h"
 #include <limits>
 
 namespace Movement

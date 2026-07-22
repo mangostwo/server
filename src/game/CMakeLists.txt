@@ -65,10 +65,6 @@ source_group("Time" FILES ${SRC_GRP_TIME})
 file(GLOB SRC_GRP_TOOL Tools/*.cpp Tools/*.h)
 source_group("Tool" FILES ${SRC_GRP_TOOL})
 
-#VMap group
-file(GLOB SRC_GRP_VMAPS vmap/*.cpp vmap/*.h)
-source_group("vmaps" FILES ${SRC_GRP_VMAPS})
-
 #Warden group
 file(GLOB SRC_GRP_WARDEN Warden/*.cpp Warden/*.h)
 source_group("Warden" FILES ${SRC_GRP_WARDEN})
@@ -111,40 +107,6 @@ endif()
 
 configure_file(AuctionHouseBot/ahbot.conf.dist.in ${CMAKE_CURRENT_BINARY_DIR}/AuctionHouseBot/ahbot.conf.dist)
 
-if(BUILD_TOOLS)
-add_library(vmap2 STATIC
-    vmap/BIH.cpp
-    vmap/VMapManager2.cpp
-    vmap/MapTree.cpp
-    vmap/TileAssembler.cpp
-    vmap/WorldModel.cpp
-    vmap/ModelInstance.cpp
-    vmap/BIH.h
-    vmap/VMapManager2.h
-    vmap/MapTree.h
-    vmap/TileAssembler.h
-    vmap/WorldModel.h
-    vmap/ModelInstance.h
-)
-
-target_include_directories(vmap2
-    PUBLIC
-        vmap
-        WorldHandlers
-)
-
-target_compile_definitions(vmap2
-    PUBLIC
-        MMAP_GENERATOR
-        NO_CORE_FUNCS
-)
-target_link_libraries(vmap2
-    PUBLIC
-        shared
-        g3dlite
-        RecastNavigation::Detour
-)
-endif()
 
 add_library(game STATIC
     ${SRC_GRP_AHBOT}
@@ -159,7 +121,6 @@ add_library(game STATIC
     ${SRC_GRP_SERVER}
     ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
-    ${SRC_GRP_VMAPS}
     ${SRC_GRP_WARDEN}
     ${SRC_GRP_WARDEN_MODULES}
     ${SRC_GRP_WORLD_HANDLERS}
@@ -187,7 +148,6 @@ target_include_directories(game
         Server
         Time
         Tools
-        vmap
         Warden
         Warden/Modules
         WorldHandlers
@@ -207,6 +167,10 @@ target_compile_definitions(game
 
 target_link_libraries(game
     PUBLIC
+        # The terrain engine: geometry and baked tiles, and no knowledge of the world,
+        # the database or any DBC. Everything MaNGOS-specific stays on this side of the
+        # seam, in TerrainInfo.
+        terrain
         shared
         # The world protocol. The dependency runs one way only: game links proto,
         # proto never links game. That is what keeps the seam from silently
@@ -214,7 +178,6 @@ target_link_libraries(game
         proto
         RecastNavigation::Detour
         ZLIB::ZLIB
-        g3dlite
         $<$<BOOL:${SCRIPT_LIB_SD3}>:mangosscript>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:lualib>
     PRIVATE

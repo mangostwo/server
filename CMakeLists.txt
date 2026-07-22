@@ -244,9 +244,9 @@ endif()
 # =============================================================================
 # Subdirectories
 # =============================================================================
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/dep/CMakeLists.txt")
-  add_subdirectory(dep)
-endif()
+# Not add_subdirectory(dep): that would build what the submodule's own CMakeLists
+# lists, which still includes g3dlite. See cmake/Dependencies.cmake.
+include(Dependencies)
 
 if(WITH_TESTS)
   enable_testing()

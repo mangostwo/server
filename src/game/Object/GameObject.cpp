@@ -27,7 +27,8 @@
 #include "PlayerRegistry.h"
 #include "ObjectLookup.h"
 #include "GameObject.h"
-#include "G3D/Quat.h"
+#include "GameObjectModel.h"
+#include "Geometry/Quat.h"
 #include "QuestDef.h"
 #include "ObjectMgr.h"
 #include "PoolManager.h"
@@ -50,7 +51,6 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Util.h"
 #include "ScriptMgr.h"
-#include "vmap/GameObjectModel.h"
 #include "CreatureAISelector.h"
 #include "SQLStorages.h"
 #include "GameObjectAI.h"
@@ -245,7 +245,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         rw = cos(ang/2);
     }
 
-    G3D::Quat q(rx, ry, rz, rw);
+    Geometry::Quat q(rx, ry, rz, rw);
     q.unitize();
 
     float o = GetOrientationFromQuat(q);
@@ -407,7 +407,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     // update in loaded data (changing data only in this place)
     GameObjectData& data = sObjectMgr.NewGOData(GetGUIDLow());
 
-    G3D::Quat q;
+    Geometry::Quat q;
     GetQuaternion(q);
 
     // data->guid = guid don't must be update at save
@@ -1096,16 +1096,16 @@ const char* GameObject::GetNameForLocaleIdx(int32 loc_idx) const
  *
  * @param q The quaternion to apply.
  */
-void GameObject::SetQuaternion(G3D::Quat const& q)
+void GameObject::SetQuaternion(Geometry::Quat const& q)
 {
     SetFloatValue(GAMEOBJECT_ROTATION + 0, q.x);
     SetFloatValue(GAMEOBJECT_ROTATION + 1, q.y);
     SetFloatValue(GAMEOBJECT_ROTATION + 2, q.z);
     SetFloatValue(GAMEOBJECT_ROTATION + 3, q.w);
 
-    if (m_model)
+    if (m_model && GetMap())
     {
-        m_model->UpdateRotation(q);
+        GetMap()->RefreshGameObjectModel(*m_model);
     }
 }
 
@@ -1114,7 +1114,7 @@ void GameObject::SetQuaternion(G3D::Quat const& q)
  *
  * @param q Receives the quaternion components.
  */
-void GameObject::GetQuaternion(G3D::Quat& q) const
+void GameObject::GetQuaternion(Geometry::Quat& q) const
 {
     q.x = GetFloatValue(GAMEOBJECT_ROTATION + 0);
     q.y = GetFloatValue(GAMEOBJECT_ROTATION + 1);
@@ -1128,7 +1128,7 @@ void GameObject::GetQuaternion(G3D::Quat& q) const
  * @param q The quaternion to evaluate.
  * @return The normalized orientation angle.
  */
-float GameObject::GetOrientationFromQuat(G3D::Quat const& q)
+float GameObject::GetOrientationFromQuat(Geometry::Quat const& q)
 {
     double t1 = +2.0f * (q.w * q.z + q.x * q.y);
     double t2 = +1.0f - 2.0f * (q.y * q.y + q.z * q.z);
@@ -1143,7 +1143,7 @@ int64 GameObject::GetPackedRotation()
         PACK_COEFF_X = 1 << 21,
     };
 
-    G3D::Quat quat;
+    Geometry::Quat quat;
     GetQuaternion(quat);
 
     int8 w_sign = (quat.w >= 0 ? 1 : -1);

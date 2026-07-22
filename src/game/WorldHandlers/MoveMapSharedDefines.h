@@ -25,7 +25,9 @@
 #ifndef MANGOS_H_MOVE_MAP_SHARED_DEFINES
 #define MANGOS_H_MOVE_MAP_SHARED_DEFINES
 
-#include "../recastnavigation/Detour/Include/DetourNavMesh.h"
+// Detour exports its own Include directory, so this needs no path walking.
+// The relative form resolved only by accident of the include path.
+#include "DetourNavMesh.h"
 #include "Platform/Define.h"
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'

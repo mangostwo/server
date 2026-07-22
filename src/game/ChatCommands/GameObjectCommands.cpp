@@ -39,7 +39,7 @@
 #include "Common/Locales.h"
 #include "ObjectLookup.h"
 #include "Chat.h"
-#include "G3D/Quat.h"
+#include "Geometry/Quat.h"
 #include "MapManager.h"
 #include "GameEventMgr.h"
 #include "ObjectMgr.h"
@@ -211,7 +211,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
     // the player's current orientation
 
     float rx, ry, rz, o;
-    G3D::Quat final_rot;
+    Geometry::Quat final_rot;
 
     if (!ExtractFloat(&args, o))  // if rotation angle is not specified or invalid
     {
@@ -224,7 +224,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
         // ok, let's rotate the GO.
         // we first get the original rotation quaternion
         // then we'll create a rotation quat describing the rotation around Z
-        G3D::Quat original_rot;
+        Geometry::Quat original_rot;
         obj->GetQuaternion(original_rot);
 
         // the rotation amount around Z-axis
@@ -233,7 +233,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
         // multiplying 2 quaternions gives the final rotation
         // quaternion multiplication is not commutative!
         // quaternion multiplication gives a non-unit quat.
-        final_rot = G3D::Quat(0.0f, 0.0f, sin(deltaO/2), cos(deltaO/2)) * original_rot;
+        final_rot = Geometry::Quat(0.0f, 0.0f, sin(deltaO/2), cos(deltaO/2)) * original_rot;
 
     }
     else // we have a valid rotation angle and we expect the description of rotation axis via 3 floats
@@ -245,7 +245,7 @@ bool ChatHandler::HandleGameObjectTurnCommand(char* args)
 
         float s = sin(o/2);
         float c = cos(o/2);
-        final_rot = G3D::Quat(s*rx, s*ry, s*rz, c);
+        final_rot = Geometry::Quat(s*rx, s*ry, s*rz, c);
     }
 
     final_rot.unitize();

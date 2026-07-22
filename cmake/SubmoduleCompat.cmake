@@ -20,7 +20,7 @@
 # =============================================================================
 # Compatibility glue for the submodules.
 #
-# The submodules (Eluna, SD3, Extractor_projects, realmd) are shared with other
+# The submodules (Eluna, SD3, realmd) are shared with other
 # cores and MUST NOT be modified: this fork cannot carry local commits in them,
 # because a clone would then reference objects that exist on no remote. So every
 # adaptation they need in order to build here lives in this tree instead, under

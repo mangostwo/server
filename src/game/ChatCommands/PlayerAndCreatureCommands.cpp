@@ -38,7 +38,7 @@
 #include "TargetedMovementGenerator.h"
 #include "MovementGenerator.h"
 #include "FollowerReference.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 
 /**
  * @brief Handler for HandleDeMorphCommand command.

@@ -43,7 +43,7 @@
  * data from the DBC files.
  *
  * @see Map for the main map implementation
- * @see GridMap for grid-based terrain and collision data
+ * @see TerrainInfo for terrain and collision queries
  * @see Cell for the cell structure
  * @see InstanceTemplate for instance configuration
  */
@@ -72,7 +72,7 @@
 #include "Utilities/TypeList.h"
 #include "ScriptMgr.h"
 #include "CreatureLinkingMgr.h"
-#include "DynamicTree.h"
+#include "DynamicCollision.h"
 #ifdef ENABLE_ELUNA
 #include "LuaValue.h"
 #endif /* ENABLE_ELUNA */
@@ -95,7 +95,7 @@ class DungeonPersistentState;
 class BattleGroundPersistentState;
 struct ScriptInfo;
 class BattleGround;
-class GridMap;
+class TerrainInfo;
 class GameObjectModel;
 class WeatherSystem;
 
@@ -372,6 +372,7 @@ class Map : public GridRefManager<NGridType>
         void InsertGameObjectModel(const GameObjectModel& mdl);
         void RemoveGameObjectModel(const GameObjectModel& mdl);
         bool ContainsGameObjectModel(const GameObjectModel& mdl) const;
+        void RefreshGameObjectModel(GameObjectModel& mdl);
 
         // Get Holder for Creature Linking
         CreatureLinkingHolder* GetCreatureLinkingHolder() { return &m_creatureLinkingHolder; }
@@ -546,7 +547,7 @@ class Map : public GridRefManager<NGridType>
         CreatureLinkingHolder m_creatureLinkingHolder;
 
         // Dynamic Map tree object
-        DynamicMapTree m_dyn_tree;
+        DynamicCollision m_dyn_tree;
 
         // WeatherSystem
         WeatherSystem* m_weatherSystem;

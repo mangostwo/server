@@ -17,6 +17,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+# Geometry and the terrain tile model are header-only and sit below everything
+# else; the client-data parsers link only those two. All three are configured
+# unconditionally because the unit tests use them without the tools.
+add_subdirectory(shared/Geometry)
+add_subdirectory(shared/terrain)
+
 # Build the mangos shared library
 add_subdirectory(shared)
 
@@ -56,10 +62,9 @@ if(BUILD_REALMD)
     endif()
 endif()
 
-# If we want the tools for map/vmap/mmap extraction
-if(BUILD_TOOLS)
-    add_subdirectory(tools)
-endif()
+# The client-data parsers are configured unconditionally: the unit tests link them
+# without the tools. The baker executable itself is gated on BUILD_TOOLS, inside.
+add_subdirectory(tools/extractor)
 
 if (BUILD_MANGOSD OR BUILD_REALMD)
     if(WIN32)

@@ -661,10 +661,10 @@ enum CapturePointSliderValue
 class Unit;
 class GameObjectModel;
 
-namespace G3D
+namespace Geometry
 {
     class Quat;
-};
+}
 
 struct GameObjectDisplayInfoEntry;
 
@@ -704,9 +704,9 @@ class GameObject : public WorldObject
         void DeleteFromDB();
 
         // rotation methods
-        void GetQuaternion(G3D::Quat& q) const;
-        void SetQuaternion(G3D::Quat const& q);
-        float GetOrientationFromQuat(G3D::Quat const& q);
+        void GetQuaternion(Geometry::Quat& q) const;
+        void SetQuaternion(Geometry::Quat const& q);
+        float GetOrientationFromQuat(Geometry::Quat const& q);
         int64 GetPackedRotation();
 
         void SetOwnerGuid(ObjectGuid ownerGuid)

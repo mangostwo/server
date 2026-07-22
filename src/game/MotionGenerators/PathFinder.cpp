@@ -31,6 +31,8 @@
 #include "GridMap.h"
 #include "Creature.h"
 #include "PathFinder.h"
+
+#include <cfloat>
 #include "Log.h"
 
 ////////////////// PathFinder //////////////////

@@ -46,10 +46,6 @@
 #include "PathFinder.h"                                     // for mmap commands
 #include "Totem.h"
 
-#ifdef _DEBUG_VMAPS
-#include "VMapFactory.h"
-#endif
-
  /**********************************************************************
      CommandTable : commandTable
   ***********************************************************************/

@@ -41,9 +41,6 @@
 #include "MapManager.h"
 #include "CellImpl.h"
 
-#ifdef _DEBUG_VMAPS
-#include "VMapFactory.h"
-#endif
  /*
      All commands related to Teleportation
  */
@@ -658,12 +655,14 @@ bool ChatHandler::HandleGPSCommand(char* args)
     int gx = 63 - p.x_coord;
     int gy = 63 - p.y_coord;
 
-    uint32 have_map = GridMap::ExistMap(obj->GetMapId(), gx, gy) ? 1 : 0;
-    uint32 have_vmap = GridMap::ExistVMap(obj->GetMapId(), gx, gy) ? 1 : 0;
+    // One tile carries terrain and collision together, so there is one answer to give
+    // where there used to be two columns.
+    uint32 have_map = TerrainInfo::ExistTile(obj->GetMapId(), gx, gy) ? 1 : 0;
+    uint32 have_vmap = have_map;
 
     TerrainInfo const* terrain = obj->GetTerrain();
 
-    if (have_vmap)
+    if (have_map)
     {
         if (terrain->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
         {
@@ -676,7 +675,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
     }
     else
     {
-        PSendSysMessage("no VMAP available for area info");
+        PSendSysMessage("no terrain tile available for area info");
     }
 
     PSendSysMessage(LANG_MAP_POSITION,
@@ -708,18 +707,6 @@ bool ChatHandler::HandleGPSCommand(char* args)
     {
         PSendSysMessage(LANG_LIQUID_STATUS, liquid_status.level, liquid_status.depth_level, liquid_status.type_flags, res);
     }
-
-    // Additional vmap debugging help
-#ifdef _DEBUG_VMAPS
-    PSendSysMessage("Static terrain height (maps only): %f", obj->GetTerrain()->GetHeightStatic(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), false));
-
-    if (VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
-    {
-        PSendSysMessage("Vmap Terrain Height %f", vmgr->getHeight(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ() + 2.0f, 10000.0f));
-    }
-
-    PSendSysMessage("Static map height (maps and vmaps): %f", obj->GetTerrain()->GetHeightStatic(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()));
-#endif
 
     return true;
 }

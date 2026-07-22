@@ -34,6 +34,7 @@
 #include "GridDefines.h"
 #include "Object.h"
 #include "SharedDefines.h"
+#include "terrain/FusedTerrain.hpp"
 
 #include <bitset>
 #include <list>
@@ -126,76 +127,6 @@ struct GridMapLiquidData
     float depth_level;
 };
 
-class GridMap
-{
-    private:
-
-        uint16 m_holes[16][16];
-        uint32 m_flags;
-
-        // Area data
-        uint16 m_gridArea;
-        uint16* m_area_map;
-
-        // Height level data
-        float m_gridHeight;
-        float m_gridIntHeightMultiplier;
-        union
-        {
-            float* m_V9;
-            uint16* m_uint16_V9;
-            uint8* m_uint8_V9;
-        };
-        union
-        {
-            float* m_V8;
-            uint16* m_uint16_V8;
-            uint8* m_uint8_V8;
-        };
-
-        // Liquid data
-        uint16 m_liquidType;
-        uint8 m_liquid_offX;
-        uint8 m_liquid_offY;
-        uint8 m_liquid_width;
-        uint8 m_liquid_height;
-        float m_liquidLevel;
-        uint16* m_liquidEntry;
-        uint8* m_liquidFlags;
-        float* m_liquid_map;
-
-        bool loadAreaData(FILE* in, uint32 offset, uint32 size);
-        bool loadHeightData(FILE* in, uint32 offset, uint32 size);
-        bool loadGridMapLiquidData(FILE* in, uint32 offset, uint32 size);
-        bool loadHolesData(FILE* in, uint32 offset, uint32 size);
-        bool isHole(int row, int col) const;
-
-        // Get height functions and pointers
-        typedef float(GridMap::*pGetHeightPtr)(float x, float y) const;
-        pGetHeightPtr m_gridGetHeight;
-        float getHeightFromFloat(float x, float y) const;
-        float getHeightFromUint16(float x, float y) const;
-        float getHeightFromUint8(float x, float y) const;
-        float getHeightFromFlat(float x, float y) const;
-
-    public:
-
-        GridMap();
-        ~GridMap();
-
-        bool loadData(char* filaname);
-        void unloadData();
-
-        static bool ExistMap(uint32 mapid, int gx, int gy);
-        static bool ExistVMap(uint32 mapid, int gx, int gy);
-
-        uint16 getArea(float x, float y);
-        float getHeight(float x, float y) { return (this->*m_gridGetHeight)(x, y); }
-        float getLiquidLevel(float x, float y);
-        uint8 getTerrainType(float x, float y);
-        GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = 0);
-};
-
 template<typename Countable>
 class Referencable
 {
@@ -216,23 +147,36 @@ class Referencable
 typedef std::atomic<long> AtomicLong;
 
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
-#define INVALID_HEIGHT_VALUE -200000.0f                     // for return, must be equal to VMAP_INVALID_HEIGHT_VALUE, check value for unknown height is VMAP_INVALID_HEIGHT
-#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find VMap ground if it is available, just larger than MAX_HEIGHT - INVALID_HEIGHT
+#define INVALID_HEIGHT       -100000.0f                     // for check, real value for unknown height is INVALID_HEIGHT_VALUE
+#define INVALID_HEIGHT_VALUE -200000.0f                     // for return, check value for unknown height is INVALID_HEIGHT
+#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find a floor if one is available
 #define DEFAULT_HEIGHT_SEARCH     10.0f                     // default search distance to find height at nearby locations
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
-// class for sharing and managin GridMap objects
+/**
+ * @brief One map's terrain, as the game sees it.
+ *
+ * The geometry lives in world::terrain::FusedTerrain, which knows nothing of MaNGOS:
+ * it answers in world coordinates and in the identifiers baked into the tile. This
+ * class is the half that owns the DBC -- turning a WMO group id into a WMOAreaTable
+ * entry, a LiquidType row into the flags the client expects, an AreaTable id into the
+ * area bit the rest of the server passes around.
+ *
+ * A grid index (gx,gy) and a tile index (tx,ty) are the same pair here: both are
+ * (int)(32 - coord / SIZE_OF_GRIDS).
+ */
 class TerrainInfo : public Referencable<AtomicLong>
 {
     public:
-        TerrainInfo(uint32 mapid);
+        explicit TerrainInfo(uint32 mapid);
         ~TerrainInfo();
 
         uint32 GetMapId() const { return m_mapId; }
 
-        // TODO: move all terrain/vmaps data info query functions
-        // from 'Map' class into this class
+        // True if a baked tile covers this grid. Replaces the old pair of map/vmap
+        // existence checks: one file now carries both.
+        static bool ExistTile(uint32 mapid, int gx, int gy);
+
         float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetWaterLevel(float x, float y, float z, float* pGround = NULL) const;
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = NULL, bool swim = false) const;
@@ -252,40 +196,34 @@ class TerrainInfo : public Referencable<AtomicLong>
         bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
 
+        // Static line of sight, and the nearest static hit along a segment as a fraction
+        // of it (> 1 when nothing blocks). Both take the segment VERBATIM -- any
+        // agent-height lift is the caller's, and every caller already applies its own.
+        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2) const;
+        float NearestHitFraction(float x1, float y1, float z1, float x2, float y2, float z2) const;
 
-        // this method should be used only by TerrainManager
-        // to cleanup unreferenced GridMap objects - they are too heavy
-        // to destroy them dynamically, especially on highly populated servers
-        // THIS METHOD IS NOT THREAD-SAFE!!!! AND IT SHOULDN'T BE THREAD-SAFE!!!!
+        // Ages the tile cache and reclaims what no active grid holds.
         void CleanUpGrids(const uint32 diff);
 
     protected:
         friend class Map;
-        // load/unload terrain data
-        GridMap* Load(const uint32 x, const uint32 y);
+        bool Load(const uint32 x, const uint32 y);
         void Unload(const uint32 x, const uint32 y);
 
     private:
         TerrainInfo(const TerrainInfo&);
         TerrainInfo& operator=(const TerrainInfo&);
 
-        GridMap* GetGrid(const float x, const float y);
-        GridMap* LoadMapAndVMap(const uint32 x, const uint32 y);
-
-        int RefGrid(const uint32& x, const uint32& y);
-        int UnrefGrid(const uint32& x, const uint32& y);
-
         const uint32 m_mapId;
 
-        GridMap* m_GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        // Mutable because every query is const and the cache loads lazily underneath.
+        mutable world::terrain::FusedTerrain m_terrain;
+
         int16 m_GridRef[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
-        // global garbage collection timer
         IntervalTimer i_timer;
 
         typedef std::mutex LOCK_TYPE;
-        LOCK_TYPE m_mutex;
-        char _cache_guard[1024];
         LOCK_TYPE m_refMutex;
 };
 

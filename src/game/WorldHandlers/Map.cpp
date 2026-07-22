@@ -48,6 +48,7 @@
 #include <algorithm>
 #include "Utilities/Errors.h"
 #include "Map.h"
+#include "GameObjectModel.h"
 #include "MapManager.h"
 #include "Player.h"
 #include "GridNotifiers.h"
@@ -66,7 +67,6 @@
 #include "MapRefManager.h"
 #include "DBCEnums.h"
 #include "MapPersistentStateMgr.h"
-#include "VMapFactory.h"
 #include "MoveMap.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "Calendar.h"
@@ -970,7 +970,6 @@ bool Map::loaded(const GridPair& p) const
  */
 void Map::Update(const uint32& t_diff)
 {
-    m_dyn_tree.update(t_diff);
 
     /// update worldsessions for existing players
     for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
@@ -3305,8 +3304,8 @@ void Map::PlayDirectSoundToMap(uint32 soundId, uint32 zoneId /*=0*/) const
  */
 bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask) const
 {
-    return VMAP::VMapFactory::createOrGetVMapManager()->isInLineOfSight(GetId(), srcX, srcY, srcZ, destX, destY, destZ)
-           && m_dyn_tree.isInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
+    return m_TerrainData->IsInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ)
+           && m_dyn_tree.IsInLineOfSight(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
 }
 
 /**
@@ -3315,90 +3314,58 @@ bool Map::IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float
  */
 bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const
 {
-    // at first check all static objects
-    float tempX, tempY, tempZ = 0.0f;
-    bool result0 = VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(GetId(), srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
+    // Both worlds answer with the FRACTION of the segment at which they were hit rather
+    // than with a point, so they can be asked over the SAME segment and only the nearer
+    // answer resolved into a position -- and pulled back by modifyDist exactly once.
+    //
+    // Not the other way round: bounding the dynamic sweep by the static hit, as this
+    // used to, hides every game object standing in the last modifyDist of the ray,
+    // because the static hit handed over had already been pulled back.
+    const float staticFrac = m_TerrainData->NearestHitFraction(srcX, srcY, srcZ, destX, destY, destZ);
+    const float dynFrac = m_dyn_tree.NearestHitFraction(srcX, srcY, srcZ, destX, destY, destZ, phasemask);
+    const float frac = std::min(staticFrac, dynFrac);
+    bool result0 = (frac <= 1.0f);
     if (result0)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Map::GetHitPosition vmaps corrects gained with static objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
-        destX = tempX;
-        destY = tempY;
-        destZ = tempZ;
+        const float dx = destX - srcX, dy = destY - srcY, dz = destZ - srcZ;
+        const float len = sqrt(dx * dx + dy * dy + dz * dz);
+        // Stop modifyDist short of the surface, and never past the origin.
+        float travel = frac * len - modifyDist;
+        if (travel < 0.0f)
+        {
+            travel = 0.0f;
+        }
+        const float t = (len > 0.0f) ? (travel / len) : 0.0f;
+        destX = srcX + dx * t;
+        destY = srcY + dy * t;
+        destZ = srcZ + dz * t;
     }
-    // at second all dynamic objects, if static check has an hit, then we can calculate only to this closer point
-    bool result1 = m_dyn_tree.getObjectHitPos(phasemask, srcX, srcY, srcZ, destX, destY, destZ, tempX, tempY, tempZ, modifyDist);
-    if (result1)
-    {
-        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Map::GetHitPosition vmaps corrects gained with dynamic objects! new dest coords are X:%f Y:%f Z:%f", destX, destY, destZ);
-        destX = tempX;
-        destY = tempY;
-        destZ = tempZ;
-    }
-    return result0 || result1;
+    return result0;
 }
 
 // Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
 bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist /*= 4.0f*/) const
 {
-    float height, vmapHeight, mapHeight;
-    vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
-
-    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    if (!vmgr->isLineOfSightCalcEnabled())
+    // One fused surface, so there is no longer a terrain answer and a collision answer
+    // to weigh against each other -- the engine already returned the highest of them.
+    const float height = m_TerrainData->GetHeightStatic(x, y, z, true, maxSearchDist);
+    if (height <= INVALID_HEIGHT)
     {
-        vmgr = NULL;
+        return false;
+    }
+    if (fabs(z - height) > maxSearchDist)
+    {
+        return false;
     }
 
-    if (vmgr)
+    const float dynHeight = m_dyn_tree.GetHeight(x, y, z + 2.0f, maxSearchDist + 2.0f, phasemask);
+    if (dynHeight > height && fabs(z - dynHeight) <= maxSearchDist)
     {
-        // pure vmap search
-        vmapHeight = vmgr->getHeight(i_id, x, y, z + 2.0f, maxSearchDist + 2.0f);
+        z = dynHeight;
+        return true;
     }
 
-    // find raw height from .map file on X,Y coordinates
-    if (GridMap* gmap = const_cast<TerrainInfo*>(m_TerrainData)->GetGrid(x, y)) // TODO:: find a way to remove that const_cast
-    {
-        mapHeight = gmap->getHeight(x, y);
-    }
-
-    float diffMaps = fabs(fabs(z) - fabs(mapHeight));
-    float diffVmaps = fabs(fabs(z) - fabs(vmapHeight));
-    if (diffVmaps < maxSearchDist)
-    {
-        if (diffMaps < maxSearchDist)
-        {
-            // well we simply have to take the highest as normally there we cannot be on top of cavern is maxSearchDist is not too big
-            if (vmapHeight > mapHeight)
-            {
-                height = vmapHeight;
-            }
-            else
-            {
-                height = mapHeight;
-            }
-
-            //sLog.outString("vmap %5.4f, map %5.4f, height %5.4f", vmapHeight, mapHeight, height);
-        }
-        else
-        {
-            //sLog.outString("vmap %5.4f", vmapHeight);
-            height = vmapHeight;
-        }
-    }
-    else
-    {
-        if (diffMaps < maxSearchDist)
-        {
-            //sLog.outString("map %5.4f", mapHeight);
-            height = mapHeight;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    z = std::max<float>(height, m_dyn_tree.getHeight(x, y, height + 1.0f, maxSearchDist, phasemask));
+    z = height;
     return true;
 }
 
@@ -3416,7 +3383,7 @@ float Map::GetHeight(uint32 phasemask, float x, float y, float z) const
 
     // Get Dynamic Height around static Height (if valid)
     float dynSearchHeight = 2.0f + (z < staticHeight ? staticHeight : z);
-    return std::max<float>(staticHeight, m_dyn_tree.getHeight(x, y, dynSearchHeight, dynSearchHeight - staticHeight, phasemask));
+    return std::max<float>(staticHeight, m_dyn_tree.GetHeight(x, y, dynSearchHeight, dynSearchHeight - staticHeight, phasemask));
 }
 
 /**
@@ -3426,7 +3393,7 @@ float Map::GetHeight(uint32 phasemask, float x, float y, float z) const
  */
 void Map::InsertGameObjectModel(const GameObjectModel& mdl)
 {
-    m_dyn_tree.insert(mdl);
+    m_dyn_tree.Insert(const_cast<GameObjectModel&>(mdl));
 }
 
 /**
@@ -3436,7 +3403,7 @@ void Map::InsertGameObjectModel(const GameObjectModel& mdl)
  */
 void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
 {
-    m_dyn_tree.remove(mdl);
+    m_dyn_tree.Remove(const_cast<GameObjectModel&>(mdl));
 }
 
 /**
@@ -3447,7 +3414,20 @@ void Map::RemoveGameObjectModel(const GameObjectModel& mdl)
  */
 bool Map::ContainsGameObjectModel(const GameObjectModel& mdl) const
 {
-    return m_dyn_tree.contains(mdl);
+    return m_dyn_tree.Contains(mdl);
+}
+
+/**
+ * @brief Re-files a game object's body after its pose changed.
+ *
+ * Position, rotation and scale are all re-derived from the owner. The old path took
+ * a quaternion and updated only the rotation, so a game object that was moved rather
+ * than turned kept a stale box and collided where it no longer stood.
+ */
+void Map::RefreshGameObjectModel(GameObjectModel& mdl)
+{
+    mdl.UpdatePose();
+    m_dyn_tree.Refresh(mdl);
 }
 
 // This will generate a random point to all directions in water for the provided point in radius range.

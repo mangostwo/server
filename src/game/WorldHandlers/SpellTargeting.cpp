@@ -58,7 +58,6 @@
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
 #include "LootMgr.h"
-#include "VMapFactory.h"
 #include "BattleGround/BattleGround.h"
 #include "Util.h"
 #include "Chat.h"

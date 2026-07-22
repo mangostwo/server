@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <vector>
 
 #include "DBCFileLoader.h"
 
@@ -37,59 +38,76 @@ DBCFileLoader::DBCFileLoader()
 
 bool DBCFileLoader::Load(const char* filename, const char* fmt)
 {
-    uint32 header;
-    delete[] data;
-
     FILE* f = fopen(filename, "rb");
     if (!f)
     {
         return false;
     }
 
-    if (fread(&header, 4, 1, f) != 1)                       // Number of records
+    fseek(f, 0, SEEK_END);
+    const long length = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    if (length <= 0)
     {
         fclose(f);
         return false;
     }
 
+    // Not `bytes(size_t(length))`: that is a function declaration, not a vector.
+    std::vector<unsigned char> bytes(static_cast<size_t>(length));
+    const size_t got = fread(bytes.data(), 1, bytes.size(), f);
+    fclose(f);
+    if (got != bytes.size())
+    {
+        return false;
+    }
+
+    return LoadFromMemory(bytes.data(), bytes.size(), fmt);
+}
+
+// The offline baker reads its DBCs out of the client MPQs, where there is no file to
+// open. Sharing this path with Load keeps the baker's column layout identical to the
+// server's -- one parser, one set of format strings, nothing to drift.
+bool DBCFileLoader::LoadFromMemory(const void* bytes, size_t size, const char* fmt)
+{
+    delete[] data;
+    data = NULL;
+    delete[] fieldsOffset;
+    fieldsOffset = NULL;
+
+    if (!bytes || size < 20)
+    {
+        return false;
+    }
+
+    const unsigned char* p = static_cast<const unsigned char*>(bytes);
+    uint32 header;
+    memcpy(&header, p, 4);
     EndianConvert(header);
     if (header != 0x43424457)                               //'WDBC'
     {
-        fclose(f);
         return false;
     }
 
-    if (fread(&recordCount, 4, 1, f) != 1)                  // Number of records
-    {
-        fclose(f);
-        return false;
-    }
-
+    memcpy(&recordCount, p + 4, 4);
     EndianConvert(recordCount);
-
-    if (fread(&fieldCount, 4, 1, f) != 1)                   // Number of fields
-    {
-        fclose(f);
-        return false;
-    }
-
+    memcpy(&fieldCount, p + 8, 4);
     EndianConvert(fieldCount);
-
-    if (fread(&recordSize, 4, 1, f) != 1)                   // Size of a record
-    {
-        fclose(f);
-        return false;
-    }
-
+    memcpy(&recordSize, p + 12, 4);
     EndianConvert(recordSize);
+    memcpy(&stringSize, p + 16, 4);
+    EndianConvert(stringSize);
 
-    if (fread(&stringSize, 4, 1, f) != 1)                   // String size
+    if (!fieldCount || strlen(fmt) < fieldCount)
     {
-        fclose(f);
         return false;
     }
 
-    EndianConvert(stringSize);
+    const uint64 payload = uint64(recordSize) * recordCount + stringSize;
+    if (payload + 20 > size)
+    {
+        return false;
+    }
 
     fieldsOffset = new uint32[fieldCount];
     fieldsOffset[0] = 0;
@@ -106,16 +124,9 @@ bool DBCFileLoader::Load(const char* filename, const char* fmt)
         }
     }
 
-    data = new unsigned char[recordSize * recordCount + stringSize];
+    data = new unsigned char[size_t(payload)];
     stringTable = data + recordSize * recordCount;
-
-    if (fread(data, recordSize * recordCount + stringSize, 1, f) != 1)
-    {
-        fclose(f);
-        return false;
-    }
-
-    fclose(f);
+    memcpy(data, p + 20, size_t(payload));
     return true;
 }
 

@@ -52,7 +52,6 @@
 #include "BattleGround/BattleGroundWS.h"
 #include "Language.h"
 #include "SocialMgr.h"
-#include "VMapFactory.h"
 #include "Util.h"
 #include "TemporarySummon.h"
 #include "ScriptMgr.h"
@@ -62,7 +61,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Vehicle.h"
-#include "G3D/Vector3.h"
+#include "Geometry/Vector3.h"
 #include <random>
 
 #ifdef ENABLE_ELUNA
