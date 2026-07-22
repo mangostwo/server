@@ -224,13 +224,12 @@ class SqlConnection
          * @brief
          *
          */
-        // Plain, not recursive. Every scope that takes this lock calls only
-        // SqlConnection virtuals (Query/Execute/ExecuteStmt), none of which take
-        // it again; FreePreparedStatements does, but runs solely from the
-        // destructor. A recursive mutex here would only serve to hide a future
-        // mistake -- with a plain one, an accidental reentry deadlocks at once
-        // instead of quietly violating what the lock was protecting.
-        typedef std::mutex LOCK_TYPE;
+        // Recursive, as ACE_Recursive_Thread_Mutex was, and for the reason the
+        // design requires: SqlTransaction::Execute holds this across the whole
+        // BEGIN..COMMIT so nothing interleaves, then runs each queued
+        // SqlOperation, and every one of those takes it again because each must
+        // also work standalone from the delay queue.
+        typedef std::recursive_mutex LOCK_TYPE;
         LOCK_TYPE m_mutex; /**< TODO */
 
         /**
