@@ -55,6 +55,12 @@ class CliService : public IService
 
         void Run();
 
+        /// Reader loop for the full-screen console, which owns the keyboard.
+        void RunManaged();
+
+        /// Reader loop for a plain line-oriented terminal (or redirected stdin).
+        void RunLineBased();
+
         const bool        m_beep;
         std::thread       m_thread;
         std::atomic<bool> m_stop;

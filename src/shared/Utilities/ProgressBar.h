@@ -28,6 +28,7 @@
 #include "Platform/Define.h"
 
 #include <cstddef>
+#include <string>
 
 /**
  * @brief
@@ -83,6 +84,21 @@ class BarGoLink
          * @param sink
          */
         static void SetConsoleSink(ConsoleSink sink);
+
+        /**
+         * @brief Progress sink for a console that draws the bar itself.
+         *
+         * Reports the completion percentage rather than the bytes of a redraw:
+         * 0 when a bar starts, its current value as it advances, and -1 when it
+         * is done. A full-screen console owns a progress region and needs the
+         * number, not a '\r'-terminated repaint. Installing one suppresses the
+         * byte sink, since the two would draw the same bar twice.
+         */
+        typedef void (*ProgressSink)(int percent);
+
+        /// Install the progress sink. Passing NULL restores byte-sink drawing.
+        static void SetProgressSink(ProgressSink sink);
+
     private:
         /**
          * @brief
@@ -94,7 +110,11 @@ class BarGoLink
         /// Default synchronous sink: fwrite(stdout)+fflush (legacy behaviour).
         static void DefaultSink(char const* bytes, size_t len);
 
+        /// Route one visual update to whichever sink is installed.
+        void emit(int percent, const std::string& bytes);
+
         static ConsoleSink m_sink; /**< active console sink for built bar redraws */
+        static ProgressSink m_progressSink; /**< when set, takes over from m_sink */
         static bool m_showOutput; /**< not recommended change with existed active bar */
 
         int rec_no; /**< TODO */

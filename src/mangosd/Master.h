@@ -76,6 +76,10 @@ class Master
         /// The world heartbeat. Returns when World::IsStopped() becomes true.
         void WorldLoop();
 
+        /// Push the once-a-second figures into the full-screen console's status
+        /// region. A no-op when that console is not running.
+        void PublishConsoleStatus(uint32 diff);
+
         /// Everything that must happen after the final world tick.
         void ShutdownWorld();
 

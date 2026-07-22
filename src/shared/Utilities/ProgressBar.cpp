@@ -72,10 +72,28 @@ void BarGoLink::DefaultSink(char const* bytes, size_t len)
 }
 
 BarGoLink::ConsoleSink BarGoLink::m_sink = &BarGoLink::DefaultSink;
+BarGoLink::ProgressSink BarGoLink::m_progressSink = NULL;
 
 void BarGoLink::SetConsoleSink(ConsoleSink sink)
 {
     m_sink = sink ? sink : &BarGoLink::DefaultSink;
+}
+
+void BarGoLink::SetProgressSink(ProgressSink sink)
+{
+    m_progressSink = sink;
+}
+
+void BarGoLink::emit(int percent, const std::string& bytes)
+{
+    if (m_progressSink)
+    {
+        m_progressSink(percent);
+    }
+    else
+    {
+        m_sink(bytes.data(), bytes.size());
+    }
 }
 
 /**
@@ -105,8 +123,7 @@ BarGoLink::~BarGoLink()
         return;
     }
 
-    std::string const bar = ProgressBarRender::buildEnd();
-    m_sink(bar.data(), bar.size());
+    emit(-1, ProgressBarRender::buildEnd());
 }
 
 /**
@@ -130,8 +147,7 @@ void BarGoLink::init(int row_count)
         return;
     }
 
-    std::string const bar = ProgressBarRender::buildInit(indic_len);
-    m_sink(bar.data(), bar.size());
+    emit(0, ProgressBarRender::buildInit(indic_len));
 }
 
 /**
@@ -160,8 +176,7 @@ void BarGoLink::step()
     int n = rec_no * indic_len / num_rec;
     if (n != rec_pos)
     {
-        std::string const bar = ProgressBarRender::buildStep(n, indic_len);
-        m_sink(bar.data(), bar.size());
+        emit(n * 100 / indic_len, ProgressBarRender::buildStep(n, indic_len));
         rec_pos = n;
     }
 }

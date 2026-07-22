@@ -25,6 +25,7 @@
 #include "CliService.h"
 
 #include "Common/ServerDefines.h"
+#include "Console/ConsoleUI.h"
 #include "Log.h"
 #include "Util.h"
 #include "World.h"
@@ -53,6 +54,11 @@ namespace
      */
     void Prompt(void* /*callbackArg*/ = nullptr, bool /*success*/ = true)
     {
+        if (MaNGOS::Console::ConsoleUI::Instance().Active())
+        {
+            return;                             // the console draws its own input row
+        }
+
         sLog.ConsoleEmitRaw("mangos>");
     }
 
@@ -126,13 +132,45 @@ void CliService::Run()
     // Let start-up finish printing before the prompt lands in the middle of it.
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    if (m_beep)
+    if (m_beep && !MaNGOS::Console::ConsoleUI::Instance().Active())
     {
         sLog.ConsoleEmitRaw("\a");
     }
 
     Prompt();
 
+    if (MaNGOS::Console::ConsoleUI::Instance().Active())
+    {
+        RunManaged();
+    }
+    else
+    {
+        RunLineBased();
+    }
+}
+
+void CliService::RunManaged()
+{
+    std::string line;
+
+    while (!m_stop.load(std::memory_order_acquire) && !World::IsStopped())
+    {
+        // Already UTF-8: the console decodes keystrokes to code points itself, so
+        // the consoleToUtf8() step of the line-based path would double-convert.
+        if (!MaNGOS::Console::ConsoleUI::Instance().PollInput(line))
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(15));
+            continue;
+        }
+
+        sWorld.QueueCliCommand(
+            new CliCommandHolder(0, SEC_CONSOLE, nullptr, line.c_str(),
+                                 &utf8print, &Prompt));
+    }
+}
+
+void CliService::RunLineBased()
+{
     char buffer[256];
 
     while (!m_stop.load(std::memory_order_acquire) && !World::IsStopped())
