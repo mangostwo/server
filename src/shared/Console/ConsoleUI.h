@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_CONSOLE_CONSOLEUI
 #define MANGOS_H_CONSOLE_CONSOLEUI
 
+#include <atomic>
 #include <deque>
 #include <mutex>
 #include <string>
@@ -166,7 +167,9 @@ namespace Console
             void ComposeInput(std::vector<std::string>& frame, int cols);
 
             mutable std::mutex      m_mutex;
-            bool                    m_active;
+            /// Read without m_mutex by the log writer and the CLI thread, while
+            /// Stop() clears it from the main thread -- so it has to be atomic.
+            std::atomic<bool>       m_active;
             bool                    m_forceRedraw;
             int                     m_rows;
             int                     m_cols;

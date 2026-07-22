@@ -867,13 +867,10 @@ void ConsoleUI::Render()
         out += "H";
     }
 
-    if (!out.empty())
-    {
-        // Hidden across the repaint so the caret does not streak over every row
-        // being painted, then shown where it was parked: the terminal's own
-        // cursor, which blinks and matches what the operator expects.
-        Terminal::Write("\x1b[?25l" + out + "\x1b[?25h");
-    }
+    // Hidden across the repaint so the caret does not streak over every row being
+    // painted, then shown where it was parked: the terminal's own cursor, which
+    // blinks and matches what the operator expects.
+    Terminal::Write("\x1b[?25l" + out + "\x1b[?25h");
 }
 
 }
