@@ -33,6 +33,7 @@ set(SRC_GRP_TESTS
     TestHarness.h
     BigNumberTest.cpp
     ByteBufferTest.cpp
+    SessionMailboxTest.cpp
     ClientParserTest.cpp
     TerrainModelTest.cpp
     TileSerializerTest.cpp
@@ -42,6 +43,7 @@ set(SRC_GRP_TESTS
     # database globals that only mangosd defines. These two know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
@@ -53,7 +55,9 @@ source_group("tests" FILES ${SRC_GRP_TESTS})
 add_executable(mangos_tests ${SRC_GRP_TESTS})
 
 target_include_directories(mangos_tests
-    PRIVATE ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers)
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
+        ${CMAKE_SOURCE_DIR}/src/game/Server)
 
 target_link_libraries(mangos_tests
     PRIVATE
