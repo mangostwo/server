@@ -34,6 +34,7 @@ set(SRC_GRP_TESTS
     BigNumberTest.cpp
     ByteBufferTest.cpp
     SessionMailboxTest.cpp
+    SessionProtocolPolicyTest.cpp
     ClientParserTest.cpp
     TerrainModelTest.cpp
     TileSerializerTest.cpp
@@ -70,3 +71,8 @@ target_link_libraries(mangos_tests
 )
 
 add_test(NAME mangos_tests COMMAND mangos_tests)
+
+add_test(NAME world_network_boundary
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckWorldNetworkBoundary.cmake)

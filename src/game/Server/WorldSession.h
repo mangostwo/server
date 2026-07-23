@@ -29,7 +29,6 @@
 #ifndef MANGOS_H_WORLDSESSION
 #define MANGOS_H_WORLDSESSION
 
-#include "LockedQueue/LockedQueue.h"
 #include "Common/ServerDefines.h"
 #include "Platform/Define.h"
 #include "Common/Locales.h"
@@ -44,6 +43,7 @@
 #include "AuctionHouseMgr.h"
 #include "Item.h"
 #include "LFGMgr.h"
+#include "SessionProtocolPolicy.h"
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -59,6 +59,7 @@ class Player;
 class Unit;
 class Warden;
 class WorldPacket;
+class SessionMailbox;
 namespace proto
 {
     class IClientLink;
@@ -310,6 +311,7 @@ class WorldSession
          *             verify the login, and Warden needs it here.
          */
         WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     std::shared_ptr<SessionMailbox> mailbox,
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKey);
 
@@ -614,6 +616,7 @@ class WorldSession
         void HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data);
 
         void HandlePingOpcode(WorldPacket& recvPacket);
+        void HandleKeepAliveOpcode(WorldPacket& recvPacket);
         void HandleAuthSessionOpcode(WorldPacket& recvPacket);
         void HandleRepopRequestOpcode(WorldPacket& recvPacket);
         void HandleAutostoreLootItemOpcode(WorldPacket& recvPacket);
@@ -1084,6 +1087,7 @@ class WorldSession
         /// Channel back to the client. Null once the connection is gone; every
         /// call on it is safe after teardown, so callers need only null-check.
         std::shared_ptr<proto::IClientLink> m_link;
+        std::shared_ptr<SessionMailbox> m_mailbox;
 
         /// The account's session key, for Warden's HMAC. Owned here because it is
         /// account data, not transport state.
@@ -1107,11 +1111,11 @@ class WorldSession
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
+        SessionPingTracker m_pingTracker;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[8];
         TutorialDataState m_tutorialState;
         AddonsList m_addonsList;
-        MaNGOS::LockedQueue<WorldPacket*> _recvQueue;
 };
 #endif
 /// @}

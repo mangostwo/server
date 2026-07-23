@@ -68,6 +68,7 @@
 #include "OpcodeTable.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "SessionMailbox.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "Group.h"
@@ -162,9 +163,12 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           std::shared_ptr<SessionMailbox> mailbox,
                            AccountTypes sec, uint8 expansion, time_t mute_time,
                            LocaleConstant locale, const BigNumber& sessionKey) :
-    m_muteTime(mute_time), _player(nullptr), m_link(std::move(link)), m_sessionKey(sessionKey),
+    m_muteTime(mute_time), _player(nullptr), m_link(std::move(link)),
+    m_mailbox(mailbox ? std::move(mailbox) : std::make_shared<SessionMailbox>()),
+    m_sessionKey(sessionKey),
     _security(sec), _accountId(id), _warden(nullptr), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
@@ -179,6 +183,8 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
+    m_mailbox->Close();
+
     ///- unload player if not unloaded
     if (_player)
     {
@@ -194,18 +200,7 @@ WorldSession::~WorldSession()
         m_link.reset();
     }
 
-    // Warden
-    if (_warden)
-    {
-        delete _warden;
-    }
-
-    ///- empty incoming packet queue
-    WorldPacket* packet = NULL;
-    while (_recvQueue.next(packet))
-    {
-        delete packet;
-    }
+    delete _warden;
 }
 
 /**
@@ -285,7 +280,7 @@ void WorldSession::SendPacket(WorldPacket const* packet)
 /// Add an incoming packet to the queue
 void WorldSession::QueuePacket(WorldPacket* new_packet)
 {
-    _recvQueue.add(new_packet);
+    m_mailbox->Enqueue(std::unique_ptr<WorldPacket>(new_packet));
 }
 
 /// Logging helper for unexpected opcodes
@@ -312,7 +307,7 @@ bool WorldSession::Update(PacketFilter& updater)
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
     WorldPacket* packet = nullptr;
-    while (m_link && !m_link->IsClosed() && _recvQueue.next(packet, updater))
+    while (m_link && !m_link->IsClosed() && m_mailbox->Next(packet, updater))
     {
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
@@ -368,7 +363,8 @@ bool WorldSession::Update(PacketFilter& updater)
                     break;
                 case STATUS_AUTHED:
                     // prevent cheating with skip queue wait
-                    if (m_inQueue)
+                    if (m_inQueue &&
+                        !IsAllowedWhileLoginQueued(packet->GetOpcode()))
                     {
                         LogUnexpectedOpcode(packet, "the player not pass queue yet");
                         break;
@@ -376,7 +372,8 @@ bool WorldSession::Update(PacketFilter& updater)
 
                     // single from authed time opcodes send in to after logout time
                     // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
-                    if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL)
+                    if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL &&
+                        !IsAllowedWhileLoginQueued(packet->GetOpcode()))
                     {
                         m_playerRecentlyLogout = false;
                     }
@@ -685,6 +682,39 @@ void WorldSession::KickPlayer()
     {
         m_link->Close();
     }
+}
+
+void WorldSession::HandlePingOpcode(WorldPacket& recvPacket)
+{
+    uint32 ping = 0;
+    uint32 latency = 0;
+    recvPacket >> ping;
+    recvPacket >> latency;
+
+    m_pingTracker.Record(SessionPingTracker::Clock::now());
+    uint32 maximum =
+        sWorld.getConfig(CONFIG_UINT32_MAX_OVERSPEED_PINGS);
+    if (m_pingTracker.ShouldKick(
+            maximum, GetSecurity() == SEC_PLAYER))
+    {
+        sLog.outError(
+            "WorldSession::HandlePingOpcode: Player kicked for "
+            "overspeeded pings address = %s",
+            GetRemoteAddress().c_str());
+        KickPlayer();
+        return;
+    }
+
+    SetLatency(latency);
+
+    WorldPacket response(SMSG_PONG, 4);
+    response << ping;
+    SendPacket(&response);
+}
+
+void WorldSession::HandleKeepAliveOpcode(WorldPacket& recvPacket)
+{
+    DEBUG_LOG("CMSG_KEEP_ALIVE ,size: %zu ", recvPacket.size());
 }
 
 /// Cancel channeling handler
