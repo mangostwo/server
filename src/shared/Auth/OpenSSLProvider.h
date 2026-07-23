@@ -118,6 +118,12 @@ public:
     bool IsLoaded() const { return m_provider != nullptr; }
 
     /**
+     * @brief Get the version reported by the loaded provider
+     * @return Provider version, or an empty string if unavailable
+     */
+    std::string Version() const;
+
+    /**
      * @brief Get the underlying provider handle
      * @return OSSL_PROVIDER pointer or nullptr if not loaded
      */

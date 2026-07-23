@@ -27,9 +27,14 @@
  * @brief Implementation of RAII wrappers for OpenSSL providers
  */
 
-#include <utility>
 #include "OpenSSLProvider.h"
 #include "Log/Log.h"
+
+#include <charconv>
+#include <cstdlib>
+#include <openssl/core_names.h>
+#include <openssl/params.h>
+#include <utility>
 
 /**
  * Creates a new OpenSSL cipher context wrapper.
@@ -81,6 +86,22 @@ OpenSSLCipherContext& OpenSSLCipherContext::operator=(OpenSSLCipherContext&& oth
 
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
 
+namespace
+{
+bool ParseProviderMajor(const std::string& version, unsigned& major)
+{
+    std::size_t separator = version.find('.');
+    if (separator == std::string::npos || separator == 0)
+        return false;
+
+    const char* begin = version.data();
+    const char* end = begin + separator;
+    std::from_chars_result parsed =
+        std::from_chars(begin, end, major);
+    return parsed.ec == std::errc{} && parsed.ptr == end;
+}
+}
+
 /**
  * Loads the named OpenSSL provider into the specified library context.
  */
@@ -110,6 +131,22 @@ OpenSSLProvider::~OpenSSLProvider()
         OSSL_PROVIDER_unload(m_provider);
         m_provider = nullptr;
     }
+}
+
+std::string OpenSSLProvider::Version() const
+{
+    if (!m_provider)
+        return {};
+
+    char* version = nullptr;
+    OSSL_PARAM params[] = {
+        OSSL_PARAM_construct_utf8_ptr(
+            OSSL_PROV_PARAM_VERSION, &version, 0),
+        OSSL_PARAM_construct_end()
+    };
+    if (OSSL_PROVIDER_get_params(m_provider, params) != 1 || !version)
+        return {};
+    return version;
 }
 
 OpenSSLProvider::OpenSSLProvider(OpenSSLProvider&& other) noexcept
@@ -142,13 +179,7 @@ OpenSSLProvider& OpenSSLProvider::operator=(OpenSSLProvider&& other) noexcept
 OpenSSLProviderManager::OpenSSLProviderManager()
     : m_legacyProvider("legacy"), m_defaultProvider("default"), m_initialized(false)
 {
-    // Check if both providers loaded successfully
-    if (m_legacyProvider.IsLoaded() && m_defaultProvider.IsLoaded())
-    {
-        m_initialized = true;
-        sLog.outString("OpenSSL 3.x providers loaded successfully: legacy, default");
-    }
-    else
+    if (!m_legacyProvider.IsLoaded() || !m_defaultProvider.IsLoaded())
     {
         sLog.outError("Failed to load OpenSSL 3.x providers");
 
@@ -166,7 +197,49 @@ OpenSSLProviderManager::OpenSSLProviderManager()
         {
             sLog.outError("  - Default provider failed to load");
         }
+        return;
     }
+
+    std::string legacyVersion = m_legacyProvider.Version();
+    std::string defaultVersion = m_defaultProvider.Version();
+    unsigned legacyMajor = 0;
+    unsigned defaultMajor = 0;
+    bool parsedLegacy =
+        ParseProviderMajor(legacyVersion, legacyMajor);
+    bool parsedDefault =
+        ParseProviderMajor(defaultVersion, defaultMajor);
+
+    unsigned runtimeMajor =
+        unsigned((OpenSSL_version_num() >> 28) & 0x0f);
+    if (runtimeMajor != 3
+        || !parsedLegacy || legacyMajor != runtimeMajor
+        || !parsedDefault || defaultMajor != runtimeMajor)
+    {
+        const char* modules = std::getenv("OPENSSL_MODULES");
+        sLog.outError(
+            "OpenSSL 3.x provider/runtime validation failed: "
+            "runtime='%s', legacy provider='%s', default provider='%s', "
+            "OPENSSL_MODULES='%s'",
+            OpenSSL_version(OPENSSL_VERSION),
+            legacyVersion.empty() ? "<unavailable>" : legacyVersion.c_str(),
+            defaultVersion.empty() ? "<unavailable>" : defaultVersion.c_str(),
+            modules ? modules : "<unset>");
+        return;
+    }
+
+    EVP_CIPHER* rc4 = EVP_CIPHER_fetch(nullptr, "RC4", nullptr);
+    if (!rc4)
+    {
+        sLog.outError(
+            "OpenSSL legacy provider is loaded but RC4 is unavailable");
+        return;
+    }
+    EVP_CIPHER_free(rc4);
+
+    m_initialized = true;
+    sLog.outString(
+        "OpenSSL 3.x providers loaded successfully: legacy %s, default %s",
+        legacyVersion.c_str(), defaultVersion.c_str());
 }
 
 OpenSSLProviderManager& OpenSSLProviderManager::Instance()

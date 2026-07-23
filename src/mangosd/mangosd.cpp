@@ -308,7 +308,7 @@ int main(int argc, char** argv)
     if (!OpenSSLProviderManager::Instance().IsInitialized())
     {
         Log::WaitBeforeContinueIfNeed();
-        return 0;
+        return 1;
     }
 #else
     if (SSLeay() < 0x10100000L || SSLeay() > 0x10200000L)
