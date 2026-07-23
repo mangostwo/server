@@ -293,17 +293,17 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     // out encrypted -- which is the one ordering constraint across this seam.
     // AddSession also answers the addon block, via SendAddonsInfo() over the
     // list ReadAddonsInfo() just parsed -- so nothing more is owed here.
-    WorldSession* published = session.get();
+    WorldSession* published = session.release();
     try
     {
         sWorld.AddSession(published);
     }
     catch (...)
     {
+        session.reset(published);
         Detach(id);
         throw;
     }
-    (void)session.release();
 
     return id;
 }
@@ -340,4 +340,8 @@ void WorldGateway::Detach(proto::SessionId session)
     }
 
     mailbox->Close();
+
+    // The transport marks the shared client link closed before calling Detach.
+    // WorldSession::Update observes that state on the world thread, logs the
+    // player out, and returns false so World::UpdateSessions reaps the session.
 }

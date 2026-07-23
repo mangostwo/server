@@ -263,11 +263,10 @@ void Database::escape_string(std::string& str)
         return;
     }
 
-    char* buf = new char[str.size() * 2 + 1];
+    std::unique_ptr<char[]> buf(new char[str.size() * 2 + 1]);
     SqlConnection::Lock guard(m_pQueryConnections[0]);
-    guard->escape_string(buf, str.c_str(), str.size());
-    str = buf;
-    delete[] buf;
+    guard->escape_string(buf.get(), str.c_str(), str.size());
+    str = buf.get();
 }
 
 SqlConnection* Database::getQueryConnection()

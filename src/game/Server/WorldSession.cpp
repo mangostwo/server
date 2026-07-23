@@ -691,16 +691,17 @@ void WorldSession::HandlePingOpcode(WorldPacket& recvPacket)
     recvPacket >> ping;
     recvPacket >> latency;
 
-    m_pingTracker.Record(SessionPingTracker::Clock::now());
+    uint32 fastPingRun =
+        m_pingTracker.Record(SessionPingTracker::Clock::now());
     uint32 maximum =
         sWorld.getConfig(CONFIG_UINT32_MAX_OVERSPEED_PINGS);
     if (m_pingTracker.ShouldKick(
             maximum, GetSecurity() == SEC_PLAYER))
     {
         sLog.outError(
-            "WorldSession::HandlePingOpcode: Player kicked for "
-            "overspeeded pings address = %s",
-            GetRemoteAddress().c_str());
+            "WorldSession::HandlePingOpcode: account %u kicked for "
+            "overspeeded pings (%u in a row), address = %s",
+            GetAccountId(), fastPingRun, GetRemoteAddress().c_str());
         KickPlayer();
         return;
     }

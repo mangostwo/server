@@ -79,14 +79,23 @@ TEST(SessionMailbox_close_racing_producers_leaves_no_packets)
 {
     SessionMailbox mailbox;
     std::atomic<bool> start{false};
+    std::atomic<unsigned> ready{0};
+    std::atomic<bool> raceClose{false};
     std::vector<std::thread> producers;
     for (unsigned producer = 0; producer < 4; ++producer)
     {
-        producers.emplace_back([&mailbox, &start, producer]()
+        producers.emplace_back(
+            [&mailbox, &start, &ready, &raceClose, producer]()
         {
             while (!start.load())
                 std::this_thread::yield();
-            for (unsigned packet = 0; packet < 200; ++packet)
+
+            mailbox.Enqueue(MakePacket(uint16(producer + 1), 0));
+            ready.fetch_add(1);
+            while (!raceClose.load())
+                std::this_thread::yield();
+
+            for (unsigned packet = 1; packet < 200; ++packet)
             {
                 mailbox.Enqueue(MakePacket(
                     uint16(producer + 1), uint8(packet)));
@@ -95,6 +104,9 @@ TEST(SessionMailbox_close_racing_producers_leaves_no_packets)
     }
 
     start.store(true);
+    while (ready.load() != producers.size())
+        std::this_thread::yield();
+    raceClose.store(true);
     mailbox.Close();
     for (std::thread& producer : producers)
         producer.join();

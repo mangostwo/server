@@ -24,6 +24,7 @@ file(READ "${SOURCE_ROOT}/src/game/Server/OpcodeTable.cpp" OPCODE_SOURCE)
 foreach(REQUIRED_TEXT
     "std::unordered_map<proto::SessionId, std::shared_ptr<SessionMailbox>> m_routes"
     "std::shared_ptr<SessionMailbox> mailbox"
+    "WorldSession* published = session.release()"
     "mailbox->Enqueue"
     "mailbox->Close")
   string(FIND "${GATEWAY_HEADER}\n${GATEWAY_SOURCE}"
@@ -73,7 +74,10 @@ foreach(REQUIRED_TEXT
     "std::shared_ptr<SessionMailbox> m_mailbox"
     "m_mailbox->Close()"
     "m_mailbox->Enqueue"
-    "m_mailbox->Next")
+    "m_mailbox->Next"
+    "if (m_link && m_link->IsClosed())"
+    "m_link.reset()"
+    "return false;                                    // Will remove this session from the world session map")
   string(FIND "${SESSION_HEADER}\n${SESSION_SOURCE}"
     "${REQUIRED_TEXT}" POSITION)
   if(POSITION EQUAL -1)
