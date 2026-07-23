@@ -40,3 +40,18 @@ string(FIND "${SRC_CMAKE}" "Upstream realmd passes the *file*" POSITION)
 if(NOT POSITION EQUAL -1)
   message(FATAL_ERROR "Obsolete external realmd VersionInfo workaround remains")
 endif()
+
+foreach(CI_TEXT IN ITEMS "${LINUX_CI}" "${WINDOWS_CI}")
+  foreach(REQUIRED_TEXT "-DWITH_TESTS=1" "ctest --test-dir")
+    string(FIND "${CI_TEXT}" "${REQUIRED_TEXT}" POSITION)
+    if(POSITION EQUAL -1)
+      message(FATAL_ERROR "CI does not run tests: ${REQUIRED_TEXT}")
+    endif()
+  endforeach()
+endforeach()
+
+string(REGEX MATCH "OPENSSL_VERSION: 3\\.[0-9]+\\.[0-9]+"
+  OPENSSL_PIN "${WINDOWS_CI}")
+if(NOT OPENSSL_PIN)
+  message(FATAL_ERROR "Windows CI is not pinned to OpenSSL 3.x")
+endif()
