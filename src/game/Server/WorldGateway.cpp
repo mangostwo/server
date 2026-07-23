@@ -303,7 +303,7 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         Detach(id);
         throw;
     }
-    session.release();
+    (void)session.release();
 
     return id;
 }

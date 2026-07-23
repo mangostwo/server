@@ -40,7 +40,7 @@ bool SessionMailbox::Enqueue(std::unique_ptr<WorldPacket> packet)
 
     WorldPacket* accepted = packet.get();
     m_packets.add(accepted);
-    packet.release();
+    (void)packet.release();
     return true;
 }
 
