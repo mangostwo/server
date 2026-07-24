@@ -280,11 +280,11 @@ namespace
 
     // The navmesh is baked from the TILES, never from the MPQs, so the surface the
     // pathfinder walks is the one the collision engine answers with.
-    void BakeNav(const Options& opt, const std::string& tileDir)
+    bool BakeNav(const Options& opt, const std::string& tileDir)
     {
         if (!opt.nav)
         {
-            return;
+            return true;
         }
 
         g_console.SetStage("nav");
@@ -299,14 +299,16 @@ namespace
         const int written = builder.BakeAll(opt.mapFilter);
         if (written < 0)
         {
-            g_console.Error("nav: could not read the tile directory " + tileDir);
-            return;
+            g_console.Error("nav: bake failed; inspect the earlier diagnostics and " +
+                            tileDir);
+            return false;
         }
 
         char msg[256];
         std::snprintf(msg, sizeof(msg), "nav: %d mmtile files -> %s/mmaps", written,
                       opt.dest.c_str());
         g_console.Success(msg);
+        return true;
     }
 
     // One map's tiles. A map is either an ADT grid or a single global WMO; both end up
@@ -432,11 +434,11 @@ int main(int argc, char** argv)
     // not require a client to be present at all.
     if (!opt.dbc && !opt.tiles && !opt.goModels)
     {
-        BakeNav(opt, tileDir);
+        const bool ok = BakeNav(opt, tileDir);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
-        return 0;
+        return ok ? 0 : 1;
     }
 
     StormLibArchive mpq;
@@ -499,11 +501,11 @@ int main(int argc, char** argv)
 
     if (!opt.tiles)
     {
-        BakeNav(opt, tileDir);
+        const bool ok = BakeNav(opt, tileDir);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
-        return 0;
+        return ok ? 0 : 1;
     }
 
     g_console.SetStage("tiles");
@@ -519,7 +521,11 @@ int main(int argc, char** argv)
         BakeMap(source, entry.first, entry.second, tileDir);
     }
 
-    BakeNav(opt, tileDir);
+    if (!BakeNav(opt, tileDir))
+    {
+        g_console.Stop();
+        return 1;
+    }
 
     g_console.SetStage("done");
     g_console.Progress(-1);

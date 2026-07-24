@@ -29,6 +29,8 @@
 #include <random>
 
 using world::nav::SubTileSpan;
+using world::nav::CellRect;
+using world::nav::NeighbourCellRect;
 
 namespace
 {
@@ -142,4 +144,41 @@ TEST(NavBinningIncludesTheBorderNeighbour)
     SubTileSpan(justOutside, justOutside, ORIGIN, WIDTH, PAD, SIDE, first, last);
     CHECK(first <= 5);
     CHECK(last >= 5);
+}
+
+TEST(NavNeighbourCellRectSelectsTheAdjacentCellStrip)
+{
+    CellRect rect{};
+
+    CHECK(NeighbourCellRect(-1, 0, rect));
+    CHECK_EQ(rect.ixFirst, 127);
+    CHECK_EQ(rect.ixLast, 127);
+    CHECK_EQ(rect.iyFirst, 0);
+    CHECK_EQ(rect.iyLast, 127);
+
+    CHECK(NeighbourCellRect(1, 0, rect));
+    CHECK_EQ(rect.ixFirst, 0);
+    CHECK_EQ(rect.ixLast, 0);
+    CHECK_EQ(rect.iyFirst, 0);
+    CHECK_EQ(rect.iyLast, 127);
+
+    CHECK(NeighbourCellRect(0, -1, rect));
+    CHECK_EQ(rect.ixFirst, 0);
+    CHECK_EQ(rect.ixLast, 127);
+    CHECK_EQ(rect.iyFirst, 127);
+    CHECK_EQ(rect.iyLast, 127);
+
+    CHECK(NeighbourCellRect(0, 1, rect));
+    CHECK_EQ(rect.ixFirst, 0);
+    CHECK_EQ(rect.ixLast, 127);
+    CHECK_EQ(rect.iyFirst, 0);
+    CHECK_EQ(rect.iyLast, 0);
+}
+
+TEST(NavNeighbourCellRectRejectsNonOrthogonalNeighbours)
+{
+    CellRect rect{};
+    CHECK(!NeighbourCellRect(0, 0, rect));
+    CHECK(!NeighbourCellRect(1, 1, rect));
+    CHECK(!NeighbourCellRect(-2, 0, rect));
 }

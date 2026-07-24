@@ -37,6 +37,8 @@ namespace world::nav
         constexpr int V8_SIDE = 128;
         constexpr float GRID_PART = GRID_SIZE / float(V8_SIDE);
 
+        std::mutex g_bakeLogMutex;
+
         // Triangle soup in RECAST space. Vertices go in as world (x, y, z) and come out
         // as (y, z, x) -- the same permutation the server's PathFinder applies.
         struct Soup
@@ -130,6 +132,54 @@ namespace world::nav
             }
         }
 
+        // Recast's ledge filter and walkable-radius erosion need geometry outside the
+        // tile's core bounds. The legacy generator supplied one terrain cell from each
+        // orthogonal neighbour. Emit only that requested cell range here; importing a
+        // neighbour's models as well would duplicate placements which already overlap
+        // the current tile.
+        void AddTerrainCells(const TerrainTile& tile, int gx, int gy,
+                             const CellRect& cells, Soup& out)
+        {
+            if (!tile.hasTerrain || tile.v9.empty() || tile.v8.empty())
+            {
+                return;
+            }
+
+            const auto v9 = [&](int ix, int iy) { return tile.v9[ix * V9_SIDE + iy]; };
+            const auto v8 = [&](int ix, int iy) { return tile.v8[ix * V8_SIDE + iy]; };
+
+            for (int ix = cells.ixFirst; ix <= cells.ixLast; ++ix)
+            {
+                for (int iy = cells.iyFirst; iy <= cells.iyLast; ++iy)
+                {
+                    if (tile.IsHoleAt(ix, iy))
+                    {
+                        continue;
+                    }
+
+                    const int a = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix)), WorldY(gy, float(iy)), v9(ix, iy)});
+                    const int b = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix)), WorldY(gy, float(iy) + 1.f),
+                             v9(ix, iy + 1)});
+                    const int c = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy) + 1.f),
+                             v9(ix + 1, iy + 1)});
+                    const int d = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy)),
+                             v9(ix + 1, iy)});
+                    const int m = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix) + 0.5f),
+                             WorldY(gy, float(iy) + 0.5f), v8(ix, iy)});
+
+                    out.AddTriangle(a, m, b, NAV_GROUND);
+                    out.AddTriangle(b, m, c, NAV_GROUND);
+                    out.AddTriangle(c, m, d, NAV_GROUND);
+                    out.AddTriangle(d, m, a, NAV_GROUND);
+                }
+            }
+        }
+
         unsigned char LiquidArea(world::terrain::LiquidKind kind)
         {
             switch (kind)
@@ -206,6 +256,76 @@ namespace world::nav
                     const int b = out.AddVertex(Vec3{WorldX(gx, float(ix)), WorldY(gy, float(iy) + 1.f), h01});
                     const int c = out.AddVertex(Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy) + 1.f), h11});
                     const int d = out.AddVertex(Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy)), h10});
+
+                    out.AddTriangle(a, c, b, area);
+                    out.AddTriangle(a, d, c, area);
+                }
+            }
+        }
+
+        void AddLiquidCells(const TerrainTile& tile, int gx, int gy,
+                            const CellRect& cells, Soup& out)
+        {
+            if (!tile.hasLiquid || tile.liquidHeight.empty() || tile.liquidShow.empty())
+            {
+                return;
+            }
+
+            const auto lh = [&](int ix, int iy) { return tile.liquidHeight[ix * V9_SIDE + iy]; };
+            const auto v9 = [&](int ix, int iy) { return tile.v9[ix * V9_SIDE + iy]; };
+            const auto v8 = [&](int ix, int iy) { return tile.v8[ix * V8_SIDE + iy]; };
+            const bool haveTerrain = tile.hasTerrain && !tile.v9.empty() && !tile.v8.empty();
+
+            for (int ix = cells.ixFirst; ix <= cells.ixLast; ++ix)
+            {
+                for (int iy = cells.iyFirst; iy <= cells.iyLast; ++iy)
+                {
+                    const size_t cell = size_t(ix) * V8_SIDE + iy;
+                    if (!tile.liquidShow[cell])
+                    {
+                        continue;
+                    }
+                    if (!tile.liquidDeep.empty() && tile.liquidDeep[cell])
+                    {
+                        continue;
+                    }
+
+                    const auto kind = tile.liquidKind.empty()
+                                          ? world::terrain::LiquidKind::Water
+                                          : world::terrain::LiquidKind(tile.liquidKind[cell]);
+                    const unsigned char area = LiquidArea(kind);
+                    if (area == NAV_EMPTY)
+                    {
+                        continue;
+                    }
+
+                    const float h00 = lh(ix, iy), h01 = lh(ix, iy + 1);
+                    const float h11 = lh(ix + 1, iy + 1), h10 = lh(ix + 1, iy);
+
+                    if (haveTerrain && !tile.IsHoleAt(ix, iy))
+                    {
+                        const float maxLiquid =
+                            std::max(std::max(h00, h01), std::max(h11, h10));
+                        const float minTerrain =
+                            std::min(std::min(std::min(v9(ix, iy), v9(ix, iy + 1)),
+                                              std::min(v9(ix + 1, iy + 1),
+                                                       v9(ix + 1, iy))),
+                                     v8(ix, iy));
+                        if (minTerrain > maxLiquid)
+                        {
+                            continue;
+                        }
+                    }
+
+                    const int a = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix)), WorldY(gy, float(iy)), h00});
+                    const int b = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix)), WorldY(gy, float(iy) + 1.f), h01});
+                    const int c = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy) + 1.f),
+                             h11});
+                    const int d = out.AddVertex(
+                        Vec3{WorldX(gx, float(ix) + 1.f), WorldY(gy, float(iy)), h10});
 
                     out.AddTriangle(a, c, b, area);
                     out.AddTriangle(a, d, c, area);
@@ -333,6 +453,65 @@ namespace world::nav
             int subTilesPerTile = 0;
             int borderSize = 0;
         };
+
+        bool AddNeighbourGeometry(const MapBake& mb, int gx, int gy,
+                                  Soup& solid, Soup& liquid)
+        {
+            constexpr int neighbours[][2] = {
+                {-1, 0},
+                {1, 0},
+                {0, -1},
+                {0, 1},
+            };
+
+            for (const auto& offset : neighbours)
+            {
+                const int neighbourGx = gx + offset[0];
+                const int neighbourGy = gy + offset[1];
+                const std::string path =
+                    mb.tileDir + "/" +
+                    world::terrain::TileFileName(mb.mapId, neighbourGx, neighbourGy);
+
+                std::error_code ec;
+                const bool exists = std::filesystem::exists(path, ec);
+                if (ec)
+                {
+                    std::lock_guard<std::mutex> lock(g_bakeLogMutex);
+                    std::fprintf(stderr,
+                                 "nav: map %u tile (%d,%d): cannot inspect neighbour "
+                                 "(%d,%d): %s\n",
+                                 mb.mapId, gx, gy, neighbourGx, neighbourGy,
+                                 ec.message().c_str());
+                    return false;
+                }
+                if (!exists)
+                {
+                    continue;
+                }
+
+                std::shared_ptr<TerrainTile> neighbour =
+                    world::terrain::ReadTile(path);
+                if (!neighbour)
+                {
+                    std::lock_guard<std::mutex> lock(g_bakeLogMutex);
+                    std::fprintf(stderr,
+                                 "nav: map %u tile (%d,%d): existing neighbour "
+                                 "(%d,%d) is unreadable: %s\n",
+                                 mb.mapId, gx, gy, neighbourGx, neighbourGy,
+                                 path.c_str());
+                    return false;
+                }
+
+                CellRect cells;
+                if (!NeighbourCellRect(offset[0], offset[1], cells))
+                {
+                    return false;
+                }
+                AddTerrainCells(*neighbour, neighbourGx, neighbourGy, cells, solid);
+                AddLiquidCells(*neighbour, neighbourGx, neighbourGy, cells, liquid);
+            }
+            return true;
+        }
 
         // Which triangles each sub-tile has to look at.
         //
@@ -526,15 +705,21 @@ namespace world::nav
             return true;
         }
 
-        // Bakes one grid cell into one .mmtile. Tiles share nothing -- own file in, own
-        // file out -- which is what lets the map bake run one tile per core unlocked.
-        bool BakeTile(const MapBake& mb, int gx, int gy)
+        // Bakes one grid cell into one .mmtile. Workers share no mutable state: each
+        // reads its own tile plus up to four neighbour borders and writes its own file,
+        // which keeps the map bake safe to run one tile per core without a cache lock.
+        bool BakeTile(const MapBake& mb, int gx, int gy, bool& tileError)
         {
+            tileError = false;
             const std::string tilePath =
                 mb.tileDir + "/" + world::terrain::TileFileName(mb.mapId, gx, gy);
             std::shared_ptr<TerrainTile> tile = world::terrain::ReadTile(tilePath);
             if (!tile)
             {
+                std::lock_guard<std::mutex> lock(g_bakeLogMutex);
+                std::fprintf(stderr, "nav: map %u tile (%d,%d) is unreadable: %s\n",
+                             mb.mapId, gx, gy, tilePath.c_str());
+                tileError = true;
                 return false;
             }
 
@@ -546,6 +731,11 @@ namespace world::nav
             if (solid.Empty())
             {
                 return false;  // ocean tile: nothing to stand on
+            }
+            if (!AddNeighbourGeometry(mb, gx, gy, solid, liquid))
+            {
+                tileError = true;
+                return false;
             }
 
             const int navTileX = gy;
@@ -730,6 +920,32 @@ namespace world::nav
         last = std::min(side - 1, last);
     }
 
+    bool NeighbourCellRect(int deltaGx, int deltaGy, CellRect& out)
+    {
+        constexpr int last = V8_SIDE - 1;
+        if (deltaGx == -1 && deltaGy == 0)
+        {
+            out = {last, last, 0, last};
+        }
+        else if (deltaGx == 1 && deltaGy == 0)
+        {
+            out = {0, 0, 0, last};
+        }
+        else if (deltaGx == 0 && deltaGy == -1)
+        {
+            out = {0, last, last, last};
+        }
+        else if (deltaGx == 0 && deltaGy == 1)
+        {
+            out = {0, last, 0, 0};
+        }
+        else
+        {
+            return false;
+        }
+        return true;
+    }
+
     NavMeshBuilder::NavMeshBuilder(std::string tileDir, std::string outDir, NavConfig cfg)
         : m_tileDir(std::move(tileDir)), m_outDir(std::move(outDir)), m_cfg(cfg)
     {
@@ -798,6 +1014,7 @@ namespace world::nav
 
         std::atomic<size_t> next{0};
         std::atomic<int> written{0};
+        std::atomic<int> tileErrors{0};
         auto worker = [&]()
         {
             for (;;)
@@ -807,9 +1024,14 @@ namespace world::nav
                 {
                     return;
                 }
-                if (BakeTile(mb, grids[i].first, grids[i].second))
+                bool tileError = false;
+                if (BakeTile(mb, grids[i].first, grids[i].second, tileError))
                 {
                     ++written;
+                }
+                else if (tileError)
+                {
+                    ++tileErrors;
                 }
             }
         };
@@ -826,6 +1048,13 @@ namespace world::nav
             t.join();
         }
 
+        if (tileErrors.load() != 0)
+        {
+            std::lock_guard<std::mutex> lock(g_bakeLogMutex);
+            std::fprintf(stderr, "nav: map %u failed: %d tile input error(s)\n",
+                         mapId, tileErrors.load());
+            return -1;
+        }
         return written.load();
     }
 
@@ -867,7 +1096,12 @@ namespace world::nav
             {
                 m_progress(m_progressContext, entry.first, label, done, byMap.size());
             }
-            total += BakeMap(entry.first, entry.second);
+            const int written = BakeMap(entry.first, entry.second);
+            if (written < 0)
+            {
+                return -1;
+            }
+            total += written;
             ++done;
         }
         if (m_progress)

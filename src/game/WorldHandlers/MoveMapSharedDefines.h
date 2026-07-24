@@ -31,7 +31,8 @@
 #include "Platform/Define.h"
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
-#define MMAP_VERSION 5
+// Version 6 adds orthogonal terrain/liquid border cells during fused navmesh baking.
+#define MMAP_VERSION 6
 
 struct MmapTileHeader
 {

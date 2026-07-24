@@ -47,6 +47,20 @@ namespace world::nav
     void SubTileSpan(float lo, float hi, float origin, float width, float pad, int side,
                      int& first, int& last);
 
+    // Inclusive terrain-cell range contributed by one orthogonal neighbour. Tile
+    // indices and height-cell indices both increase toward falling world coordinates,
+    // so the neighbour at gx-1 contributes its final X row, while gx+1 contributes
+    // its first. Diagonal, current-tile and non-adjacent offsets are rejected.
+    struct CellRect
+    {
+        int ixFirst = 0;
+        int ixLast = 0;
+        int iyFirst = 0;
+        int iyLast = 0;
+    };
+
+    bool NeighbourCellRect(int deltaGx, int deltaGy, CellRect& out);
+
     class NavMeshBuilder
     {
     public:
