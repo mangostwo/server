@@ -49,17 +49,6 @@ endif()
 # Build the mangos realm authentication server
 if(BUILD_REALMD)
     add_subdirectory(realmd)
-
-    # Upstream realmd passes the *file* ${CMAKE_CURRENT_BINARY_DIR}/VersionInfo.h
-    # to target_include_directories, where a directory belongs. The Visual Studio
-    # generator happens to hand the target's own binary directory to the resource
-    # compiler anyway, so it built; Ninja does not, and VersionInfo.rc then fails
-    # to find the header it includes. The submodule is not modified here, so the
-    # directory is added from outside. Remove once upstream fixes the path.
-    if(WIN32)
-        target_include_directories(realmd
-            PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/realmd")
-    endif()
 endif()
 
 # The client-data parsers are configured unconditionally: the unit tests link them

@@ -13,6 +13,10 @@ concurrency:
   group: windows-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  OPENSSL_VERSION: 3.6.3
+  OPENSSL_SHA512: 120A2E9A3E8B961484CB94D52F85D48DC2C8AF777B5B3B9E26BF49B4408797281F7C0FB2D543FD7796B3C3232ADFAA0F675E7122C0E5C4225B3B02E767197AC6
+
 jobs:
   build:
     runs-on: windows-2022
@@ -29,28 +33,67 @@ jobs:
           submodules: recursive
           fetch-depth: 1
 
+      # Bump the -vN suffix to force a re-install of OpenSSL.
       - name: Cache OpenSSL
         id: cache-openssl
         uses: actions/cache@v4
         with:
-          path: |
-            C:\Program Files\OpenSSL
-            C:\Program Files\OpenSSL-Win64
-          key: ${{ runner.os }}-openssl-3
+          path: C:\Program Files\OpenSSL-Win64
+          key: ${{ runner.os }}-openssl-${{ env.OPENSSL_VERSION }}-v1
 
-      - name: Install OpenSSL
+      - name: Install full OpenSSL (developer)
         if: steps.cache-openssl.outputs.cache-hit != 'true'
-        run: choco upgrade openssl -y --no-progress
+        shell: powershell
+        run: |
+          $versionSlug = $env:OPENSSL_VERSION.Replace('.', '_')
+          $installer = Join-Path $env:RUNNER_TEMP "Win64OpenSSL-$versionSlug.exe"
+          $url = "https://slproweb.com/download/Win64OpenSSL-$versionSlug.exe"
 
-      - name: Locate OpenSSL
+          Write-Host "Downloading OpenSSL $env:OPENSSL_VERSION for development..."
+          curl.exe --fail --location --retry 3 --output $installer $url
+          if ($LASTEXITCODE -ne 0) {
+            throw "OpenSSL download failed with exit code $LASTEXITCODE"
+          }
+
+          $actualHash = (Get-FileHash -Algorithm SHA512 $installer).Hash
+          if ($actualHash -ne $env:OPENSSL_SHA512) {
+            throw "OpenSSL installer checksum mismatch: $actualHash"
+          }
+
+          $installArgs = '/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /DIR="C:\Program Files\OpenSSL-Win64"'
+          $process = Start-Process -FilePath $installer -ArgumentList $installArgs -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "OpenSSL installer failed with exit code $($process.ExitCode)"
+          }
+
+      - name: Verify OpenSSL major version
+        shell: powershell
+        run: |
+          $openssl = "C:\Program Files\OpenSSL-Win64\bin\openssl.exe"
+          if (-not (Test-Path $openssl)) {
+            throw "OpenSSL executable not found at $openssl"
+          }
+
+          $version = & $openssl version
+          Write-Host "Installed OpenSSL version: $version"
+          if ($version -notmatch '^OpenSSL 3\.') {
+            throw "Windows CI requires OpenSSL 3.x, found: $version"
+          }
+
+      - name: Configure OpenSSL environment
         shell: bash
         run: |
-          for root in "C:/Program Files/OpenSSL" "C:/Program Files/OpenSSL-Win64"; do
-            if [ -d "$root/lib/VC" ]; then
-              echo "OPENSSL_ROOT_DIR=$root" >> $GITHUB_ENV
-              break
-            fi
-          done
+          root="C:/Program Files/OpenSSL-Win64"
+          if [ -d "$root/lib/VC" ]; then
+            echo "OPENSSL_ROOT_DIR=$root" >> "$GITHUB_ENV"
+            echo "OPENSSL_INCLUDE_DIR=$root/include" >> "$GITHUB_ENV"
+            echo "OPENSSL_CRYPTO_LIBRARY=$root/lib/VC/libcrypto64MT.lib" >> "$GITHUB_ENV"
+            echo "OPENSSL_SSL_LIBRARY=$root/lib/VC/libssl64MT.lib" >> "$GITHUB_ENV"
+            echo "$root/bin" >> "$GITHUB_PATH"
+          else
+            echo "::error::OpenSSL developer libraries not found"
+            exit 1
+          fi
 
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
@@ -72,9 +115,11 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="$BUILD_DIR/install"
           -DCMAKE_C_COMPILER_LAUNCHER=sccache
           -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+          -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR"
           -DBUILD_TOOLS=1
           -DBUILD_MANGOSD=1
           -DBUILD_REALMD=1
+          -DWITH_TESTS=1
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
           -DSCRIPT_LIB_SD3=1
@@ -84,6 +129,10 @@ jobs:
       - name: Build
         shell: bash
         run: cmake --build "$BUILD_DIR" --parallel
+
+      - name: Test
+        shell: bash
+        run: ctest --test-dir "$BUILD_DIR" --output-on-failure
 
       - name: Verify the working tree is clean
         shell: bash

@@ -68,6 +68,7 @@ jobs:
           -DBUILD_TOOLS=1
           -DBUILD_MANGOSD=1
           -DBUILD_REALMD=1
+          -DWITH_TESTS=1
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
           -DSCRIPT_LIB_SD3=1
@@ -76,6 +77,9 @@ jobs:
 
       - name: Build
         run: cmake --build "$BUILD_DIR" --parallel
+
+      - name: Test
+        run: ctest --test-dir "$BUILD_DIR" --output-on-failure
 
       - name: Install
         run: cmake --install "$BUILD_DIR"

@@ -559,7 +559,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_START_MIRROR_TIMER,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(SMSG_PAUSE_MIRROR_TIMER,                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(SMSG_STOP_MIRROR_TIMER,                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    OPCODE(CMSG_PING,                                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess);
+    OPCODE(CMSG_PING,                                      STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandlePingOpcode);
     OPCODE(SMSG_PONG,                                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(SMSG_CLEAR_COOLDOWN,                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(SMSG_GAMEOBJECT_PAGETEXT,                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
@@ -1114,7 +1114,7 @@ void InitializeOpcodes()
     OPCODE(SMSG_SPELL_CHANCE_RESIST_PUSHBACK,              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(CMSG_IGNORE_DIMINISHING_RETURNS_CHEAT,          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL);
     OPCODE(SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT,          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
-    OPCODE(CMSG_KEEP_ALIVE,                                STATUS_NEVER,    PROCESS_THREADUNSAFE, &WorldSession::Handle_EarlyProccess);
+    OPCODE(CMSG_KEEP_ALIVE,                                STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleKeepAliveOpcode);
     OPCODE(SMSG_RAID_READY_CHECK_ERROR,                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide);
     OPCODE(CMSG_OPT_OUT_OF_LOOT,                           STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleOptOutOfLootOpcode);
     OPCODE(MSG_QUERY_GUILD_BANK_TEXT,                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleQueryGuildBankTabText);

@@ -263,11 +263,10 @@ void Database::escape_string(std::string& str)
         return;
     }
 
-    char* buf = new char[str.size() * 2 + 1];
-    // we don't care what connection to use - escape string will be the same
-    m_pQueryConnections[0]->escape_string(buf, str.c_str(), str.size());
-    str = buf;
-    delete[] buf;
+    std::unique_ptr<char[]> buf(new char[str.size() * 2 + 1]);
+    SqlConnection::Lock guard(m_pQueryConnections[0]);
+    guard->escape_string(buf.get(), str.c_str(), str.size());
+    str = buf.get();
 }
 
 SqlConnection* Database::getQueryConnection()

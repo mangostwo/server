@@ -184,24 +184,6 @@ namespace proto
             virtual void Deliver(SessionId session, WorldPacket&& packet) = 0;
 
             /**
-             * @brief A client ping arrived.
-             *
-             * The protocol layer counts how many pings in a row arrived faster than
-             * a real client sends them, because that is a property of the stream.
-             * The world decides what the run is worth: the threshold is
-             * configuration, and staff accounts are exempt, which is session state.
-             *
-             * @param session      The session, or INVALID_SESSION_ID if the peer
-             *                     pinged before authenticating.
-             * @param latency      Round-trip time the client reported.
-             * @param fastPingRun  Number of consecutive suspiciously fast pings;
-             *                     zero once the client returns to a normal cadence.
-             * @return false to drop the connection.
-             */
-            virtual bool OnPing(SessionId session, uint32 latency,
-                                uint32 fastPingRun) = 0;
-
-            /**
              * @brief The connection is gone; release the session.
              *
              * The world may keep the session alive past this call to unwind game
