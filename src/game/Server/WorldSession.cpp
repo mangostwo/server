@@ -200,7 +200,10 @@ WorldSession::~WorldSession()
         m_link.reset();
     }
 
-    delete _warden;
+    if (_warden)
+    {
+        delete _warden;
+    }
 }
 
 /**
