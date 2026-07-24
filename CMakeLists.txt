@@ -256,6 +256,7 @@ endif()
 include(Dependencies)
 
 if(WITH_TESTS)
+  set(BUILD_TESTING ON)
   enable_testing()
 endif()
 
