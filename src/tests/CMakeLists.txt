@@ -73,18 +73,58 @@ target_link_libraries(mangos_tests
 )
 
 if(WIN32)
-    find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
-        NAMES libcrypto-3-x64.dll libcrypto-3.dll
-        HINTS "${OPENSSL_ROOT_DIR}/bin"
-        NO_DEFAULT_PATH)
-    if(NOT MANGOS_TEST_OPENSSL_CRYPTO_DLL)
-        message(FATAL_ERROR
-            "Could not find the OpenSSL 3.x crypto runtime DLL under ${OPENSSL_ROOT_DIR}/bin")
+    # Co-locate the OpenSSL crypto runtime next to the test executable.
+    #
+    # OPENSSL_ROOT_DIR alone is not a usable anchor: FindOpenSSL routinely resolves via
+    # OPENSSL_INCLUDE_DIR / the library paths without it ever being set, in which case
+    # "${OPENSSL_ROOT_DIR}/bin" degrades to "/bin" and, with NO_DEFAULT_PATH, the search cannot
+    # succeed -- turning a missing test-only DLL into a FATAL_ERROR that kills the whole configure.
+    # Installs also disagree on whether the DLLs live in <prefix>/bin or directly in <prefix>, and
+    # the runtime name carries the major version (libcrypto-3-x64.dll vs libcrypto-4-x64.dll).
+    #
+    # Same defect and same fix as mangos/realmd PR #32.
+    set(_mangos_openssl_hints)
+    if(OPENSSL_ROOT_DIR)
+        list(APPEND _mangos_openssl_hints "${OPENSSL_ROOT_DIR}" "${OPENSSL_ROOT_DIR}/bin")
     endif()
-    add_custom_command(TARGET mangos_tests POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${MANGOS_TEST_OPENSSL_CRYPTO_DLL}"
-            "$<TARGET_FILE_DIR:mangos_tests>")
+    if(OPENSSL_INCLUDE_DIR)
+        get_filename_component(_mangos_openssl_prefix "${OPENSSL_INCLUDE_DIR}" DIRECTORY)
+        list(APPEND _mangos_openssl_hints "${_mangos_openssl_prefix}" "${_mangos_openssl_prefix}/bin")
+    endif()
+    foreach(_mangos_openssl_lib IN ITEMS ${OPENSSL_CRYPTO_LIBRARY} ${LIB_EAY_RELEASE} ${LIB_EAY})
+        if(_mangos_openssl_lib)
+            get_filename_component(_mangos_openssl_libdir "${_mangos_openssl_lib}" DIRECTORY)
+            list(APPEND _mangos_openssl_hints
+                "${_mangos_openssl_libdir}" "${_mangos_openssl_libdir}/../bin")
+        endif()
+    endforeach()
+
+    # Prefer the runtime whose major version matches the OpenSSL we actually linked against, rather
+    # than a fixed preference order -- otherwise a stale libcrypto from a previous install lying
+    # around in a searched directory can win over the correct one.
+    string(REGEX MATCH "^[0-9]+" _mangos_openssl_major "${OPENSSL_VERSION}")
+    set(_mangos_crypto_names)
+    if(_mangos_openssl_major)
+        list(APPEND _mangos_crypto_names
+            "libcrypto-${_mangos_openssl_major}-x64.dll" "libcrypto-${_mangos_openssl_major}.dll")
+    endif()
+    list(APPEND _mangos_crypto_names libcrypto-x64.dll libcrypto.dll)
+
+    find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
+        NAMES ${_mangos_crypto_names}
+        HINTS ${_mangos_openssl_hints})
+
+    # A missing test-only runtime must not break configuring the server.
+    if(MANGOS_TEST_OPENSSL_CRYPTO_DLL)
+        add_custom_command(TARGET mangos_tests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${MANGOS_TEST_OPENSSL_CRYPTO_DLL}"
+                "$<TARGET_FILE_DIR:mangos_tests>")
+    else()
+        message(WARNING
+            "OpenSSL crypto runtime DLL not found; mangos_tests will rely on it being on PATH. "
+            "Set OPENSSL_ROOT_DIR to have it copied next to the test executable.")
+    endif()
 
     get_filename_component(
         MANGOS_TEST_MYSQL_DLL_DIR "${MySQL_LIBRARY}" DIRECTORY)
