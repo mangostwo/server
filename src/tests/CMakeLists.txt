@@ -110,9 +110,17 @@ if(WIN32)
     endif()
     list(APPEND _mangos_crypto_names libcrypto-x64.dll libcrypto.dll)
 
+    # Confine the search to the directories derived above. find_file considers one NAME at a time
+    # across every searched directory before advancing to the next name, so with the default paths
+    # enabled an unrelated OpenSSL on PATH -- possibly of the wrong architecture -- could match the
+    # first name and win over the correct DLL sitting in our own hints. NO_DEFAULT_PATH removes that
+    # exposure entirely, and is safe here in a way it was not before, because the hints are now
+    # actually derived from the OpenSSL that FindOpenSSL selected rather than from an unset variable.
+    # (NAMES_PER_DIR would express the ordering directly but find_file does not accept it.)
     find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
         NAMES ${_mangos_crypto_names}
-        HINTS ${_mangos_openssl_hints})
+        HINTS ${_mangos_openssl_hints}
+        NO_DEFAULT_PATH)
 
     # A missing test-only runtime must not break configuring the server.
     if(MANGOS_TEST_OPENSSL_CRYPTO_DLL)
@@ -142,8 +150,29 @@ endif()
 add_test(NAME mangos_tests COMMAND mangos_tests)
 
 if(WIN32)
-    set_tests_properties(mangos_tests PROPERTIES
-        ENVIRONMENT "OPENSSL_MODULES=${OPENSSL_ROOT_DIR}/bin")
+    # OpenSSLProviderTest loads the legacy provider, so the test needs OPENSSL_MODULES to point at
+    # the provider directory. This previously hardcoded "${OPENSSL_ROOT_DIR}/bin", which has the same
+    # defect as the crypto-DLL lookup above: with OPENSSL_ROOT_DIR unset it becomes "/bin", and
+    # because OpenSSL treats an explicit OPENSSL_MODULES as authoritative, the legacy provider fails
+    # to load and ctest stays broken even once the DLL is found.
+    #
+    # Locate the provider directory from the same derived prefix instead. If it cannot be found, do
+    # not set the variable at all -- an unset OPENSSL_MODULES lets OpenSSL fall back to its
+    # compiled-in location, which is far more likely to be right than a fabricated path.
+    find_path(MANGOS_TEST_OPENSSL_MODULES_DIR
+        NAMES legacy.dll
+        HINTS ${_mangos_openssl_hints}
+        PATH_SUFFIXES ossl-modules lib/ossl-modules
+        NO_DEFAULT_PATH)
+
+    if(MANGOS_TEST_OPENSSL_MODULES_DIR)
+        set_tests_properties(mangos_tests PROPERTIES
+            ENVIRONMENT "OPENSSL_MODULES=${MANGOS_TEST_OPENSSL_MODULES_DIR}")
+    else()
+        message(WARNING
+            "OpenSSL provider directory (legacy.dll) not found; leaving OPENSSL_MODULES unset so "
+            "OpenSSL uses its compiled-in provider location.")
+    endif()
 endif()
 
 add_test(NAME world_network_boundary
