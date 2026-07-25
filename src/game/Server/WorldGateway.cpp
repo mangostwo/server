@@ -33,6 +33,7 @@
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
 #include "Log/Log.h"
+#include "OpcodeTable.h"
 #include "SharedDefines.h"
 #include "SessionMailbox.h"
 #include "World.h"
@@ -319,6 +320,16 @@ void WorldGateway::Deliver(proto::SessionId session, WorldPacket&& packet)
             return;
         }
         mailbox = route->second;
+    }
+
+    // Dump incoming packet (opt-in via PacketLoggingEnabled; off by default).
+    // WorldSocket.cpp did this with the ACE socket fd as the "SOCKET:" field;
+    // the proto SessionId is the modern equivalent -- a slot assigned once at
+    // Attach() and released at Detach(), same lifetime shape as a fd.
+    if (sLog.IsPacketLoggingEnabled())
+    {
+        sLog.outWorldPacketDump(session, packet.GetOpcode(),
+                                LookupOpcodeName(packet.GetOpcode()), &packet, true);
     }
 
     mailbox->Enqueue(std::make_unique<WorldPacket>(std::move(packet)));

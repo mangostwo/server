@@ -309,6 +309,9 @@ class Log : public MaNGOS::Singleton<Log>
         /**
          * @brief any log level
          *
+         * Called from WorldGateway::Deliver (incoming) and WorldSession::SendPacket
+         * (outgoing) -- see IsPacketLoggingEnabled()'s comment below.
+         *
          * @param socket
          * @param opcode
          * @param opcodeName
@@ -465,6 +468,10 @@ class Log : public MaNGOS::Singleton<Log>
          *        PacketLoggingEnabled config flag at startup: worldLogfile is
          *        only opened when the flag is set, so this is the single source
          *        of truth and is off by default even on legacy configs.
+         *
+         *        Hooked into WorldGateway::Deliver (incoming) and
+         *        WorldSession::SendPacket (outgoing) -- not into proto, which
+         *        must stay game-agnostic and does not resolve opcode names.
          * @return bool
          */
         bool IsPacketLoggingEnabled() const { return worldLogfile != NULL; }
