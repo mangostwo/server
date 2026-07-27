@@ -452,7 +452,48 @@ namespace world::nav
             int subTileSize = 0;
             int subTilesPerTile = 0;
             int borderSize = 0;
+
+            // Set only for a WMO-only map (a WDT with no ADT grid, e.g. Deeprun Tram):
+            // there is no per-grid t_ tile to read, so every grid this WMO spans bakes
+            // from this one shared tile instead. Null for an ordinary ADT grid.
+            std::shared_ptr<const TerrainTile> globalWmo;
         };
+
+        // Grid tiles a global WMO's world footprint touches. Both axes fall as the index
+        // grows -- WorldX(gx,0) = (32 - gx) * GRID_SIZE -- so the high world corner gives
+        // the low index and vice versa. A rectangle over the union bbox can name a grid
+        // the WMO never reaches; that tile just bakes empty and writes nothing.
+        std::vector<std::pair<int, int>> GlobalWmoGrids(const TerrainTile& tile)
+        {
+            Geometry::Aabb box;
+            for (const world::terrain::StaticInstance& inst : tile.instances)
+            {
+                if (inst.worldBounds.valid())
+                {
+                    box.expand(inst.worldBounds);
+                }
+            }
+            if (!box.valid())
+            {
+                return {};
+            }
+
+            const auto gridIndex = [](float world)
+            {
+                const int i = int(std::floor(32.0f - world / GRID_SIZE));
+                return std::max(0, std::min(63, i));
+            };
+
+            std::vector<std::pair<int, int>> grids;
+            for (int gx = gridIndex(box.hi.x); gx <= gridIndex(box.lo.x); ++gx)
+            {
+                for (int gy = gridIndex(box.hi.y); gy <= gridIndex(box.lo.y); ++gy)
+                {
+                    grids.emplace_back(gx, gy);
+                }
+            }
+            return grids;
+        }
 
         bool AddNeighbourGeometry(const MapBake& mb, int gx, int gy,
                                   Soup& solid, Soup& liquid)
@@ -711,31 +752,46 @@ namespace world::nav
         bool BakeTile(const MapBake& mb, int gx, int gy, bool& tileError)
         {
             tileError = false;
-            const std::string tilePath =
-                mb.tileDir + "/" + world::terrain::TileFileName(mb.mapId, gx, gy);
-            std::shared_ptr<TerrainTile> tile = world::terrain::ReadTile(tilePath);
-            if (!tile)
-            {
-                std::lock_guard<std::mutex> lock(g_bakeLogMutex);
-                std::fprintf(stderr, "nav: map %u tile (%d,%d) is unreadable: %s\n",
-                             mb.mapId, gx, gy, tilePath.c_str());
-                tileError = true;
-                return false;
-            }
 
             Soup solid;
             Soup liquid;
-            AddTerrain(*tile, gx, gy, solid);
-            AddModels(*tile, solid);
-            AddLiquid(*tile, gx, gy, liquid);
-            if (solid.Empty())
+
+            if (mb.globalWmo)
             {
-                return false;  // ocean tile: nothing to stand on
+                // No terrain, no neighbours: the one WMO is the whole map. Each grid it
+                // spans rasterises the shared soup; Recast clips it to the grid bounds.
+                AddModels(*mb.globalWmo, solid);
+                if (solid.Empty())
+                {
+                    return false;
+                }
             }
-            if (!AddNeighbourGeometry(mb, gx, gy, solid, liquid))
+            else
             {
-                tileError = true;
-                return false;
+                const std::string tilePath =
+                    mb.tileDir + "/" + world::terrain::TileFileName(mb.mapId, gx, gy);
+                std::shared_ptr<TerrainTile> tile = world::terrain::ReadTile(tilePath);
+                if (!tile)
+                {
+                    std::lock_guard<std::mutex> lock(g_bakeLogMutex);
+                    std::fprintf(stderr, "nav: map %u tile (%d,%d) is unreadable: %s\n",
+                                 mb.mapId, gx, gy, tilePath.c_str());
+                    tileError = true;
+                    return false;
+                }
+
+                AddTerrain(*tile, gx, gy, solid);
+                AddModels(*tile, solid);
+                AddLiquid(*tile, gx, gy, liquid);
+                if (solid.Empty())
+                {
+                    return false;  // ocean tile: nothing to stand on
+                }
+                if (!AddNeighbourGeometry(mb, gx, gy, solid, liquid))
+                {
+                    tileError = true;
+                    return false;
+                }
             }
 
             const int navTileX = gy;
@@ -957,7 +1013,14 @@ namespace world::nav
         m_progressContext = context;
     }
 
-    int NavMeshBuilder::BakeMap(uint32_t mapId, const std::vector<std::pair<int, int>>& grids)
+    void NavMeshBuilder::SetMapDone(MapDoneFn fn)
+    {
+        m_mapDone = fn;
+    }
+
+    int NavMeshBuilder::BakeMap(uint32_t mapId, const std::string& mapName,
+                                const std::vector<std::pair<int, int>>& grids,
+                                std::shared_ptr<const world::terrain::TerrainTile> globalWmo)
     {
         if (grids.empty())
         {
@@ -1003,6 +1066,7 @@ namespace world::nav
         mb.subTileSize = m_cfg.subTileSize;
         mb.subTilesPerTile = int(GRID_SIZE / m_cfg.cellSize + 0.5f) / m_cfg.subTileSize;
         mb.borderSize = m_cfg.walkableRadius + 3;
+        mb.globalWmo = std::move(globalWmo);
 
         unsigned workers = m_cfg.threads > 0 ? unsigned(m_cfg.threads)
                                              : std::thread::hardware_concurrency();
@@ -1015,7 +1079,20 @@ namespace world::nav
         std::atomic<size_t> next{0};
         std::atomic<int> written{0};
         std::atomic<int> tileErrors{0};
-        auto worker = [&]()
+
+        // Only the main-thread worker touches the console, so the report reads the shared
+        // dispatch counter rather than adding a lock the pool would contend on. `next`
+        // counts tiles STARTED, which is a fine progress proxy and never stalls at the end.
+        auto report = [&](size_t started)
+        {
+            if (m_progress)
+            {
+                m_progress(m_progressContext, mapId, mapName.c_str(),
+                           std::min(started, grids.size()), grids.size());
+            }
+        };
+
+        auto worker = [&](bool isMain)
         {
             for (;;)
             {
@@ -1033,20 +1110,26 @@ namespace world::nav
                 {
                     ++tileErrors;
                 }
+                if (isMain)
+                {
+                    report(next.load());
+                }
             }
         };
 
+        report(0);
         std::vector<std::thread> pool;
         pool.reserve(workers);
         for (unsigned i = 1; i < workers; ++i)
         {
-            pool.emplace_back(worker);
+            pool.emplace_back(worker, false);
         }
-        worker();
+        worker(true);
         for (std::thread& t : pool)
         {
             t.join();
         }
+        report(grids.size());
 
         if (tileErrors.load() != 0)
         {
@@ -1064,49 +1147,81 @@ namespace world::nav
         std::filesystem::create_directories(m_outDir, ec);
 
         // Which maps and grids exist is read off the baked tiles themselves, so the
-        // navmesh can only ever cover ground the collision engine also has.
+        // navmesh can only ever cover ground the collision engine also has. A map is
+        // either an ADT grid (t_ tiles) or a single global WMO (a lone w_ tile); the
+        // extractor writes one or the other, never both.
         std::map<uint32_t, std::vector<std::pair<int, int>>> byMap;
+        std::set<uint32_t> globalWmoMaps;
         for (const auto& entry : std::filesystem::directory_iterator(m_tileDir, ec))
         {
             const std::string leaf = entry.path().filename().string();
             unsigned mapId = 0;
             int gx = 0, gy = 0;
-            if (std::sscanf(leaf.c_str(), "t_%u_%d_%d.tile", &mapId, &gx, &gy) != 3)
+            if (std::sscanf(leaf.c_str(), "t_%u_%d_%d.tile", &mapId, &gx, &gy) == 3)
             {
-                continue;
+                if (mapFilter < 0 || uint32_t(mapFilter) == mapId)
+                {
+                    byMap[mapId].emplace_back(gx, gy);
+                }
             }
-            if (mapFilter >= 0 && uint32_t(mapFilter) != mapId)
+            else if (std::sscanf(leaf.c_str(), "w_%u.tile", &mapId) == 1)
             {
-                continue;
+                if (mapFilter < 0 || uint32_t(mapFilter) == mapId)
+                {
+                    globalWmoMaps.insert(mapId);
+                }
             }
-            byMap[mapId].emplace_back(gx, gy);
         }
         if (ec)
         {
             return -1;
         }
 
+        const size_t mapCount = byMap.size() + globalWmoMaps.size();
         int total = 0;
         size_t done = 0;
         for (auto& entry : byMap)
         {
-            char label[32];
-            std::snprintf(label, sizeof(label), "map %u", entry.first);
-            if (m_progress)
-            {
-                m_progress(m_progressContext, entry.first, label, done, byMap.size());
-            }
-            const int written = BakeMap(entry.first, entry.second);
+            char label[48];
+            std::snprintf(label, sizeof(label), "map %u  [%zu/%zu]", entry.first,
+                          done + 1, mapCount);
+            const int written = BakeMap(entry.first, label, entry.second);
             if (written < 0)
             {
                 return -1;
             }
+            if (m_mapDone)
+            {
+                m_mapDone(m_progressContext, entry.first, label, written,
+                          entry.second.size());
+            }
             total += written;
             ++done;
         }
-        if (m_progress)
+
+        for (uint32_t mapId : globalWmoMaps)
         {
-            m_progress(m_progressContext, 0, "", done, byMap.size());
+            char label[48];
+            std::snprintf(label, sizeof(label), "map %u  [%zu/%zu]", mapId, done + 1,
+                          mapCount);
+
+            std::shared_ptr<TerrainTile> tile = world::terrain::ReadTile(
+                m_tileDir + "/" + world::terrain::GlobalWmoFileName(mapId));
+            if (tile)
+            {
+                const std::vector<std::pair<int, int>> grids = GlobalWmoGrids(*tile);
+                const int written = BakeMap(mapId, label, grids, tile);
+                if (written < 0)
+                {
+                    return -1;
+                }
+                if (m_mapDone)
+                {
+                    m_mapDone(m_progressContext, mapId, label, written, grids.size());
+                }
+                total += written;
+            }
+            ++done;
         }
         return total;
     }

@@ -30,6 +30,7 @@
 // gate appears hundreds of times over and is stored once.
 
 #include "Platform/Define.h"
+#include "terrain/Column.hpp"
 #include "terrain/ICollisionModel.hpp"
 
 #include <cfloat>
@@ -78,8 +79,9 @@ class GameObjectModel
         // the geometry pushed into world space.
         float SegmentHitFraction(const Geometry::Vector3& a, const Geometry::Vector3& b) const;
 
-        // Highest surface of this body under (x,y) at or below zTop, or -FLT_MAX.
-        float SurfaceUnder(float x, float y, float zTop, float maxDrop) const;
+        // Appends every surface of this body crossing the window over (x,y).
+        void AddSurfaces(float x, float y, float zTop, float zBottom,
+                         world::terrain::Column& out) const;
 
     private:
         friend class DynamicCollision;

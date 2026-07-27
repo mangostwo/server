@@ -89,7 +89,9 @@ const char LfgDungeonsEntryfmt[] = "nssssssssssssssssxiiiiiiiiixxiiixxxxxxxxxxxx
 const char LiquidTypefmt[] = "nsxixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char LockEntryfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiixxxxxxxx";
 const char MailTemplateEntryfmt[] = "nxxxxxxxxxxxxxxxxxssssssssssssssssx";
-const char MapEntryfmt[] = "nxixxssssssssssssssssxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixiffxixx";
+// Field 1 is the client's own directory name. It is the ONLY link between a vessel's
+// game object and the Map.dbc row Blizzard gave it: "Transport<goEntry>".
+const char MapEntryfmt[] = "nsixxssssssssssssssssxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixiffxixx";
 const char MapDifficultyEntryfmt[] = "diixxxxxxxxxxxxxxxxxiix";
 const char MovieEntryfmt[] = "nxx";
 const char OverrideSpellDatafmt[] = "niiiiiiiiiix";

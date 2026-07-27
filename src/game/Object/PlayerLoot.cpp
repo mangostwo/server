@@ -167,7 +167,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
 
             // not check distance for GO in case owned GO (fishing bobber case, for example)
             // And permit out of range GO with no owner in case fishing hole
-            if (!go || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING && loot_type != LOOT_FISHING_FAIL || go->GetOwnerGuid() != GetObjectGuid()) && !go->IsWithinDistInMap(this, INTERACTION_DISTANCE)))
+            if (!go || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING && loot_type != LOOT_FISHING_FAIL || go->GetOwnerGuid() != GetObjectGuid()) && !InReach(*go, *this, INTERACTION_DISTANCE)))
             {
                 SendLootRelease(guid);
                 return;
@@ -209,7 +209,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                         break;
                     case LOOT_FISHING:
                         uint32 zone, subzone;
-                        go->GetZoneAndAreaId(zone, subzone);
+                        go->GetTerrain()->GetZoneAndAreaId(zone, subzone, go->Where().X(), go->Where().Y(), go->Where().Z());
                         // if subzone loot exist use it
                         if (!loot->FillLoot(subzone, LootTemplates_Fishing, this, true, (subzone != zone)) && subzone != zone)
                             // else use zone loot (if zone diff. from subzone, must exist in like case)
@@ -384,7 +384,7 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
             Creature* creature = GetMap()->GetCreature(guid);
 
             // must be in range and creature must be alive for pickpocket and must be dead for another loot
-            if (!creature || creature->IsAlive() != (loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this, INTERACTION_DISTANCE))
+            if (!creature || creature->IsAlive() != (loot_type == LOOT_PICKPOCKETING) || !InReach(*creature, *this, INTERACTION_DISTANCE))
             {
                 SendLootRelease(guid);
                 return;

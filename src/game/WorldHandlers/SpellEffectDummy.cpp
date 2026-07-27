@@ -422,8 +422,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 177704,
                                           map, m_caster->GetPhaseMask(),
-                                          unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(),
-                                          unitTarget->GetOrientation()))
+                                          unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(),
+                                          unitTarget->Where().Facing()))
                     {
                         delete pGameObj;
                         return;
@@ -507,8 +507,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     // create before death for get proper coordinates
                     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 179644, map, m_caster->GetPhaseMask(),
-                                          creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
-                                          creatureTarget->GetOrientation()))
+                                          creatureTarget->Where().X(), creatureTarget->Where().Y(), creatureTarget->Where().Z(),
+                                          creatureTarget->Where().Facing()))
                     {
                         delete pGameObj;
                         return;
@@ -891,7 +891,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 35745:                                 // Socrethar's Stone
                 {
                     uint32 spell_id;
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 3900: spell_id = 35743; break; // Socrethar Portal
                         case 3742: spell_id = 35744; break; // Socrethar Portal
@@ -1019,7 +1019,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    m_caster->SummonCreature(23416, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 30000);
+                    m_caster->SummonCreature(23416, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), 0, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 30000);
                     return;
                 }
                 case 41333:                                 // Empyreal Equivalency
@@ -1360,7 +1360,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check_big(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check_big(*unitTarget, 187675, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker1(pGo, go_check_big);
 
                     Cell::VisitGridObjects(unitTarget, checker1, fMaxDist);
@@ -1374,7 +1374,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // small fire
                     std::list<GameObject*> lList;
 
-                    MaNGOS::GameObjectEntryInPosRangeCheck go_check_small(*unitTarget, 187676, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::GameObjectEntryInPosRangeCheck go_check_small(*unitTarget, 187676, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker2(lList, go_check_small);
 
                     Cell::VisitGridObjects(unitTarget, checker2, fMaxDist);
@@ -1522,7 +1522,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check(*unitTarget, 187675, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::NearestGameObjectEntryInPosRangeCheck go_check(*unitTarget, 187675, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectEntryInPosRangeCheck> checker(pGo, go_check);
 
                     Cell::VisitGridObjects(unitTarget, checker, fMaxDist);
@@ -1633,7 +1633,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // Spell 47117,47149,47316,47405,50439 exist, are these used to check area/meet requirement
                     // and to cast correct spell in correct area?
 
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 4255: spellId = 47381; break;  // Reagent Check (Frozen Mojo)
                         case 4209: spellId = 47386; break;  // Reagent Check (Zim'Bo's Mojo)
@@ -2079,7 +2079,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             unitTarget->GetMotionMaster()->MovementExpired();
                         }
 
-                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->GetPositionX(), pTargetDummy->GetPositionY(), pTargetDummy->GetPositionZ(), 24.f);
+                        unitTarget->MonsterMoveWithSpeed(pTargetDummy->Where().X(), pTargetDummy->Where().Y(), pTargetDummy->Where().Z(), 24.f);
 
                         // Add state to temporarily prevent follow
                         unitTarget->addUnitState(UNIT_STAT_ROOT);
@@ -2174,7 +2174,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->RangeIndex));
 
-                    MaNGOS::GameObjectEntryInPosRangeCheck go_check(*unitTarget, 182071, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
+                    MaNGOS::GameObjectEntryInPosRangeCheck go_check(*unitTarget, 182071, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker(lList, go_check);
 
                     Cell::VisitGridObjects(unitTarget, checker, fMaxDist);
@@ -2816,7 +2816,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    m_caster->CastSpell(unitTarget, m_caster->CanReachWithMeleeAttack(unitTarget) ? 71623 : 72264, true);
+                    m_caster->CastSpell(unitTarget, InMeleeReach(*m_caster, *unitTarget) ? 71623 : 72264, true);
                     return;
                 }
                 case 74452:                                 // Conflagration
@@ -3793,8 +3793,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                 float dest_x, dest_y;
-                m_caster->GetNearPoint2D(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
-                unitTarget->CastSpell(dest_x, dest_y, m_caster->GetPositionZ() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
+                { const Geometry::Vector3 p = PointNear(*m_caster, m_caster->Where().Extent() + unitTarget->Where().Extent(), m_caster->Where().Facing()); dest_x = p.x; dest_y = p.y; }
+                unitTarget->CastSpell(dest_x, dest_y, m_caster->Where().Z() + 0.5f, spellId, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
                 return;
             }
             // Obliterate

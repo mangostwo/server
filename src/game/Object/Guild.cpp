@@ -55,7 +55,7 @@ void MemberSlot::SetMemberStats(Player* player)
     Name   = player->GetName();
     Level  = player->getLevel();
     Class  = player->getClass();
-    ZoneId = player->IsInWorld() ? player->GetZoneId() : player->GetCachedZoneId();
+    ZoneId = player->IsInWorld() ? player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z()) : player->GetCachedZoneId();
 }
 
 /**
@@ -278,7 +278,7 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
         newmember.Name   = pl->GetName();
         newmember.Level  = pl->getLevel();
         newmember.Class  = pl->getClass();
-        newmember.ZoneId = pl->GetZoneId();
+        newmember.ZoneId = pl->GetTerrain()->GetZoneId(pl->Where().X(), pl->Where().Y(), pl->Where().Z());
     }
     else
     {
@@ -1009,7 +1009,7 @@ void Guild::Roster(WorldSession* session /*= NULL*/)
             data << uint8(pl->getLevel());
             data << uint8(pl->getClass());
             data << uint8(0);                               // new 2.4.0
-            data << uint32(pl->GetZoneId());
+            data << uint32(pl->GetTerrain()->GetZoneId(pl->Where().X(), pl->Where().Y(), pl->Where().Z()));
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
         }

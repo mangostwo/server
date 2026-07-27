@@ -25,9 +25,41 @@
 #include "TestHarness.h"
 
 #include <cstdio>
+#include <cstring>
+#include <string>
+#include <vector>
 
-int main()
+// No argument runs everything, which is what CI does and what the ctest entry does.
+// -only/-skip are for iterating: the network and crypto stress cases cost minutes and
+// have nothing to say about a change elsewhere.
+static void Usage()
 {
+    std::printf("usage: mangos_tests [-only <substr>]... [-skip <substr>]...\n");
+}
+
+int main(int argc, char** argv)
+{
+    std::vector<std::string> only;
+    std::vector<std::string> skip;
+
+    for (int i = 1; i < argc; ++i)
+    {
+        const bool hasValue = (i + 1 < argc);
+        if (std::strcmp(argv[i], "-only") == 0 && hasValue)
+        {
+            only.push_back(argv[++i]);
+        }
+        else if (std::strcmp(argv[i], "-skip") == 0 && hasValue)
+        {
+            skip.push_back(argv[++i]);
+        }
+        else
+        {
+            Usage();
+            return 2;
+        }
+    }
+
     std::printf("mangos unit tests\n\n");
-    return testing::RunAll();
+    return testing::RunAll(only, skip);
 }

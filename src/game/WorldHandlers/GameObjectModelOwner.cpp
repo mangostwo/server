@@ -76,8 +76,8 @@ void GameObjectModel::UpdatePose()
     Geometry::Quat q;
     m_owner->GetQuaternion(q);
 
-    m_xf.pos = Vector3(m_owner->GetPositionX(), m_owner->GetPositionY(),
-                       m_owner->GetPositionZ());
+    m_xf.pos = Vector3(m_owner->Where().X(), m_owner->Where().Y(),
+                       m_owner->Where().Z());
     m_xf.rot = Geometry::Mat3::fromQuat(q.x, q.y, q.z, q.w);
     m_xf.scale = m_owner->GetObjectScale();
     if (!(m_xf.scale > 0.f))

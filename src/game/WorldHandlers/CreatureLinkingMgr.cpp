@@ -681,8 +681,15 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom)
 {
     // Do some calculations
     float sX, sY, sZ, mX, mY, mZ, mO;
-    pWho->GetRespawnCoord(sX, sY, sZ);
-    pWhom->GetRespawnCoord(mX, mY, mZ, &mO);
+    const Geometry::Placement& spawnPose = pWho->Spawn();
+    sX = spawnPose.X();
+    sY = spawnPose.Y();
+    sZ = spawnPose.Z();
+    const Geometry::Placement& spawnPose2 = pWhom->Spawn();
+    mX = spawnPose2.X();
+    mY = spawnPose2.Y();
+    mZ = spawnPose2.Z();
+    mO = spawnPose2.Facing();
 
     float dx, dy, dz;
     dx = sX - mX;
@@ -692,7 +699,7 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom)
     float dist = sqrt(dx * dx + dy * dy + dz * dz);
     // REMARK: This code needs the same distance calculation that is used for following
     // Atm this means we have to subtract the bounding radiuses
-    dist = dist - pWho->GetObjectBoundingRadius() - pWhom->GetObjectBoundingRadius();
+    dist = dist - pWho->Where().Extent() - pWhom->Where().Extent();
     if (dist < 0.0f)
     {
         dist = 0.0f;
@@ -709,7 +716,10 @@ void CreatureLinkingHolder::SetFollowing(Creature* pWho, Creature* pWhom)
 bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pSlave, Creature const* pBoss, uint16 searchRange) const
 {
     float sX, sY, sZ;
-    pSlave->GetRespawnCoord(sX, sY, sZ);
+    const Geometry::Placement& spawnPose3 = pSlave->Spawn();
+    sX = spawnPose3.X();
+    sY = spawnPose3.Y();
+    sZ = spawnPose3.Z();
     return IsSlaveInRangeOfBoss(pBoss, sX, sY, searchRange);
 }
 
@@ -731,7 +741,10 @@ bool CreatureLinkingHolder::IsSlaveInRangeOfBoss(Creature const* pBoss, float sX
 
     // Do some calculations
     float mX, mY, mZ, dx, dy;
-    pBoss->GetRespawnCoord(mX, mY, mZ);
+    const Geometry::Placement& spawnPose4 = pBoss->Spawn();
+    mX = spawnPose4.X();
+    mY = spawnPose4.Y();
+    mZ = spawnPose4.Z();
 
     dx = sX - mX;
     dy = sY - mY;
@@ -756,7 +769,10 @@ bool CreatureLinkingHolder::CanSpawn(Creature* pCreature) const
     }
 
     float sx, sy, sz;
-    pCreature->GetRespawnCoord(sx, sy, sz);
+    const Geometry::Placement& spawnPose5 = pCreature->Spawn();
+    sx = spawnPose5.X();
+    sy = spawnPose5.Y();
+    sz = spawnPose5.Z();
     return CanSpawn(0, pCreature->GetMap(), pInfo, sx, sy);
 }
 

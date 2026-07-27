@@ -185,12 +185,29 @@ void Player::SaveToDB()
 
     if (!IsBeingTeleported())
     {
-        uberInsert.addUInt32(GetMapId());
+        // What goes in this row is what the client will be handed at the next login, so it
+        // is the map the ship SAILS and a point on it -- never the deck map, which the
+        // client cannot load. Where he actually stands is the deck position saved in the
+        // transport columns below, and that is the one that survives the voyage intact.
+        uint32 savedMap = GetMapId();
+        float savedX = Where().X(), savedY = Where().Y();
+        float savedZ = Where().Z(), savedO = Where().Facing();
+
+        if (m_transport)
+        {
+            savedMap = m_transport->GetMapId();
+            savedX = m_transport->Where().X();
+            savedY = m_transport->Where().Y();
+            savedZ = m_transport->Where().Z();
+            savedO = m_transport->Where().Facing();
+        }
+
+        uberInsert.addUInt32(savedMap);
         uberInsert.addUInt32(uint32(GetDungeonDifficulty()));
-        uberInsert.addFloat(finiteAlways(GetPositionX()));
-        uberInsert.addFloat(finiteAlways(GetPositionY()));
-        uberInsert.addFloat(finiteAlways(GetPositionZ()));
-        uberInsert.addFloat(finiteAlways(GetOrientation()));
+        uberInsert.addFloat(finiteAlways(savedX));
+        uberInsert.addFloat(finiteAlways(savedY));
+        uberInsert.addFloat(finiteAlways(savedZ));
+        uberInsert.addFloat(finiteAlways(savedO));
     }
     else
     {
@@ -240,7 +257,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt32(uint32(m_atLoginFlags));
 
-    uberInsert.addUInt32(IsInWorld() ? GetZoneId() : GetCachedZoneId());
+    uberInsert.addUInt32(IsInWorld() ? GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z()) : GetCachedZoneId());
 
     uberInsert.addUInt64(uint64(m_deathExpireTime));
 
@@ -2035,7 +2052,7 @@ void Player::HandleStealthedUnitsDetection()
                 (*i)->SendCreateUpdateToPlayer(this);
                 m_clientGUIDs.insert(i_guid);
 
-                DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), GetDistance(*i));
+                DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), Where().DistanceTo((*i)->Where()));
 
                 // target aura duration for caster show only if target exist at caster client
                 // send data at target visibility change (adding to client)
@@ -2145,9 +2162,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     if (node->x != 0.0f || node->y != 0.0f || node->z != 0.0f)
     {
         if (node->ContinentID != GetMapId() ||
-                (node->x - GetPositionX()) * (node->x - GetPositionX()) +
-                (node->y - GetPositionY()) * (node->y - GetPositionY()) +
-                (node->z - GetPositionZ()) * (node->z - GetPositionZ()) >
+                (node->x - Where().X()) * (node->x - Where().X()) +
+                (node->y - Where().Y()) * (node->y - Where().Y()) +
+                (node->z - Where().Z()) * (node->z - Where().Z()) >
                 (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE) * (2 * INTERACTION_DISTANCE))
         {
             GetSession()->SendActivateTaxiReply(ERR_TAXITOOFARAWAY);
@@ -2246,7 +2263,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     {
         TaxiNodesEntry const* lastnode = sTaxiNodesStore.LookupEntry(nodes[nodes.size() - 1]);
         m_taxi.ClearTaxiDestinations();
-        TeleportTo(lastnode->ContinentID, lastnode->x, lastnode->y, lastnode->z, GetOrientation());
+        TeleportTo(lastnode->ContinentID, lastnode->x, lastnode->y, lastnode->z, Where().Facing());
         return false;
     }
     else
@@ -2304,9 +2321,9 @@ void Player::ContinueTaxiFlight()
 
     float distPrev = MAP_SIZE * MAP_SIZE;
     float distNext =
-        (nodeList[0].LocX - GetPositionX()) * (nodeList[0].LocX - GetPositionX()) +
-        (nodeList[0].LocY - GetPositionY()) * (nodeList[0].LocY - GetPositionY()) +
-        (nodeList[0].LocZ - GetPositionZ()) * (nodeList[0].LocZ - GetPositionZ());
+        (nodeList[0].LocX - Where().X()) * (nodeList[0].LocX - Where().X()) +
+        (nodeList[0].LocY - Where().Y()) * (nodeList[0].LocY - Where().Y()) +
+        (nodeList[0].LocZ - Where().Z()) * (nodeList[0].LocZ - Where().Z());
 
     for (uint32 i = 1; i < nodeList.size(); ++i)
     {
@@ -2322,9 +2339,9 @@ void Player::ContinueTaxiFlight()
         distPrev = distNext;
 
         distNext =
-            (node.LocX - GetPositionX()) * (node.LocX - GetPositionX()) +
-            (node.LocY - GetPositionY()) * (node.LocY - GetPositionY()) +
-            (node.LocZ - GetPositionZ()) * (node.LocZ - GetPositionZ());
+            (node.LocX - Where().X()) * (node.LocX - Where().X()) +
+            (node.LocY - Where().Y()) * (node.LocY - Where().Y()) +
+            (node.LocZ - Where().Z()) * (node.LocZ - Where().Z());
 
         float distNodes =
             (node.LocX - prevNode.LocX) * (node.LocX - prevNode.LocX) +

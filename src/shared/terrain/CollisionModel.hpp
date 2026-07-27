@@ -28,6 +28,9 @@ namespace world::terrain
         std::optional<float> RaycastNearest(const Vec3& origin, const Vec3& dir,
                                             float tMax) const override;
 
+        void RaycastAll(const Vec3& origin, const Vec3& dir, float tMax,
+                        std::vector<float>& out) const override;
+
         const Aabb& Bounds() const override { return m_bounds; }
         bool Empty() const override { return m_empty; }
 

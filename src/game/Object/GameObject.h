@@ -706,7 +706,6 @@ class GameObject : public WorldObject
         // rotation methods
         void GetQuaternion(Geometry::Quat& q) const;
         void SetQuaternion(Geometry::Quat const& q);
-        float GetOrientationFromQuat(Geometry::Quat const& q);
         int64 GetPackedRotation();
 
         void SetOwnerGuid(ObjectGuid ownerGuid)
@@ -772,7 +771,7 @@ class GameObject : public WorldObject
         void SetDisplayId(uint32 modelId);
         void SetPhaseMask(uint32 newPhaseMask, bool update);
 
-        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
+        float ComputeBoundingRadius() const override;
 
         void Use(Unit* user);
 

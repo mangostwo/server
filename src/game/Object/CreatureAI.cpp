@@ -107,7 +107,7 @@ CanCastResult CreatureAI::CanCastSpell(Unit* pTarget, const SpellEntry* pSpell, 
         if (pTarget != m_creature)
         {
             // pTarget is out of range of this spell (also done by Spell::CheckCast())
-            float fDistance = m_creature->GetCombatDistance(pTarget, pSpell->RangeIndex == SPELL_RANGE_IDX_COMBAT);
+            float fDistance = CombatDistanceBetween(*m_creature, *pTarget, pSpell->RangeIndex == SPELL_RANGE_IDX_COMBAT);
 
             if (fDistance > (m_creature->IsHostileTo(pTarget) ? pSpellRange->RangeMax_0 : pSpellRange->RangeMax_1))
             {

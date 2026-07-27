@@ -740,7 +740,7 @@ void Spell::update(uint32 difftime)
 
     // check if the player caster has moved before the spell finished
     if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-        (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
+        (m_castPositionX != m_caster->Where().X() || m_castPositionY != m_caster->Where().Y() || m_castPositionZ != m_caster->Where().Z()) &&
         (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !((Player*)m_caster)->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
@@ -796,7 +796,7 @@ void Spell::update(uint32 difftime)
                     }
 
                     // check if player has turned if flag is set
-                    if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->GetOrientation())
+                    if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING && m_castOrientation != m_caster->Where().Facing())
                     {
                         cancel();
                     }

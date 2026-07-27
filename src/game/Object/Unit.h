@@ -818,8 +818,9 @@ class MovementInfo
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
         void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
 
-        // Position manipulations
-        Position const* GetPos() const { return &pos; }
+        /// The pose the CLIENT last claimed, which is this record's whole purpose. Not the
+        /// server's placement: fall damage and the anticheat want what the client said.
+        Geometry::Placement const& Reported() const { return reported; }
         void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 time, int8 seat)
         {
             t_guid = guid;
@@ -845,9 +846,10 @@ class MovementInfo
         int8 GetTransportSeat() const { return t_seat; }
         uint32 GetTime() const { return time; }
         uint32 GetTransportTime() const { return t_time; }
+        uint32 GetTransportTime2() const { return t_time2; }
+        float GetPitch() const { return s_pitch; }
         uint32 GetFallTime() const { return fallTime; }
-        void ChangeOrientation(float o) { pos.o = o; }
-        void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
+        void Report(float x, float y, float z, float o) { reported.MoveTo(x, y, z, o); }
         void UpdateTime(uint32 _time) { time = _time; }
 
         struct JumpInfo
@@ -862,7 +864,7 @@ class MovementInfo
         uint32   moveFlags;                                 // see enum MovementFlags
         uint16   moveFlags2;                                // see enum MovementFlags2
         uint32   time;
-        Position pos;
+        Geometry::Placement reported;
         // transport
         ObjectGuid t_guid;
         Position t_pos;
@@ -1303,6 +1305,13 @@ enum PowerDefaults
 
 struct SpellProcEventEntry;                                 // used only privately
 
+// Reach is a game stat (UNIT_FIELD_COMBATREACH), not geometry, so it composes the two
+// placements from outside rather than living on them -- or on the units.
+float CombatReachBetween(Unit const& attacker, Unit const& victim, bool forMeleeRange = true,
+                         float flat_mod = 0.0f);
+float CombatDistanceBetween(Unit const& attacker, Unit const& target, bool forMeleeRange);
+bool InMeleeReach(Unit const& attacker, Unit const& victim, float flat_mod = 0.0f);
+
 class Unit : public WorldObject
 {
     public:
@@ -1356,7 +1365,7 @@ class Unit : public WorldObject
          */
         void CleanupsBeforeDelete() override;
 
-        float GetObjectBoundingRadius() const override      // overwrite WorldObject version
+        float ComputeBoundingRadius() const override
         {
             return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS];
         }
@@ -1472,7 +1481,6 @@ class Unit : public WorldObject
          * \see EUnitFields
          * \see GetFloatValue
          */
-        float GetCombatReach(Unit const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
         /**
          * Returns the remaining combat distance between two mobs (CombatReach substracted).
          * Does this by getting the radius of combat/aggro between them and then subtracting their
@@ -1482,7 +1490,6 @@ class Unit : public WorldObject
          * @param forMeleeRange If we want to check melee range instead
          * @return The reach between them left until one of the creatures could/should aggro
          */
-        float GetCombatDistance(Unit const* target, bool forMeleeRange) const;
         /**
          * Returns if the Unit can reach a victim with Melee Attack. Does so by using
          * Unit::GetCombatReach for melee and checking if the distance from the target is less than
@@ -1491,7 +1498,6 @@ class Unit : public WorldObject
          * @param flat_mod The same as sent to Unit::GetCombatReach
          * @return true if we can reach pVictim with a melee attack
          */
-        bool CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod = 0.0f) const;
         uint32 m_extraAttacks;
 
         /**
@@ -2601,7 +2607,6 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * @param distanceZ is the distance from the creature's current Z ordinate to the destination Z ordinate
          *
          */
-        bool IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPositionX, float destinationPositionY, float destinationPositionZ, float distanceX, float distanceY, float distanceZ);
 
 
         /**
@@ -3121,6 +3126,11 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
          * \ref OpcodesList::MSG_MOVE_HEARTBEAT which will send the new position to all clients etc
          * in the same \ref Cell
          */
+        /// Serialise this unit's movement info. THE only writer -- see the source: on a
+        /// transport map it substitutes the deck's coordinates as a transport offset and
+        /// sends no world position, because the client has never heard of that map.
+        void WriteMovementInfo(ByteBuffer& out) const;
+
         void SendHeartBeat();
 
         /**
@@ -4123,6 +4133,10 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void CastSpell(float x, float y, float z, uint32 spell, TR triggered);
         template <typename TR>
         void CastSpell(float x, float y, float z, SpellEntry const* spell, TR triggered);
+
+#ifdef MANGOS_SCRIPT_COMPAT
+#include "Object/ScriptApiCompatUnit.inl"
+#endif
 };
 
 template<typename Func>

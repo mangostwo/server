@@ -172,15 +172,25 @@ bool TerrainInfo::Load(const uint32 x, const uint32 y)
     MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
     MANGOS_ASSERT(y < MAX_NUMBER_OF_GRIDS);
 
+    bool firstReference = false;
     {
         std::lock_guard<LOCK_TYPE> lock(m_refMutex);
-        ++m_GridRef[x][y];
+        firstReference = (++m_GridRef[x][y] == 1);
     }
 
     // Pins the cell's tile against the cache sweep for as long as a grid stands on it.
     // The tile data itself still loads lazily, on the first query that reaches it.
     m_terrain.PinCell(int(x), int(y));
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
+
+    // The navmesh tile is loaded by the FIRST referent only -- the refcount above is what
+    // makes several owners of one grid legal, and Unload already releases on the last.
+    // Loading unconditionally made every second owner ask for a tile the first had already
+    // brought in, which the mmap manager rejects and logs. Common now that a vessel is an
+    // active object holding grids a player then walks into.
+    if (firstReference)
+    {
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
+    }
     return true;
 }
 
@@ -229,18 +239,17 @@ void TerrainInfo::CleanUpGrids(const uint32 diff)
     i_timer.Reset();
 }
 
-// The fused tile carries terrain and collision together, so there is no longer a
-// "consult the vmaps as well" switch and no two answers to reconcile. checkVMap and
-// maxSearchDist are kept so every call site need not change at once.
-float TerrainInfo::GetHeightStatic(float x, float y, float z, bool /*checkVMap*/,
-                                   float /*maxSearchDist*/) const
+world::terrain::Column TerrainInfo::ColumnAt(float x, float y, float zTop, float zBottom,
+                                             const world::terrain::ILiveGeometry* live,
+                                             uint32 phasemask) const
 {
-    float out = 0.0f;
-    if (m_terrain.GetFloor(x, y, z, out))
-    {
-        return out;
-    }
-    return INVALID_HEIGHT_VALUE;
+    return m_terrain.ColumnAt(x, y, zTop, zBottom, live, phasemask);
+}
+
+std::optional<float> TerrainInfo::StaticFloor(float x, float y, float z) const
+{
+    return ColumnAt(x, y, z + FLOOR_BURIED_LIFT, z - FLOOR_SEARCH_DOWN)
+           .Floor(z, FLOOR_SEARCH_UP);
 }
 
 bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId,
@@ -308,13 +317,13 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
 
 uint8 TerrainInfo::GetTerrainType(float x, float y) const
 {
-    LiquidInfo info;
-    if (!m_terrain.GetLiquid(x, y, MAX_HEIGHT, info) || !info.entry)
+    const auto liquid = ColumnAt(x, y, MAX_HEIGHT, -MAX_HEIGHT).HighestLiquid();
+    if (!liquid || !liquid->liquidEntry)
     {
         return 0;
     }
     uint32 soundBank = 0;
-    return uint8(LiquidFlagsOfRow(info.entry, soundBank));
+    return uint8(LiquidFlagsOfRow(liquid->liquidEntry, soundBank));
 }
 
 uint32 TerrainInfo::GetAreaId(float x, float y, float z) const
@@ -337,11 +346,17 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z,
                                                  uint8 ReqLiquidType,
                                                  GridMapLiquidData* data) const
 {
-    LiquidInfo info;
-    if (!m_terrain.GetLiquid(x, y, z, info) || !info.entry)
+    // One sweep answers both halves of this: the liquid surface AND the floor under it,
+    // which the depth and the "is there really water here" test below both need.
+    const world::terrain::Column column =
+        ColumnAt(x, y, z + FLOOR_BURIED_LIFT, z - FLOOR_SEARCH_DOWN);
+
+    const auto liquid = column.HighestLiquid();
+    if (!liquid || !liquid->liquidEntry)
     {
         return LIQUID_MAP_NO_WATER;
     }
+    const LiquidInfo info = liquid->AsLiquid();
 
     uint32 entry = info.entry;
     // Hard-coded in the client: Outland's ocean is its own row.
@@ -386,7 +401,8 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z,
         return LIQUID_MAP_NO_WATER;
     }
 
-    const float groundZ = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
+    const auto floor = column.Floor(z, FLOOR_SEARCH_UP);
+    const float groundZ = floor ? *floor : INVALID_HEIGHT;
     if (info.level <= groundZ || z <= groundZ - 2.0f)
     {
         return LIQUID_MAP_NO_WATER;
@@ -446,9 +462,11 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z) const
             LIQUID_MAP_UNDER_WATER) != 0;
 }
 
-float TerrainInfo::GetWaterLevel(float x, float y, float z, float* pGround) const
+std::optional<float> TerrainInfo::GetWaterLevel(float x, float y, float z,
+                                                float* pGround) const
 {
-    const float groundZ = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
+    const auto floor = StaticFloor(x, y, z);
+    const float groundZ = floor ? *floor : INVALID_HEIGHT;
     if (pGround)
     {
         *pGround = groundZ;
@@ -458,7 +476,7 @@ float TerrainInfo::GetWaterLevel(float x, float y, float z, float* pGround) cons
     if (!(getLiquidStatus(x, y, groundZ, MAP_ALL_LIQUIDS, &liquidStatus) &
           (LIQUID_MAP_ABOVE_WATER | LIQUID_MAP_IN_WATER | LIQUID_MAP_UNDER_WATER)))
     {
-        return INVALID_HEIGHT_VALUE;
+        return std::nullopt;
     }
     return liquidStatus.level;
 }
@@ -466,7 +484,8 @@ float TerrainInfo::GetWaterLevel(float x, float y, float z, float* pGround) cons
 float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGround,
                                          bool swim) const
 {
-    const float groundZ = GetHeightStatic(x, y, z, true, DEFAULT_WATER_SEARCH);
+    const auto floor = StaticFloor(x, y, z);
+    const float groundZ = floor ? *floor : INVALID_HEIGHT;
     if (pGround)
     {
         *pGround = groundZ;

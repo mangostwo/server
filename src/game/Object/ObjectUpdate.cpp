@@ -46,6 +46,7 @@
 #include "MapManager.h"
 #include "Log.h"
 #include "Transports.h"
+#include "TransportMap.h"
 #include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "CellImpl.h"
@@ -268,7 +269,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     {
         Unit* unit = ((Unit*)this);
 
-        // ToDo: Remove this hack
+        // A PLAYER'S transport data comes from his own client, in every movement packet,
+        // and it is right even before he has been moved onto the deck map -- which is the
+        // order login happens in. Touch only the flag, exactly as before.
         if (GetTypeId() == TYPEID_PLAYER)
         {
             Player* player = ((Player*)unit);
@@ -281,11 +284,32 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
                 player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
             }
         }
+        // A CREATURE has no client to speak for it, so it is derived here, at the instant
+        // of writing, from the one thing that cannot fall out of step: the map it is on.
+        // Its position on a deck map already IS the offset -- nothing is composed.
+        else if (Map* on = unit->GetMap())
+        {
+            if (TransportMap* hull = on->AsTransport())
+            {
+                if (Transport* vessel = hull->Vessel())
+                {
+                    unit->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+                    unit->m_movementInfo.SetTransportData(
+                        vessel->GetObjectGuid(), unit->Where().X(), unit->Where().Y(),
+                        unit->Where().Z(), unit->Where().Facing(), 0, -1);
+                }
+            }
+        }
 
         // Update movement info time
         unit->m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
-        // Write movement info
-        unit->m_movementInfo.Write(*data);
+
+        // A boarded unit has no world position worth sending: the client places it from
+        // the vessel's own interpolated pose and the deck offset. A composed world
+        // coordinate here is a guess the client would have to discard -- and when it does
+        // not, the unit lands wherever the guess pointed. Same shape the vessel itself
+        // uses below: zero the position, keep the facing.
+        unit->WriteMovementInfo(*data);
 
         // Unit speeds
         *data << float(unit->GetSpeed(MOVE_WALK));
@@ -309,17 +333,17 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         if (updateFlags & UPDATEFLAG_POSITION)
         {
             *data << uint8(0);                              // unk PGUID!
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetOrientation());
+            *data << float(((WorldObject*)this)->Where().X());
+            *data << float(((WorldObject*)this)->Where().Y());
+            *data << float(((WorldObject*)this)->Where().Z());
+            *data << float(((WorldObject*)this)->Where().X());
+            *data << float(((WorldObject*)this)->Where().Y());
+            *data << float(((WorldObject*)this)->Where().Z());
+            *data << float(((WorldObject*)this)->Where().Facing());
 
             if (GetTypeId() == TYPEID_CORPSE)
             {
-                *data << float(((WorldObject*)this)->GetOrientation());
+                *data << float(((WorldObject*)this)->Where().Facing());
             }
             else
             {
@@ -337,14 +361,14 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
                     *data << float(0);
                     *data << float(0);
                     *data << float(0);
-                    *data << float(((WorldObject*)this)->GetOrientation());
+                    *data << float(((WorldObject*)this)->Where().Facing());
                 }
                 else
                 {
-                    *data << float(((WorldObject*)this)->GetPositionX());
-                    *data << float(((WorldObject*)this)->GetPositionY());
-                    *data << float(((WorldObject*)this)->GetPositionZ());
-                    *data << float(((WorldObject*)this)->GetOrientation());
+                    *data << float(((WorldObject*)this)->Where().X());
+                    *data << float(((WorldObject*)this)->Where().Y());
+                    *data << float(((WorldObject*)this)->Where().Z());
+                    *data << float(((WorldObject*)this)->Where().Facing());
                 }
             }
         }
@@ -430,14 +454,27 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        *data << uint32(GameTime::GetGameTimeMS());           // ms time
+        // THE PHASE, not the clock. Tried the raw wall clock here once, to take our own
+        // `transports`.`period` out of the loop: the client stopped animating the hull
+        // altogether -- a dead ship, and everyone standing on one frozen with it. It does
+        // not take the modulo itself. It wants how far along the route she is, and that is
+        // ours to compute.
+        if (isType(TYPEMASK_GAMEOBJECT)
+            && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
+        {
+            *data << uint32(((Transport*)this)->GetPathProgress());
+        }
+        else
+        {
+            *data << uint32(GameTime::GetGameTimeMS());       // ms time
+        }
     }
 
     // 0x80
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
         *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->ID); // vehicle id
-        *data << float(((WorldObject*)this)->GetOrientation());
+        *data << float(((WorldObject*)this)->Where().Facing());
     }
 
     // 0x200

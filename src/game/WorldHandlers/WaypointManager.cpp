@@ -187,7 +187,12 @@ void WaypointManager::Load()
 
                 if (result1)
                 {
-                    node.z = sTerrainMgr.LoadTerrain(result1->Fetch()[1].GetUInt32())->GetHeightStatic(node.x, node.y, node.z);
+                    const TerrainInfo* terrain =
+                        sTerrainMgr.LoadTerrain(result1->Fetch()[1].GetUInt32());
+                    if (auto floor = terrain->StaticFloor(node.x, node.y, node.z))
+                    {
+                        node.z = *floor;
+                    }
                     delete result1;
                 }
 
@@ -520,10 +525,16 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     // Prepare information
     char const* const table     = wpDest == PATH_FROM_GUID ? "creature_movement" : "creature_movement_template";
     char const* const key_field = wpDest == PATH_FROM_GUID ? "id" : "entry";
-    uint32 const key            = wpDest == PATH_FROM_GUID ? dbGuid : ((entry << 8) /*+ pathId*/);
+    // TWO KEYS, and they are not the same number. The in-memory map is keyed by
+    // (entry << 8) + pathId; the TABLE is keyed by the plain entry. Conflating them wrote
+    // every added node under `entry` = 8002304 for a creature of entry 31259 -- a row no
+    // loader will ever ask for. DeleteNode and every Set* below already use the plain
+    // entry, so add and delete were talking about different rows.
+    uint32 const mapKey         = wpDest == PATH_FROM_GUID ? dbGuid : ((entry << 8) /*+ pathId*/);
+    uint32 const key            = wpDest == PATH_FROM_GUID ? dbGuid : entry;
     WaypointPathMap* wpMap      = wpDest == PATH_FROM_GUID ? &m_pathMap : &m_pathTemplateMap;
 
-    WaypointPath& path = (*wpMap)[key];
+    WaypointPath& path = (*wpMap)[mapKey];
 
     if (pointId == 0 && !path.empty())                      // Start with highest waypoint
     {
@@ -535,7 +546,11 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
     }
 
     uint32 nextPoint = pointId;
-    WaypointNode temp = WaypointNode(x, y, z, 100, 0, 0, NULL);
+    // The 100 that used to sit here was meant as a default WAITTIME, from a version of this
+    // struct that had no orientation field. When orientation was added in front of delay,
+    // it silently became a facing of 100 RADIANS -- roughly sixteen full turns -- carried
+    // into every spline the node produces.
+    WaypointNode temp = WaypointNode(x, y, z, 0.0f, 0, 0, NULL);
     WaypointPath::iterator find = path.find(nextPoint);
     if (find != path.end())                                 // Point already exists
     {
@@ -561,7 +576,8 @@ WaypointNode const* WaypointManager::AddNode(uint32 entry, uint32 dbGuid, uint32
         }
     }
     // Insert new Point to database
-    WorldDatabase.PExecuteLog("INSERT INTO `%s` (`%s`,`point`,`position_x`,`position_y`,`position_z`,`orientation`) VALUES (%u,%u, %f,%f,%f, 100)", table, key_field, key, pointId, x, y, z);
+    WorldDatabase.PExecuteLog("INSERT INTO `%s` (`%s`,`point`,`position_x`,`position_y`,`position_z`) "
+                              "VALUES (%u,%u, %f,%f,%f)", table, key_field, key, pointId, x, y, z);
 
     return &path[pointId];
 }

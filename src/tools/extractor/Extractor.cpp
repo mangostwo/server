@@ -43,6 +43,8 @@
 #include <cctype>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -53,13 +55,15 @@ namespace
     struct Options
     {
         std::string src = "Data";
-        std::string dest = "cache";
+        std::string dest = "extracted_data";
         std::string locale = "enUS";
         int mapFilter = -1;
         bool dbc = false;
         bool tiles = false;
         bool goModels = false;
+        bool vessels = false;
         bool nav = false;
+        std::string vesselList;
 
         // Whether the command line named components itself. Naming them is an
         // instruction, so it suppresses the menu; leaving them out is a question, so
@@ -83,11 +87,17 @@ namespace
     void Usage()
     {
         std::printf(
-            "usage: mangos-extractor [dbc] [tile] [gomodels] [all] [options]\n"
+            "usage: mangos-extractor [dbc] [tile] [gomodels] [trans] [nav] [all]"
+            " [options]\n"
             "  --src <dir>     client Data directory (default Data)\n"
-            "  --dest <dir>    output root (default cache)\n"
+            "  --dest <dir>    output root (default extracted_data)\n"
             "  --locale <loc>  client locale folder (default enUS)\n"
             "  --map <id>      bake only this map id\n"
+            "  --vessels <f>   file of \"<mapId> <displayId>\" pairs: give each vessel's\n"
+            "                  Map.dbc id the hull baked for that display id. Reads only\n"
+            "                  baked gomodels, so it needs no client. Defaults to\n"
+            "                  vessels.txt beside the executable, which ships with\n"
+            "                  every vessel the client has.\n"
             "  --no-menu       never ask; bake everything not already named\n"
             "\n"
             "Naming no component opens the interactive menu. Without a terminal to\n"
@@ -104,11 +114,14 @@ namespace
             if (a == "dbc") { out.dbc = out.named = true; }
             else if (a == "tile") { out.tiles = out.named = true; }
             else if (a == "gomodels") { out.goModels = out.named = true; }
+            else if (a == "trans" || a == "vessels") { out.vessels = out.named = true; }
             else if (a == "nav") { out.nav = out.named = true; }
             else if (a == "all")
             {
-                out.dbc = out.tiles = out.goModels = out.nav = out.named = true;
+                out.dbc = out.tiles = out.goModels = out.vessels = out.nav =
+                    out.named = true;
             }
+            else if (a == "--vessels" && hasValue) { out.vesselList = argv[++i]; }
             else if (a == "--src" && hasValue) { out.src = argv[++i]; }
             else if (a == "--dest" && hasValue) { out.dest = argv[++i]; }
             else if (a == "--locale" && hasValue) { out.locale = argv[++i]; }
@@ -171,7 +184,7 @@ namespace
             {
                 continue;
             }
-            const size_t slash = name.find_last_of("\/");
+            const size_t slash = name.find_last_of("\\/");
             std::string leaf = slash == std::string::npos ? name : name.substr(slash + 1);
 
             // The archive stores the locale lower-cased; the server fopen()s the name it
@@ -278,8 +291,128 @@ namespace
         Tick();
     }
 
+    // One durable line per map, so a piped log -- where the moving header prints nothing
+    // -- still shows the bake advancing map by map.
+    void NavMapDone(void* ctx, uint32_t, const char* label, int written, size_t total)
+    {
+        (void)ctx;
+        char msg[128];
+        std::snprintf(msg, sizeof(msg), "nav %s -> %d/%zu mmtiles",
+                      label ? label : "", written, total);
+        g_console.Detail(msg);
+        Tick();
+    }
+
     // The navmesh is baked from the TILES, never from the MPQs, so the surface the
     // pathfinder walks is the one the collision engine answers with.
+    struct VesselMap
+    {
+        uint32_t mapId;
+        uint32_t displayId;
+    };
+
+    /**
+     * @brief The list that ships with the tool: vessels.txt beside the executable.
+     *
+     * Beside the EXECUTABLE, not the working directory, because this is data the build
+     * installs next to the binary and a baker is run from wherever it happens to be run
+     * from. The list changes only when the client does, so having to name it every time was
+     * a flag that only ever took one value.
+     */
+    std::string DefaultVesselList(const char* argv0)
+    {
+        std::error_code ec;
+        std::filesystem::path exe = std::filesystem::absolute(
+            argv0 ? argv0 : "mangos-extractor", ec);
+        if (ec)
+        {
+            return "vessels.txt";
+        }
+
+        const std::filesystem::path beside = exe.parent_path() / "vessels.txt";
+        return std::filesystem::exists(beside, ec) ? beside.string() : std::string("vessels.txt");
+    }
+
+    std::vector<VesselMap> ReadVesselMaps(const std::string& path)
+    {
+        std::vector<VesselMap> out;
+        std::ifstream in(path);
+        if (!in)
+        {
+            g_console.Error("vessels: could not open " + path);
+            return out;
+        }
+
+        std::string line;
+        while (std::getline(in, line))
+        {
+            const size_t hash = line.find('#');
+            if (hash != std::string::npos)
+            {
+                line.erase(hash);
+            }
+
+            std::istringstream ls(line);
+            VesselMap v{};
+            if (ls >> v.mapId >> v.displayId)
+            {
+                out.push_back(v);
+            }
+        }
+        return out;
+    }
+
+    // Blizzard ships a Map.dbc row per vessel and no terrain for it -- a "Transport<entry>"
+    // map with no WDT at all -- because the hull only ever existed as a game object model.
+    // This gives that identity its geometry: the tile the gomodel bake already wrote,
+    // marked global and named for the vessel's own map, so terrain, collision and nav all
+    // reach it by the ordinary WMO-only map path.
+    //
+    // The instance keeps its identity placement. Model space IS the deck, and there is no
+    // world pose to compose with.
+    int BakeVesselMaps(const std::string& goDir, const std::string& tileDir,
+                       const std::vector<VesselMap>& vessels)
+    {
+        int written = 0;
+        for (const VesselMap& v : vessels)
+        {
+            auto tile = ReadTile(goDir + "/" + GoModelFileName(v.displayId));
+            if (!tile || tile->instances.empty())
+            {
+                char msg[256];
+                std::snprintf(msg, sizeof(msg),
+                              "vessels: no baked collision for display id %u",
+                              v.displayId);
+                g_console.Error(msg);
+                continue;
+            }
+
+            tile->isGlobalWmo = true;
+
+            char msg[256];
+            if (WriteTile(*tile, tileDir + "/" + GlobalWmoFileName(v.mapId)))
+            {
+                ++written;
+                std::snprintf(msg, sizeof(msg), "  map %5u <- display %5u", v.mapId,
+                              v.displayId);
+                g_console.Detail(msg);
+            }
+            else
+            {
+                std::snprintf(msg, sizeof(msg),
+                              "vessels: could not write map %u", v.mapId);
+                g_console.Error(msg);
+            }
+            Tick();
+        }
+
+        char msg[256];
+        std::snprintf(msg, sizeof(msg), "vessels: %d hull maps -> %s", written,
+                      tileDir.c_str());
+        g_console.Success(msg);
+        return written;
+    }
+
     bool BakeNav(const Options& opt, const std::string& tileDir)
     {
         if (!opt.nav)
@@ -295,6 +428,7 @@ namespace
 
         world::nav::NavMeshBuilder builder(tileDir, opt.dest + "/mmaps", cfg);
         builder.SetProgress(&NavProgress, nullptr);
+        builder.SetMapDone(&NavMapDone);
 
         const int written = builder.BakeAll(opt.mapFilter);
         if (written < 0)
@@ -392,6 +526,11 @@ int main(int argc, char** argv)
     opt.src = ExtractorConsole::ToUnixPath(opt.src);
     opt.dest = ExtractorConsole::ToUnixPath(opt.dest);
 
+    if (opt.vesselList.empty())
+    {
+        opt.vesselList = DefaultVesselList(argc > 0 ? argv[0] : nullptr);
+    }
+
     g_started = std::chrono::steady_clock::now();
     g_console.Start(opt.src, opt.dest);
 
@@ -430,10 +569,22 @@ int main(int argc, char** argv)
 
     const std::string tileDir = opt.dest + "/tiles";
 
-    // nav reads the baked tiles and never touches the client, so a nav-only run must
-    // not require a client to be present at all.
+    // Like nav, a vessel map is built from baked data alone, so neither needs a client.
+    const auto BakeVessels = [&opt, &tileDir]()
+    {
+        if (!opt.vessels)
+        {
+            return;
+        }
+        std::error_code ec;
+        std::filesystem::create_directories(tileDir, ec);
+        g_console.SetStage("vessels");
+        BakeVesselMaps(opt.dest + "/gomodels", tileDir, ReadVesselMaps(opt.vesselList));
+    };
+
     if (!opt.dbc && !opt.tiles && !opt.goModels)
     {
+        BakeVessels();
         const bool ok = BakeNav(opt, tileDir);
         g_console.SetStage("done");
         g_console.Progress(-1);
@@ -465,10 +616,12 @@ int main(int argc, char** argv)
 
     if (!opt.tiles && !opt.goModels)
     {
+        BakeVessels();
+        const bool ok = BakeNav(opt, tileDir);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
-        return 0;
+        return ok ? 0 : 1;
     }
 
     world::MapDbcStore maps;
@@ -498,6 +651,8 @@ int main(int argc, char** argv)
             g_console.Error("GameObjectDisplayInfo.dbc could not be read");
         }
     }
+
+    BakeVessels();
 
     if (!opt.tiles)
     {

@@ -358,9 +358,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
     }
 
     uint32 corpsemapid = corpse->GetMapId();
-    float x = corpse->GetPositionX();
-    float y = corpse->GetPositionY();
-    float z = corpse->GetPositionZ();
+    float x = corpse->Where().X();
+    float y = corpse->Where().Y();
+    float z = corpse->Where().Z();
     int32 mapid = corpsemapid;
 
     // if corpse at different map
@@ -377,7 +377,10 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
                     mapid = corpseMapEntry->CorpseMapID;
                     x = corpseMapEntry->Corpse_0;
                     y = corpseMapEntry->Corpse_1;
-                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
+                    if (auto floor = entranceMap->StaticFloor(x, y, MAX_HEIGHT))
+                    {
+                        z = *floor;
+                    }
                 }
             }
         }

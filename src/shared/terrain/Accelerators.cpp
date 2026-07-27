@@ -239,4 +239,45 @@ namespace world::terrain
         }
         return best;
     }
+
+    void Bvh::RaycastAll(const TriSoup& soup, const Vec3& o, const Vec3& d, float tMax,
+                         std::vector<Crossing>& out) const
+    {
+        if (m_nodes.empty())
+        {
+            return;
+        }
+
+        auto inv = [](float v) { return std::fabs(v) > 1e-9f ? 1.f / v : 1e30f; };
+        const Vec3 invDir{inv(d.x), inv(d.y), inv(d.z)};
+
+        int stack[MAX_DEPTH + 16];
+        int sp = 0;
+        stack[sp++] = 0;
+
+        while (sp)
+        {
+            const Node& n = m_nodes[stack[--sp]];
+            if (!n.box.intersectsRay(o, invDir, tMax))
+            {
+                continue;
+            }
+            if (n.left < 0)
+            {
+                for (uint32_t i = n.first; i < n.first + n.count; ++i)
+                {
+                    if (auto t = rayTri(o, d, soup.At(i)))
+                    {
+                        if (*t >= 0.f && *t < tMax)
+                        {
+                            out.push_back(Crossing{*t, i});
+                        }
+                    }
+                }
+                continue;
+            }
+            stack[sp++] = n.left;
+            stack[sp++] = n.right;
+        }
+    }
 }

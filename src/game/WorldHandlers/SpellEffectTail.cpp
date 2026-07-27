@@ -333,7 +333,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     else if (m_spellInfo->EffectRadiusIndex[eff_idx] && m_spellInfo->Speed == 0)
     {
         float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[eff_idx]));
-        m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+        ClosePointNear(*m_caster, fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
     {
@@ -346,22 +346,22 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
         if (goinfo->type == GAMEOBJECT_TYPE_FISHINGNODE)
         {
             // calculate angle variation for roughly equal dimensions of target area
-            float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
+            float max_angle = (max_dis - min_dis) / (max_dis + m_caster->Where().Extent());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
+            { const Geometry::Vector3 p = PointNear(*m_caster, dis + m_caster->Where().Extent(), m_caster->Where().Facing() + angle_offset); fx = p.x; fy = p.y; }
 
             SpellCastResult err = SPELL_FAILED_SUCCESS;
             float waistHeight = GetModelMidpoint(m_caster->GetDisplayId()) * m_caster->GetObjectScale();
 
-            if (!m_caster->GetTerrain()->IsAboveWater(fx, fy, m_caster->GetPositionZ() + waistHeight + 0.5f, &fz))
+            if (!m_caster->GetTerrain()->IsAboveWater(fx, fy, m_caster->Where().Z() + waistHeight + 0.5f, &fz))
             {
                 err = SPELL_FAILED_NOT_FISHABLE;
             }
-            else if (m_caster->GetPositionZ() < (fz - waistHeight))
+            else if (m_caster->Where().Z() < (fz - waistHeight))
             {
                 err = SPELL_FAILED_ONLY_ABOVEWATER;
             }
-            else if (!m_caster->IsWithinLOS(fx, fy, fz))
+            else if (!HasLineOfSight(*m_caster, Geometry::Vector3(fx, fy, fz)))
             {
                 err = SPELL_FAILED_LINE_OF_SIGHT;
             }
@@ -375,7 +375,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
         }
         else
         {
-            m_caster->GetClosePoint(fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
+            ClosePointNear(*m_caster, fx, fy, fz, DEFAULT_WORLD_OBJECT_SIZE, dis);
         }
     }
 
@@ -385,13 +385,13 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     // if gameobject is summoning object, it should be spawned right on caster's position
     if (goinfo->type == GAMEOBJECT_TYPE_SUMMONING_RITUAL)
     {
-        m_caster->GetPosition(fx, fy, fz);
+        fx = m_caster->Where().X(), fy = m_caster->Where().Y(), fz = m_caster->Where().Z();
     }
 
     GameObject* pGameObj = new GameObject;
 
     if (!pGameObj->Create(cMap->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
-                          m_caster->GetPhaseMask(), fx, fy, fz, m_caster->GetOrientation()))
+                          m_caster->GetPhaseMask(), fx, fy, fz, m_caster->Where().Facing()))
     {
         delete pGameObj;
         return;
@@ -895,10 +895,10 @@ void Spell::EffectBind(SpellEffectIndex eff_idx)
     }
     else
     {
-        player->GetPosition(loc);
+        loc = WorldLocation(player->GetMapId(), player->Where().X(), player->Where().Y(), player->Where().Z(), player->Where().Facing());
         if (!area_id)
         {
-            area_id = player->GetAreaId();
+            area_id = player->GetTerrain()->GetAreaId(player->Where().X(), player->Where().Y(), player->Where().Z());
         }
     }
 
@@ -1052,10 +1052,10 @@ void Spell::EffectKnockBackFromPosition(SpellEffectIndex eff_idx)
     }
     else
     {
-        m_caster->GetPosition(x, y, z);
+        x = m_caster->Where().X(), y = m_caster->Where().Y(), z = m_caster->Where().Z();
     }
 
-    float angle = unitTarget->GetAngle(x, y) + M_PI_F;
+    float angle = unitTarget->Where().BearingTo(Geometry::Vector2(x, y)) + M_PI_F;
     float horizontalSpeed = m_spellInfo->EffectMiscValue[eff_idx] * 0.1f;
     float verticalSpeed = damage * 0.1f;
     unitTarget->KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
@@ -1075,11 +1075,11 @@ void Spell::EffectGravityPull(SpellEffectIndex eff_idx)
     }
     else
     {
-        m_caster->GetPosition(x, y, z);
+        x = m_caster->Where().X(), y = m_caster->Where().Y(), z = m_caster->Where().Z();
     }
 
     float speed = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.15f;
-    float height = float(unitTarget->GetDistance(x, y, z) * 0.2f);
+    float height = float(unitTarget->Where().DistanceTo(Geometry::Vector3(x, y, z)) * 0.2f);
 
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speed, height);
 }

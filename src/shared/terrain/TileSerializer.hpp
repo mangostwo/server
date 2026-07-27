@@ -25,6 +25,14 @@ namespace world::terrain
     std::string TileFileName(uint32_t mapId, int tx, int ty);
     std::string GlobalWmoFileName(uint32_t mapId);
 
+    // Blizzard named a map for most vessels but not all, and a hull has a model either
+    // way. One is minted per GAME OBJECT entry -- not per display id, since two ships of
+    // the same model are still two decks -- clear of Map.dbc, whose ids end in the
+    // hundreds.
+    constexpr uint32_t VESSEL_MAP_BASE = 1000000;
+
+    inline uint32_t MintedVesselMapId(uint32_t goEntry) { return VESSEL_MAP_BASE + goEntry; }
+
     // A game object's collision, per GameObjectDisplayInfo.dbc id. It is stored as an
     // ordinary one-instance tile so the writer and reader above are the only ones,
     // rather than a second format that could drift from them.

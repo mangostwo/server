@@ -473,7 +473,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry)
 
             if (flags & 0x20)
             {
-                data << uint32(plr->GetZoneId());               // areaid
+                data << uint32(plr->GetTerrain()->GetZoneId(plr->Where().X(), plr->Where().Y(), plr->Where().Z()));               // areaid
             }
 
             if (flags & 0x40)

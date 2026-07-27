@@ -1346,7 +1346,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
             if (dummySpell->IsFitToFamilyMask(UI64LIT(0x0000000800000000)))
             {
                 // check attack comes not from behind
-                if (!HasInArc(M_PI_F, pVictim))
+                if (!Where().HasInArc(pVictim->Where(), M_PI_F))
                 {
                     return SPELL_AURA_PROC_FAILED;
                 }
@@ -2954,7 +2954,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(Unit* pVictim, uint32 damage, Aura
                     return SPELL_AURA_PROC_FAILED;
                 }
 
-                float distance = caster->GetDistance(pVictim);
+                float distance = caster->Where().DistanceTo(pVictim->Where());
                 int32 chance = triggerAmount;
 
                 if (distance < 15.0f || !roll_chance_i(chance))

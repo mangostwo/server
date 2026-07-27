@@ -1160,6 +1160,14 @@ class Player : public Unit
         void AddToWorld() override; // Add the player to the world
         void RemoveFromWorld() override; // Remove the player from the world
 
+        /// Put this player's own minions (pet, mini-pet, guardians) onto a type-11 lift he
+        /// is riding, or take them off when he steps away. A lift is a plain grid GameObject
+        /// the client animates, not a vessel: the minion stays an ordinary grid creature,
+        /// seen the ordinary way, and only carries MOVEFLAG_ONTRANSPORT so the client rides
+        /// it up with its master. Genuine vessel passengers (a TransportInfo) are the ship's
+        /// business and are left alone.
+        void UpdateLiftMinions();
+
         // Teleport the player to a specific location
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0, AreaTrigger const* at = NULL);
 
@@ -1198,7 +1206,7 @@ class Player : public Unit
         bool IsUnderWater() const override; // Check if the player is underwater
         bool IsFalling() // Check if the player is falling
         {
-            return GetPositionZ() < m_lastFallZ;
+            return Where().Z() < m_lastFallZ;
         }
 
         void SendInitialPacketsBeforeAddToMap();
@@ -2091,6 +2099,23 @@ class Player : public Unit
 
         // Get the zone ID from the database
         static uint32 GetZoneIdFromDB(ObjectGuid guid);
+
+        /// Zone and area for wherever this player stands -- inherited from the vessel when
+        /// he is aboard one, because a deck map carries no area table of its own.
+        void GetZoneAndAreaAboardOrHere(uint32& zone, uint32& area) const;
+
+        /// Map and position for world-level lookups (graveyards, area triggers) -- the
+        /// vessel's when aboard one, because a deck map has no area table.
+        void GetWorldAnchor(uint32& mapId, float& x, float& y, float& z) const;
+
+        /// THE MAP HE IS ACTUALLY ADDED TO when he enters the world -- at login, and on
+        /// the far side of a teleport. Aboard a vessel that is HER map, never the one he
+        /// was just told about: the client is handed the world map she sails and nothing
+        /// else, ever, and the server puts him where he really stands.
+        Map* BoardingMap() const;
+
+        /// Terrain for world-level questions -- the vessel's map when aboard one.
+        TerrainInfo const* AnchorTerrain() const;
 
         // Get the level from the database
         static uint32 GetLevelFromDB(ObjectGuid guid);
@@ -3596,10 +3621,10 @@ class Player : public Unit
         void SetHomebindToLocation(WorldLocation const& loc, uint32 area_id);
 
         // Relocate the player to the homebind location
-        void RelocateToHomebind() { SetLocationMapId(m_homebindMapId); Relocate(m_homebindX, m_homebindY, m_homebindZ); }
+        void RelocateToHomebind() { SetLocationMapId(m_homebindMapId); Place().MoveTo(m_homebindX, m_homebindY, m_homebindZ); }
 
         // Teleport the player to the homebind location
-        bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation(), options); }
+        bool TeleportToHomebind(uint32 options = 0) { return TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, Where().Facing(), options); }
 
         // Get an object by type mask
         Object* GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask);

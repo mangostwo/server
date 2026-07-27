@@ -93,7 +93,7 @@ static char const* const areatriggerKeys[] =
 bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y, float const* zPtr, float const* ortPtr)
 {
     float z;
-    float ort = player->GetOrientation();
+    float ort = player->Where().Facing();
 
     if (zPtr)
     {
@@ -122,8 +122,8 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
             return false;
         }
 
-        TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
-        z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT);
+        TerrainInfo const* terrain = sTerrainMgr.LoadTerrain(mapid);
+        z = terrain->GetWaterOrGroundLevel(x, y, MAX_HEIGHT);
     }
 
     // stop flight if need
@@ -253,8 +253,8 @@ bool ChatHandler::HandleSummonCommand(char* args)
 
         // before GM
         float x, y, z;
-        player->GetClosePoint(x, y, z, target->GetObjectBoundingRadius());
-        target->TeleportTo(player->GetMapId(), x, y, z, target->GetOrientation());
+        ClosePointNear(*player, x, y, z, target->Where().Extent());
+        target->TeleportTo(player->GetMapId(), x, y, z, target->Where().Facing());
     }
     else
     {
@@ -270,11 +270,11 @@ bool ChatHandler::HandleSummonCommand(char* args)
 
         // in point where GM stay
         Player::SavePositionInDB(target_guid, player->GetMapId(),
-                                 player->GetPositionX(),
-                                 player->GetPositionY(),
-                                 player->GetPositionZ(),
-                                 player->GetOrientation(),
-                                 player->GetZoneId());
+                                 player->Where().X(),
+                                 player->Where().Y(),
+                                 player->Where().Z(),
+                                 player->Where().Facing(),
+                                 player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z()));
     }
 
     return true;
@@ -422,9 +422,9 @@ bool ChatHandler::HandleAppearCommand(char* args)
 
         // to point to see at target with same orientation
         float x, y, z;
-        target->GetContactPoint(_player, x, y, z);
+        ContactPointNear(*target, _player, x, y, z);
 
-        _player->TeleportTo(target->GetMapId(), x, y, z, _player->GetAngle(target), TELE_TO_GM_MODE);
+        _player->TeleportTo(target->GetMapId(), x, y, z, _player->Where().BearingTo(target->Where()), TELE_TO_GM_MODE);
     }
     else
     {
@@ -556,8 +556,8 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
 
         // before GM
         float x, y, z;
-        m_session->GetPlayer()->GetClosePoint(x, y, z, pl->GetObjectBoundingRadius());
-        pl->TeleportTo(m_session->GetPlayer()->GetMapId(), x, y, z, pl->GetOrientation());
+        ClosePointNear(*(m_session->GetPlayer()), x, y, z, pl->Where().Extent());
+        pl->TeleportTo(m_session->GetPlayer()->GetMapId(), x, y, z, pl->Where().Facing());
     }
 
     return true;
@@ -627,18 +627,18 @@ bool ChatHandler::HandleGPSCommand(char* args)
             return false;
         }
     }
-    CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    CellPair cell_val = MaNGOS::ComputeCellPair(obj->Where().X(), obj->Where().Y());
     Cell cell(cell_val);
 
     uint32 zone_id, area_id;
-    obj->GetZoneAndAreaId(zone_id, area_id);
+    obj->GetTerrain()->GetZoneAndAreaId(zone_id, area_id, obj->Where().X(), obj->Where().Y(), obj->Where().Z());
 
     MapEntry const* mapEntry = sMapStore.LookupEntry(obj->GetMapId());
     AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zone_id);
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(area_id);
 
-    float zone_x = obj->GetPositionX();
-    float zone_y = obj->GetPositionY();
+    float zone_x = obj->Where().X();
+    float zone_y = obj->Where().Y();
 
     if (!Map2ZoneCoordinates(zone_x, zone_y, zone_id))
     {
@@ -647,10 +647,11 @@ bool ChatHandler::HandleGPSCommand(char* args)
     }
 
     Map const* map = obj->GetMap();
-    float ground_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
-    float floor_z = map->GetHeight(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+    float ground_z = map->GetHeight(obj->GetPhaseMask(), obj->Where().X(), obj->Where().Y(), MAX_HEIGHT);
+    float floor_z = map->GetHeight(obj->GetPhaseMask(), obj->Where().X(), obj->Where().Y(), obj->Where().Z());
 
-    GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
+
+    GridPair p = MaNGOS::ComputeGridPair(obj->Where().X(), obj->Where().Y());
 
     int gx = 63 - p.x_coord;
     int gy = 63 - p.y_coord;
@@ -664,7 +665,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
 
     if (have_map)
     {
-        if (terrain->IsOutdoors(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ()))
+        if (terrain->IsOutdoors(obj->Where().X(), obj->Where().Y(), obj->Where().Z()))
         {
             PSendSysMessage("You are OUTdoor");
         }
@@ -683,7 +684,7 @@ bool ChatHandler::HandleGPSCommand(char* args)
                     zone_id, (zoneEntry ? zoneEntry->AreaName_lang[GetSessionDbcLocale()] : "<unknown>"),
                     area_id, (areaEntry ? areaEntry->AreaName_lang[GetSessionDbcLocale()] : "<unknown>"),
                     obj->GetPhaseMask(),
-                    obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
+                    obj->Where().X(), obj->Where().Y(), obj->Where().Z(), obj->Where().Facing(),
                     cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
                     zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
@@ -697,12 +698,12 @@ bool ChatHandler::HandleGPSCommand(char* args)
               zone_id, (zoneEntry ? zoneEntry->AreaName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               area_id, (areaEntry ? areaEntry->AreaName_lang[sWorld.GetDefaultDbcLocale()] : "<unknown>"),
               obj->GetPhaseMask(),
-              obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
+              obj->Where().X(), obj->Where().Y(), obj->Where().Z(), obj->Where().Facing(),
               cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
               zone_x, zone_y, ground_z, floor_z, have_map, have_vmap);
 
     GridMapLiquidData liquid_status;
-    GridMapLiquidStatus res = terrain->getLiquidStatus(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), MAP_ALL_LIQUIDS, &liquid_status);
+    GridMapLiquidStatus res = terrain->getLiquidStatus(obj->Where().X(), obj->Where().Y(), obj->Where().Z(), MAP_ALL_LIQUIDS, &liquid_status);
     if (res)
     {
         PSendSysMessage(LANG_LIQUID_STATUS, liquid_status.level, liquid_status.depth_level, liquid_status.type_flags, res);
@@ -750,11 +751,11 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     Player* player = m_session->GetPlayer();
     // Calculate point-to-point distance
     float dx, dy, dz;
-    dx = player->GetPositionX() - obj->GetPositionX();
-    dy = player->GetPositionY() - obj->GetPositionY();
-    dz = player->GetPositionZ() - obj->GetPositionZ();
+    dx = player->Where().X() - obj->Where().X();
+    dy = player->Where().Y() - obj->Where().Y();
+    dz = player->Where().Z() - obj->Where().Z();
 
-    PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance2d(obj), sqrt(dx * dx + dy * dy + dz * dz));
+    PSendSysMessage(LANG_DISTANCE, player->Where().DistanceTo(obj->Where()), player->Where().DistanceTo(obj->Where(), false), sqrt(dx * dx + dy * dy + dz * dz));
 
     return true;
 }
@@ -789,9 +790,9 @@ bool ChatHandler::HandleNearGraveCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    uint32 zone_id = player->GetZoneId();
+    uint32 zone_id = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
 
-    WorldSafeLocsEntry const* graveyard = sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), g_team);
+    WorldSafeLocsEntry const* graveyard = sObjectMgr.GetClosestGraveYard(player->Where().X(), player->Where().Y(), player->Where().Z(), player->GetMapId(), g_team);
 
     if (graveyard)
     {
@@ -1035,7 +1036,7 @@ bool ChatHandler::HandleGoZoneXYCommand(char* args)
     }
     else
     {
-        areaid = _player->GetZoneId();
+        areaid = _player->GetTerrain()->GetZoneId(_player->Where().X(), _player->Where().Y(), _player->Where().Z());
     }
 
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(areaid);
@@ -1570,10 +1571,10 @@ bool ChatHandler::HandleTeleAddCommand(char* args)
     }
 
     GameTele tele;
-    tele.position_x = player->GetPositionX();
-    tele.position_y = player->GetPositionY();
-    tele.position_z = player->GetPositionZ();
-    tele.orientation = player->GetOrientation();
+    tele.position_x = player->Where().X();
+    tele.position_y = player->Where().Y();
+    tele.position_z = player->Where().Z();
+    tele.orientation = player->Where().Facing();
     tele.mapId = player->GetMapId();
     tele.name = name;
 

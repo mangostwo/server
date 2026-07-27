@@ -1849,7 +1849,7 @@ void ChatHandler::LogCommand(char const* fullcmd)
         Player* p = m_session->GetPlayer();
         ObjectGuid sel_guid = p->GetSelectionGuid();
         sLog.outCommand(GetAccountId(), "Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s]",
-                        fullcmd, p->GetName(), GetAccountId(), p->GetPositionX(), p->GetPositionY(), p->GetPositionZ(), p->GetMapId(),
+                        fullcmd, p->GetName(), GetAccountId(), p->Where().X(), p->Where().Y(), p->Where().Z(), p->GetMapId(),
                         sel_guid.GetString().c_str());
     }
     else                                        // 0 account -> console

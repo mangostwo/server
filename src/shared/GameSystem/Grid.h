@@ -25,13 +25,10 @@
 #ifndef MANGOS_GRID_H
 #define MANGOS_GRID_H
 
-#include <set>
+#include <unordered_set>
 #include "Platform/Define.h"
 #include "TypeContainer.h"
 #include "TypeContainerVisitor.h"
-
-// forward declaration
-template<class A, class T, class O> class GridLoader;
 
 /**
  * @brief Grid is a logical segment of the game world represented inside MaNGOS.
@@ -47,9 +44,6 @@ template<class A, class T, class O> class GridLoader;
 template <typename ACTIVE_OBJECT, typename WORLD_CONTAINER, typename GRID_CONTAINER>
 class Grid
 {
-        // allows the GridLoader to access its internals
-        template<class A, class T, class O> friend class GridLoader;
-
     public:
 
         template<class SPECIFIC_OBJECT>
@@ -130,7 +124,7 @@ class Grid
     private:
         GRID_CONTAINER  i_gridContainer;
         WORLD_CONTAINER i_worldContainer;
-        std::set<void*> m_activeGridObjects;
+        std::unordered_set<const void*> m_activeGridObjects;
 };
 
 #endif

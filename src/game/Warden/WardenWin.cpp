@@ -199,7 +199,7 @@ void WardenWin::HandleHashResult(ByteBuffer &buff)
     // Verify key
     if (memcmp(buff.contents() + 1, Module.ClientKeySeedHash, sizeof(Module.ClientKeySeedHash)) != 0)
     {
-        sLog.outWarden("%s failed hash reply. Action: %s", _session->GetPlayerName(), Penalty().c_str());
+        sLog.outError("[Warden] %s failed hash reply. Action: %s", _session->GetPlayerName(), Penalty().c_str());
         return;
     }
 
@@ -401,7 +401,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     if (!IsValidCheckSum(Checksum, buff.contents() + buff.rpos(), Length))
     {
         buff.rpos(buff.wpos());
-        sLog.outWarden("%s failed checksum. Action: %s", _session->GetPlayerName(), Penalty().c_str());
+        sLog.outError("[Warden] %s failed checksum. Action: %s", _session->GetPlayerName(), Penalty().c_str());
         return;
     }
 
@@ -412,7 +412,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
         /// @todo test it.
         if (result == 0x00)
         {
-            sLog.outWarden("%s failed timing check. Action: %s", _session->GetPlayerName(), Penalty().c_str());
+            sLog.outError("[Warden] %s failed timing check. Action: %s", _session->GetPlayerName(), Penalty().c_str());
             return;
         }
 
@@ -562,7 +562,7 @@ void WardenWin::HandleData(ByteBuffer &buff)
     if (checkFailed > 0)
     {
         WardenCheck* check = sWardenCheckMgr->GetWardenDataById(_session->GetClientBuild(), checkFailed);   //note it IS NOT NULL here
-        sLog.outWarden("%s failed Warden check %u. Action: %s", _session->GetPlayerName(), checkFailed, Penalty(check).c_str());
+        sLog.outError("[Warden] %s failed Warden check %u. Action: %s", _session->GetPlayerName(), checkFailed, Penalty(check).c_str());
         LogPositiveToDB(check);
     }
 

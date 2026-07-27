@@ -233,7 +233,7 @@ Player* Player::GetNextRandomRaidMember(float radius)
         Player* Target = itr->getSource();
 
         // IsHostileTo check duel and controlled by enemy
-        if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
+        if (Target && Target != this && InReach(*this, *Target, radius) &&
                 !Target->HasInvisibilityAura() && !IsHostileTo(Target))
                 {
                     nearMembers.push_back(Target);

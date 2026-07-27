@@ -42,13 +42,17 @@
  * @param owner The unit that owns this PathFinder.
  */
 PathFinder::PathFinder(const Unit* owner) :
+    PathFinder(owner, owner->GetMapId())
+{
+}
+
+PathFinder::PathFinder(const Unit* owner, uint32 mapId) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH),
     m_sourceUnit(owner), m_navMesh(NULL), m_navMeshQuery(NULL)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
-    uint32 mapId = m_sourceUnit->GetMapId();
     if (MMAP::MMapFactory::IsPathfindingEnabled(mapId))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
@@ -78,7 +82,7 @@ PathFinder::~PathFinder()
 bool PathFinder::calculate(float destX, float destY, float destZ, bool forceDest)
 {
     float x, y, z;
-    m_sourceUnit->GetPosition(x, y, z);
+    x = m_sourceUnit->Where().X(), y = m_sourceUnit->Where().Y(), z = m_sourceUnit->Where().Z();
 
     return calculate(x, y, z, destX, destY, destZ, forceDest);
 }
@@ -279,7 +283,7 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
             Creature* owner = (Creature*)m_sourceUnit;
 
             Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
-            if (m_sourceUnit->GetTerrain()->IsUnderWater(p.x, p.y, p.z))
+            if (m_sourceUnit->GetTerrain()->IsInWater(p.x, p.y, p.z + 1.0))
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: underWater case\n");
                 if (owner->CanSwim())
@@ -594,7 +598,7 @@ void PathFinder::BuildShortcut()
     {
         float t = float(i) / float(segments);
         Vector3 point = start + (end - start) * t;
-        m_sourceUnit->UpdateAllowedPositionZ(point.x, point.y, point.z);
+        ClampToAllowedZ(*m_sourceUnit, point.x, point.y, point.z);
         m_pathPoints[i] = point;
     }
 
@@ -645,9 +649,9 @@ void PathFinder::updateFilter()
     if (m_sourceUnit->IsInWater() || m_sourceUnit->IsUnderWater())
     {
         uint16 includedFlags = m_filter.getIncludeFlags();
-        includedFlags |= getNavTerrain(m_sourceUnit->GetPositionX(),
-                                       m_sourceUnit->GetPositionY(),
-                                       m_sourceUnit->GetPositionZ());
+        includedFlags |= getNavTerrain(m_sourceUnit->Where().X(),
+                                       m_sourceUnit->Where().Y(),
+                                       m_sourceUnit->Where().Z());
 
         m_filter.setIncludeFlags(includedFlags);
     }

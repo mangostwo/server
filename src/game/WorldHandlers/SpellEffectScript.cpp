@@ -454,7 +454,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
                     // Two separate mounts depending on area id (allows use both in and out of specific instance)
-                    if (unitTarget->GetAreaId() == 3428)
+                    if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 3428)
                     {
                         unitTarget->CastSpell(unitTarget, 25863, false);
                     }
@@ -475,10 +475,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // Spells 27690, 27691, 27692, 27693 are missing from DBC
                     // So we need to summon creature 16119 manually
                     float x, y, z;
-                    float angle = unitTarget->GetOrientation();
+                    float angle = unitTarget->Where().Facing();
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        unitTarget->GetNearPoint(unitTarget, x, y, z, unitTarget->GetObjectBoundingRadius(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
+                        FindFreeSpotNear(*unitTarget, unitTarget, x, y, z, unitTarget->Where().Extent(), INTERACTION_DISTANCE, angle + i * M_PI_F / 2);
                         unitTarget->SummonCreature(16119, x, y, z, angle, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
                     }
                     return;
@@ -531,7 +531,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    m_caster->SummonCreature(16474, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_DESPAWN, 30000);
+                    m_caster->SummonCreature(16474, unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), 0.0f, TEMPSPAWN_TIMED_DESPAWN, 30000);
                     return;
                 }
                 case 28859:                                 // Cleansing Flames
@@ -709,7 +709,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     float x, y, z;
                     for (uint8 i = 0; i < 4; ++i)
                     {
-                        m_caster->GetNearPoint(m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
+                        FindFreeSpotNear(*m_caster, m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
                         m_caster->SummonCreature(21002, x, y, z, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                     }
                     return;
@@ -899,7 +899,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), true);
                     // despawn delay depends on the distance between caster and target
-                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->Where().DistanceTo(m_caster->Where(), false));
                     return;
                 }
                 case 44364:                                 // Rock Falcon Primer
@@ -941,7 +941,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                                 // trigger cast of quest complete script (see code for this spell below)
                                 pTarget->CastSpell(pTarget, 44462, true);
 
-                                pTarget->GetMotionMaster()->MovePoint(0, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+                                pTarget->GetMotionMaster()->MovePoint(0, m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z());
                             }
 
                             return;
@@ -1116,7 +1116,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    ((Creature*)unitTarget)->SetRespawnCoord(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation());
+                    ((Creature*)unitTarget)->SetSpawn(Geometry::Vector3(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()), unitTarget->Where().Facing());
                     return;
                 }
                 case 45625:                                 // Arcane Chains: Character Force Cast
@@ -1220,7 +1220,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     // We can assume 45705-45712 are transform auras, used instead of hard coded models in the below code.
 
                     // not in map yet OR no npc flags yet (restored after LoadCreatureAddon for respawn cases)
-                    if (!m_caster->IsInMap(m_caster) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
+                    if (!CanInteract(*m_caster, *m_caster) || m_caster->GetUInt32Value(UNIT_NPC_FLAGS) == UNIT_NPC_FLAG_NONE)
                     {
                         display_id = Creature::ChooseDisplayId(cTemplate);
                         ((Creature*)m_caster)->LoadEquipment(((Creature*)m_caster)->GetEquipmentId());
@@ -1380,11 +1380,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
                     }
 
-                    if (unitTarget->GetAreaId() == 4157)
+                    if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 4157)
                     {
                         unitTarget->CastSpell(unitTarget, 47324, true);
                     }
-                    else if (unitTarget->GetAreaId() == 4156)
+                    else if (unitTarget->GetTerrain()->GetAreaId(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 4156)
                     {
                         unitTarget->CastSpell(unitTarget, 47325, true);
                     }
@@ -1882,7 +1882,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     Unit::SpellAuraHolderConstBounds bounds = m_caster->GetSpellAuraHolderBounds(52500);
                     uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
 
-                    m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
+                    m_caster->CastSpell(unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, true);
                     return;
                 }
                 case 52555:                                 // Dispel Scarlet Ghoul Credit Counter
@@ -1946,7 +1946,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 {
                     uint32 spellId = 0;
 
-                    switch (m_caster->GetAreaId())
+                    switch (m_caster->GetTerrain()->GetAreaId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()))
                     {
                         case 4385: spellId = 52954; break;  // Bittertide Lake
                         case 4290: spellId = 52958; break;  // River's Heart
@@ -2118,7 +2118,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
 
                     // return from top
-                    if (((Player*)unitTarget)->GetAreaId() == 4637)
+                    if (((Player*)unitTarget)->GetTerrain()->GetAreaId(
+                            unitTarget->Where().X(), unitTarget->Where().Y(), unitTarget->Where().Z()) == 4637)
                     {
                         unitTarget->CastSpell(unitTarget, 59316, true);
                     }
@@ -3325,11 +3326,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     uint32 triggered_spell_id = m_spellInfo->CalculateSimpleValue(SpellEffectIndex(m_caster->HasSpell(52143) ? EFFECT_INDEX_2 : EFFECT_INDEX_1));
 
                     float x,y,z;
-                    m_caster->GetClosePoint(x, y, z, m_caster->GetObjectBoundingRadius(), PET_FOLLOW_DIST);
+                    ClosePointNear(*m_caster, x, y, z, m_caster->Where().Extent(), PET_FOLLOW_DIST);
 
                     if (unitTarget != (Unit*)m_caster)
                     {
-                        m_caster->CastSpell(unitTarget->GetPositionX(),unitTarget->GetPositionY(),unitTarget->GetPositionZ(),triggered_spell_id, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
+                        m_caster->CastSpell(unitTarget->Where().X(),unitTarget->Where().Y(),unitTarget->Where().Z(),triggered_spell_id, true, NULL, NULL, m_caster->GetObjectGuid(), m_spellInfo);
                     }
                     else if (m_caster->HasAura(60200))
                     {

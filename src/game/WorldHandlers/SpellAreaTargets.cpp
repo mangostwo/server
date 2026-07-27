@@ -49,6 +49,10 @@
 #include "Group.h"
 #include "UpdateData.h"
 #include "MapManager.h"
+#include "Transports.h"
+#include "TransportMap.h"
+
+#include <cmath>
 #include "CellImpl.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
@@ -124,10 +128,163 @@ typedef std::priority_queue<PrioritizeHealthUnitWraper, std::vector<PrioritizeHe
  * @param spellTargets         Additional rules for target selection base at hostile/friendly state to original spell caster
  * @param originalCaster       If provided set alternative original caster, if =NULL then used Spell::GetAffectiveObject() return
  */
+namespace
+{
+    // The half-width of the cone each forward/back push selects, matching the arcs the
+    // world path passes to IsInFront/IsInBack.
+    float ConeHalfArc(SpellNotifyPushType push)
+    {
+        switch (push)
+        {
+            case PUSH_IN_FRONT:    return (2 * M_PI_F / 3) * 0.5f;
+            case PUSH_IN_FRONT_90: return (M_PI_F / 2) * 0.5f;
+            case PUSH_IN_FRONT_30: return (M_PI_F / 6) * 0.5f;
+            case PUSH_IN_FRONT_15: return (M_PI_F / 12) * 0.5f;
+            case PUSH_IN_BACK:     return (2 * M_PI_F / 3) * 0.5f;
+            default:               return 0.0f;
+        }
+    }
+
+    bool IsConePush(SpellNotifyPushType push)
+    {
+        return push == PUSH_IN_FRONT || push == PUSH_IN_FRONT_90 || push == PUSH_IN_FRONT_30 ||
+               push == PUSH_IN_FRONT_15 || push == PUSH_IN_BACK;
+    }
+}
+
 void Spell::FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster /*=NULL*/)
 {
     MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, targetUnitMap, radius, pushType, spellTargets, originalCaster);
+
+    // Where is the area's centre, and is it a point on a vessel? A caster-centred push
+    // sits on the caster; a dest-centred one on the ground-target the client sent; a
+    // target-centred one on the unit. If that anchor is aboard a transport, the whole
+    // search runs in the vessel's local space -- exact, and never asking where the hull is.
+    TransportMap* vessel = NULL;
+    float lx = 0.0f, ly = 0.0f, lz = 0.0f, lo = 0.0f;
+
+    switch (pushType)
+    {
+        case PUSH_SELF_CENTER:
+        case PUSH_IN_FRONT:
+        case PUSH_IN_FRONT_90:
+        case PUSH_IN_FRONT_30:
+        case PUSH_IN_FRONT_15:
+        case PUSH_IN_BACK:
+            if (WorldObject* castingObject = GetCastingObject())
+            {
+                if ((vessel = castingObject->GetMap()->AsTransport()))
+                {
+                    if (const auto p = vessel->PositionOf(*castingObject))
+                    {
+                        lx = p->X(); ly = p->Y(); lz = p->Z(); lo = p->Facing();
+                    }
+                    else
+                    {
+                        vessel = NULL;
+                    }
+                }
+            }
+            break;
+
+        case PUSH_DEST_CENTER:
+        {
+            const bool src = (m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION) != 0;
+            const ObjectGuid guid = src ? m_targets.getSrcTransportGuid()
+                                        : m_targets.getDestTransportGuid();
+            Transport* named = guid ? Transport::GetTransport(m_caster->GetMap(), guid) : NULL;
+            if (named && (vessel = named->AsMap()))
+            {
+                if (src)
+                {
+                    m_targets.getSrcTransportOffset(lx, ly, lz);
+                }
+                else
+                {
+                    m_targets.getDestTransportOffset(lx, ly, lz);
+                }
+            }
+            break;
+        }
+
+        case PUSH_TARGET_CENTER:
+            if (Unit* target = m_targets.getUnitTarget())
+            {
+                if ((vessel = target->GetMap()->AsTransport()))
+                {
+                    if (const auto p = vessel->PositionOf(*target))
+                    {
+                        lx = p->X(); ly = p->Y(); lz = p->Z(); lo = p->Facing();
+                    }
+                    else
+                    {
+                        vessel = NULL;
+                    }
+                }
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    // The ordinary sweep runs either way: on a deck it walks the deck map's own cells, in
+    // the deck's own coordinates, and nothing in it knows a ship is involved.
     Cell::VisitAllObjects(notifier.GetCenterX(), notifier.GetCenterY(), m_caster->GetMap(), notifier, radius);
+
+    if (!vessel)
+    {
+        return;
+    }
+
+    // The deck search. Everyone aboard is a boarded creature or minion (the crew grid) or a
+    // boarded player; each one's LOCAL separation from the centre is exact, because a rigid
+    // transform preserves distances and angles -- so this needs, and touches, no world
+    // coordinate at all.
+    const float r2 = radius * radius;
+    const bool cone = IsConePush(pushType);
+    const float half = ConeHalfArc(pushType);
+    const float ref = (pushType == PUSH_IN_BACK) ? MapManager::NormalizeOrientation(lo + M_PI_F) : lo;
+
+    const auto consider = [&](Unit* unit)
+    {
+        if (!notifier.PassesTargetFilter(unit))
+        {
+            return;
+        }
+
+        const auto tl = vessel->PositionOf(*unit);
+        if (!tl)
+        {
+            return;                                     // not aboard this vessel
+        }
+
+        const float dx = tl->X() - lx;
+        const float dy = tl->Y() - ly;
+        const float dz = tl->Z() - lz;
+
+        if (dx * dx + dy * dy + dz * dz > r2)
+        {
+            return;
+        }
+
+        if (cone)
+        {
+            float diff = std::atan2(dy, dx) - ref;
+            diff = MapManager::NormalizeOrientation(diff);
+            if (diff > M_PI_F)
+            {
+                diff -= 2 * M_PI_F;
+            }
+            if (std::fabs(diff) > half)
+            {
+                return;
+            }
+        }
+
+        targetUnitMap.push_back(unit);
+    };
+
 }
 
 /**
@@ -157,7 +314,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
             if (Target && (raid || subgroup == Target->GetSubGroup())
                 && !m_caster->IsHostileTo(Target))
             {
-                if ((Target == center || center->IsWithinDistInMap(Target, radius)) &&
+                if ((Target == center || InReach(*center, *Target, radius)) &&
                         (withcaster || Target != m_caster))
                 {
                     targetUnitMap.push_back(Target);
@@ -167,7 +324,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
                 {
                     if (Pet* pet = Target->GetPet())
                     {
-                        if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                        if ((pet == center || InReach(*center, *pet, radius)) &&
                                 (withcaster || pet != m_caster))
                         {
                             targetUnitMap.push_back(pet);
@@ -180,7 +337,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
     else
     {
         Unit* ownerOrSelf = pMember ? pMember : member->GetCharmerOrOwnerOrSelf();
-        if ((ownerOrSelf == center || center->IsWithinDistInMap(ownerOrSelf, radius)) &&
+        if ((ownerOrSelf == center || InReach(*center, *ownerOrSelf, radius)) &&
                 (withcaster || ownerOrSelf != m_caster))
         {
             targetUnitMap.push_back(ownerOrSelf);
@@ -190,7 +347,7 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
         {
             if (Pet* pet = ownerOrSelf->GetPet())
             {
-                if ((pet == center || center->IsWithinDistInMap(pet, radius)) &&
+                if ((pet == center || InReach(*center, *pet, radius)) &&
                         (withcaster || pet != m_caster))
                 {
                     targetUnitMap.push_back(pet);

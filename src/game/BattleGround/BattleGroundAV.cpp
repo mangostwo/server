@@ -981,8 +981,8 @@ void BattleGroundAV::SendMineWorldStates(uint32 mine)
  */
 WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
 {
-    float x = plr->GetPositionX();
-    float y = plr->GetPositionY();
+    float x = plr->Where().X();
+    float y = plr->Where().Y();
     BattleGroundAVTeamIndex teamIdx = GetAVTeamIndexByTeamId(plr->GetTeam());
     WorldSafeLocsEntry const* good_entry = NULL;
     if (GetStatus() == STATUS_IN_PROGRESS)

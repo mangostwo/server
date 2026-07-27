@@ -158,7 +158,7 @@ void GameObject::RemoveFromWorld()
 #endif /* ENABLE_ELUNA */
 
         // Notify the outdoor pvp script
-        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z())))
         {
             outdoorPvP->HandleGameObjectRemove(this);
         }
@@ -248,12 +248,12 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     Geometry::Quat q(rx, ry, rz, rw);
     q.unitize();
 
-    float o = GetOrientationFromQuat(q);
-    Relocate(x, y, z, o);
+    float o = Geometry::YawOf(q);
+    Place().MoveTo(x, y, z, o);
     SetMap(map);
     SetPhaseMask(phaseMask, false);
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
         sLog.outError("Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates are invalid (X: %f Y: %f)", guidlow, name_id, x, y);
         return false;
@@ -302,7 +302,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     {
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
     }
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z())))
     {
         outdoorPvP->HandleGameObjectCreate(this);
     }
@@ -414,10 +414,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.id = GetEntry();
     data.mapid = mapid;
     data.phaseMask = phaseMask;
-    data.posX = GetPositionX();
-    data.posY = GetPositionY();
-    data.posZ = GetPositionZ();
-    data.orientation = GetOrientation();
+    data.posX = Where().X();
+    data.posY = Where().Y();
+    data.posZ = Where().Z();
+    data.orientation = Where().Facing();
     data.rotx = q.x;
     data.roty = q.y;
     data.rotz = q.z;
@@ -435,10 +435,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
        << mapid << ", "
        << uint32(spawnMask) << ","                         // cast to prevent save as symbol
        << uint16(GetPhaseMask()) << ","                    // prevent out of range error
-       << GetPositionX() << ", "
-       << GetPositionY() << ", "
-       << GetPositionZ() << ", "
-       << GetOrientation() << ", "
+       << Where().X() << ", "
+       << Where().Y() << ", "
+       << Where().Z() << ", "
+       << Where().Facing() << ", "
        << q.x << ", "
        << q.y << ", "
        << q.z << ", "
@@ -656,7 +656,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // Transport always visible at this step implementation
-    if (IsTransport() && IsInMap(u))
+    if (IsTransport() && CanBeSeen(*this, *u))
     {
         return true;
     }
@@ -755,7 +755,7 @@ bool GameObject::IsVisibleForInState(Player const* u, WorldObject const* viewPoi
     }
 
     // check distance
-    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() +
+    return SeenWithin(*this, *viewPoint, GetMap()->GetVisibilityDistance() +
                              (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
@@ -889,7 +889,7 @@ void GameObject::SummonLinkedTrapIfAny()
 
     GameObject* linkedGO = new GameObject;
     if (!linkedGO->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, GetMap(),
-                          GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()))
+                          GetPhaseMask(), Where().X(), Where().Y(), Where().Z(), Where().Facing()))
     {
         delete linkedGO;
         return;
@@ -1128,30 +1128,13 @@ void GameObject::GetQuaternion(Geometry::Quat& q) const
  * @param q The quaternion to evaluate.
  * @return The normalized orientation angle.
  */
-float GameObject::GetOrientationFromQuat(Geometry::Quat const& q)
-{
-    double t1 = +2.0f * (q.w * q.z + q.x * q.y);
-    double t2 = +1.0f - 2.0f * (q.y * q.y + q.z * q.z);
-    return MapManager::NormalizeOrientation(std::atan2(t1, t2));
-}
-
 int64 GameObject::GetPackedRotation()
 {
-   enum
-    {
-        PACK_COEFF_YZ = 1 << 20,
-        PACK_COEFF_X = 1 << 21,
-    };
-
     Geometry::Quat quat;
     GetQuaternion(quat);
-
-    int8 w_sign = (quat.w >= 0 ? 1 : -1);
-    int64 X = int32(quat.x * PACK_COEFF_X) * w_sign & ((1 << 22) - 1);
-    int64 Y = int32(quat.y * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
-    int64 Z = int32(quat.z * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
-    return Z | (Y << 21) | (X << 42);
+    return Geometry::PackRotation(quat);
 }
+
 
 /**
  * @brief Checks whether the game object is hostile to a unit.
@@ -1322,6 +1305,7 @@ void GameObject::SetDisplayId(uint32 modelId)
 {
     SetUInt32Value(GAMEOBJECT_DISPLAYID, modelId);
     m_displayInfo = sGameObjectDisplayInfoStore.LookupEntry(modelId);
+    RefreshBoundingRadius();
     UpdateModel();
 }
 
@@ -1493,7 +1477,7 @@ void GameObject::SetLootRecipient(Unit* pUnit)
  *
  * @return The default game object radius.
  */
-float GameObject::GetObjectBoundingRadius() const
+float GameObject::ComputeBoundingRadius() const
 {
     // FIXME:
     // 1. This is clearly hack way because we usually need this to check range, but a box just is no ball

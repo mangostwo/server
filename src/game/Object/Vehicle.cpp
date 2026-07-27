@@ -22,10 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/*
- * @addtogroup TransportSystem
- * @{
- *
+/**
  * @file Vehicle.cpp
  * This file contains the code needed for CMaNGOS to support vehicles
  * Currently implemented
@@ -98,14 +95,18 @@ void ObjectMgr::LoadVehicleAccessory()
  * This function will initialise the VehicleInfo of the vehicle owner
  * Also the seat-map is created here
  */
-VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry) : TransportBase(owner),
+VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry) :
     m_vehicleEntry(vehicleEntry),
     m_creatureSeats(0),
     m_playerSeats(0),
     m_overwriteNpcEntry(overwriteNpcEntry),
-    m_isInitialized(false)
+    m_isInitialized(false),
+    m_owner(owner),
+    m_lastPose(owner->Where()),
+    m_updatePositionsTimer(500)
 {
     MANGOS_ASSERT(vehicleEntry);
+    MANGOS_ASSERT(m_owner);
 
     // Initial fill of available seats for the vehicle
     for (uint8 i = 0; i < MAX_VEHICLE_SEAT; ++i)
@@ -148,7 +149,7 @@ void VehicleInfo::Initialize()
     SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
     for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
     {
-        if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->Where().X(), m_owner->Where().Y(), m_owner->Where().Z(), 2 * m_owner->Where().Facing(), TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
             m_accessoryGuids.insert(summoned->GetObjectGuid());
@@ -210,6 +211,130 @@ void VehicleInfo::Initialize()
  * @param passenger MUST be provided. This Unit will be boarded onto the vehicles (if it checks out)
  * @param seat      Seat to which the passenger will be boarded (if can, elsewise an alternative will be selected if possible)
  */
+/* ******************************* Passengers, and their seats ************************* */
+
+Geometry::Frame VehicleInfo::SeatFrame() const
+{
+    return Geometry::Frame::Deck(m_owner->GetObjectGuid().GetRawValue());
+}
+
+Geometry::Placement VehicleInfo::SeatPoseOf(Geometry::Vector3 const& worldPoint,
+                                            float worldFacing) const
+{
+    // The vehicle's own basis turns a world delta into seat axes. The negated delta is
+    // MaNGOS' stored convention and is kept exactly: every seat offset in the database is
+    // expressed in it.
+    const Geometry::Vector3 delta = worldPoint - m_owner->Where().Pos();
+    const Geometry::Vector3 flat =
+        m_owner->Where().Basis().rot.mul(Geometry::Vector3(-delta.x, -delta.y, 0.0f));
+
+    Geometry::Placement seat;
+    seat.EnterFrame(SeatFrame(), Geometry::Vector3(flat.x, flat.y, delta.z),
+                    worldFacing - m_owner->Where().Facing());
+    return seat;
+}
+
+bool VehicleInfo::HasOnBoard(WorldObject const* passenger) const
+{
+    MANGOS_ASSERT(passenger);
+
+    // Down from the (possible) passenger until we reach our owner, or no passenger at all.
+    while (passenger->IsBoarded())
+    {
+        if (passenger->GetTransportInfo()->GetTransport() == m_owner)
+        {
+            return true;
+        }
+
+        passenger = passenger->GetTransportInfo()->GetTransport();
+    }
+
+    return false;
+}
+
+void VehicleInfo::BoardPassenger(WorldObject* passenger, Geometry::Placement const& seatPose,
+                                 uint8 seat)
+{
+    TransportInfo* transportInfo = new TransportInfo(passenger, this, seatPose, seat);
+
+    m_passengers.insert(PassengerMap::value_type(passenger, transportInfo));
+
+    // The passenger needs fast access to transportInfo
+    passenger->SetTransportInfo(transportInfo);
+}
+
+void VehicleInfo::UnBoardPassenger(WorldObject* passenger)
+{
+    PassengerMap::iterator itr = m_passengers.find(passenger);
+
+    if (itr == m_passengers.end())
+    {
+        return;
+    }
+
+    passenger->SetTransportInfo(NULL);
+
+    delete itr->second;
+
+    m_passengers.erase(itr);
+}
+
+TransportInfo::TransportInfo(WorldObject* owner, VehicleInfo* transport,
+                             Geometry::Placement const& seatPose, uint8 seat) :
+    m_owner(owner),
+    m_transport(transport),
+    m_seatPose(seatPose),
+    m_seat(seat)
+{
+    MANGOS_ASSERT(owner && m_transport);
+    SetSeatPose(seatPose);
+}
+
+WorldObject* TransportInfo::GetTransport() const
+{
+    return m_transport->GetOwner();
+}
+
+ObjectGuid TransportInfo::GetTransportGuid() const
+{
+    return m_transport->GetOwner()->GetObjectGuid();
+}
+
+bool TransportInfo::IsOnVehicle() const
+{
+    return m_transport->GetOwner()->GetTypeId() == TYPEID_PLAYER ||
+           m_transport->GetOwner()->GetTypeId() == TYPEID_UNIT;
+}
+
+bool TransportInfo::HasOnBoard(WorldObject const* passenger) const
+{
+    return m_transport->HasOnBoard(passenger);
+}
+
+void TransportInfo::SetSeatPose(Geometry::Placement const& seatPose)
+{
+    m_seatPose = seatPose;
+
+    // The extent is the passenger's, not the pose's: a placement that carries none makes
+    // every reach test act as though the riders were points.
+    m_seatPose.Resize(m_owner->Where().Extent());
+
+    m_owner->Place() = m_seatPose;
+
+    // The create block a LATER observer receives carries this offset, so a rider that moved
+    // and then had someone arrive would otherwise be drawn at the spot it boarded at.
+    if (m_owner->GetTypeId() == TYPEID_UNIT || m_owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        Unit* unit = static_cast<Unit*>(m_owner);
+        if (unit->m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+        {
+            unit->m_movementInfo.SetTransportData(GetTransportGuid(), m_seatPose.X(),
+                                                  m_seatPose.Y(), m_seatPose.Z(),
+                                                  m_seatPose.Facing(), 0, m_seat);
+        }
+    }
+}
+
 void VehicleInfo::Board(Unit* passenger, uint8 seat)
 {
     MANGOS_ASSERT(passenger);
@@ -247,9 +372,11 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Calculate passengers local position
     float lx, ly, lz, lo;
-    CalculateBoardingPositionOf(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ(), passenger->GetOrientation(), lx, ly, lz, lo);
+    CalculateBoardingPositionOf(passenger->Where().X(), passenger->Where().Y(), passenger->Where().Z(), passenger->Where().Facing(), lx, ly, lz, lo);
 
-    BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
+    Geometry::Placement seatPose;
+    seatPose.EnterFrame(SeatFrame(), Geometry::Vector3(lx, ly, lz), lo);
+    BoardPassenger(passenger, seatPose, seat);
 
     // Set data for createobject packets
     passenger->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -370,7 +497,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     VehicleSeatEntry const* seatEntry = GetSeatEntry(itr->second->GetTransportSeat());
     MANGOS_ASSERT(seatEntry);
 
-    UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
+    UnBoardPassenger(passenger);
 
     if (!changeVehicle)                                     // Send expected unboarding packages
     {
@@ -382,7 +509,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         {
             Player* pPlayer = (Player*)passenger;
             pPlayer->ResummonPetTemporaryUnSummonedIfAny();
-            pPlayer->SetFallInformation(0, pPlayer->GetPositionZ());
+            pPlayer->SetFallInformation(0, pPlayer->Where().Z());
 
             // SMSG_PET_DISMISS_SOUND (?)
         }
@@ -394,7 +521,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
         Movement::MoveSplineInit init(*passenger);
         // ToDo: Set proper unboard coordinates
-        init.MoveTo(m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
+        init.MoveTo(m_owner->Where().X(), m_owner->Where().Y(), m_owner->Where().Z());
         init.SetExitVehicle();
         init.Launch();
 
@@ -502,10 +629,78 @@ Unit* VehicleInfo::GetPassenger(uint8 seat) const
 // Helper function to undo the turning of the vehicle to calculate a relative position of the passenger when boarding
 void VehicleInfo::CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const
 {
-    NormalizeRotatedPosition(gx - m_owner->GetPositionX(), gy - m_owner->GetPositionY(), lx, ly);
+    const Geometry::Placement seat = SeatPoseOf(Geometry::Vector3(gx, gy, gz), go);
+    lx = seat.X();
+    ly = seat.Y();
+    lz = seat.Z();
+    lo = seat.Facing();
+}
 
-    lz = gz - m_owner->GetPositionZ();
-    lo = MapManager::NormalizeOrientation(go - m_owner->GetOrientation());
+void VehicleInfo::Update(uint32 diff)
+{
+    if (m_updatePositionsTimer < diff)
+    {
+        if ((m_owner->Where().Pos() - m_lastPose.Pos()).magnitude() > 1.0f ||
+                Geometry::Placement::NormalizeOrientation(
+                    m_owner->Where().Facing() - m_lastPose.Facing()) > 0.01f)
+        {
+            UpdateGlobalPositions();
+        }
+
+        m_updatePositionsTimer = 500;
+    }
+    else
+    {
+        m_updatePositionsTimer -= diff;
+    }
+}
+
+void VehicleInfo::UpdateGlobalPositions()
+{
+    for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
+    {
+        Geometry::Placement const& seat = itr->second->Seat();
+        UpdateGlobalPositionOf(itr->first, seat.X(), seat.Y(), seat.Z(), seat.Facing());
+    }
+
+    m_lastPose = m_owner->Where();
+}
+
+void VehicleInfo::UpdateGlobalPositionOf(WorldObject* passenger, float lx, float ly, float lz, float lo) const
+{
+    float gx, gy, gz, go;
+    CalculateGlobalPositionOf(lx, ly, lz, lo, gx, gy, gz, go);
+
+    if (passenger->GetTypeId() == TYPEID_PLAYER)
+    {
+        m_owner->GetMap()->PlayerRelocation((Player*)passenger, gx, gy, gz, go);
+    }
+    else if (passenger->GetTypeId() == TYPEID_UNIT)
+    {
+        m_owner->GetMap()->CreatureRelocation((Creature*)passenger, gx, gy, gz, go);
+    }
+    else
+    {
+        return;
+    }
+
+    if (((Unit*)passenger)->IsVehicle())
+    {
+        ((Unit*)passenger)->GetVehicleInfo()->UpdateGlobalPositions();
+    }
+}
+
+void VehicleInfo::CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const
+{
+    // A seat offset carried into the world by the vehicle's own basis -- the one place a
+    // local-to-world composition IS legitimate, because a vehicle is a grid unit whose
+    // pose the server actually owns (unlike a global transport's hull).
+    const Geometry::Vector3 world =
+        m_owner->Where().Basis().localToWorld(Geometry::Vector3(lx, ly, lz));
+    gx = world.x;
+    gy = world.y;
+    gz = world.z;
+    go = Geometry::Placement::NormalizeOrientation(lo + m_owner->Where().Facing());
 }
 
 void VehicleInfo::RemoveAccessoriesFromMap()
@@ -726,4 +921,3 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     }
 }
 
-/*! @} */

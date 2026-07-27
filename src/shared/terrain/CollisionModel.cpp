@@ -27,4 +27,16 @@ namespace world::terrain
     {
         return m_bvh.Raycast(m_soup, origin, dir, tMax);
     }
+
+    void CollisionModel::RaycastAll(const Vec3& origin, const Vec3& dir, float tMax,
+                                    std::vector<float>& out) const
+    {
+        thread_local std::vector<Bvh::Crossing> crossings;
+        crossings.clear();
+        m_bvh.RaycastAll(m_soup, origin, dir, tMax, crossings);
+        for (const Bvh::Crossing& c : crossings)
+        {
+            out.push_back(c.t);
+        }
+    }
 }

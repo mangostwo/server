@@ -470,25 +470,24 @@ TEST(FusedTerrainServesTheBakedTile)
     // Tile (32,32) is the one containing world (0,0).
     const float x = -1.f, y = -1.f;
 
-    float outZ = 0.f;
-    REQUIRE(terrain.GetHeight(x, y, 150.f, outZ));
-    CHECK(std::fabs(outZ - 100.f) < 0.01f);
+    auto outZ = terrain.ColumnAt(x, y, 152.f, -10000.f).HighestSolidAtOrBelow(152.f);
+    REQUIRE(outZ.has_value());
+    CHECK(std::fabs(*outZ - 100.f) < 0.01f);
     CHECK_EQ(terrain.ResidentTiles(), size_t(1));
 
-    // A query point buried under the surface: the plain probe finds nothing above it,
-    // and GetFloor's second pass is the whole reason it exists.
-    float buried = 0.f;
-    CHECK(!terrain.GetHeight(x, y, 50.f, buried));
-    REQUIRE(terrain.GetFloor(x, y, 50.f, buried));
-    CHECK(std::fabs(buried - 100.f) < 0.01f);
+    // A query point buried under the surface. Nothing is below it, which is exactly the
+    // case a window that starts AT the point cannot answer.
+    CHECK(!terrain.ColumnAt(x, y, 52.f, -10000.f).HighestSolidAtOrBelow(52.f).has_value());
+    auto buried = terrain.ColumnAt(x, y, 100.f, -10000.f).Floor(50.f);
+    REQUIRE(buried.has_value());
+    CHECK(std::fabs(*buried - 100.f) < 0.01f);
 
     // Nothing occludes, so the sightline is clear and the fraction is past the far end.
     CHECK(terrain.IsInLineOfSight(x, y, 120.f, x + 20.f, y + 20.f, 120.f));
     CHECK(terrain.NearestHitFraction(x, y, 120.f, x + 20.f, y + 20.f, 120.f) > 1.0f);
 
     // Off the map entirely.
-    float none = 0.f;
-    CHECK(!terrain.GetHeight(20000.f, 20000.f, 100.f, none));
+    CHECK(terrain.ColumnAt(20000.f, 20000.f, 102.f, -10000.f).Empty());
 
     std::remove(path.c_str());
     FusedTerrain::SetTileDir(std::string());
@@ -516,9 +515,8 @@ TEST(FusedTerrainSweepDropsUnpinnedTilesAndKeepsPinnedOnes)
     FusedTerrain::SetTileDir(dir);
     FusedTerrain terrain(8888);
 
-    float z = 0.f;
-    REQUIRE(terrain.GetHeight(-1.f, -1.f, 50.f, z));
-    REQUIRE(terrain.GetHeight(-1.f - TILE_SIZE, -1.f, 50.f, z));
+    REQUIRE(!terrain.ColumnAt(-1.f, -1.f, 50.f, -10000.f).Empty());
+    REQUIRE(!terrain.ColumnAt(-1.f - TILE_SIZE, -1.f, 50.f, -10000.f).Empty());
     CHECK_EQ(terrain.ResidentTiles(), size_t(2));
 
     terrain.PinCell(32, 32);
@@ -529,8 +527,8 @@ TEST(FusedTerrainSweepDropsUnpinnedTilesAndKeepsPinnedOnes)
     CHECK_EQ(terrain.ResidentTiles(), size_t(1));
 
     // The pinned cell is still served, and re-probing the evicted one brings it back.
-    REQUIRE(terrain.GetHeight(-1.f, -1.f, 50.f, z));
-    REQUIRE(terrain.GetHeight(-1.f - TILE_SIZE, -1.f, 50.f, z));
+    REQUIRE(!terrain.ColumnAt(-1.f, -1.f, 50.f, -10000.f).Empty());
+    REQUIRE(!terrain.ColumnAt(-1.f - TILE_SIZE, -1.f, 50.f, -10000.f).Empty());
     CHECK_EQ(terrain.ResidentTiles(), size_t(2));
 
     terrain.UnpinCell(32, 32);

@@ -30,6 +30,8 @@
 #include "Database/DatabaseEnv.h"
 #include "GridNotifiers.h"
 #include "CellImpl.h"
+#include "Transports.h"
+#include "TransportMap.h"
 #include "GridNotifiersImpl.h"
 #include "SpellMgr.h"
 #include "DBCStores.h"
@@ -45,6 +47,45 @@ DynamicObject::DynamicObject() : WorldObject()
     m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_POSITION);
 
     m_valuesCount = DYNAMICOBJECT_END;
+
+    m_transOffsetX = m_transOffsetY = m_transOffsetZ = 0.0f;
+}
+
+void DynamicObject::BindToTransport(ObjectGuid transportGuid, float lx, float ly, float lz)
+{
+    m_transportGuid = transportGuid;
+    m_transOffsetX = lx;
+    m_transOffsetY = ly;
+    m_transOffsetZ = lz;
+}
+
+bool DynamicObject::IsInEffectRange(Unit const* target) const
+{
+    if (m_transportGuid)
+    {
+        Transport* named = Transport::GetTransport(GetMap(), m_transportGuid);
+        TransportMap* vessel = named ? named->AsMap() : NULL;
+        if (!vessel)
+        {
+            return false;
+        }
+
+        // Both the effect and the target are points on the same deck, so the separation is
+        // their local one -- no world position is consulted on either side, which is the
+        // whole point: the deck spot does not move even though the hull does.
+        const auto local = vessel->PositionOf(*target);
+        if (!local)
+        {
+            return false;                   // ashore, or on another vessel: not in a deck effect
+        }
+
+        const float dx = local->X() - m_transOffsetX;
+        const float dy = local->Y() - m_transOffsetY;
+        const float dz = local->Z() - m_transOffsetZ;
+        return dx * dx + dy * dy + dz * dz <= GetRadius() * GetRadius();
+    }
+
+    return InReach(*this, *target, GetRadius());
 }
 
 /**
@@ -95,11 +136,11 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
 {
     WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetPhaseMask());
     SetMap(caster->GetMap());
-    Relocate(x, y, z, 0);
+    Place().MoveTo(x, y, z, 0);
 
-    if (!IsPositionValid())
+    if (!IsPlaceable(*this))
     {
-        sLog.outError("DynamicObject (spell %u eff %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", spellId, effIndex, GetPositionX(), GetPositionY());
+        sLog.outError("DynamicObject (spell %u eff %u) not created. Suggested coordinates isn't valid (X: %f Y: %f)", spellId, effIndex, Where().X(), Where().Y());
         return false;
     }
 
@@ -184,6 +225,7 @@ void DynamicObject::Update(uint32 /*update_diff*/, uint32 p_time)
     {
         // TODO: make a timer and update this in larger intervals
         MaNGOS::DynamicObjectUpdater notifier(*this, caster, m_positive);
+
         Cell::VisitAllObjects(this, notifier, m_radius);
     }
 
@@ -271,7 +313,7 @@ bool DynamicObject::IsVisibleForInState(Player const* u, WorldObject const* view
     }
 
     // normal case
-    return IsWithinDistInMap(viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
+    return SeenWithin(*this, *viewPoint, GetMap()->GetVisibilityDistance() + (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f), false);
 }
 
 /**

@@ -600,10 +600,10 @@ void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
     if (pGroupLeader && pGroupLeader->GetMapId() == mapID) // Already in the dungeon
     {
         // set teleport location to that of the group leader
-        x = pGroupLeader->GetPositionX();
-        y = pGroupLeader->GetPositionY();
-        z = pGroupLeader->GetPositionZ();
-        o = pGroupLeader->GetOrientation();
+        x = pGroupLeader->Where().X();
+        y = pGroupLeader->Where().Y();
+        z = pGroupLeader->Where().Z();
+        o = pGroupLeader->Where().Facing();
     }
     else
     {

@@ -169,7 +169,7 @@ void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player)
         {
             // check capture point range
             GameObjectInfo const* info = capturePoint->GetGOInfo();
-            if (info && player->IsWithinDistInMap(capturePoint, info->capturePoint.radius))
+            if (info && InReach(*player, *capturePoint, info->capturePoint.radius))
             {
                 // check capture point team
                 if (player->GetTeam() == m_towerOwner[i])

@@ -513,7 +513,7 @@ HostileReference* ThreatContainer::selectNextVictim(Creature* pAttacker, Hostile
                 }
 
                 if (pCurrentRef->getThreat() > 1.3f * pCurrentVictim->getThreat() ||
-                    (pCurrentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() && pAttacker->CanReachWithMeleeAttack(pTarget)))
+                    (pCurrentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() && InMeleeReach(*pAttacker, *pTarget)))
                 {
                     // implement 110% threat rule for targets in melee range
                     found = true;                           // and 130% rule for targets in ranged distances

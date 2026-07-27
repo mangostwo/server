@@ -22,31 +22,32 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-/*
- * @addtogroup TransportSystem to provide abstract support for transported entities
- * The Transport System in MaNGOS consists of these files:
- * - TransportSystem.h to provide the basic classes TransportBase and TransportInfo
- * - TransportSystem.cpp which implements these classes
- * - Vehicle.h as a vehicle is a transporter it will inherit itr transporter-information from TransportBase
- * - Transports.h to implement the MOTransporter (subclas of gameobject) - Remains TODO
- * as well of
- * - impacts to various files
- *
- * @{
- *
+/**
  * @file Vehicle.h
- * This file contains the headers for the functionality required by Vehicles
+ * The functionality required by Vehicles -- the ONLY thing in this core that carries a
+ * passenger by composing a transform.
  *
+ * A vehicle is not a vessel and shares nothing with one. A tank really does carry its rider
+ * across the map, so the rider really does have a world position and the server really does
+ * own it: seat offset composed through the vehicle's own basis, every tick. A ship is the
+ * opposite -- she IS a map, her passengers are on it, and nothing about them is ever
+ * composed. The two used to share a base class; they had no business doing so.
  */
 
 #ifndef MANGOSSERVER_VEHICLE_H
 #define MANGOSSERVER_VEHICLE_H
 
 #include "Platform/Define.h"
+#include "Object.h"
+#include "Utilities/UnorderedMapSet.h"
+
 #include <map>
-#include "TransportSystem.h"
 
 class Unit;
+class TransportInfo;
+class VehicleInfo;
+
+typedef UNORDERED_MAP < WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/ > PassengerMap;
 
 struct VehicleEntry;
 struct VehicleSeatEntry;
@@ -60,19 +61,70 @@ struct VehicleAccessory
 
 typedef std::map<uint8 /*seatPosition*/, VehicleSeatEntry const*> VehicleSeatMap;
 
+/**
+ * @brief What a passenger of a VEHICLE carries: which vehicle, which seat, and where that
+ *        seat is in the vehicle's own frame.
+ *
+ * Nothing aboard a ship has one of these, and nothing aboard a ship ever will: there is no
+ * seat there, only a map.
+ */
+class TransportInfo
+{
+    public:
+        explicit TransportInfo(WorldObject* owner, VehicleInfo* transport,
+                               Geometry::Placement const& seatPose, uint8 seat);
+
+        /// Writes the passenger's OWN placement too, so `Where()` on a rider is its seat
+        /// pose rather than a stale world token.
+        void SetSeatPose(Geometry::Placement const& seatPose);
+        void SetTransportSeat(uint8 seat) { m_seat = seat; }
+
+        WorldObject* GetTransport() const;
+        ObjectGuid GetTransportGuid() const;
+
+        // Required for chain-updating (passenger on vehicle on vehicle)
+        bool IsOnVehicle() const;
+
+        // Helper function if a passenger is already boarded somewhere onto the boarded transports
+        bool HasOnBoard(WorldObject const* passenger) const;
+
+        uint8 GetTransportSeat() const { return m_seat; }
+
+        /// Where the passenger sits, in the vehicle's own frame.
+        Geometry::Placement const& Seat() const { return m_seatPose; }
+
+    private:
+        WorldObject* m_owner;                               ///< Passenger
+        VehicleInfo* m_transport;                           ///< Vehicle
+        Geometry::Placement m_seatPose;
+        uint8 m_seat;
+};
+
 /*
  * A class to provide support for each vehicle. This includes
  * - Boarding and unboarding of passengers, including support to switch vehicles
  * - Basic checks if a passenger can board
  */
-class VehicleInfo : public TransportBase
+class VehicleInfo
 {
     public:
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
+        ~VehicleInfo();
+
+        WorldObject* GetOwner() const { return m_owner; }
+
+        /// Bring a world point into this vehicle's frame. A vehicle composes both ways --
+        /// legitimately, because the server owns its pose.
+        Geometry::Placement SeatPoseOf(Geometry::Vector3 const& worldPoint, float worldFacing) const;
+
+        /// The frame the seats are expressed in.
+        Geometry::Frame SeatFrame() const;
+
+        /// Is this unit boarded onto this vehicle (or onto a vehicle boarded onto it)?
+        bool HasOnBoard(WorldObject const* passenger) const;
+
         void Initialize();                                  ///< Initializes the accessories
         bool IsInitialized() const { return m_isInitialized; }
-
-        ~VehicleInfo();
 
         VehicleEntry const* GetVehicleEntry() const { return m_vehicleEntry; }
         VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
@@ -86,7 +138,18 @@ class VehicleInfo : public TransportBase
 
         void RemoveAccessoriesFromMap();                    ///< Unsummones accessory in case of far-teleport or death
 
+        /// Drag the passengers' world positions along with the vehicle. ONLY VEHICLES
+        /// COMPOSE, and this is the one place it happens.
+        void Update(uint32 diff);
+        void UpdateGlobalPositions();
+
     private:
+        void BoardPassenger(WorldObject* passenger, Geometry::Placement const& seatPose, uint8 seat);
+        void UnBoardPassenger(WorldObject* passenger);
+
+        void UpdateGlobalPositionOf(WorldObject* passenger, float lx, float ly, float lz, float lo) const;
+        void CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const;
+
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
 
@@ -113,8 +176,12 @@ class VehicleInfo : public TransportBase
         uint32 m_overwriteNpcEntry;                         // Internal use to store the entry with which the vehicle-accessories are fetched
         bool m_isInitialized;                               // Internal use to store if the accessory is initialized
         GuidSet m_accessoryGuids;                           ///< Stores the summoned accessories of this vehicle
+
+        WorldObject* m_owner;                               ///< The vehicle itself
+        PassengerMap m_passengers;                          ///< Passengers and their seat information
+
+        Geometry::Placement m_lastPose;                     ///< Pose the last global update ran at
+        uint32 m_updatePositionsTimer;                      ///< Triggers the global position updates
 };
 
 #endif
-
-/*! @} */

@@ -1442,7 +1442,7 @@ struct MailTemplateEntry
 struct MapEntry
 {
     uint32  ID;                                          // 0        m_ID
-    // char*       internalname;                            // 1        m_Directory
+    char*   Directory;                                   // 1        m_Directory
     uint32  InstanceType;                                       // 2        m_InstanceType
     // uint32 mapFlags;                                     // 3        m_Flags (0x100 - CAN_CHANGE_PLAYER_DIFFICULTY)
     // uint32 isPvP;                                        // 4        m_PVP 0 or 1 for battlegrounds (not arenas)

@@ -133,7 +133,7 @@ bool ChatHandler::HandleDebugSendPoiCommand(char* args)
     }
 
     DETAIL_LOG("Command : POI, NPC = %u, icon = %u flags = %u", target->GetGUIDLow(), icon, flags);
-    pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), Poi_Icon(icon), flags, 30, "Test POI");
+    pPlayer->PlayerTalkClass->SendPointOfInterest(target->Where().X(), target->Where().Y(), Poi_Icon(icon), flags, 30, "Test POI");
     return true;
 }
 

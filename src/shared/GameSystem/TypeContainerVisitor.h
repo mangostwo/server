@@ -42,11 +42,11 @@ class TypeContainerVisitor
         TypeContainerVisitor(VISITOR& v) : i_visitor(v){}
         void Visit(CONTAINER& c)
         {
-            c.template accept<VISITOR>(std::forward<VISITOR>(i_visitor));
+            c.accept(i_visitor);
         }
         void Visit(const CONTAINER& c) const
         {
-            c.template accept<VISITOR>(std::forward<VISITOR>(i_visitor));
+            c.accept(i_visitor);
         }
     private:
         VISITOR& i_visitor;

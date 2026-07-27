@@ -99,7 +99,7 @@ void CorpseManager::RemoveObject(Corpse* corpse)
 void CorpseManager::RecordCell(Corpse* corpse)
 {
     const CellPair cellPair =
-        MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
+        MaNGOS::ComputeCellPair(corpse->Where().X(), corpse->Where().Y());
     const uint32 cellId =
         (cellPair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cellPair.x_coord;
 
@@ -111,7 +111,7 @@ void CorpseManager::RecordCell(Corpse* corpse)
 void CorpseManager::ForgetCell(Corpse* corpse)
 {
     const CellPair cellPair =
-        MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
+        MaNGOS::ComputeCellPair(corpse->Where().X(), corpse->Where().Y());
     const uint32 cellId =
         (cellPair.y_coord * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cellPair.x_coord;
 
@@ -201,7 +201,7 @@ Corpse* CorpseManager::ConvertCorpseForPlayer(ObjectGuid playerGuid, bool insign
                 : sWorld.getConfig(CONFIG_BOOL_DEATH_BONES_WORLD));
 
     if (map && bonesAllowed
-        && !map->IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
+        && !map->IsRemovalGrid(corpse->Where().X(), corpse->Where().Y()))
     {
         bones = new Corpse;
         bones->Create(corpse->GetGUIDLow());
@@ -214,8 +214,7 @@ Corpse* CorpseManager::ConvertCorpseForPlayer(ObjectGuid playerGuid, bool insign
         }
 
         bones->SetGrid(corpse->GetGrid());
-        bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(),
-                        corpse->GetPositionZ(), corpse->GetOrientation());
+        bones->Place().MoveTo(corpse->Where().X(), corpse->Where().Y(), corpse->Where().Z(), corpse->Where().Facing());
         bones->SetPhaseMask(corpse->GetPhaseMask(), false);
         bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
         bones->SetGuidValue(CORPSE_FIELD_OWNER, ObjectGuid());

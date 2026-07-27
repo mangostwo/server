@@ -335,7 +335,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
+    if (!InReach(*obj, *_player, obj->GetInteractionDistance()))
     {
         return;
     }
@@ -383,7 +383,7 @@ void WorldSession::HandleGameobjectReportUse(WorldPacket& recvPacket)
         return;
     }
 
-    if (!go->IsWithinDistInMap(_player, INTERACTION_DISTANCE))
+    if (!InReach(*go, *_player, INTERACTION_DISTANCE))
     {
         return;
     }

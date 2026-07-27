@@ -278,7 +278,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         case ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA:
         {
             uint32 zone_id, area_id;
-            source->GetZoneAndAreaId(zone_id, area_id);
+            source->GetTerrain()->GetZoneAndAreaId(zone_id, area_id, source->Where().X(), source->Where().Y(), source->Where().Z());
             return area.id == zone_id || area.id == area_id;
         }
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA:

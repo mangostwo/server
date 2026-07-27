@@ -96,7 +96,7 @@ void BattleGroundRL::HandleKillPlayer(Player* player, Player* killer)
 
 bool BattleGroundRL::HandlePlayerUnderMap(Player* player)
 {
-    player->TeleportTo(GetMapId(), 1285.810547f, 1667.896851f, 39.957642f, player->GetOrientation());
+    player->TeleportTo(GetMapId(), 1285.810547f, 1667.896851f, 39.957642f, player->Where().Facing());
     return true;
 }
 

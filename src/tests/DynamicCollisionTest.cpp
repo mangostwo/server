@@ -32,6 +32,7 @@
 #include <cfloat>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <vector>
 
 using Geometry::Transform;
@@ -75,6 +76,17 @@ namespace
             }
         }
     };
+
+    // The live half no longer answers with a height; it CONTRIBUTES to the terrain
+    // engine's column. Highest surface under the probe is the selection that used to be
+    // baked into the call.
+    std::optional<float> SurfaceUnder(const DynamicCollision& world, float x, float y,
+                                     float zTop, float drop, uint32 phase = 1)
+    {
+        world::terrain::Column column;
+        world.AddSurfaces(x, y, zTop, zTop - drop, phase, column);
+        return column.HighestSolidAtOrBelow(zTop);
+    }
 }
 
 TEST(DynamicCollisionInsertRemoveAndContains)
@@ -133,7 +145,7 @@ TEST(DynamicCollisionRespectsTheCollidableFlag)
     CHECK(!world.IsInLineOfSight(-20.f, 0.f, 0.f, 20.f, 0.f, 0.f, 1));
     door.model->SetCollidable(false);
     CHECK(world.IsInLineOfSight(-20.f, 0.f, 0.f, 20.f, 0.f, 0.f, 1));
-    CHECK(world.GetHeight(0.f, 0.f, 20.f, 100.f, 1) == -FLT_MAX);
+    CHECK(!SurfaceUnder(world, 0.f, 0.f, 20.f, 100.f).has_value());
 }
 
 TEST(DynamicCollisionRespectsThePhaseMask)
@@ -156,14 +168,15 @@ TEST(DynamicCollisionReportsTheSurfaceUnderAColumn)
     world.Insert(*platform.model);
 
     // The box top is at z = 14.
-    const float top = world.GetHeight(0.f, 0.f, 40.f, 100.f, 1);
-    CHECK(std::fabs(top - 14.f) < 0.01f);
+    const auto top = SurfaceUnder(world, 0.f, 0.f, 40.f, 100.f);
+    REQUIRE(top.has_value());
+    CHECK(std::fabs(*top - 14.f) < 0.01f);
 
     // Nothing under a column that misses it.
-    CHECK(world.GetHeight(50.f, 50.f, 40.f, 100.f, 1) == -FLT_MAX);
+    CHECK(!SurfaceUnder(world, 50.f, 50.f, 40.f, 100.f).has_value());
 
     // A probe already below the body finds nothing above itself.
-    CHECK(world.GetHeight(0.f, 0.f, -10.f, 100.f, 1) == -FLT_MAX);
+    CHECK(!SurfaceUnder(world, 0.f, 0.f, -10.f, 100.f).has_value());
 }
 
 TEST(DynamicCollisionFindsABodySpanningManyTileCells)
@@ -188,7 +201,7 @@ TEST(DynamicCollisionFindsABodySpanningManyTileCells)
             ++probes;
             const float x = float(i) * step;
             const float y = float(j) * step;
-            if (world.GetHeight(x, y, half + 50.f, 500.f, 1) > -FLT_MAX)
+            if (SurfaceUnder(world, x, y, half + 50.f, 500.f))
             {
                 ++found;
             }
@@ -209,8 +222,9 @@ TEST(DynamicCollisionCountsASpanningBodyOnceNotOncePerCell)
     REQUIRE(wide.model != nullptr);
     world.Insert(*wide.model);
 
-    const float top = world.GetHeight(0.f, 0.f, half + 100.f, 1000.f, 1);
-    CHECK(std::fabs(top - half) < 0.01f);
+    const auto top = SurfaceUnder(world, 0.f, 0.f, half + 100.f, 1000.f);
+    REQUIRE(top.has_value());
+    CHECK(std::fabs(*top - half) < 0.01f);
 
     // And a segment crossing the whole thing still yields one sane fraction.
     const float frac = world.NearestHitFraction(-half * 2.f, 0.f, 0.f, half * 2.f, 0.f,
@@ -251,7 +265,7 @@ TEST(DynamicCollisionEmptyWorldBlocksNothing)
     CHECK_EQ(world.Size(), 0);
     CHECK(world.IsInLineOfSight(-100.f, -100.f, 0.f, 100.f, 100.f, 0.f, 1));
     CHECK(world.NearestHitFraction(-100.f, 0.f, 0.f, 100.f, 0.f, 0.f, 1) > 1.0f);
-    CHECK(world.GetHeight(0.f, 0.f, 50.f, 100.f, 1) == -FLT_MAX);
+    CHECK(!SurfaceUnder(world, 0.f, 0.f, 50.f, 100.f).has_value());
 }
 
 TEST(DynamicCollisionDegenerateSegmentDoesNotBlock)
@@ -278,7 +292,7 @@ TEST(DynamicCollisionOffMapCoordinatesDoNotIndexOutOfTheGrid)
     CHECK_EQ(world.Size(), 1);
 
     world.IsInLineOfSight(-70000.f, 70000.f, 0.f, 70000.f, -70000.f, 0.f, 1);
-    world.GetHeight(60000.f, -60000.f, 100.f, 500.f, 1);
+    SurfaceUnder(world, 60000.f, -60000.f, 100.f, 500.f);
 
     world.Remove(*far.model);
     CHECK_EQ(world.Size(), 0);

@@ -213,7 +213,7 @@ void ObjectMgr::LoadGameObjects()
 
 
         //uint32 zoneId, areaId;
-        //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
+        //sTerrainMgr.LoadTerrain(data.mapid)->GetTerrain()->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ, sTerrainMgr.LoadTerrain(data.mapid)->Where().X(), sTerrainMgr.LoadTerrain(data.mapid)->Where().Y(), sTerrainMgr.LoadTerrain(data.mapid)->Where().Z());
         //sLog.outErrorDb("UPDATE gameobject SET zone_id=%u, area_id=%u WHERE guid=%u;", zoneId, areaId, guid);
 
         ++count;

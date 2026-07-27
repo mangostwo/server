@@ -191,6 +191,14 @@ namespace world::terrain
     public:
         virtual ~ITileSource() = default;
         virtual std::shared_ptr<TerrainTile> Load(uint32_t mapId, int tx, int ty) = 0;
+
+        /// The one tile that covers the whole map, for a map built from a single model
+        /// rather than an ADT grid. Nothing by default: most sources have a grid.
+        virtual std::shared_ptr<TerrainTile> LoadGlobal(uint32_t mapId)
+        {
+            (void)mapId;
+            return nullptr;
+        }
     };
 
     class NullTileSource : public ITileSource

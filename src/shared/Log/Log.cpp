@@ -1108,14 +1108,11 @@ void Log::outWarden(const char* str, ...)
     {
         return;
     }
-    if (m_logLevel >= LOG_LVL_DETAIL)
-    {
-        va_list ap;
 
-        va_start(ap, str);
-        ConsoleEmit(true, LogNormal, m_colored, str, &ap);
-        va_end(ap);
-    }
+    // FILE ONLY. Warden narrates six lines per check per player, every thirty seconds --
+    // at LogLevel 3 that is a console nobody can read anything else in. It has a logfile of
+    // its own, which is the whole point of having one; a real detection is reported through
+    // outError and reaches the console that way.
 
     if (wardenLogfile && m_logFileLevel >= LOG_LVL_DETAIL)
     {

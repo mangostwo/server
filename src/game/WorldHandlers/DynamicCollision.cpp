@@ -192,21 +192,15 @@ bool DynamicCollision::IsInLineOfSight(float x1, float y1, float z1, float x2, f
     return NearestHitFraction(x1, y1, z1, x2, y2, z2, phasemask) > 1.0f;
 }
 
-float DynamicCollision::GetHeight(float x, float y, float z, float maxSearchDist,
-                                  uint32_t phasemask) const
+void DynamicCollision::AddSurfaces(float x, float y, float zTop, float zBottom,
+                                   uint32_t filter, world::terrain::Column& out) const
 {
-    float best = -FLT_MAX;
     ForEachCandidate(x, y, x, y, [&](const GameObjectModel& model)
     {
-        if (!model.IsCollidable() || !(model.GetPhaseMask() & phasemask))
+        if (!model.IsCollidable() || !(model.GetPhaseMask() & filter))
         {
             return;
         }
-        const float surface = model.SurfaceUnder(x, y, z, maxSearchDist);
-        if (surface > best)
-        {
-            best = surface;
-        }
+        model.AddSurfaces(x, y, zTop, zBottom, out);
     });
-    return best;
 }

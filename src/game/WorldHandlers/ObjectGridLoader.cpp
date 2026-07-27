@@ -137,7 +137,10 @@ ObjectGridRespawnMover::Visit(CreatureMapType& m)
         Cell const& cur_cell  = c->GetCurrentCell();
 
         float resp_x, resp_y, resp_z;
-        c->GetRespawnCoord(resp_x, resp_y, resp_z);
+        const Geometry::Placement& spawnPose = c->Spawn();
+        resp_x = spawnPose.X();
+        resp_y = spawnPose.Y();
+        resp_z = spawnPose.Z();
         CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
         Cell resp_cell(resp_val);
 
@@ -387,8 +390,7 @@ void ObjectGridLoader::LoadCell(uint32 cellX, uint32 cellY)
     i_cell.data.Part.cell_x = cellX;
     i_cell.data.Part.cell_y = cellY;
 
-    GridLoaderType loader;
-    loader.Load(i_grid(cellX, cellY), *this);
+    Load(i_grid(cellX, cellY));
 }
 
 /**

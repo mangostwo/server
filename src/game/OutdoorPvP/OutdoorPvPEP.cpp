@@ -181,19 +181,19 @@ void OutdoorPvPEP::HandleGameObjectCreate(GameObject* go)
             break;
         case GO_TOWER_BANNER:
             // sort banners
-            if (go->IsWithinDist2d(plaguelandsTowerLocations[TOWER_ID_NORTHPASS][0], plaguelandsTowerLocations[TOWER_ID_NORTHPASS][1], 50.0f))
+            if (go->Where().WithinDist(Geometry::Vector2(plaguelandsTowerLocations[TOWER_ID_NORTHPASS][0], plaguelandsTowerLocations[TOWER_ID_NORTHPASS][1]), 50.0f))
             {
                 InitBanner(go, TOWER_ID_NORTHPASS);
             }
-            else if (go->IsWithinDist2d(plaguelandsTowerLocations[TOWER_ID_CROWNGUARD][0], plaguelandsTowerLocations[TOWER_ID_CROWNGUARD][1], 50.0f))
+            else if (go->Where().WithinDist(Geometry::Vector2(plaguelandsTowerLocations[TOWER_ID_CROWNGUARD][0], plaguelandsTowerLocations[TOWER_ID_CROWNGUARD][1]), 50.0f))
             {
                 InitBanner(go, TOWER_ID_CROWNGUARD);
             }
-            else if (go->IsWithinDist2d(plaguelandsTowerLocations[TOWER_ID_EASTWALL][0], plaguelandsTowerLocations[TOWER_ID_EASTWALL][1], 50.0f))
+            else if (go->Where().WithinDist(Geometry::Vector2(plaguelandsTowerLocations[TOWER_ID_EASTWALL][0], plaguelandsTowerLocations[TOWER_ID_EASTWALL][1]), 50.0f))
             {
                 InitBanner(go, TOWER_ID_EASTWALL);
             }
-            else if (go->IsWithinDist2d(plaguelandsTowerLocations[TOWER_ID_PLAGUEWOOD][0], plaguelandsTowerLocations[TOWER_ID_PLAGUEWOOD][1], 50.0f))
+            else if (go->Where().WithinDist(Geometry::Vector2(plaguelandsTowerLocations[TOWER_ID_PLAGUEWOOD][0], plaguelandsTowerLocations[TOWER_ID_PLAGUEWOOD][1]), 50.0f))
             {
                 InitBanner(go, TOWER_ID_PLAGUEWOOD);
             }

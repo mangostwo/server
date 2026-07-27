@@ -147,7 +147,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         return;
                     }
                     // Not let attack through obstructions
-                    if (!pet->IsWithinLOSInMap(TargetUnit))
+                    if (!HasLineOfSight(*pet, *TargetUnit))
                     {
                         return;
                     }
