@@ -727,10 +727,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
-    data << pCurrChar->GetPositionX();
-    data << pCurrChar->GetPositionY();
-    data << pCurrChar->GetPositionZ();
-    data << pCurrChar->GetOrientation();
+    data << pCurrChar->Where().X();
+    data << pCurrChar->Where().Y();
+    data << pCurrChar->Where().Z();
+    data << pCurrChar->Where().Facing();
     SendPacket(&data);
 
     // load player specific part before send times
@@ -900,7 +900,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     }
 
     /* This code is run if we can not add the player to the map for some reason */
-    if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->GetMap()->Add(pCurrChar))
+    // STRAIGHT ABOARD if he logged out on a ship. The client was told the map she sails,
+    // above, and is loading it; the server puts him on her own map, at the position saved
+    // with him. He is never added to the world's grid, not even for a tick.
+    if (lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->BoardingMap()->Add(pCurrChar))
     {
         pCurrChar->SetCinematicFlyover(nullptr);
 
@@ -912,7 +915,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         }
 
         /* We couldn't find an areatrigger to teleport, so just move the player back to their home bind */
-        if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation()))
+        if (!at || lockStatus != AREA_LOCKSTATUS_OK || !pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->Where().Facing()))
         {
             pCurrChar->TeleportToHomebind();
         }

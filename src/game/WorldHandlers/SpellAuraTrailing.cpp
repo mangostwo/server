@@ -400,7 +400,7 @@ void Aura::HandlePhase(bool apply, bool Real)
         if (saBounds.first != saBounds.second)
         {
             uint32 zone, area;
-            target->GetZoneAndAreaId(zone, area);
+            target->GetTerrain()->GetZoneAndAreaId(zone, area, target->Where().X(), target->Where().Y(), target->Where().Z());
 
             for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
             {

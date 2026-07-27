@@ -156,7 +156,7 @@ struct TargetDistanceOrderNear
     // functor for operator ">"
     bool operator()(const Unit* _Left, const Unit* _Right) const
     {
-        return MainTarget->GetDistanceOrder(_Left, _Right);
+        return MainTarget->Where().IsNearer(_Left->Where(), _Right->Where());
     }
 };
 
@@ -176,7 +176,7 @@ struct TargetDistanceOrderFarAway : public binary_function<const Unit, const Uni
     // functor for operator "<"
     bool operator()(const Unit* _Left, const Unit* _Right) const
     {
-        return !MainTarget->GetDistanceOrder(_Left, _Right);
+        return !MainTarget->Where().IsNearer(_Left->Where(), _Right->Where());
     }
 };
 
@@ -224,7 +224,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
             float dest_x, dest_y, dest_z;
-            m_caster->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle);
+            ClosePointNear(*m_caster, dest_x, dest_y, dest_z, 0.0f, radius, angle);
             m_targets.setDestination(dest_x, dest_y, dest_z);
 
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates
@@ -246,8 +246,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 float angle = 2.0f * M_PI_F * rand_norm_f();
                 float dest_x = m_targets.m_destX + cos(angle) * radius;
                 float dest_y = m_targets.m_destY + sin(angle) * radius;
-                float dest_z = m_caster->GetPositionZ();
-                m_caster->UpdateGroundPositionZ(dest_x, dest_y, dest_z);
+                float dest_z = m_caster->Where().Z();
+                DropToGround(*m_caster, dest_x, dest_y, dest_z);
                 m_targets.setDestination(dest_x, dest_y, dest_z);
             }
 
@@ -266,7 +266,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_TOTEM_AIR:
         case TARGET_TOTEM_FIRE:
         {
-            float angle = m_caster->GetOrientation();
+            float angle = m_caster->Where().Facing();
             switch (targetMode)
             {
                 case TARGET_TOTEM_FIRE:  angle += M_PI_F * 0.25f; break;            // front - left
@@ -276,11 +276,11 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
 
             float x, y;
-            float z = m_caster->GetPositionZ();
+            float z = m_caster->Where().Z();
             // Do not search for a free spot. TODO: Should there be searched for a free spot. There was once a discussion that in case this space was impossible (LOS) m_caster's position should be used.
             // TODO Bring this back to memory and search for it!
-            m_caster->GetNearPoint2D(x, y, radius, angle);
-            m_caster->UpdateAllowedPositionZ(x, y, z);
+            { const Geometry::Vector3 p = PointNear(*m_caster, radius, angle); x = p.x; y = p.y; }
+            ClampToAllowedZ(*m_caster, x, y, z);
             m_targets.setDestination(x, y, z);
 
             // Add Summoner
@@ -329,7 +329,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Now to get us a random target that's in the initial range of the spell
             uint32 t = 0;
             UnitList::iterator itr = tempTargetUnitMap.begin();
-            while (itr != tempTargetUnitMap.end() && (*itr)->IsWithinDist(m_caster, radius))
+            while (itr != tempTargetUnitMap.end() && (*itr)->Where().WithinDist(m_caster->Where(), radius))
             {
                 ++t, ++itr;
             }
@@ -354,12 +354,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             while (t && next != tempTargetUnitMap.end())
             {
-                if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                if (!prev->Where().WithinDist((*next)->Where(), CHAIN_SPELL_JUMP_RADIUS))
                 {
                     break;
                 }
 
-                if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !prev->IsWithinLOSInMap(*next))
+                if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !HasLineOfSight(*prev, *(*next)))
                 {
                     ++next;
                     continue;
@@ -442,12 +442,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 while (t && next != tempTargetUnitMap.end())
                 {
-                    if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                    if (!prev->Where().WithinDist((*next)->Where(), CHAIN_SPELL_JUMP_RADIUS))
                     {
                         break;
                     }
 
-                    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !prev->IsWithinLOSInMap(*next))
+                    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !HasLineOfSight(*prev, *(*next)))
                     {
                         ++next;
                         continue;
@@ -656,7 +656,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             else                                            // can also happen for GO_AROUND_SOURCE without SOURCE_LOCATION
             {
-                m_caster->GetPosition(x, y, z);
+                x = m_caster->Where().X(), y = m_caster->Where().Y(), z = m_caster->Where().Z();
             }
 
             bool fixedTargetExist = false;
@@ -695,7 +695,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 switch (targetMode)
                 {
                     case TARGET_GO_IN_FRONT_OF_CASTER_90:
-                        if (!m_caster->HasInArc(M_PI_F / 2, *itr))
+                        if (!m_caster->Where().HasInArc((*itr)->Where(), M_PI_F / 2))
                         {
                             tempTargetGOList.erase(itr++);
                             continue;
@@ -738,7 +738,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             if (Unit* currentTarget = m_targets.getUnitTarget())
             {
-                m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
+                m_targets.setDestination(currentTarget->Where().X(), currentTarget->Where().Y(), currentTarget->Where().Z());
             }
             break;
         }
@@ -856,7 +856,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // Check original caster is GO - set its coordinates as src cast
             if (WorldObject* caster = GetCastingObject())
             {
-                m_targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+                m_targets.setSource(caster->Where().X(), caster->Where().Y(), caster->Where().Z());
             }
             break;
         }
@@ -1181,13 +1181,13 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     // IsHostileTo check duel and controlled by enemy
                     if (Target && Target->GetSubGroup() == subgroup && !m_caster->IsHostileTo(Target))
                     {
-                        if (pTarget->IsWithinDistInMap(Target, radius))
+                        if (InReach(*pTarget, *Target, radius))
                         {
                             targetUnitMap.push_back(Target);
                         }
 
                         if (Pet* pet = Target->GetPet())
-                            if (pTarget->IsWithinDistInMap(pet, radius))
+                            if (InReach(*pTarget, *pet, radius))
                             {
                                 targetUnitMap.push_back(pet);
                             }
@@ -1196,7 +1196,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             else if (owner)
             {
-                if (m_caster->IsWithinDistInMap(owner, radius))
+                if (InReach(*m_caster, *owner, radius))
                 {
                     targetUnitMap.push_back(owner);
                 }
@@ -1207,7 +1207,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 if (Pet* pet = pTarget->GetPet())
                 {
-                    if (m_caster->IsWithinDistInMap(pet, radius))
+                    if (InReach(*m_caster, *pet, radius))
                     {
                         targetUnitMap.push_back(pet);
                     }
@@ -1275,12 +1275,12 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 while (t && next != tempTargetUnitMap.end())
                 {
-                    if (!prev->IsWithinDist(*next, CHAIN_SPELL_JUMP_RADIUS))
+                    if (!prev->Where().WithinDist((*next)->Where(), CHAIN_SPELL_JUMP_RADIUS))
                     {
                         break;
                     }
 
-                    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !prev->IsWithinLOSInMap(*next))
+                    if (!DisableMgr::IsDisabledFor(DISABLE_TYPE_SPELL, m_spellInfo->ID, NULL, SPELL_DISABLE_LOS) && !HasLineOfSight(*prev, *(*next)))
                     {
                         ++next;
                         continue;
@@ -1309,7 +1309,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (currentTarget)
             {
                 targetUnitMap.push_back(currentTarget);
-                m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
+                m_targets.setDestination(currentTarget->Where().X(), currentTarget->Where().Y(), currentTarget->Where().Z());
             }
             break;
         }
@@ -1326,7 +1326,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     Player* Target = itr->getSource();
 
                     // IsHostileTo check duel and controlled by enemy
-                    if (Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
+                    if (Target && InReach(*targetPlayer, *Target, radius) &&
                         targetPlayer->getClass() == Target->getClass() &&
                         !m_caster->IsHostileTo(Target))
                     {
@@ -1398,8 +1398,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float _target_x, _target_y, _target_z;
-                pTarget->GetClosePoint(_target_x, _target_y, _target_z, pTarget->GetObjectBoundingRadius(), radius, angle);
-                if (pTarget->IsWithinLOS(_target_x, _target_y, _target_z))
+                ClosePointNear(*pTarget, _target_x, _target_y, _target_z, pTarget->Where().Extent(), radius, angle);
+                if (HasLineOfSight(*pTarget, Geometry::Vector3(_target_x, _target_y, _target_z)))
                 {
                     targetUnitMap.push_back(m_caster);
                     m_targets.setDestination(_target_x, _target_y, _target_z);
@@ -1411,7 +1411,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             // if parent spell create dynamic object extract area from it
             if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->ID : m_spellInfo->ID))
             {
-                m_targets.setDestination(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ());
+                m_targets.setDestination(dynObj->Where().X(), dynObj->Where().Y(), dynObj->Where().Z());
             }
             // else use destination of target if no destination set (ie for Mind Sear - 53022)
             else if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && m_targets.m_targetMask & TARGET_FLAG_UNIT)
@@ -1442,7 +1442,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     radius = 10.0f;
                 }
 
-                float angle = m_caster->GetOrientation();
+                float angle = m_caster->Where().Facing();
                 switch (targetMode)
                 {
                     case TARGET_DYNAMIC_OBJECT_FRONT:                           break;
@@ -1452,8 +1452,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                m_caster->GetNearPoint2D(x, y, radius + m_caster->GetObjectBoundingRadius(), angle);
-                m_targets.setDestination(x, y, m_caster->GetPositionZ());
+                { const Geometry::Vector3 p = PointNear(*m_caster, radius + m_caster->Where().Extent(), angle); x = p.x; y = p.y; }
+                m_targets.setDestination(x, y, m_caster->Where().Z());
             }
 
             targetUnitMap.push_back(m_caster);
@@ -1471,7 +1471,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             if (!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
             {
                 Unit* currentTarget = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
-                float angle = currentTarget != m_caster ? currentTarget->GetAngle(m_caster) : m_caster->GetOrientation();
+                float angle = currentTarget != m_caster ? currentTarget->Where().BearingTo(m_caster->Where()) : m_caster->Where().Facing();
 
                 switch (targetMode)
                 {
@@ -1486,8 +1486,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 }
 
                 float x, y;
-                currentTarget->GetNearPoint2D(x, y, radius + currentTarget->GetObjectBoundingRadius(), angle);
-                m_targets.setDestination(x, y, currentTarget->GetPositionZ());
+                { const Geometry::Vector3 p = PointNear(*currentTarget, radius + currentTarget->Where().Extent(), angle); x = p.x; y = p.y; }
+                m_targets.setDestination(x, y, currentTarget->Where().Z());
             }
             break;
         }
@@ -1501,7 +1501,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 float dist = minRange + rand_norm_f() * (maxRange - minRange);
 
                 float _target_x, _target_y, _target_z;
-                m_caster->GetClosePoint(_target_x, _target_y, _target_z, m_caster->GetObjectBoundingRadius(), dist);
+                ClosePointNear(*m_caster, _target_x, _target_y, _target_z, m_caster->Where().Extent(), dist);
                 m_targets.setDestination(_target_x, _target_y, _target_z);
             }
 
@@ -1561,7 +1561,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                     // Add AoE target-mask to self, if no target-dest provided already
                     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
                     {
-                        m_targets.setDestination(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+                        m_targets.setDestination(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z());
                     }
                     break;
                 }
@@ -1632,7 +1632,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case SPELL_EFFECT_PERSISTENT_AREA_AURA:
                     if (Unit* currentTarget = m_targets.getUnitTarget())
                     {
-                        m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
+                        m_targets.setDestination(currentTarget->Where().X(), currentTarget->Where().Y(), currentTarget->Where().Z());
                     }
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:

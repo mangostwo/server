@@ -15,9 +15,12 @@
 // mmaps/%04u%02i%02i.mmtile with (mapId, y, x); see MMapManager::loadMap.
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
+namespace world::terrain { class TerrainTile; }
 
 namespace world::nav
 {
@@ -66,22 +69,36 @@ namespace world::nav
     public:
         NavMeshBuilder(std::string tileDir, std::string outDir, NavConfig cfg = {});
 
-        // Reports progress so the console can show it. Called from the bake thread.
+        // Live progress WITHIN a map: `done` of `total` tiles started, so the console
+        // header moves tile by tile rather than once per map. Called only from the main
+        // thread, so the callback needs no locking of its own.
         using ProgressFn = void (*)(void* context, uint32_t mapId, const char* mapName,
                                     size_t done, size_t total);
         void SetProgress(ProgressFn fn, void* context);
+
+        // One durable line per finished map (`written` of `total` tiles produced a
+        // navmesh). Unlike ProgressFn this is meant to survive in a piped log, where the
+        // moving header renders nothing.
+        using MapDoneFn = void (*)(void* context, uint32_t mapId, const char* mapName,
+                                   int written, size_t total);
+        void SetMapDone(MapDoneFn fn);
 
         /// Bakes every map that has tiles, or only `mapFilter` when >= 0.
         /// Returns the number of .mmtile files written, or -1 on a fatal error.
         int BakeAll(long mapFilter = -1);
 
     private:
-        int BakeMap(uint32_t mapId, const std::vector<std::pair<int, int>>& grids);
+        // `globalWmo`, when set, is a WMO-only map's single shared tile: every grid in
+        // `grids` bakes from it instead of reading a per-grid tile off disk.
+        int BakeMap(uint32_t mapId, const std::string& mapName,
+                    const std::vector<std::pair<int, int>>& grids,
+                    std::shared_ptr<const world::terrain::TerrainTile> globalWmo = nullptr);
 
         std::string m_tileDir;
         std::string m_outDir;
         NavConfig m_cfg;
         ProgressFn m_progress = nullptr;
         void* m_progressContext = nullptr;
+        MapDoneFn m_mapDone = nullptr;
     };
 }

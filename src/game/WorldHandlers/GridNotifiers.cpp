@@ -50,6 +50,7 @@
 #include "Item.h"
 #include "Map.h"
 #include "Transports.h"
+#include "TransportMap.h"
 #include "PlayerRegistry.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "CreatureAI.h"
@@ -77,19 +78,26 @@ void VisibleNotifier::Notify()
     Player& player = *i_camera.GetOwner();
     // at this moment i_clientGUIDs have guids that not iterate at grid level checks
     // but exist one case when this possible and object not out of range: transports
-    if (Transport* transport = player.GetTransport())
+    if (player.GetMap()->AsTransport())
     {
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+        Map::PlayerList const& aboard = player.GetMap()->GetPlayers();
+        for (Map::PlayerList::const_iterator itr = aboard.begin(); itr != aboard.end(); ++itr)
         {
-            if (i_clientGUIDs.find((*itr)->GetObjectGuid()) != i_clientGUIDs.end())
+            Player* mate = itr->getSource();
+            if (mate && i_clientGUIDs.find(mate->GetObjectGuid()) != i_clientGUIDs.end())
             {
                 // ignore far sight case
-                (*itr)->UpdateVisibilityOf(*itr, &player);
-                player.UpdateVisibilityOf(&player, *itr, i_data, i_visibleNow);
-                i_clientGUIDs.erase((*itr)->GetObjectGuid());
+                mate->UpdateVisibilityOf(mate, &player);
+                player.UpdateVisibilityOf(&player, mate, i_data, i_visibleNow);
+                i_clientGUIDs.erase(mate->GetObjectGuid());
             }
         }
     }
+
+    // Nothing here about the shore, or about a deck. Both arrived as ordinary candidates
+    // from the extra cell sources the camera swept, so they are already erased from the
+    // leftovers below by having been re-found -- which is what makes their out-of-range
+    // correct without anybody keeping a list.
 
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
@@ -220,7 +228,7 @@ void MessageDistDeliverer::Visit(CameraMapType& m)
 
         if ((i_toSelf || owner != &i_player) &&
             (!i_ownTeamOnly || owner->GetTeam() == i_player.GetTeam()) &&
-            (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
+            (!i_dist || iter->getSource()->GetBody()->Where().WithinDist((i_player).Where(), i_dist)))
         {
             if (!i_player.InSamePhase(iter->getSource()->GetBody()))
             {
@@ -244,7 +252,7 @@ void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
 {
     for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        if (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_object, i_dist))
+        if (!i_dist || iter->getSource()->GetBody()->Where().WithinDist((i_object).Where(), i_dist))
         {
             if (!i_object.InSamePhase(iter->getSource()->GetBody()))
             {
@@ -296,7 +304,7 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
         return false;
     }
 
-    if (i_fobj->IsWithinDistInMap(u, i_range))
+    if (InReach(*i_fobj, *u, i_range))
     {
         return true;
     }
@@ -364,13 +372,13 @@ void MaNGOS::CallOfHelpCreatureInRangeDo::operator()(Creature* u)
     }
 
     // too far
-    if (!i_funit->IsWithinDistInMap(u, i_range))
+    if (!InReach(*i_funit, *u, i_range))
     {
         return;
     }
 
     // only if see assisted creature
-    if (!i_funit->IsWithinLOSInMap(u))
+    if (!HasLineOfSight(*i_funit, *u))
     {
         return;
     }
@@ -400,13 +408,13 @@ bool MaNGOS::AnyAssistCreatureInRangeCheck::operator()(Creature* u)
     }
 
     // too far
-    if (!i_funit->IsWithinDistInMap(u, i_range))
+    if (!InReach(*i_funit, *u, i_range))
     {
         return false;
     }
 
     // only if see assisted creature
-    if (!i_funit->IsWithinLOSInMap(u))
+    if (!HasLineOfSight(*i_funit, *u))
     {
         return false;
     }

@@ -233,7 +233,14 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
             }
 
-            if (sMapStore.LookupEntry(mapId)->Instanceable())
+            MapEntry const* createMap = sMapStore.LookupEntry(mapId);
+            if (!createMap)
+            {
+                sLog.outErrorDb("Map %u for class %u race %u pair in `playercreateinfo` is not in Map.dbc, ignoring.", mapId, current_class, current_race);
+                continue;
+            }
+
+            if (createMap->Instanceable())
             {
                 sLog.outErrorDb("Home position in instanceable map for class %u race %u pair in `playercreateinfo` table, ignoring.", current_class, current_race);
                 continue;

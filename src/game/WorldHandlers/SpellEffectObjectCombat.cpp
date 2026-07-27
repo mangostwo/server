@@ -175,13 +175,13 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
     }
     else
     {
-        m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+        ClosePointNear(*m_caster, x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
     }
 
     Map* map = target->GetMap();
 
     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
-                          m_caster->GetPhaseMask(), x, y, z, target->GetOrientation()))
+                          m_caster->GetPhaseMask(), x, y, z, target->Where().Facing()))
     {
         delete pGameObj;
         return;
@@ -306,14 +306,14 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     }
 
     // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
-    AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetAreaId());
+    AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetTerrain()->GetAreaId(caster->Where().X(), caster->Where().Y(), caster->Where().Z()));
     if (casterAreaEntry && !(casterAreaEntry->Flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
     }
 
-    AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetAreaId());
+    AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetTerrain()->GetAreaId(target->Where().X(), target->Where().Y(), target->Where().Z()));
     if (targetAreaEntry && !(targetAreaEntry->Flags & AREA_FLAG_DUEL))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
@@ -326,11 +326,11 @@ void Spell::EffectDuel(SpellEffectIndex eff_idx)
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[eff_idx];
 
     Map* map = m_caster->GetMap();
-    float x = (m_caster->GetPositionX() + unitTarget->GetPositionX()) * 0.5f;
-    float y = (m_caster->GetPositionY() + unitTarget->GetPositionY()) * 0.5f;
-    float z = m_caster->GetPositionZ();
-    m_caster->UpdateAllowedPositionZ(x, y, z);
-    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map, m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
+    float x = (m_caster->Where().X() + unitTarget->Where().X()) * 0.5f;
+    float y = (m_caster->Where().Y() + unitTarget->Where().Y()) * 0.5f;
+    float z = m_caster->Where().Z();
+    ClampToAllowedZ(*m_caster, x, y, z);
+    if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map, m_caster->GetPhaseMask(), x, y, z, m_caster->Where().Facing()))
     {
         delete pGameObj;
         return;
@@ -400,7 +400,7 @@ void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
     Player* pTarget = (Player*)unitTarget;
 
     DEBUG_LOG("Spell Effect: Stuck");
-    DETAIL_LOG("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", pTarget->GetName(), pTarget->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+    DETAIL_LOG("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", pTarget->GetName(), pTarget->GetGUIDLow(), m_caster->GetMapId(), m_caster->Where().X(), pTarget->Where().Y(), pTarget->Where().Z());
 
     if (pTarget->IsTaxiFlying())
     {
@@ -439,13 +439,13 @@ void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
     }
 
     float x, y, z;
-    m_caster->GetClosePoint(x, y, z, unitTarget->GetObjectBoundingRadius());
+    ClosePointNear(*m_caster, x, y, z, unitTarget->Where().Extent());
 
     ((Player*)unitTarget)->SetSummonPoint(m_caster->GetMapId(), x, y, z);
 
     WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
     data << m_caster->GetObjectGuid();                      // summoner guid
-    data << uint32(m_caster->GetZoneId());                  // summoner zone
+    data << uint32(m_caster->GetTerrain()->GetZoneId(m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z()));                  // summoner zone
     data << uint32(MAX_PLAYER_SUMMON_DELAY * IN_MILLISECONDS); // auto decline after msecs
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
 }
@@ -556,7 +556,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                         case 24790: npcEntry = 15305;                 break;
                     }
 
-                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY(), gameObjTarget->GetPositionZ(), gameObjTarget->GetAngle(m_caster), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->Where().X(), gameObjTarget->Where().Y(), gameObjTarget->Where().Z(), gameObjTarget->Where().BearingTo(m_caster->Where()), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
                     gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                     break;
                 }
@@ -583,10 +583,10 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                 case 46085:         // Place Fake Fur
                 {
                     float x, y, z;
-                    gameObjTarget->GetClosePoint(x, y, z, gameObjTarget->GetObjectBoundingRadius(), 2 * INTERACTION_DISTANCE, frand(0, M_PI_F * 2));
+                    ClosePointNear(*gameObjTarget, x, y, z, gameObjTarget->Where().Extent(), 2 * INTERACTION_DISTANCE, frand(0, M_PI_F * 2));
 
                     // Note: event script is implemented in script library
-                    gameObjTarget->SummonCreature(25835, x, y, z, gameObjTarget->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15000);
+                    gameObjTarget->SummonCreature(25835, x, y, z, gameObjTarget->Where().Facing(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15000);
                     gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                     break;
                 }
@@ -604,7 +604,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                         case 188150: npcEntry = 26216; break;       // Glacial Templar (Hellfire Peninsula)
                     }
 
-                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY(), gameObjTarget->GetPositionZ(), gameObjTarget->GetAngle(m_caster), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+                    gameObjTarget->SummonCreature(npcEntry, gameObjTarget->Where().X(), gameObjTarget->Where().Y(), gameObjTarget->Where().Z(), gameObjTarget->Where().BearingTo(m_caster->Where()), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
                     gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                     break;
                 }
@@ -883,12 +883,12 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     // Summon in random point all other units if location present
     else
     {
-        m_caster->GetClosePoint(x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
+        ClosePointNear(*m_caster, x, y, z, DEFAULT_WORLD_OBJECT_SIZE);
     }
 
     Map* map = m_caster->GetMap();
     if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), go_id, map,
-                          m_caster->GetPhaseMask(), x, y, z, m_caster->GetOrientation()))
+                          m_caster->GetPhaseMask(), x, y, z, m_caster->Where().Facing()))
     {
         delete pGameObj;
         return;
@@ -971,7 +971,7 @@ void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
     uint32 health = pTarget->GetMaxHealth() * damage / 100;
     uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
 
-    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetObjectGuid(), m_caster->GetMapId(), m_caster->Where().X(), m_caster->Where().Y(), m_caster->Where().Z(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
@@ -1032,17 +1032,22 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
     const float IN_OR_UNDER_LIQUID_RANGE = 0.8f;                // range to make player under liquid or on liquid surface from liquid level
 
     Geometry::Vector3 prevPos, nextPos;
-    float orientation = unitTarget->GetOrientation();
+    float orientation = unitTarget->Where().Facing();
 
-    prevPos.x = unitTarget->GetPositionX();
-    prevPos.y = unitTarget->GetPositionY();
-    prevPos.z = unitTarget->GetPositionZ();
+    prevPos.x = unitTarget->Where().X();
+    prevPos.y = unitTarget->Where().Y();
+    prevPos.z = unitTarget->Where().Z();
 
     float groundZ = prevPos.z;
     bool isPrevInLiquid = false;
 
     // falling case
-    if (!unitTarget->GetMap()->GetHeightInRange(unitTarget->GetPhaseMask(), prevPos.x, prevPos.y, groundZ, 3.0f) && unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+    const auto prevFloor = unitTarget->GetMap()->FloorNear(unitTarget->GetPhaseMask(), prevPos.x, prevPos.y, groundZ, 3.0f);
+    if (prevFloor)
+    {
+        groundZ = *prevFloor;
+    }
+    if (!prevFloor && unitTarget->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
     {
         nextPos.x = prevPos.x + dist * cos(orientation);
         nextPos.y = prevPos.y + dist * sin(orientation);
@@ -1060,7 +1065,10 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         else
         {
             // fix z to ground if near of it
-            unitTarget->GetMap()->GetHeightInRange(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, nextPos.z, 10.0f);
+            if (auto snap = unitTarget->GetMap()->FloorNear(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, nextPos.z, 10.0f))
+            {
+                nextPos.z = *snap;
+            }
         }
 
         // check any obstacle and fix coords
@@ -1105,7 +1113,8 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         GridMapLiquidData liquidData;
 
         // try fix height for next position
-        if (!unitTarget->GetMap()->GetHeightInRange(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, nextPos.z))
+        const auto nextFloor = unitTarget->GetMap()->FloorNear(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, nextPos.z);
+        if (!nextFloor)
         {
             // we cant so test if we are on water
             if (!unitTarget->GetMap()->GetTerrain()->IsInWater(nextPos.x, nextPos.y, nextPos.z, &liquidData))
@@ -1123,6 +1132,7 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
         }
         else
         {
+            nextPos.z = *nextFloor;
             isOnGround = true;                                  // player is on ground
         }
 
@@ -1147,12 +1157,11 @@ void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
 
             isInLiquid = true;
 
-            float ground = nextPos.z;
-            if (unitTarget->GetMap()->GetHeightInRange(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, ground))
+            if (auto ground = unitTarget->GetMap()->FloorNear(unitTarget->GetPhaseMask(), nextPos.x, nextPos.y, nextPos.z))
             {
-                if (nextPos.z < ground)
+                if (nextPos.z < *ground)
                 {
-                    nextPos.z = ground;
+                    nextPos.z = *ground;
                     isOnGround = true;                          // player is on ground of the water
                 }
             }
@@ -1367,7 +1376,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     // TODO: research more ContactPoint/attack distance.
     // 3.666666 instead of ATTACK_DISTANCE(5.0f) in below seem to give more accurate result.
     float x, y, z;
-    unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+    ContactPointNear(*unitTarget, m_caster, x, y, z, 3.666666f);
 
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
@@ -1398,7 +1407,7 @@ void Spell::EffectCharge2(SpellEffectIndex /*eff_idx*/)
     }
     else if (unitTarget && unitTarget != m_caster)
     {
-        unitTarget->GetContactPoint(m_caster, x, y, z, 3.666666f);
+        ContactPointNear(*unitTarget, m_caster, x, y, z, 3.666666f);
     }
     else
     {
@@ -1457,7 +1466,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
         return;
     }
 
-    float dist = unitTarget->GetDistance2d(m_caster);
+    float dist = unitTarget->Where().DistanceTo(m_caster->Where(), false);
     if (damage && dist > damage)
     {
         dist = float(damage);

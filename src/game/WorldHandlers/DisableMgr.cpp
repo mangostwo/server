@@ -410,7 +410,7 @@ bool IsDisabledFor(DisableType type, uint32 entry, Unit const* unit, uint8 flags
                     if (spellFlags & SPELL_DISABLE_AREA)
                     {
                         std::set<uint32> const& areaIds = itr->second.params[1];
-                        if (areaIds.find(unit->GetAreaId()) != areaIds.end())
+                        if (areaIds.find(unit->GetTerrain()->GetAreaId(unit->Where().X(), unit->Where().Y(), unit->Where().Z())) != areaIds.end())
                         {
                             return true;                                        // Spell is disabled in this area
                         }

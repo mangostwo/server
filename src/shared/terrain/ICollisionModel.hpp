@@ -7,6 +7,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 namespace world::terrain
 {
@@ -27,6 +28,12 @@ namespace world::terrain
 
         virtual std::optional<float> RaycastNearest(const Vec3& origin, const Vec3& dir,
                                                     float tMax) const = 0;
+
+        // Every surface the ray crosses, appended in no particular order. What the
+        // nearest hit cannot answer: which floor a point is standing on when the point
+        // sits under one, and how many more lie beneath it.
+        virtual void RaycastAll(const Vec3& origin, const Vec3& dir, float tMax,
+                                std::vector<float>& out) const = 0;
 
         virtual const Aabb& Bounds() const = 0;
 

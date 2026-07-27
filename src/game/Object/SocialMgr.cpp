@@ -299,7 +299,7 @@ void SocialMgr::GetFriendInfo(Player* player, uint32 friend_lowguid, FriendInfo&
             {
                 friendInfo.Status = FRIEND_STATUS_DND;
             }
-            friendInfo.Area = pFriend->GetZoneId();
+            friendInfo.Area = pFriend->GetTerrain()->GetZoneId(pFriend->Where().X(), pFriend->Where().Y(), pFriend->Where().Z());
             friendInfo.Level = pFriend->getLevel();
             friendInfo.Class = pFriend->getClass();
         }

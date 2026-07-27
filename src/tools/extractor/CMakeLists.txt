@@ -145,3 +145,7 @@ endif()
 
 set_target_properties(mangos-extractor PROPERTIES FOLDER "tools")
 install(TARGETS mangos-extractor DESTINATION ${BIN_DIR}/tools)
+
+# Beside the binary, because that is where the tool looks for it when `--vessels` is
+# not given. It is data, not configuration: it changes when the client does.
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vessels.txt DESTINATION ${BIN_DIR}/tools)

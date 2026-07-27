@@ -40,8 +40,11 @@ set(SRC_GRP_TESTS
     ClientParserTest.cpp
     TerrainModelTest.cpp
     TileSerializerTest.cpp
+    ModelMapTest.cpp
     NavBinningTest.cpp
     DynamicCollisionTest.cpp
+    GracefulCloseTest.cpp
+    PlacementTest.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These two know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
@@ -115,3 +118,8 @@ add_test(NAME build_policy
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckBuildPolicy.cmake)
+
+add_test(NAME spatial_boundary
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckSpatialBoundary.cmake)

@@ -30,12 +30,15 @@ add_library(terrain STATIC
     Accelerators.hpp
     CollisionModel.cpp
     CollisionModel.hpp
+    Column.hpp
     FusedTerrain.cpp
     FusedTerrain.hpp
     GoModelStore.cpp
     GoModelStore.hpp
     Geometry.hpp
     ICollisionModel.hpp
+    ILiveGeometry.hpp
+    ModelTileSource.hpp
     Terrain.hpp
     TileSerializer.cpp
     TileSerializer.hpp

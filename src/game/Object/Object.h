@@ -37,6 +37,7 @@
 #include "ObjectGuid.h"
 #include "Camera.h"
 #include "GameTime.h"
+#include "Geometry/Placement.h"
 #ifdef ENABLE_ELUNA
 #include "LuaValue.h"
 #endif /* ENABLE_ELUNA */
@@ -57,6 +58,13 @@
 #define DEFAULT_OBJECT_SCALE        1.0f                    // non-Tauren player/item scale as default, npc/go from database, pets from dbc
 
 #define MAX_STEALTH_DETECT_RANGE    45.0f
+
+// How far a deck map extends from its origin. A deck map is the hull, so its bounds are
+// the hull's, and the biggest in 3.3.5 is a gunship at roughly 220 yards stem to stern.
+// Used only when the vessel cannot be resolved and its real extent read; the job is to
+// reject the absolute continent coordinates a leaving zeppelin sometimes reports.
+#define MAX_DECK_EXTENT             250.0f
+#define DECK_EDGE_MARGIN            10.0f
 
 /**
  * @brief Temporary spawn type enumeration
@@ -304,6 +312,10 @@ class Object
         }
 
         void SetObjectScale(float newScale);
+
+        /// Scale feeds the spatial extent of anything that has one. A hook, not a
+        /// downcast: Object must not learn that WorldObject exists.
+        virtual void OnScaleChanged() {}
 
         uint8 GetTypeId() const { return m_objectTypeId; }
         bool isType(TypeMask mask) const { return (mask & m_objectType); }
@@ -653,73 +665,36 @@ class WorldObject : public Object
 
         void _Create(uint32 guidlow, HighGuid guidhigh, uint32 phaseMask);
 
+        /// A VEHICLE SEAT, and only ever that. Nothing aboard a ship has one: she is a map,
+        /// and what is on a map is simply on it.
         TransportInfo* GetTransportInfo() const { return m_transportInfo; }
         bool IsBoarded() const { return m_transportInfo != NULL; }
-        void SetTransportInfo(TransportInfo* transportInfo) { m_transportInfo = transportInfo; }
-
-        void Relocate(float x, float y, float z, float orientation);
-        void Relocate(float x, float y, float z);
-
-        void SetOrientation(float orientation);
-
-        float GetPositionX() const { return m_position.x; }
-        float GetPositionY() const { return m_position.y; }
-        float GetPositionZ() const { return m_position.z; }
-        void GetPosition(float& x, float& y, float& z) const
+        /// Boarding puts the object in its vehicle's frame (TransportInfo does that);
+        /// stepping off must put it back in its map's, or its coordinates would still be
+        /// read as seat offsets by everything that asks.
+        void SetTransportInfo(TransportInfo* transportInfo)
         {
-            x = m_position.x; y = m_position.y; z = m_position.z;
-        }
-        void GetPosition(WorldLocation& loc) const
-        {
-            loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation();
-        }
-        Position GetPosition() const
-        {
-            Position position = { m_position.x, m_position.y, m_position.z, m_position.o };
-            return position;
-        }
-        float GetOrientation() const { return m_position.o; }
-
-        /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
-        void GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const;
-        /** Gives a "free" spot for searcher in distance distance2d in direction absAngle on "good" height
-         * @param searcher          -           for whom a spot is searched for
-         * @param x, y, z           -           position for the found spot of the searcher
-         * @param searcher_bounding_radius  -   how much space the searcher will require
-         * @param distance2d        -           distance between the middle-points
-         * @param absAngle          -           angle in which the spot is preferred
-         */
-        void GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const;
-        /** Gives a "free" spot for a searcher on the distance (including bounding-radius calculation)
-         * @param x, y, z           -           position for the found spot
-         * @param bounding_radius   -           radius for the searcher
-         * @param distance2d        -           range in which to find a free spot. Default = 0.0f (which usually means the units will have contact)
-         * @param angle             -           direction in which to look for a free spot. Default = 0.0f (direction in which 'this' is looking
-         * @param obj               -           for whom to look for a spot. Default = NULL
-         */
-        void GetClosePoint(float& x, float& y, float& z, float bounding_radius, float distance2d = 0.0f, float angle = 0.0f, const WorldObject* obj = NULL) const
-        {
-            // angle calculated from current orientation
-            GetNearPoint(obj, x, y, z, bounding_radius, distance2d + GetObjectBoundingRadius() + bounding_radius, GetOrientation() + angle);
-        }
-        /** Gives a "free" spot for a searcher in contact-range of "this" (including bounding-radius calculation)
-         * @param x, y, z           -           position for the found spot
-         * @param obj               -           for whom to find a contact position. The position will be searched in direction from 'this' towards 'obj'
-         * @param distance2d        -           distance which 'obj' and 'this' should have beetween their bounding radiuses. Default = CONTACT_DISTANCE
-         */
-        void GetContactPoint(const WorldObject* obj, float& x, float& y, float& z, float distance2d = CONTACT_DISTANCE) const
-        {
-            // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d + GetObjectBoundingRadius() + obj->GetObjectBoundingRadius(), GetAngle(obj));
+            m_transportInfo = transportInfo;
+            if (!transportInfo)
+            {
+                RefreshFrame();
+            }
         }
 
-        virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
+        /// WHERE THIS OBJECT IS -- the whole spatial API. An object HAS a placement; it
+        /// is not a bag of coordinates with geometry methods bolted on, so there are no
+        /// GetPositionX/GetDistance/HasInArc here and there never will be. Ask the
+        /// component: obj->Where().DistanceTo(other->Where()).
+        Geometry::Placement const& Where() const { return m_placement; }
 
-        bool IsPositionValid() const;
-        void UpdateGroundPositionZ(float x, float y, float& z) const;
-        void UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap = NULL) const;
+        /// Mutation of the pose. Movement drives this; nobody else should need it.
+        Geometry::Placement& Place() { return m_placement; }
 
-        void GetRandomPoint(float x, float y, float z, float distance, float& rand_x, float& rand_y, float& rand_z, float minDist = 0.0f, float const* ori = NULL) const;
+        /// The extent lives in the component; this only pushes a new value in when the
+        /// per-class formula's inputs change (a model, a scale -- rarely).
+        void RefreshBoundingRadius() { m_placement.Resize(ComputeBoundingRadius()); }
+
+        void OnScaleChanged() override { RefreshBoundingRadius(); }
 
         uint32 GetMapId() const { return m_mapId; }
         uint32 GetInstanceId() const { return m_InstanceId; }
@@ -729,54 +704,12 @@ class WorldObject : public Object
         bool InSamePhase(WorldObject const* obj) const { return InSamePhase(obj->GetPhaseMask()); }
         bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask); }
 
-        uint32 GetZoneId() const;
-        uint32 GetAreaId() const;
-        void GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const;
-
         InstanceData* GetInstanceData() const;
 
         const char* GetName() const { return m_name.c_str(); }
         void SetName(const std::string& newname) { m_name = newname; }
 
         virtual const char* GetNameForLocaleIdx(int32 /*locale_idx*/) const { return GetName(); }
-
-        float GetDistance(const WorldObject* obj) const;
-        float GetDistance(float x, float y, float z) const;
-        float GetDistance2d(const WorldObject* obj) const;
-        float GetDistance2d(float x, float y) const;
-        float GetDistanceZ(const WorldObject* obj) const;
-        bool IsInMap(const WorldObject* obj) const
-        {
-            return IsInWorld() && obj->IsInWorld() && (GetMap() == obj->GetMap()) && InSamePhase(obj);
-        }
-        bool IsWithinDist3d(float x, float y, float z, float dist2compare) const;
-        bool IsWithinDist2d(float x, float y, float dist2compare) const;
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
-
-        // use only if you will sure about placing both object at same map
-        bool IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D = true) const
-        {
-            return obj && _IsWithinDist(obj, dist2compare, is3D);
-        }
-
-        bool IsWithinDistInMap(WorldObject const* obj, float dist2compare, bool is3D = true) const
-        {
-            return obj && IsInMap(obj) && _IsWithinDist(obj, dist2compare, is3D);
-        }
-        bool IsWithinLOS(float x, float y, float z) const;
-        bool IsWithinLOSInMap(const WorldObject* obj) const;
-        bool GetDistanceOrder(WorldObject const* obj1, WorldObject const* obj2, bool is3D = true) const;
-        bool IsInRange(WorldObject const* obj, float minRange, float maxRange, bool is3D = true) const;
-        bool IsInRange2d(float x, float y, float minRange, float maxRange) const;
-        bool IsInRange3d(float x, float y, float z, float minRange, float maxRange) const;
-
-        float GetAngle(const WorldObject* obj) const;
-        float GetAngle(const float x, const float y) const;
-        bool HasInArc(const float arcangle, const WorldObject* obj) const;
-        bool IsInFrontInMap(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool IsInBackInMap(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool IsInFront(WorldObject const* target, float distance, float arc = M_PI) const;
-        bool IsInBack(WorldObject const* target, float distance, float arc = M_PI) const;
 
         virtual void CleanupsBeforeDelete();                // used in destructor or explicitly before mass creature delete to remove cross-references to already deleted units
 
@@ -846,6 +779,11 @@ class WorldObject : public Object
 
         virtual void StartGroupLoot(Group* /*group*/, uint32 /*timer*/) { }
 
+#ifdef MANGOS_SCRIPT_COMPAT
+        // The old coordinate-owning API, for SD3 and Eluna only. See the file's header.
+#include "Object/ScriptApiCompat.inl"
+#endif
+
 #ifdef ENABLE_ELUNA
         ElunaEventProcessor* elunaEvents;
 
@@ -857,11 +795,22 @@ class WorldObject : public Object
     protected:
         explicit WorldObject();
 
+        /// The per-class spatial extent. Overridden where the object is not a default
+        /// blob: a unit reads its model, a gameobject its geometry box.
+        virtual float ComputeBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
+
         // these functions are used mostly for Relocate() and Corpse/Player specific stuff...
         // use them ONLY in LoadFromDB()/Create() funcs and nowhere else!
         // mapId/instanceId should be set in SetMap() function!
-        void SetLocationMapId(uint32 _mapId) { m_mapId = _mapId; }
-        void SetLocationInstanceId(uint32 _instanceId) { m_InstanceId = _instanceId; }
+        void SetLocationMapId(uint32 _mapId) { m_mapId = _mapId; RefreshFrame(); }
+        void SetLocationInstanceId(uint32 _instanceId) { m_InstanceId = _instanceId; RefreshFrame(); }
+
+        /// Re-anchor the component to the frame the object's map identity names. The
+        /// pose is untouched: this says where the numbers are measured, not what they are.
+        void RefreshFrame()
+        {
+            m_placement.Rebase(Geometry::Frame::World(m_mapId, m_InstanceId));
+        }
 
         virtual void StopGroupLoot() {}
 
@@ -876,11 +825,47 @@ class WorldObject : public Object
         uint32 m_InstanceId;                                // in map copy with instance id
         uint32 m_phaseMask;                                 // in area phase state
 
-        Position m_position;
+        Geometry::Placement m_placement;
         ViewPoint m_viewPoint;
         WorldUpdateCounter m_updateTracker;
         bool m_isActiveObject;
         float m_visibilityDistanceOverride;
 };
+
+// Tests that are NOT geometry, so they are not the component's and never the object's:
+// world membership and phasing are game state, line of sight is a terrain question, and a
+// map's coordinate bounds belong to the map. Each asks the placement for the geometry and
+// adds only what the placement must not know.
+/// Can A reach B -- a common frame is required. Melee, spells, threat, aggro.
+bool CanInteract(WorldObject const& a, WorldObject const& b);
+
+/// Can B be shown A -- wider: also across a vessel's boundary, which the vessel relays.
+bool CanBeSeen(WorldObject const& seen, WorldObject const& viewer);
+
+/// CanBeSeen plus "near enough to bother". Anything aboard is measured from its VESSEL,
+/// the only pose it shares a frame with the shore -- an estimate, wrong by up to a
+/// waypoint gap, and adequate for a question whose answer is only ever draw or do not.
+bool SeenWithin(WorldObject const& seen, WorldObject const& viewer, float dist, bool is3D = true);
+
+bool InReach(WorldObject const& a, WorldObject const& b, float dist, bool is3D = true);
+bool InFrontPhased(WorldObject const& a, WorldObject const& b, float dist, float arc);
+bool InBackPhased(WorldObject const& a, WorldObject const& b, float dist, float arc);
+bool HasLineOfSight(WorldObject const& a, WorldObject const& b);
+bool HasLineOfSight(WorldObject const& a, Geometry::Vector3 const& point);
+bool IsPlaceable(WorldObject const& obj);
+
+// Terrain and grid answers about a position. The component supplies the geometry; the
+// height, the collision sweep and the map's bounds come from the engines that own them.
+Geometry::Vector3 PointNear(WorldObject const& anchor, float distance2d, float absAngle);
+void DropToGround(WorldObject const& obj, float x, float y, float& z);
+void ClampToAllowedZ(WorldObject const& obj, float x, float y, float& z, Map* atMap = NULL);
+Geometry::Vector3 RandomGroundPointNear(WorldObject const& obj, Geometry::Vector3 const& centre,
+                                       float distance, float minDist = 0.0f, float const* ori = NULL);
+void FindFreeSpotNear(WorldObject const& anchor, WorldObject const* searcher, float& x, float& y, float& z,
+                      float searcher_bounding_radius, float distance2d, float absAngle);
+void ClosePointNear(WorldObject const& anchor, float& x, float& y, float& z, float bounding_radius,
+                    float distance2d = 0.0f, float angle = 0.0f, WorldObject const* searcher = NULL);
+void ContactPointNear(WorldObject const& anchor, WorldObject const* obj, float& x, float& y, float& z,
+                      float distance2d = CONTACT_DISTANCE);
 
 #endif

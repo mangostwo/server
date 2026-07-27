@@ -804,7 +804,7 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
 
     // Some spells applied at quest activation
     uint32 zone, area;
-    GetZoneAndAreaId(zone, area);
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
     {
@@ -1118,7 +1118,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // remove auras from spells with quest reward state limitations
     // Some spells applied at quest reward
     uint32 zone, area;
-    GetZoneAndAreaId(zone, area);
+    GetTerrain()->GetZoneAndAreaId(zone, area, Where().X(), Where().Y(), Where().Z());
     SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAreaMapBounds(zone);
     for (SpellAreaForAreaMap::const_iterator itr = saBounds.first; itr != saBounds.second; ++itr)
     {

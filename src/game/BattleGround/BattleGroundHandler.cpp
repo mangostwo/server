@@ -356,14 +356,14 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
             if (flagCarrierAlliance)
             {
                 data << flagCarrierAlliance->GetObjectGuid();
-                data << float(flagCarrierAlliance->GetPositionX());
-                data << float(flagCarrierAlliance->GetPositionY());
+                data << float(flagCarrierAlliance->Where().X());
+                data << float(flagCarrierAlliance->Where().Y());
             }
             if (flagCarrierHorde)
             {
                 data << flagCarrierHorde->GetObjectGuid();
-                data << float(flagCarrierHorde->GetPositionX());
-                data << float(flagCarrierHorde->GetPositionY());
+                data << float(flagCarrierHorde->Where().X());
+                data << float(flagCarrierHorde->Where().Y());
             }
 
             SendPacket(&data);
@@ -386,8 +386,8 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket & /*recv_
             if (flagCarrier)
             {
                 data << flagCarrier->GetObjectGuid();
-                data << float(flagCarrier->GetPositionX());
-                data << float(flagCarrier->GetPositionY());
+                data << float(flagCarrier->Where().X());
+                data << float(flagCarrier->Where().Y());
             }
 
             SendPacket(&data);

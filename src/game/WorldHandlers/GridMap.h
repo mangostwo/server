@@ -38,6 +38,7 @@
 
 #include <bitset>
 #include <list>
+#include <optional>
 
 class Creature;
 class Unit;
@@ -147,10 +148,24 @@ class Referencable
 typedef std::atomic<long> AtomicLong;
 
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, real value for unknown height is INVALID_HEIGHT_VALUE
-#define INVALID_HEIGHT_VALUE -200000.0f                     // for return, check value for unknown height is INVALID_HEIGHT
-#define MAX_FALL_DISTANCE     250000.0f                     // "unlimited fall" to find a floor if one is available
-#define DEFAULT_HEIGHT_SEARCH     10.0f                     // default search distance to find height at nearby locations
+
+// The ONE value that means "no height". There used to be a second, INVALID_HEIGHT_VALUE,
+// returned where this one was compared against -- so a caller that checked the wrong
+// constant accepted -200000 as a real height and never said so. Absence is std::optional
+// everywhere inside the core; this survives only for the scripting modules, which cannot
+// be changed from this repository.
+#define INVALID_HEIGHT       -100000.0f
+
+// A floor at most this far above the point still counts as the one it stands on. Small on
+// purpose: a wider tolerance answers someone on a floor with the roof over their head.
+#define FLOOR_SEARCH_UP            2.0f
+
+// How far the sweep starts ABOVE the point anyway, so a position buried in geometry -- a
+// spawn a yard into a hillside -- still finds the surface it would stand on. Buried deeper
+// than this is a broken coordinate, and no floor is the honest answer.
+#define FLOOR_BURIED_LIFT         50.0f
+
+#define FLOOR_SEARCH_DOWN      10000.0f
 #define DEFAULT_WATER_SEARCH      50.0f                     // default search distance to case detection water level
 
 /**
@@ -177,8 +192,18 @@ class TerrainInfo : public Referencable<AtomicLong>
         // existence checks: one file now carries both.
         static bool ExistTile(uint32 mapid, int gx, int gy);
 
-        float GetHeightStatic(float x, float y, float z, bool checkVMap = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
-        float GetWaterLevel(float x, float y, float z, float* pGround = NULL) const;
+        /// THE terrain query. Every surface crossing [zBottom, zTop] over (x,y); select
+        /// the one the question means on the result. `live` is the caller's runtime
+        /// geometry -- a Map owns one, a bare terrain lookup has none -- and `phasemask`
+        /// only ever reaches it.
+        world::terrain::Column ColumnAt(float x, float y, float zTop, float zBottom,
+                                        const world::terrain::ILiveGeometry* live = nullptr,
+                                        uint32 phasemask = 0) const;
+
+        /// The floor under a point, static geometry only. Nothing when the column is bare.
+        std::optional<float> StaticFloor(float x, float y, float z) const;
+
+        std::optional<float> GetWaterLevel(float x, float y, float z, float* pGround = NULL) const;
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = NULL, bool swim = false) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = 0) const;
         bool IsUnderWater(float x, float y, float z) const;

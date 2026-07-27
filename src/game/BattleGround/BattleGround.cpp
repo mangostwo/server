@@ -462,7 +462,7 @@ void BattleGround::Update(uint32 diff)
                     {
                         float x, y, z, o;
                         GetTeamStartLoc(player->GetTeam(), x, y, z, o);
-                        if (!player->IsWithinDist3d(x, y, z, maxDist))
+                        if (!player->Where().WithinDist(Geometry::Vector3(x, y, z), maxDist))
                         {
                             player->TeleportTo(GetMapId(), x, y, z, o);
                         }
@@ -1607,7 +1607,7 @@ void BattleGround::SetBgRaid(Team team, Group* bg_raid)
 /// <returns></returns>
 WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
 {
-    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
+    return sObjectMgr.GetClosestGraveYard(player->Where().X(), player->Where().Y(), player->Where().Z(), player->GetMapId(), player->GetTeam());
 }
 
 bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const

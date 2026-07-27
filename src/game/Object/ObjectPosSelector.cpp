@@ -93,7 +93,7 @@ void ObjectPosSelector::AddUsedArea(WorldObject const* obj, float angle, float d
     }
 
     // (half) angle that obj occupies
-    float sr_angle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * obj->GetObjectBoundingRadius() / dist);
+    float sr_angle = atan(OCCUPY_POS_ANGLE_ATAN_FACTOR * obj->Where().Extent() / dist);
 
     if (angle >= 0)
     {

@@ -48,10 +48,32 @@ void SendChannel::post(const uint8_t* data, size_t len) {
         ctx->enqueue(data, len);
 }
 
+// The session asked to close. Do NOT close the socket here.
+//
+// Closing it discards whatever is still queued, and what is queued at this exact
+// moment is the reason for the disconnect -- the auth rejection, the transfer abort,
+// the kick message. The session sets closed() before calling this, so every completion
+// path already re-checks "closed and drained"; all this has to do is record the intent
+// and kick the drain along.
 void SendChannel::requestClose() {
-    std::lock_guard<std::mutex> lock(mu);
-    if (ctx)
-        ctx->close();  // closing the socket makes pending I/O complete -> markDead
+    ConnCtx* c = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(mu);
+        closeRequested = true;
+        c = ctx;
+    }
+    if (!c)
+    {
+        return;
+    }
+
+    // Inside a callback the response has not been queued yet, so the dispatcher makes
+    // this call instead, once it has. Outside one -- a world thread closing an idle
+    // connection -- no completion may ever arrive, so this is the only chance to act.
+    if (!c->dispatching.load(std::memory_order_acquire))
+    {
+        c->closeIfDrained();
+    }
 }
 
 void SendChannel::disarm() {
@@ -115,6 +137,38 @@ void ConnCtx::onSendComplete(DWORD bytes) {
     // the protocol. consume() advances the cursor; startSend() re-posts the remainder.
     channel->out.consume(static_cast<size_t>(bytes));
     startSend();
+}
+
+bool ConnCtx::drained() const {
+    return channel->out.empty();
+}
+
+// Half-closes once the queue is empty. shutdown(SD_SEND) rather than closesocket:
+// the FIN flushes what Winsock still holds and the peer reads the tail, whereas a
+// closesocket on a socket with unsent data is free to reset the connection and throw
+// it away. The recv side stays open so the peer's own FIN still arrives and drives the
+// normal teardown.
+bool ConnCtx::closeIfDrained() {
+    {
+        std::lock_guard<std::mutex> lock(channel->mu);
+        if (!channel->closeRequested)
+        {
+            return false;
+        }
+    }
+    if (!drained())
+    {
+        return false;
+    }
+
+    std::lock_guard<std::mutex> sk(sockMu);
+    if (sock == INVALID_SOCKET || sendShutdown)
+    {
+        return false;
+    }
+    sendShutdown = true;
+    ::shutdown(sock, SD_SEND);
+    return true;
 }
 
 void ConnCtx::close() {
@@ -376,6 +430,12 @@ void IocpServer::workerThread() {
             // because this completion's own ref is still held, so the free happens at
             // the release() below -- after the lock is already gone.
             std::lock_guard<std::mutex> cbLock(ctx->cb);
+            ctx->dispatching.store(true, std::memory_order_release);
+            struct DispatchGuard {
+                ConnCtx* c;
+                ~DispatchGuard() { c->dispatching.store(false, std::memory_order_release); }
+            } dispatchGuard{ctx};
+
             if (!ok || bytesXfr == 0)
                 markDead(ctx);                  // closed or error: tear down (idempotent)
             else if (ctx->dead.load(std::memory_order_acquire)) {
@@ -484,17 +544,22 @@ void IocpServer::handleAccept(AcceptOv* aov, DWORD /*bytes*/) {
         // race this handler. Run the callbacks under the same per-ctx lock the worker
         // dispatch uses, and skip if a teardown already won.
         std::lock_guard<std::mutex> cbLock(ctx->cb);
+        ctx->dispatching.store(true, std::memory_order_release);
         if (!ctx->dead.load(std::memory_order_acquire)) {
             // Server-initiated greeting (e.g. world server's SMSG_AUTH_CHALLENGE).
             auto greeting = ctx->session->onConnect();
             if (!greeting.empty())
                 ctx->enqueue(greeting.data(), greeting.size());
 
+            ctx->dispatching.store(false, std::memory_order_release);
+            ctx->closeIfDrained();
+
             if (ctx->session->closed() && ctx->channel->out.empty())
                 markDead(ctx);
             else if (!postRecv(ctx))
                 markDead(ctx);
         }
+        ctx->dispatching.store(false, std::memory_order_release);
     }
 
     ctx->release();  // drop the accept-handler reference
@@ -533,6 +598,8 @@ void IocpServer::handleRecv(ConnCtx* ctx, DWORD bytes) {
     if (!response.empty())
         ctx->enqueue(response.data(), response.size());
 
+    ctx->closeIfDrained();
+
     // A session that asks to close having just queued its final bytes (an auth
     // rejection, say) must still get them out, so only tear down once the outbound
     // buffer has actually drained. Otherwise keep a recv posted: it guarantees a
@@ -548,6 +615,7 @@ void IocpServer::handleRecv(ConnCtx* ctx, DWORD bytes) {
 
 void IocpServer::handleSend(ConnCtx* ctx, DWORD bytes) {
     ctx->onSendComplete(bytes);
+    ctx->closeIfDrained();
     // Only tear down once the session's remaining output has actually drained —
     // otherwise a session that closes right after queueing its last packet (e.g. an
     // auth rejection followed by a disconnect) loses those bytes.

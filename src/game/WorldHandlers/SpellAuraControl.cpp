@@ -249,7 +249,7 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
         pet->AttackStop();
 
         // out of range pet dismissed
-        if (!pet->IsWithinDistInMap(p_caster, pet->GetMap()->GetVisibilityDistance()))
+        if (!InReach(*pet, *p_caster, pet->GetMap()->GetVisibilityDistance()))
         {
             p_caster->RemovePet(PET_SAVE_REAGENTS);
         }
@@ -590,7 +590,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         {
             GameObject* pObj = new GameObject;
             if (pObj->Create(target->GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), 185584, target->GetMap(), target->GetPhaseMask(),
-                             target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation()))
+                             target->Where().X(), target->Where().Y(), target->Where().Z(), target->Where().Facing()))
             {
                 pObj->SetRespawnTime(GetAuraDuration() / IN_MILLISECONDS);
                 pObj->SetSpellId(GetId());

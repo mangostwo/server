@@ -6,6 +6,7 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
+#include <utility>
 
 namespace world::terrain
 {
@@ -57,7 +58,10 @@ namespace world::terrain
     void FusedTerrain::SetTileDir(const std::string& dir) { g_tileDir = dir; }
     const std::string& FusedTerrain::TileDir() { return g_tileDir; }
 
-    FusedTerrain::FusedTerrain(uint32_t mapId) : m_mapId(mapId) {}
+    FusedTerrain::FusedTerrain(uint32_t mapId, std::shared_ptr<ITileSource> source)
+        : m_mapId(mapId), m_source(std::move(source))
+    {
+    }
 
     bool FusedTerrain::HasTile(uint32_t mapId, int tx, int ty)
     {
@@ -77,6 +81,10 @@ namespace world::terrain
 
     FusedTerrain::TilePtr FusedTerrain::LoadCell(int tx, int ty) const
     {
+        if (m_source)
+        {
+            return m_source->Load(m_mapId, tx, ty);
+        }
         if (g_tileDir.empty())
         {
             return nullptr;
@@ -128,7 +136,11 @@ namespace world::terrain
         }
 
         TilePtr tile;
-        if (!g_tileDir.empty())
+        if (m_source)
+        {
+            tile = m_source->LoadGlobal(m_mapId);
+        }
+        else if (!g_tileDir.empty())
         {
             tile = ReadTile(g_tileDir + "/" + GlobalWmoFileName(m_mapId));
         }
@@ -224,34 +236,38 @@ namespace world::terrain
         return n;
     }
 
-    bool FusedTerrain::GetHeight(float x, float y, float z, float& outZ, float searchUp,
-                                 float maxDrop) const
+    Column FusedTerrain::ColumnAt(float x, float y, float zTop, float zBottom,
+                                  const ILiveGeometry* live, uint32_t filter) const
     {
+        Column column;
+
         TilePtr tile = TileAt(x, y);
         TilePtr global = GlobalWmo();
         if (!tile && !global)
         {
-            return false;
+            return column;
         }
 
-        const float ceiling = z + searchUp;
-        float best = -std::numeric_limits<float>::max();
-        bool found = false;
-
+        // Deliberately not clipped to zBottom. A heightmap sample is a single value the
+        // tile already holds, so there is nothing to gain by hiding it, and a caller
+        // probing from far above (MAX_HEIGHT) would otherwise get an empty column on a
+        // map whose only surface is terrain.
         if (tile)
         {
             if (auto h = tile->TerrainHeight(x, y))
             {
-                if (*h <= ceiling)
+                if (*h <= zTop)
                 {
-                    best = *h;
-                    found = true;
+                    column.AddSolid(*h, SurfaceKind::Terrain);
                 }
             }
         }
 
-        const Vec3 originWorld{x, y, ceiling};
+        const float span = zTop - zBottom;
+        const Vec3 originWorld{x, y, zTop};
         const Vec3 downWorld{0.0f, 0.0f, -1.0f};
+
+        std::vector<float> hits;
 
         auto probe = [&](const std::vector<StaticInstance>& instances)
         {
@@ -262,8 +278,7 @@ namespace world::terrain
                     continue;
                 }
                 const Aabb& wb = inst.worldBounds;
-                if (!wb.coversColumn(x, y) || wb.hi.z < ceiling - maxDrop ||
-                    wb.lo.z > ceiling + 0.1f)
+                if (!wb.coversColumn(x, y) || wb.hi.z < zBottom || wb.lo.z > zTop + 0.1f)
                 {
                     continue;
                 }
@@ -278,97 +293,36 @@ namespace world::terrain
 
                 // localToWorld(o + t*d) == originWorld + t*downWorld, so t is already a
                 // world distance whatever the instance scale.
-                if (auto t = inst.model->RaycastNearest(originLocal, dirLocal, maxDrop))
+                hits.clear();
+                inst.model->RaycastAll(originLocal, dirLocal, span, hits);
+                for (const float t : hits)
                 {
-                    const float hitZ = ceiling - *t;
-                    if (hitZ > best)
+                    column.AddSolid(zTop - t, SurfaceKind::Static);
+                }
+
+                // The ray origin doubles as the liquid probe: MLIQ is indexed by local X
+                // and Y alone, and every real placement is a Z-rotation plus a
+                // translation, so which height along the column it is taken from cannot
+                // change the pair those come out as.
+                const Vec3 pointLocal = inst.xf.worldToLocal(originWorld);
+                if (auto local = inst.model->LiquidLocal(pointLocal))
+                {
+                    const LiquidKind kind = static_cast<LiquidKind>(local->kind);
+                    if (kind != LiquidKind::None)
                     {
-                        best = hitZ;
-                        found = true;
+                        // Lift the surface back through the placement itself: it sits
+                        // directly over the query column, so transforming that exact
+                        // point is exact. Reconstructing the lift by hand applies the
+                        // placement scale twice and assumes the model's local Z is
+                        // parallel to world Z.
+                        const Vec3 surfaceLocal{pointLocal.x, pointLocal.y, local->z};
+                        LiquidInfo info;
+                        info.level = inst.xf.localToWorld(surfaceLocal).z;
+                        info.kind = kind;
+                        info.entry = local->entry;
+                        info.deep = local->deep;
+                        column.AddLiquid(info);
                     }
-                }
-            }
-        };
-
-        if (tile)
-        {
-            probe(tile->instances);
-        }
-        if (global && global != tile)
-        {
-            probe(global->instances);
-        }
-
-        if (found)
-        {
-            outZ = best;
-        }
-        return found;
-    }
-
-    bool FusedTerrain::GetFloor(float x, float y, float z, float& outZ) const
-    {
-        if (GetHeight(x, y, z, outZ, 2.0f, 10000.0f))
-        {
-            return true;
-        }
-        return GetHeight(x, y, z, outZ, 10000.0f, 10000.0f);
-    }
-
-    bool FusedTerrain::GetLiquid(float x, float y, float z, LiquidInfo& out) const
-    {
-        TilePtr tile = TileAt(x, y);
-        TilePtr global = GlobalWmo();
-        if (!tile && !global)
-        {
-            return false;
-        }
-
-        bool have = false;
-        LiquidInfo best;
-        const Vec3 queryWorld{x, y, z};
-
-        auto probe = [&](const std::vector<StaticInstance>& instances)
-        {
-            for (const StaticInstance& inst : instances)
-            {
-                if (!inst.model || inst.model->Empty())
-                {
-                    continue;
-                }
-                const Aabb& wb = inst.worldBounds;
-                if (!wb.coversColumn(x, y) || wb.hi.z < z - 50.f || wb.lo.z > z + 50.f)
-                {
-                    continue;
-                }
-
-                const Vec3 pointLocal = inst.xf.worldToLocal(queryWorld);
-                auto local = inst.model->LiquidLocal(pointLocal);
-                if (!local)
-                {
-                    continue;
-                }
-
-                const LiquidKind kind = static_cast<LiquidKind>(local->kind);
-                if (kind == LiquidKind::None)
-                {
-                    continue;
-                }
-
-                // Lift the surface back through the placement itself: it sits directly
-                // over the query column, so transforming that exact point is exact.
-                // Reconstructing the lift by hand applies the placement scale twice and
-                // assumes the model's local Z is parallel to world Z.
-                const Vec3 surfaceLocal{pointLocal.x, pointLocal.y, local->z};
-                const float surfaceZ = inst.xf.localToWorld(surfaceLocal).z;
-
-                if (!have || surfaceZ > best.level)
-                {
-                    best.level = surfaceZ;
-                    best.kind = kind;
-                    best.entry = local->entry;
-                    best.deep = local->deep;
-                    have = true;
                 }
             }
         };
@@ -386,19 +340,16 @@ namespace world::terrain
         {
             if (auto adt = tile->LiquidAt(x, y))
             {
-                if (!have || adt->level > best.level)
-                {
-                    best = *adt;
-                    have = true;
-                }
+                column.AddLiquid(*adt);
             }
         }
 
-        if (have)
+        if (live)
         {
-            out = best;
+            live->AddSurfaces(x, y, zTop, zBottom, filter, column);
         }
-        return have;
+
+        return column;
     }
 
     void FusedTerrain::CollectSegmentInstances(const Vec3& a, const Vec3& b,

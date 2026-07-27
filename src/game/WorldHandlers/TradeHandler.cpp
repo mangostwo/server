@@ -343,7 +343,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     my_trade->SetAccepted(true);
 
     TradeStatusInfo info;
-    if (!_player->IsWithinDistInMap(trader, TRADE_DISTANCE, false))
+    if (!InReach(*_player, *trader, TRADE_DISTANCE, false))
     {
         info.Status = TRADE_STATUS_TARGET_TO_FAR;
         SendTradeStatus(info);
@@ -758,7 +758,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pOther->IsWithinDistInMap(_player, 10.0f, false))
+    if (!InReach(*pOther, *_player, 10.0f, false))
     {
         info.Status = TRADE_STATUS_TARGET_TO_FAR;
         SendTradeStatus(info);

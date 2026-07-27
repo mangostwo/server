@@ -95,6 +95,8 @@ class DungeonPersistentState;
 class BattleGroundPersistentState;
 struct ScriptInfo;
 class BattleGround;
+class Transport;
+class TransportMap;
 class TerrainInfo;
 class GameObjectModel;
 class WeatherSystem;
@@ -286,6 +288,12 @@ class Map : public GridRefManager<NGridType>
         bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
         bool IsContinent() const { return i_mapEntry && i_mapEntry->IsContinent(); }
 
+        /// This map AS A VESSEL, or NULL. Asked of the map itself rather than of its id, so
+        /// the answer comes from what the map IS -- and the caller gets the thing it wanted
+        /// rather than a boolean plus a downcast.
+        virtual TransportMap* AsTransport() { return NULL; }
+        virtual TransportMap const* AsTransport() const { return NULL; }
+
         // can't be nullptr for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
 
@@ -322,6 +330,9 @@ class Map : public GridRefManager<NGridType>
 
         // must called with AddToWorld
         void AddToActive(WorldObject* obj);
+
+        /// How many non-player objects this map is keeping awake.
+        size_t GetActiveObjectCount() const { return m_activeNonPlayers.size(); }
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
@@ -354,6 +365,21 @@ class Map : public GridRefManager<NGridType>
         // get corresponding TerrainData object for this particular map
         const TerrainInfo* GetTerrain() const { return m_TerrainData; }
 
+        /**
+         * @brief The players OUTSIDE this map who must nonetheless HEAR what happens on it.
+         *
+         * Only a deck map has them, refreshed by the vessel at the top of its tick. This is
+         * a BROADCAST channel, not a visibility one: a spline, an emote, a spell go -- the
+         * things a crew member says when nobody's visibility pass happens to be running.
+         * Who can SEE the deck is decided by each viewer's own sweep, which reaches across
+         * the boundary itself.
+         */
+        std::vector<Player*> const& ExternalObservers() const { return m_externalObservers; }
+        void SetExternalObservers(std::vector<Player*>&& observers)
+        {
+            m_externalObservers = std::move(observers);
+        }
+
         void CreateInstanceData(bool load);
         InstanceData* GetInstanceData() const { return i_data; }
         virtual uint32 GetScriptId() const { return sScriptMgr.GetBoundScriptId(SCRIPTED_MAP, GetId()); }
@@ -362,9 +388,24 @@ class Map : public GridRefManager<NGridType>
         void MonsterYellToMap(CreatureInfo const* cinfo, int32 textId, Language language, Unit const* target, uint32 senderLowGuid = 0) const;
         void PlayDirectSoundToMap(uint32 soundId, uint32 zoneId = 0) const;
 
-        // Dynamic VMaps
+        /// THE Z QUERY for this map, and the only place the baked world and the runtime
+        /// one are put together. Everything that asks where a surface is goes through
+        /// here and selects on the result; ask the terrain directly and doors, lifts and
+        /// phase silently stop existing.
+        world::terrain::Column ColumnAt(uint32 phasemask, float x, float y, float zTop,
+                                        float zBottom) const;
+
+        /// The floor under a point. Nothing when the column is bare.
+        std::optional<float> Floor(uint32 phasemask, float x, float y, float z) const;
+
+        /// Floor, but only if it is within `maxSearchDist` of z. Nothing otherwise.
+        std::optional<float> FloorNear(uint32 phasemask, float x, float y, float z,
+                                       float maxSearchDist = 4.0f) const;
+
+        /// Floor as a bare float, INVALID_HEIGHT when there is none. Exists because the
+        /// scripting modules are submodules and cannot be changed from this repository;
+        /// core code uses Floor().
         float GetHeight(uint32 phasemask, float x, float y, float z) const;
-        bool GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist = 4.0f) const;
         bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 
@@ -445,7 +486,6 @@ class Map : public GridRefManager<NGridType>
         void SendRemoveTransports(Player* player);
 
         bool CreatureCellRelocation(Creature* creature, const Cell &new_cell);
-        void PromoteEnvelopeNeighboursToFull(uint32 gridX, uint32 gridY);
         void MaybePromoteEnvelopeGridForPlayer(uint32 gridX, uint32 gridY);
 
         bool loaded(const GridPair&) const;
@@ -454,19 +494,11 @@ class Map : public GridRefManager<NGridType>
         bool EnsureCellEnvelopeLoaded(const Cell& centerCell);
         void UnloadCell(NGridType* grid, uint32 cellX, uint32 cellY);
         void ProcessPendingCellUnloads();
-        void EnsureGridLoadedAtEnter(Cell const&, Player* player = nullptr);
 
         void buildNGridLinkage(NGridType* pNGridType) { pNGridType->link(this); }
 
         template<class T> void AddType(T* obj);
         template<class T> void RemoveType(T* obj, bool);
-
-        NGridType* getNGrid(uint32 x, uint32 y) const
-        {
-            MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
-            MANGOS_ASSERT(y < MAX_NUMBER_OF_GRIDS);
-            return i_grids[x][y];
-        }
 
         bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x, y)->isGridObjectDataLoaded(); }
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x, y)->setGridObjectDataLoaded(pLoaded); }
@@ -478,7 +510,22 @@ class Map : public GridRefManager<NGridType>
         std::set<Object*> i_objectsToClientUpdate;
 
     protected:
+        /// A vessel writes her own Add(Player*): her passengers arrive on a map their client
+        /// has never heard of, so nothing an ordinary map sends on entry applies.
+        void EnsureGridLoadedAtEnter(Cell const&, Player* player = nullptr);
+        void PromoteEnvelopeNeighboursToFull(uint32 gridX, uint32 gridY);
+
+        NGridType* getNGrid(uint32 x, uint32 y) const
+        {
+            MANGOS_ASSERT(x < MAX_NUMBER_OF_GRIDS);
+            MANGOS_ASSERT(y < MAX_NUMBER_OF_GRIDS);
+            return i_grids[x][y];
+        }
+
         MapEntry const* i_mapEntry;
+
+        /// Players off this map who must hear it -- see ExternalObservers().
+        std::vector<Player*> m_externalObservers;
         uint8 i_spawnMode;
         uint32 i_id;
         uint32 i_InstanceId;

@@ -98,11 +98,13 @@ float GameObjectModel::SegmentHitFraction(const Vector3& a, const Vector3& b) co
     return 2.0f;
 }
 
-float GameObjectModel::SurfaceUnder(float x, float y, float zTop, float maxDrop) const
+void GameObjectModel::AddSurfaces(float x, float y, float zTop, float zBottom,
+                                  world::terrain::Column& out) const
 {
-    if (!m_collidable || !m_model || !m_bounds.coversColumn(x, y))
+    if (!m_collidable || !m_model || !m_bounds.coversColumn(x, y) ||
+        m_bounds.hi.z < zBottom || m_bounds.lo.z > zTop)
     {
-        return -FLT_MAX;
+        return;
     }
 
     const Vector3 originWorld{x, y, zTop};
@@ -112,9 +114,11 @@ float GameObjectModel::SurfaceUnder(float x, float y, float zTop, float maxDrop)
 
     // localToWorld(o + t*d) == originWorld + t*downWorld, so t is a world distance
     // whatever this object's scale.
-    if (auto t = m_model->RaycastNearest(originLocal, dirLocal, maxDrop))
+    thread_local std::vector<float> hits;
+    hits.clear();
+    m_model->RaycastAll(originLocal, dirLocal, zTop - zBottom, hits);
+    for (const float t : hits)
     {
-        return zTop - *t;
+        out.AddSolid(zTop - t, world::terrain::SurfaceKind::Live);
     }
-    return -FLT_MAX;
 }

@@ -10,6 +10,8 @@
 // caller's job. That is what lets the offline probe tools ask the terrain exactly what
 // mangosd asks it, and link none of the server to do so.
 
+#include "terrain/Column.hpp"
+#include "terrain/ILiveGeometry.hpp"
 #include "terrain/Terrain.hpp"
 
 #include <array>
@@ -28,7 +30,12 @@ namespace world::terrain
     public:
         static constexpr int GRID_COUNT = FusedTerrainGridCount;
 
-        explicit FusedTerrain(uint32_t mapId);
+        /// Without a source the tiles come from files named after `mapId`, as they always
+        /// have. WITH one the source is the only supplier -- a map backed by a model has
+        /// no grid on disk and must never half-resolve against a file that happens to
+        /// carry its id.
+        explicit FusedTerrain(uint32_t mapId,
+                              std::shared_ptr<ITileSource> source = nullptr);
 
         FusedTerrain(const FusedTerrain&) = delete;
         FusedTerrain& operator=(const FusedTerrain&) = delete;
@@ -39,20 +46,17 @@ namespace world::terrain
         static const std::string& TileDir();
         static bool HasTile(uint32_t mapId, int tx, int ty);
 
-        // Highest floor at (x,y) at or just below z, over terrain and every static under
-        // the column. searchUp starts the probe a little above z; maxDrop bounds how far
-        // down a floor may be. False when nothing was found.
-        bool GetHeight(float x, float y, float z, float& outZ, float searchUp = 2.0f,
-                       float maxDrop = 200.0f) const;
-
-        // What "how high is the ground here" means to the server. Not a plain GetHeight:
-        // a query point often sits a little UNDER the surface -- a spawn buried a yard
-        // into a hillside -- and a bare downward probe from z+2 misses the ground above
-        // it and reports nothing. Hence the second pass.
-        bool GetFloor(float x, float y, float z, float& outZ) const;
-
-        // Liquid surface at (x,y) near z, from ADT liquid and WMO interior MLIQ alike.
-        bool GetLiquid(float x, float y, float z, LiquidInfo& out) const;
+        // THE height query. Every surface crossing the window [zBottom, zTop] over (x,y):
+        // the ADT heightmap, each baked static, the liquid surface, and -- when `live` is
+        // given -- the bodies the game poses at runtime. `filter` reaches that provider
+        // untouched; this side does not know what it selects.
+        //
+        // There is deliberately no GetHeight/GetFloor/GetWaterOrGround here. Each was the
+        // same gather with a different selection already applied, so a caller could not
+        // ask a question the entry point had not anticipated, and four layers each kept
+        // their own idea of which surface "the ground" meant. Select on the Column.
+        Column ColumnAt(float x, float y, float zTop, float zBottom,
+                        const ILiveGeometry* live = nullptr, uint32_t filter = 0) const;
 
         // Nearest static hit along a->b as a fraction of the segment; > 1 when nothing
         // blocks. A fraction rather than a point on purpose: the static and dynamic
@@ -102,6 +106,7 @@ namespace world::terrain
                                      std::vector<TilePtr>& keepAlive) const;
 
         const uint32_t m_mapId;
+        const std::shared_ptr<ITileSource> m_source;
 
         // Every query from every map-update thread goes through this cache, so the hit
         // path takes the lock SHARED: readers do not serialise against each other. All

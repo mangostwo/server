@@ -31,6 +31,26 @@ they need in order to build against this fork lives in `src/shared/Compat/<name>
 outside — see `cmake/SubmoduleCompat.cmake`. A local commit inside a submodule makes the parent reference an
 object that exists on no remote, and a fresh clone cannot resolve it.
 
+#### Aboard a transport, the world does not exist
+
+For **crew, pets and minions on a global transport** (ship, zeppelin — a vehicle is a different mechanism
+and is exempt), using world coordinates or any world/global mechanism is **absolutely forbidden**. They are
+worked in **local (deck) coordinates only**.
+
+- No local→world composition. Not for placement, not for login, not for a create block. A passenger's world
+  position is never computed, because it is never true and never sent: the create block carries `(0,0,0)`
+  plus the transport GUID and the deck offset, and the client does the transform itself.
+- No world grid. A passenger is in no cell and is visited by no grid searcher — not by the visibility
+  notifier, not by an AoE sweep. On-deck searches read the vessel's own crew container directly.
+- No world distance test decides anything about a passenger.
+
+**The crew are PERMANENTLY visible to the players on the vessel, for as long as those players are aboard.**
+Not conditionally, not by range, not by a visibility pass — being aboard is the whole test. Observers
+*ashore* see the crew too, but through the vessel: the ship announces and retains them, and only the ship
+has an (approximate) world position at all, used solely to find those observers.
+
+Only the vessel is allowed a world position, and only because someone has to find it.
+
 ### Rule one: the code aligns to C++, not C++ to the code
 
 This is C++17, strict. When old MaNGOS code and the language disagree, **the code changes.** Do not
@@ -190,3 +210,118 @@ and anything touching live world/DB state; **(3)** build/CI impact (GCC *and* Cl
 Keep feedback concrete and minimal-diff. Flag correctness and rule violations, not style preferences the
 rules do not cover. If something is a real defect, say so plainly and show the failing case — a review that
 hedges on a bug is worse than no review.
+
+## What is built here (transport, movement, the offline baker) — and how to port it
+
+A map of the non-obvious subsystems this fork has reworked, and the invariants a sibling core
+(CMaNGOS, or the getMangos line — mangoszero/one/three) must satisfy to carry the same work across. These
+forks are **divergent and byte-similar in places but not identical**: name the target and re-check, never
+assume a change ported because the file looked the same.
+
+### Passenger transport (global vessels: ships, zeppelins)
+
+The rule is Rule zero's subsection above — *aboard a transport the world does not exist*. What implements it:
+
+- **`Transports.{h,cpp}`** — the game object, and it is a CLOCK and a RELAY and nothing else: the route
+  (`GenerateWaypoints`, `m_timer`, `TeleportTransport` — whose only decision is *when* the ship changes
+  world map), `PinRouteGrids` (the world grids the route crosses, pinned at start-up), `GetPathProgress`
+  (the one number the client needs; the create block carries position `(0,0,0)` and always will), and
+  `AsMap()`. It knows nothing about passengers. There is no pose recovery, no transform, no composition.
+- **`TransportMap.{h,cpp}`** — the vessel AS A MAP, and where her whole life is kept: crew (`EnlistCrew`),
+  passengers (`Embark`/`Disembark`), minions (`UpdateMinions`), the hull as terrain (`SurfaceAt`,
+  `IsBlocked`, `FreeSpotNear`, `HullRadius`), the announcement channel (`AnnounceVessel`/`RetractVessel`,
+  `CollectRelaySources`, `GatherObservers`) and both sides of the seam (`VesselLeavingWorld`/
+  `VesselEnteredWorld`). `Map::AsTransport()` is the one way to ask; `Transport::VesselOf` derives being
+  aboard from the map alone and never stores it.
+- **`Vehicle.{h,cpp}`** — `VehicleInfo`/`TransportInfo`, the vehicle's own and shared with nothing. A
+  vehicle is the ONLY thing here that composes a seat offset into a world position, legitimately, because
+  the server owns its pose. The old `TransportBase` that a ship and a tank both inherited is gone.
+- **`ObjectUpdate.cpp`** — an `ONTRANSPORT` unit serialises world position `(0,0,0)`; a MO_TRANSPORT's
+  `UPDATEFLAG_TRANSPORT` sends `GetPathProgress()`, **not** a wall clock.
+- **`Map.cpp`** — `SendInitTransports` is map-scoped through `SendCreateTo`; `SendInitSelf` sends the
+  boarder's own vessel crew.
+- **`ObjectMgr` static-GUID pool** — `GenerateStaticCreatureLowGuid`/`FreeStaticCreatureLowGuid` with a free
+  list, so carrying crew (not respawning) no longer leaks the bounded static range.
+- **`Unit::RemoveFromWorld`** unboards a boarded minion before the base class forgets it.
+
+**The load-bearing invariant for any core.** Visibility is *elimination-by-leftovers*: `VisibleNotifier`
+copies `m_clientGUIDs`, erases whatever the cell visit re-finds, and destroys the remainder as out-of-range.
+So the vessel and its crew **must never be inserted into `m_clientGUIDs`** — put them there and the sweep
+destroys them every tick. Visibility is instead a **map-membership channel**, edge-triggered on four events
+(player/vessel enters/leaves the map), never a distance poll. If the target core's notifier differs, find
+its equivalent of this sweep first; that is where a port breaks.
+
+**MO_TRANSPORT vs. lift.** A ship is `GAMEOBJECT_TYPE_MO_TRANSPORT` (type 15, `transports` table), **never
+`AddToWorld`'d** (`IsInWorld == false` by design), only `SetMap`; the server *estimates* its pose from
+waypoints, so the crew's world position is a lie. A lift/tram/elevator is `GAMEOBJECT_TYPE_TRANSPORT` (type
+11, `gameobject` table): an ordinary grid GameObject, client-animated along a fixed path, **server-static at
+a fixed anchor** — so there local↔world is **exact, not a lie**, and passengers stay ordinary grid creatures
+seen through the normal grid. Pets ride a type-11 lift beside their master via an event-driven heartbeat off
+the master's movement packet (`Player::UpdateLiftMinions`); the local-mesh upgrade is the open TODO.
+
+### The spatial component: an object HAS a placement
+
+`Geometry::Placement` (`src/shared/Geometry/Placement.h`) holds a **frame**, a pose in it, and an extent.
+Nothing in the object hierarchy owns geometry any more: `WorldObject` exposes `Where()` (read) and `Place()`
+(mutate) and has no `GetPositionX`, no `GetDistance`, no `HasInArc`. Ask the component:
+`obj->Where().DistanceTo(other->Where())`.
+
+- **`Geometry::Frame`** is a map instance — a vessel is one like any other — **or** a vehicle
+  seat (`Frame::Deck(vehicleGuid)`, the last thing still spelled that way), and
+  **cross-frame answers fail closed** — infinite distance, never in reach, never in arc. Forgetting the map
+  check is unwritable, which is why `IsWithinDist`/`IsWithinDistInMap` collapsed into one call.
+- **Terrain-agnostic by construction.** Ground height, water level, line of sight and the free-spot sweep are
+  not the component's: they are free functions (`DropToGround`, `ClampToAllowedZ`, `HasLineOfSight`,
+  `FindFreeSpotNear`, `PointNear`, `RandomGroundPointNear`) that compose a placement with the engine that
+  owns the answer. Phase and world membership likewise: `SharesWorld`, `InReach`, `InFrontPhased`.
+- **The extent lives in the component.** `ComputeBoundingRadius()` is the per-class formula, pushed in by
+  `RefreshBoundingRadius()` when a model or scale changes — rarely — and read back as `Where().Extent()`.
+- **Transforms are `Geometry::Transform`.** `Placement::Basis()` is the bridge; a vehicle seat composes
+  through it legitimately (the server owns a vehicle's pose), a global transport's hull never does.
+  `TransportInfo` holds a VEHICLE rider's pose; a ship's passengers have no such record, because they
+  are simply on her map.
+- Anchors are placements too: `Creature::Spawn()` (respawn pose) and `CombatAnchor()` (leash point).
+  `MovementInfo::Reported()` is the CLIENT's claimed pose, kept because the anticheat and fall damage want
+  it — not a mirror of the placement.
+- The seam is enforced: `ctest -R spatial_boundary` (`src/tests/CheckSpatialBoundary.cmake`) fails the build
+  if any of those names reappears as a member of `Object` or a descendant. `src/tests/PlacementTest.cpp`
+  pins the behaviour on **real world-database rows** (Stormwind spawns by guid, a named zeppelin by entry),
+  not on invented coordinates.
+
+### Movement frame
+
+`Motion::IMotionFrame` with `FrameFor(mover)` → `WorldFrame` or `TransportFrame` (chosen by
+`Transport::VesselOf`). Chase/Follow/random/AoE resolve in the mover's frame, so on-deck movement is done in
+deck coordinates without the caller knowing. Porting the transport visibility without this frame will
+reintroduce world composition on the deck.
+
+### Client-side interpolation and DBC coupling (cannot be fixed server-side)
+
+- A vessel's position is **interpolated by the client** from `time % period` against `TransportAnimation.dbc`
+  / `TransportRotation.dbc`. The **server never loads those DBCs**; it only sends TIME + GUID + world
+  `(0,0,0)`. Every map's clock must yield the same `time % period` — verify the target core's map clock is
+  monotonic and shared, or vessels desync across a seam.
+- The **tram 90° rotation** is a data/DBC coupling: the GO base rotation drives the animation direction and
+  is bound to `TransportRotation.dbc`. It is **not** server-fixable — aligning the DB quaternion made the
+  cars slide through walls. Don't chase it in core code.
+- Field name: this fork spells the quaternion field **`GAMEOBJECT_ROTATION`** (`OBJECT_END + 0x04`, 4 floats
+  x,y,z,w). The 3.3.5 emulator community usually calls it `GAMEOBJECT_PARENTROTATION` — a convention, **not**
+  a Blizzard-official name. A sibling core may use either spelling for the same offset.
+
+### Offline baker (extractor) and navmesh
+
+- One pass over the client MPQs bakes `tiles`, `gomodels`, `dbc`; the navmesh is baked **from the tiles,
+  never the MPQs**, so the pathfinder walks exactly the surface the collision engine answers with.
+- **WMO-only maps** (a WDT with no ADT grid — Deeprun Tram, map 369) emit a single `w_<map>.tile`. The nav
+  bake (`NavMeshBuilder::BakeAll`) enumerates both `t_<map>_<x>_<y>.tile` grids **and** those `w_` tiles;
+  `GlobalWmoGrids` derives the grid cells the WMO's world footprint spans, and each bakes from the one shared
+  tile (no terrain/liquid/neighbours). A core that only scans `t_` tiles gives those maps no navmesh.
+- Console feedback is two narrow callbacks the game-agnostic builder exposes: `ProgressFn` (live per-tile
+  header, terminal only) and `MapDoneFn` (one durable line per map, survives a pipe). Keep them decoupled —
+  the builder must not learn about the console.
+
+### Known cross-core defect
+
+`BigNumber::AsByteArray` pads at the **wrong end** on the whole getMangos line (mangoszero/one/three and
+this tree's ancestor), so ~1 SRP login in 256 fails at random. Prefer `BN_bn2binpad`. If you port auth or
+crypto here from a sibling core, assume it carries the bug until you have read the bytes.

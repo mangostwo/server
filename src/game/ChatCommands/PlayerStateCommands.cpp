@@ -143,7 +143,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
 
     Player* player = m_session->GetPlayer();
 
-    uint32 zoneId = player->GetZoneId();
+    uint32 zoneId = player->GetTerrain()->GetZoneId(player->Where().X(), player->Where().Y(), player->Where().Z());
 
     AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(zoneId);
     if (!areaEntry || areaEntry->ParentAreaID != 0)

@@ -83,28 +83,6 @@ namespace Meta
   using Rename = typename Rename_Impl<A, B>::type;
   //----------------------------------------------------------------------------------------
 
-  //tuple iteration
-  template<size_t index, typename F, typename... Ts>
-  struct iterate_tuple {
-     void operator() (std::tuple<Ts...>&& t, F&& callback) {
-         iterate_tuple<index - 1, F, Ts...>{}(std::forward<std::tuple<Ts...>>(t), std::forward<F>(callback));
-         callback.Visit(std::get<index>(t));
-     }
-  };
-
-  template<typename F, typename... Ts>
-  struct iterate_tuple<0, F, Ts...> {
-     void operator() (std::tuple<Ts...>&& t, F&& callback) {
-         callback.Visit(std::get<0>(t));
-     }
-  };
-
-  template<typename F, typename... Ts>
-  void for_each(std::tuple<Ts...>&& t, F&& callback) {
-     iterate_tuple<std::tuple_size<std::tuple<Ts...>>::value - 1, F, Ts...> it;
-     it(std::forward<std::tuple<Ts...>>(t), std::forward<F>(callback));
-  }
-
 } //Meta namespace end
 
 
@@ -193,7 +171,7 @@ class TypeMapContainer
         template <typename Visitor>
         void accept(Visitor&& v)
         {
-            Meta::for_each(std::forward<Container>(i_container), std::forward<Visitor>(v));
+            std::apply([&v](auto&... maps) { (v.Visit(maps), ...); }, i_container);
         }
 
     private:

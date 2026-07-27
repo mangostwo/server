@@ -78,14 +78,50 @@ namespace testing
         std::printf("  FAIL %s\n    %s:%d: %s\n", CurrentTest(), file, line, what.c_str());
     }
 
-    inline int RunAll()
+    /// Substring match on the case name, so `-only Spell` and `-skip Stress` both mean
+    /// what they look like. Selecting is a convenience while iterating; it is not a way
+    /// to make a red suite green, so the count printed is always what actually ran.
+    inline bool Selected(const char* name, const std::vector<std::string>& only,
+                         const std::vector<std::string>& skip)
+    {
+        const std::string n = name;
+        for (const std::string& s : skip)
+        {
+            if (n.find(s) != std::string::npos)
+            {
+                return false;
+            }
+        }
+        if (only.empty())
+        {
+            return true;
+        }
+        for (const std::string& s : only)
+        {
+            if (n.find(s) != std::string::npos)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    inline int RunAll(const std::vector<std::string>& only = {},
+                      const std::vector<std::string>& skip = {})
     {
         int failedCases = 0;
+        int ran = 0;
 
         for (const Case& c : Registry())
         {
+            if (!Selected(c.name, only, skip))
+            {
+                continue;
+            }
+
             CurrentTest() = c.name;
             const int before = Failures();
+            ++ran;
 
             c.fn();
 
@@ -99,8 +135,16 @@ namespace testing
             }
         }
 
-        std::printf("\n%d test(s), %d failed\n",
-                    int(Registry().size()), failedCases);
+        const size_t total = Registry().size();
+        if (size_t(ran) != total)
+        {
+            std::printf("\n%d of %d test(s) selected, %d failed\n", ran, int(total),
+                        failedCases);
+        }
+        else
+        {
+            std::printf("\n%d test(s), %d failed\n", ran, failedCases);
+        }
         return failedCases == 0 ? 0 : 1;
     }
 }

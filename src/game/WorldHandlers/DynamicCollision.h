@@ -49,6 +49,7 @@
 // Threading: one instance per Map, touched only by that map's update thread.
 
 #include "terrain/Geometry.hpp"
+#include "terrain/ILiveGeometry.hpp"
 
 #include <cfloat>
 #include <cstdint>
@@ -57,7 +58,7 @@
 
 class GameObjectModel;
 
-class DynamicCollision
+class DynamicCollision : public world::terrain::ILiveGeometry
 {
     public:
         DynamicCollision() = default;
@@ -81,10 +82,11 @@ class DynamicCollision
         float NearestHitFraction(float x1, float y1, float z1, float x2, float y2,
                                  float z2, uint32_t phasemask) const;
 
-        // Highest collidable surface under (x,y) at or below z, or -FLT_MAX when the
-        // column is clear.
-        float GetHeight(float x, float y, float z, float maxSearchDist,
-                        uint32_t phasemask) const;
+        // Every collidable surface crossing the window over (x,y), appended to the
+        // terrain engine's column. `filter` is the phase mask: this is the ILiveGeometry
+        // side of the seam, so the engine hands it back without having looked at it.
+        void AddSurfaces(float x, float y, float zTop, float zBottom, uint32_t filter,
+                         world::terrain::Column& out) const override;
 
     private:
         void FileBody(GameObjectModel& model);

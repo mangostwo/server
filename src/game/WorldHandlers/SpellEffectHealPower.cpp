@@ -43,6 +43,8 @@
 #include "Unit.h"
 #include "Spell.h"
 #include "DynamicObject.h"
+#include "Transports.h"
+#include "TransportMap.h"
 #include "SpellAuras.h"
 #include "Group.h"
 #include "UpdateData.h"
@@ -757,6 +759,28 @@ void Spell::EffectPersistentAA(SpellEffectIndex eff_idx)
     {
         delete dynObj;
         return;
+    }
+
+    // A deck-anchored area effect: it belongs to the deck spot, not the sea underneath.
+    // The destination composed to a world position at cast; here we keep the local offset
+    // and the vessel so Update can recompose it as the ship sails. Two ways to be on a
+    // deck: the point was ground-targeted on one (the dest carries its guid), or the
+    // caster is simply standing on one (a self-centred aura like a consecration).
+    if (ObjectGuid destVessel = m_targets.getDestTransportGuid())
+    {
+        float lx, ly, lz;
+        m_targets.getDestTransportOffset(lx, ly, lz);
+        dynObj->BindToTransport(destVessel, lx, ly, lz);
+    }
+    else if (TransportMap* vessel = pCaster->GetMap()->AsTransport())
+    {
+        // A self-centred aura on a caster aboard: its anchor is simply the caster's own
+        // position on the ship -- exact, and asking for nothing the server has to estimate.
+        if (const auto local = vessel->PositionOf(*pCaster))
+        {
+            dynObj->BindToTransport(vessel->Vessel()->GetObjectGuid(),
+                                    local->X(), local->Y(), local->Z());
+        }
     }
 
     pCaster->AddDynObject(dynObj);

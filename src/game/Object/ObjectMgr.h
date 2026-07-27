@@ -929,11 +929,31 @@ class ObjectMgr
         // used in .npc add/.gobject add commands for adding static spawns
         uint32 GenerateStaticCreatureLowGuid()
         {
+            // Reuse before advancing. A vessel's crew are despawned and respawned on every
+            // map seam, and each fresh spawn used to burn one more guid of a bounded pool --
+            // a boat that crosses maps for a few hours ran the pool dry. UnBoardCreature
+            // returns the guid here on despawn, so the high-water mark only grows with the
+            // peak number of crew alive at once, not the number ever spawned.
+            if (!m_freedStaticCreatureLowGuids.empty())
+            {
+                const uint32 reused = m_freedStaticCreatureLowGuids.back();
+                m_freedStaticCreatureLowGuids.pop_back();
+                return reused;
+            }
+
             if (m_StaticCreatureGuids.GetNextAfterMaxUsed() >= m_FirstTemporaryCreatureGuid)
             {
                 return 0;
             }
             return m_StaticCreatureGuids.Generate();
+        }
+
+        void FreeStaticCreatureLowGuid(uint32 lowGuid)
+        {
+            if (lowGuid)
+            {
+                m_freedStaticCreatureLowGuids.push_back(lowGuid);
+            }
         }
         uint32 GenerateStaticGameObjectLowGuid()
         {
@@ -1427,6 +1447,7 @@ class ObjectMgr
 
         // guids from reserved range for use in .npc add/.gobject add commands for adding new static spawns (saved in DB) from client.
         ObjectGuidGenerator<HIGHGUID_UNIT>        m_StaticCreatureGuids;
+        std::vector<uint32>                       m_freedStaticCreatureLowGuids;
         ObjectGuidGenerator<HIGHGUID_GAMEOBJECT>  m_StaticGameObjectGuids;
 
         // first free low guid for selected guid type

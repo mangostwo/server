@@ -53,6 +53,8 @@
 #include "Util.h"
 #include "Totem.h"
 #include "Vehicle.h"
+#include "Transports.h"
+#include "TransportMap.h"
 #include "BattleGround/BattleGround.h"
 #include "InstanceData.h"
 #include "OutdoorPvP/OutdoorPvP.h"
@@ -94,10 +96,12 @@ void MovementInfo::Read(ByteBuffer& data)
     data >> moveFlags;
     data >> moveFlags2;
     data >> time;
-    data >> pos.x;
-    data >> pos.y;
-    data >> pos.z;
-    data >> pos.o;
+    float px, py, pz, po;
+    data >> px;
+    data >> py;
+    data >> pz;
+    data >> po;
+    reported.MoveTo(px, py, pz, po);
 
     if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
@@ -146,10 +150,10 @@ void MovementInfo::Write(ByteBuffer& data) const
     data << moveFlags;
     data << moveFlags2;
     data << time;
-    data << pos.x;
-    data << pos.y;
-    data << pos.z;
-    data << pos.o;
+    data << reported.X();
+    data << reported.Y();
+    data << reported.Z();
+    data << reported.Facing();
 
     if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
@@ -465,14 +469,14 @@ bool Unit::UpdateMeleeAttackingState()
     }
 
     uint8 swingError = 0;
-    if (!CanReachWithMeleeAttack(victim))
+    if (!InMeleeReach(*this, *victim))
     {
         setAttackTimer(BASE_ATTACK, 100);
         setAttackTimer(OFF_ATTACK, 100);
         swingError = 1;
     }
     // 120 degrees of radiant range
-    else if (!HasInArc(2 * M_PI_F / 3, victim))
+    else if (!Where().HasInArc(victim->Where(), 2 * M_PI_F / 3))
     {
         setAttackTimer(BASE_ATTACK, 100);
         setAttackTimer(OFF_ATTACK, 100);
@@ -557,12 +561,41 @@ bool Unit::haveOffhandWeapon() const
 /**
  * @brief Sends a heartbeat movement packet for the unit.
  */
+void Unit::WriteMovementInfo(ByteBuffer& out) const
+{
+    // THE ONE PLACE THIS IS DECIDED, and it is decided at the instant of writing, from the
+    // map. An ordinary map: send what we have. A transport map: our coordinates ARE that
+    // map's, and the client has never heard of it -- no WDT, no terrain, no id it would
+    // accept -- so it gets no world position at all. It gets the vessel's guid and those
+    // same coordinates as an offset, which is the only thing it can compose a position from.
+    //
+    // Nothing is stored and nothing is stamped in advance. Decided anywhere but here and
+    // some other writer -- a heartbeat is enough -- sends a map coordinate in a world
+    // position field, and the client walks the unit to (5, 3, 11) on the continent.
+    Map* on = GetMap();
+    TransportMap* hull = on ? on->AsTransport() : NULL;
+    Transport* vessel = hull ? hull->Vessel() : NULL;
+
+    if (!vessel)
+    {
+        m_movementInfo.Write(out);
+        return;
+    }
+
+    MovementInfo onDeck = m_movementInfo;
+    onDeck.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+    onDeck.SetTransportData(vessel->GetObjectGuid(), Where().X(), Where().Y(), Where().Z(),
+                            Where().Facing(), 0, -1);
+    onDeck.Report(0.0f, 0.0f, 0.0f, Where().Facing());
+    onDeck.Write(out);
+}
+
 void Unit::SendHeartBeat()
 {
     m_movementInfo.UpdateTime(GameTime::GetGameTimeMS());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
-    data << m_movementInfo;
+    WriteMovementInfo(data);
     SendMessageToSet(&data, true);
 }
 
@@ -584,10 +617,11 @@ void Unit::resetAttackTimer(WeaponAttackType type)
  * @param flat_mod Additional flat reach modifier.
  * @return The resulting combat reach.
  */
-float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, float flat_mod /*=0.0f*/) const
+float CombatReachBetween(Unit const& attacker, Unit const& victim, bool forMeleeRange, float flat_mod)
 {
     // The measured values show BASE_MELEE_OFFSET in (1.3224, 1.342)
-    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH) + pVictim->GetFloatValue(UNIT_FIELD_COMBATREACH) +
+    float reach = attacker.GetFloatValue(UNIT_FIELD_COMBATREACH) +
+                  victim.GetFloatValue(UNIT_FIELD_COMBATREACH) +
                   BASE_MELEERANGE_OFFSET + flat_mod;
 
     if (forMeleeRange && reach < ATTACK_DISTANCE)
@@ -605,16 +639,18 @@ float Unit::GetCombatReach(Unit const* pVictim, bool forMeleeRange /*=true*/, fl
  * @param forMeleeRange True to use melee-range reach rules.
  * @return The non-negative combat distance.
  */
-float Unit::GetCombatDistance(Unit const* target, bool forMeleeRange) const
+float CombatDistanceBetween(Unit const& attacker, Unit const& target, bool forMeleeRange)
 {
-    float radius = GetCombatReach(target, forMeleeRange);
+    if (!attacker.Where().ShareFrame(target.Where()))
+    {
+        return Geometry::Placement::Unreachable();
+    }
 
-    float dx = GetPositionX() - target->GetPositionX();
-    float dy = GetPositionY() - target->GetPositionY();
-    float dz = GetPositionZ() - target->GetPositionZ();
-    float dist = sqrt((dx * dx) + (dy * dy) + (dz * dz)) - radius;
-
-    return (dist > 0.0f ? dist : 0.0f);
+    // Combat reach, not the bounding extents: the component measures centre to centre and
+    // the game rule supplies the gap that counts as touching.
+    const float reach = CombatReachBetween(attacker, target, forMeleeRange, 0.0f);
+    const float centres = (attacker.Where().Pos() - target.Where().Pos()).magnitude();
+    return Geometry::Placement::Gap(centres, reach);
 }
 
 /**
@@ -624,18 +660,14 @@ float Unit::GetCombatDistance(Unit const* target, bool forMeleeRange) const
  * @param flat_mod Additional flat reach modifier.
  * @return True if the victim is within melee range; otherwise, false.
  */
-bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*/) const
+bool InMeleeReach(Unit const& attacker, Unit const& victim, float flat_mod)
 {
-    MANGOS_ASSERT(pVictim);
+    const float reach = CombatReachBetween(attacker, victim, true, flat_mod);
 
-    float reach = GetCombatReach(pVictim, true, flat_mod);
-
-    // This check is not related to bounding radius
-    float dx = GetPositionX() - pVictim->GetPositionX();
-    float dy = GetPositionY() - pVictim->GetPositionY();
-    float dz = GetPositionZ() - pVictim->GetPositionZ();
-
-    return dx * dx + dy * dy + dz * dz < reach * reach;
+    // Combat reach replaces the extents entirely here, so the component is asked about
+    // bare points rather than about two sized objects.
+    return attacker.Where().WithinDist(victim.Where().Pos(), reach) &&
+           attacker.Where().ShareFrame(victim.Where());
 }
 
 /**
@@ -1364,7 +1396,7 @@ void Unit::JustKilledCreature(Creature* victim, Player* responsiblePlayer)
         }
 
     // Notify the outdoor pvp script
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetZoneId()))
+    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : GetTerrain()->GetZoneId(Where().X(), Where().Y(), Where().Z())))
     {
         outdoorPvP->HandleCreatureDeath(victim);
     }
@@ -1543,12 +1575,12 @@ void Unit::CastSpell(Unit* Victim, SpellEntry const* spellInfo, bool triggered, 
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
     {
-        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+        targets.setDestination(Victim->Where().X(), Victim->Where().Y(), Victim->Where().Z());
     }
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
         {
-            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            targets.setSource(caster->Where().X(), caster->Where().Y(), caster->Where().Z());
         }
 
     spell->m_CastItem = castItem;
@@ -1656,12 +1688,12 @@ void Unit::CastCustomSpell(Unit* Victim, SpellEntry const* spellInfo, int32 cons
 
     if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
     {
-        targets.setDestination(Victim->GetPositionX(), Victim->GetPositionY(), Victim->GetPositionZ());
+        targets.setDestination(Victim->Where().X(), Victim->Where().Y(), Victim->Where().Z());
     }
     if (spellInfo->Targets & TARGET_FLAG_SOURCE_LOCATION)
         if (WorldObject* caster = spell->GetCastingObject())
         {
-            targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            targets.setSource(caster->Where().X(), caster->Where().Y(), caster->Where().Z());
         }
 
     spell->prepare(&targets, triggeredByAura);
@@ -2447,7 +2479,7 @@ Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
  */
 void Unit::SetInFront(Unit const* target)
 {
-    SetOrientation(GetAngle(target));
+    Place().Face(Where().BearingTo(target->Where()));
 }
 
 /**
@@ -2476,7 +2508,7 @@ void Unit::SetFacingToObject(WorldObject* pObject)
     }
 
     // TODO: figure out under what conditions creature will move towards object instead of facing it where it currently is.
-    SetFacingTo(GetAngle(pObject));
+    SetFacingTo(Where().BearingTo(pObject->Where()));
 }
 
 /**
@@ -2504,7 +2536,7 @@ bool Unit::isInAccessablePlaceFor(Creature const* c) const
  */
 bool Unit::IsInWater() const
 {
-    return GetTerrain()->IsInWater(GetPositionX(), GetPositionY(), GetPositionZ());
+    return GetTerrain()->IsInWater(Where().X(), Where().Y(), Where().Z());
 }
 
 /**
@@ -2514,7 +2546,7 @@ bool Unit::IsInWater() const
  */
 bool Unit::IsUnderWater() const
 {
-    return GetTerrain()->IsUnderWater(GetPositionX(), GetPositionY(), GetPositionZ());
+    return GetTerrain()->IsUnderWater(Where().X(), Where().Y(), Where().Z());
 }
 
 /**
@@ -2940,7 +2972,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         // set position before any AI calls/assistance
         if (GetTypeId() == TYPEID_UNIT)
         {
-            ((Creature*)this)->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
+            ((Creature*)this)->SetCombatAnchor(Geometry::Vector3(Where().X(), Where().Y(), Where().Z()));
         }
     }
 
@@ -3665,7 +3697,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
         {
             if (Unit* magnet = (*itr)->GetCaster())
             {
-                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && spell->CheckTarget(magnet, eff))
+                if (magnet->IsAlive() && HasLineOfSight(*magnet, *this) && spell->CheckTarget(magnet, eff))
                 {
                     return magnet;
                 }
@@ -3680,7 +3712,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell, SpellEffectIndex eff)
         {
             if (Unit* magnet = (*i)->GetCaster())
             {
-                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && (!spell || spell->CheckTarget(magnet, eff)))
+                if (magnet->IsAlive() && HasLineOfSight(*magnet, *this) && (!spell || spell->CheckTarget(magnet, eff)))
                 {
                     if (roll_chance_i((*i)->GetModifier()->m_amount))
                     {
@@ -4010,67 +4042,7 @@ void Unit::Unmount(bool from_aura)
  * @param distanceZ The allowed Z distance.
  * @return True if the waypoint is considered reached; otherwise, false.
  */
-bool Unit::IsNearWaypoint(float currentPositionX, float currentPositionY, float currentPositionZ, float destinationPostionX, float destinationPostionY, float destinationPostionZ, float distanceX, float distanceY, float distanceZ)
-{
-    // actual distance between the creature's X ordinate and destination X ordinate
-    float xDifference = 0;
-    // actual distance between the creature's Y ordinate and destination Y ordinate
-    float yDifference = 0;
-    // actual distance between the creature's Z ordinate and destination Y ordinate
-    float zDifference = 0;
 
-    // distanceX == 0, means do not test the distance between the creature's current X ordinate and the destination X ordinate
-    // A test for 0 is used, because it is not worth testing for exact coordinates, seeing as we have to use an integar in the database for the event parameters that holds the cordinates.
-    // Therefore a test for the distance between waypoints does the job more than well enough
-    if (distanceX > 0)
-    {
-        if (currentPositionX > destinationPostionX)
-        {
-            xDifference = currentPositionX - destinationPostionX;
-        }
-        else
-        {
-            xDifference = destinationPostionX - currentPositionX;
-        }
-    }
-    // distanceY == 0, means do not test the distance between the creature's current Y ordinate and the destination Y ordinate
-    if (distanceY > 0)
-    {
-        if (currentPositionY > destinationPostionY)
-        {
-            yDifference = currentPositionY - destinationPostionY;
-        }
-        else
-        {
-            yDifference = destinationPostionY - currentPositionY;
-        }
-    }
-    // distanceZ == 0, means do not test the distance between the creature's current Z ordinate and the destination Z ordinate
-    if (distanceZ > 0)
-    {
-        if (currentPositionZ > destinationPostionZ)
-        {
-            zDifference = currentPositionZ - destinationPostionZ;
-        }
-        else
-        {
-            zDifference = destinationPostionZ - currentPositionZ;
-        }
-    }
-
-    // check based on which ordinates to test the current distance from (distance along the X, and/or Y, and/or Z ordinates)
-    if (((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
-        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ > 0 && zDifference < distanceZ)) ||
-        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ)) ||
-        ((distanceX > 0 && xDifference < distanceX) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
-        ((distanceX > 0 && xDifference < distanceX) && (distanceY == 0) && (distanceZ == 0)) ||
-        ((distanceX == 0) && (distanceY > 0 && yDifference < distanceY) && (distanceZ == 0)) ||
-        ((distanceX == 0) && (distanceY == 0) && (distanceZ > 0 && zDifference < distanceZ))
-        )
-        return true;
-
-    return false;
-}
 
 /**
  * @brief Puts the unit into combat with an enemy using PvP-aware rules.
@@ -4442,10 +4414,19 @@ void Unit::SetDeathState(DeathState s)
             m_vehicleInfo->RemoveAccessoriesFromMap();
         }
 
-        // Unboard from transport
-        if (GetTransportInfo() && ((Unit*)GetTransportInfo()->GetTransport())->IsVehicle())
+        // Unboard from a VEHICLE. GetTransport() is a WorldObject, and on a ship it is the
+        // vessel -- a GameObject. Casting that to Unit* and reading IsVehicle() walks off
+        // the end of the object; a deckhand dying aboard crashed the world thread here.
+        if (TransportInfo* boarded = GetTransportInfo())
         {
-            ((Unit*)GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
+            if (boarded->IsOnVehicle())
+            {
+                Unit* carrier = static_cast<Unit*>(boarded->GetTransport());
+                if (carrier->IsVehicle())
+                {
+                    carrier->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
+                }
+            }
         }
 
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
@@ -4806,6 +4787,10 @@ void Unit::AddToWorld()
  */
 void Unit::RemoveFromWorld()
 {
+    // Nothing to unboard. A unit on a deck was never registered as a passenger of anything:
+    // its MAP is the vessel, and it stops being aboard by leaving that map. Only vehicles
+    // still keep a roster, and a rider leaving one is the vehicle system's business.
+
     // cleanup
     if (IsInWorld())
     {
@@ -5620,7 +5605,12 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
     {
         Movement::Location loc = movespline->ComputePosition();
         movespline->_Interrupt();
-        Relocate(loc.x, loc.y, loc.z, loc.orientation);
+        Place().MoveTo(loc.x, loc.y, loc.z, loc.orientation);
+
+        // The stop packet below, and every create block until the client speaks again, are
+        // written from the movement state -- so it follows the placement whenever the
+        // server is the one that moved the unit.
+        m_movementInfo.Report(loc.x, loc.y, loc.z, loc.orientation);
         isMoving = true;
     }
 
@@ -5722,6 +5712,7 @@ void Unit::UpdateModelData()
     {
         // we expect values in database to be relative to scale = 1.0
         SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, GetObjectScale() * modelInfo->bounding_radius);
+        RefreshBoundingRadius();
 
         // never actually update combat_reach for player, it's always the same. Below player case is for initialization
         if (GetTypeId() == TYPEID_PLAYER)
@@ -5856,7 +5847,7 @@ Unit* Unit::SelectRandomUnfriendlyTarget(Unit* except /*= NULL*/, float radius /
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter))
+        if (!HasLineOfSight(*this, *(*tIter)))
         {
             std::list<Unit*>::iterator tIter2 = tIter;
             ++tIter;
@@ -5910,7 +5901,7 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= NULL*/, float radius /*=
     // remove not LoS targets
     for (std::list<Unit*>::iterator tIter = targets.begin(); tIter != targets.end();)
     {
-        if (!IsWithinLOSInMap(*tIter))
+        if (!HasLineOfSight(*this, *(*tIter)))
         {
             std::list<Unit*>::iterator tIter2 = tIter;
             ++tIter;
@@ -6348,7 +6339,7 @@ void Unit::RestoreOriginalFaction()
 
 void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed)
 {
-    float angle = this == target ? GetOrientation() + M_PI_F : target->GetAngle(this);
+    float angle = this == target ? Where().Facing() + M_PI_F : target->Where().BearingTo(Where());
     KnockBackWithAngle(angle, horizontalSpeed, verticalSpeed);
 }
 
@@ -6367,12 +6358,12 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
 
         float dis = 2 * moveTimeHalf * horizontalSpeed;
         float ox, oy, oz;
-        GetPosition(ox, oy, oz);
+        ox = Where().X(), oy = Where().Y(), oz = Where().Z();
         float fx = ox + dis * vcos;
         float fy = oy + dis * vsin;
         float fz = oz + 0.5f;
         GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, GetPhaseMask(), -0.5f);
-        UpdateAllowedPositionZ(fx, fy, fz);
+        ClampToAllowedZ(*this, fx, fy, fz);
         GetMotionMaster()->MoveJump(fx, fy, fz, horizontalSpeed, max_height);
     }
 }
@@ -6585,7 +6576,7 @@ bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
     }
 
     // can't damage player controlled unit by player controlled unit in sanctuary
-    AreaTableEntry const* area = GetAreaEntryByAreaID(pVictim->GetAreaId());
+    AreaTableEntry const* area = GetAreaEntryByAreaID(pVictim->GetTerrain()->GetAreaId(pVictim->Where().X(), pVictim->Where().Y(), pVictim->Where().Z()));
     if (area && area->Flags & AREA_FLAG_SANCTUARY)
     {
         return false;
@@ -6647,15 +6638,15 @@ void Unit::ScheduleAINotify(uint32 delay)
 void Unit::OnRelocated()
 {
     // switch to use Geometry::Vector3 is good idea, maybe
-    float dx = m_last_notified_position.x - GetPositionX();
-    float dy = m_last_notified_position.y - GetPositionY();
-    float dz = m_last_notified_position.z - GetPositionZ();
+    float dx = m_last_notified_position.x - Where().X();
+    float dy = m_last_notified_position.y - Where().Y();
+    float dz = m_last_notified_position.z - Where().Z();
     float distsq = dx * dx + dy * dy + dz * dz;
     if (distsq > World::GetRelocationLowerLimitSq())
     {
-        m_last_notified_position.x = GetPositionX();
-        m_last_notified_position.y = GetPositionY();
-        m_last_notified_position.z = GetPositionZ();
+        m_last_notified_position.x = Where().X();
+        m_last_notified_position.y = Where().Y();
+        m_last_notified_position.z = Where().Z();
 
         GetViewPoint().Call_UpdateVisibilityForOwner();
         UpdateObjectVisibility();
@@ -6727,7 +6718,10 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 
         if (IsBoarded())
         {
-            GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
+            Geometry::Placement deckPose;
+            deckPose.EnterFrame(GetTransportInfo()->Seat().CurrentFrame(),
+                                Geometry::Vector3(loc.x, loc.y, loc.z), loc.orientation);
+            GetTransportInfo()->SetSeatPose(deckPose);
         }
         else if (GetTypeId() == TYPEID_PLAYER)
         {

@@ -78,6 +78,7 @@ void WorldObject::SetMap(Map* map)
     // lets save current map's Id/instanceId
     m_mapId = map->GetId();
     m_InstanceId = map->GetInstanceId();
+    RefreshFrame();
 }
 
 /**
@@ -162,7 +163,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
     {
-        pos = CreatureCreatePos(this, GetOrientation(), CONTACT_DISTANCE, ang);
+        pos = CreatureCreatePos(this, Where().Facing(), CONTACT_DISTANCE, ang);
     }
 
     if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
@@ -171,7 +172,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
         return NULL;
     }
 
-    pCreature->SetRespawnCoord(pos);
+    pCreature->SetSpawn(pos);
 
     //Set run/walk mode
     pCreature->SetWalk(!setRun);
@@ -296,8 +297,8 @@ namespace MaNGOS
 
                 if (c->IsStopped() || !c->GetMotionMaster()->GetDestination(x, y, z))
                 {
-                    x = c->GetPositionX();
-                    y = c->GetPositionY();
+                    x = c->Where().X();
+                    y = c->Where().Y();
                 }
 
                 add(c, x, y);
@@ -318,8 +319,8 @@ namespace MaNGOS
 
                 float x, y;
 
-                x = u->GetPositionX();
-                y = u->GetPositionY();
+                x = u->Where().X();
+                y = u->Where().Y();
 
                 add(u, x, y);
             }
@@ -334,15 +335,15 @@ namespace MaNGOS
              */
             void add(WorldObject* u, float x, float y) const
             {
-                float dx = i_object.GetPositionX() - x;
-                float dy = i_object.GetPositionY() - y;
+                float dx = i_object.Where().X() - x;
+                float dy = i_object.Where().Y() - y;
                 float dist2d = sqrt((dx * dx) + (dy * dy));
 
                 // It is ok for the objects to require a bit more space
-                float delta = u->GetObjectBoundingRadius();
+                float delta = u->Where().Extent();
                 if (i_selector.m_searchPosFor && i_selector.m_searchPosFor != u)
                 {
-                    delta += i_selector.m_searchPosFor->GetObjectBoundingRadius();
+                    delta += i_selector.m_searchPosFor->Where().Extent();
                 }
 
                 delta *= OCCUPY_POS_DEPTH_FACTOR;           // Increase by factor
@@ -353,7 +354,7 @@ namespace MaNGOS
                     return;
                 }
 
-                float angle = i_object.GetAngle(u) - i_absAngle;
+                float angle = i_object.Where().BearingTo(u->Where()) - i_absAngle;
 
                 // move angle to range -pi ... +pi, range before is -2Pi..2Pi
                 if (angle > M_PI_F)
@@ -393,13 +394,14 @@ namespace MaNGOS
  * @param distance2d The radial distance.
  * @param absAngle The absolute angle.
  */
-void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float absAngle) const
+// A point the component constructed, pulled back inside the map's coordinate bounds --
+// which is the map's business, not the geometry's.
+Geometry::Vector3 PointNear(WorldObject const& anchor, float distance2d, float absAngle)
 {
-    x = GetPositionX() + distance2d * cos(absAngle);
-    y = GetPositionY() + distance2d * sin(absAngle);
-
-    MaNGOS::NormalizeMapCoord(x);
-    MaNGOS::NormalizeMapCoord(y);
+    Geometry::Vector3 point = anchor.Where().PointAt(distance2d, absAngle);
+    MaNGOS::NormalizeMapCoord(point.x);
+    MaNGOS::NormalizeMapCoord(point.y);
+    return point;
 }
 
 /**
@@ -426,21 +428,24 @@ void WorldObject::GetNearPoint2D(float& x, float& y, float distance2d, float abs
  * @param distance2d The desired distance from this object.
  * @param absAngle The preferred absolute angle.
  */
-void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, float& z, float searcher_bounding_radius, float distance2d, float absAngle) const
+void FindFreeSpotNear(WorldObject const& anchor, WorldObject const* searcher, float& x, float& y, float& z,
+                      float searcher_bounding_radius, float distance2d, float absAngle)
 {
-    GetNearPoint2D(x, y, distance2d, absAngle);
-    const float init_z = z = GetPositionZ();
+    const Geometry::Vector3 first = PointNear(anchor, distance2d, absAngle);
+    x = first.x;
+    y = first.y;
+    const float init_z = z = anchor.Where().Z();
 
     // if detection disabled, return first point
     if (!sWorld.getConfig(CONFIG_BOOL_DETECT_POS_COLLISION))
     {
         if (searcher)
         {
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+            ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());       // update to LOS height if available
         }
         else
         {
-            UpdateGroundPositionZ(x, y, z);
+            DropToGround(anchor, x, y, z);
         }
         return;
     }
@@ -450,17 +455,17 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     float first_y = y;
     bool first_los_conflict = false;                        // first point LOS problems
 
-    const float dist = distance2d + searcher_bounding_radius + GetObjectBoundingRadius();
+    const float dist = distance2d + searcher_bounding_radius + anchor.Where().Extent();
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(), GetPositionY(), distance2d, searcher_bounding_radius, searcher);
+    ObjectPosSelector selector(anchor.Where().X(), anchor.Where().Y(), distance2d, searcher_bounding_radius, searcher);
 
     // adding used positions around object
     {
-        MaNGOS::NearUsedPosDo u_do(*this, searcher, absAngle, selector);
-        MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(this, u_do);
+        MaNGOS::NearUsedPosDo u_do(anchor, searcher, absAngle, selector);
+        MaNGOS::WorldObjectWorker<MaNGOS::NearUsedPosDo> worker(&anchor, u_do);
 
-        Cell::VisitAllObjects(this, worker, dist);
+        Cell::VisitAllObjects(&anchor, worker, dist);
     }
 
     // maybe can just place in primary position
@@ -468,14 +473,14 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     {
         if (searcher)
         {
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+            ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());       // update to LOS height if available
         }
         else
         {
-            UpdateGroundPositionZ(x, y, z);
+            DropToGround(anchor, x, y, z);
         }
 
-        if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
+        if (fabs(init_z - z) < dist && HasLineOfSight(anchor, Geometry::Vector3(x, y, z)))
         {
             return;
         }
@@ -491,19 +496,21 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     // select in positions after current nodes (selection one by one)
     while (selector.NextAngle(angle))                       // angle for free pos
     {
-        GetNearPoint2D(x, y, distance2d, absAngle + angle);
-        z = GetPositionZ();
+        const Geometry::Vector3 spot = PointNear(anchor, distance2d, absAngle + angle);
+        x = spot.x;
+        y = spot.y;
+        z = anchor.Where().Z();
 
         if (searcher)
         {
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+            ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());       // update to LOS height if available
         }
         else
         {
-            UpdateGroundPositionZ(x, y, z);
+            DropToGround(anchor, x, y, z);
         }
 
-        if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
+        if (fabs(init_z - z) < dist && HasLineOfSight(anchor, Geometry::Vector3(x, y, z)))
         {
             return;
         }
@@ -518,11 +525,11 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
 
         if (searcher)
         {
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+            ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());       // update to LOS height if available
         }
         else
         {
-            UpdateGroundPositionZ(x, y, z);
+            DropToGround(anchor, x, y, z);
         }
         return;
     }
@@ -533,19 +540,21 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
     // select in positions after current nodes (selection one by one)
     while (selector.NextUsedAngle(angle))                   // angle for used pos but maybe without LOS problem
     {
-        GetNearPoint2D(x, y, distance2d, absAngle + angle);
-        z = GetPositionZ();
+        const Geometry::Vector3 spot = PointNear(anchor, distance2d, absAngle + angle);
+        x = spot.x;
+        y = spot.y;
+        z = anchor.Where().Z();
 
         if (searcher)
         {
-            searcher->UpdateAllowedPositionZ(x, y, z, GetMap());       // update to LOS height if available
+            ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());       // update to LOS height if available
         }
         else
         {
-            UpdateGroundPositionZ(x, y, z);
+            DropToGround(anchor, x, y, z);
         }
 
-        if (fabs(init_z - z) < dist && IsWithinLOS(x, y, z))
+        if (fabs(init_z - z) < dist && HasLineOfSight(anchor, Geometry::Vector3(x, y, z)))
         {
             return;
         }
@@ -557,11 +566,11 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float& x, float& y, 
 
     if (searcher)
     {
-        searcher->UpdateAllowedPositionZ(x, y, z, GetMap());           // update to LOS height if available
+        ClampToAllowedZ(*searcher, x, y, z, anchor.GetMap());           // update to LOS height if available
     }
     else
     {
-        UpdateGroundPositionZ(x, y, z);
+        DropToGround(anchor, x, y, z);
     }
 }
 
@@ -651,7 +660,7 @@ void WorldObject::UpdateVisibilityAndView()
  */
 void WorldObject::UpdateObjectVisibility()
 {
-    CellPair p = MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY());
+    CellPair p = MaNGOS::ComputeCellPair(Where().X(), Where().Y());
     Cell cell(p);
 
     GetMap()->UpdateObjectVisibility(this, cell, p);
@@ -821,3 +830,20 @@ Eluna* WorldObject::GetEluna() const
     return nullptr;
 }
 #endif /* ENABLE_ELUNA */
+
+void ClosePointNear(WorldObject const& anchor, float& x, float& y, float& z, float bounding_radius,
+                    float distance2d, float angle, WorldObject const* searcher)
+{
+    FindFreeSpotNear(anchor, searcher, x, y, z, bounding_radius,
+                     Geometry::Placement::ContactSpread(distance2d, anchor.Where().Extent(), bounding_radius),
+                     anchor.Where().Facing() + angle);
+}
+
+void ContactPointNear(WorldObject const& anchor, WorldObject const* obj, float& x, float& y, float& z,
+                      float distance2d)
+{
+    FindFreeSpotNear(anchor, obj, x, y, z, obj->Where().Extent(),
+                     Geometry::Placement::ContactSpread(distance2d, anchor.Where().Extent(),
+                                                        obj->Where().Extent()),
+                     anchor.Where().BearingTo(obj->Where()));
+}

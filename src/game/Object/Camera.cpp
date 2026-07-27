@@ -30,6 +30,9 @@
 #include "Log.h"
 #include "Errors.h"
 #include "Player.h"
+#include "Transports.h"
+#include "TransportMap.h"
+#include <vector>
 
 /**
  * @brief Creates a camera bound to a player.
@@ -98,7 +101,7 @@ void Camera::SetView(WorldObject* obj, bool update_far_sight_field /*= true*/)
         return;
     }
 
-    if (!m_owner.IsInMap(obj))
+    if (!CanBeSeen(*obj, m_owner))
     {
         sLog.outError("Camera::SetView, viewpoint is not in map with camera's owner");
         return;
@@ -236,6 +239,19 @@ void Camera::UpdateVisibilityForOwner()
 
     MaNGOS::VisibleNotifier notifier(*this);
     Cell::VisitAllObjects(m_source, notifier, visibilityDistance, false);
+
+    // The other side of a vessel's boundary. A deck and the shore it sails past are two
+    // maps, and no cell visit of one reaches the other -- so the same notifier is run over
+    // the far side as well. ONE elimination follows, over both, which is the whole point:
+    // an object that drops out of reach across the boundary is destroyed by the ordinary
+    // sweep instead of by a ledger somebody has to remember to keep.
+    std::vector<RelaySource> relayed;
+    TransportMap::CollectRelaySources(m_source, visibilityDistance, relayed);
+    for (RelaySource const& src : relayed)
+    {
+        Cell::VisitAllObjects(src.x, src.y, src.map, notifier, src.radius, false);
+    }
+
     notifier.Notify();
 }
 

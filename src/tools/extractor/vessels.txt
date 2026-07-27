@@ -1,0 +1,33 @@
+# mangos-extractor vessel list: <mapId> <displayId>   # name
+#
+# Each line gives one vessel map the id of the hull model to bake into it. Map ids
+# below 1000000 are the client's own Transport<entry> rows; the rest are minted by
+# the server for hulls Blizzard shipped no map for (VESSEL_MAP_BASE + entry).
+# Generated from the transports table and Map.dbc; regenerate if either changes.
+
+593      3015   # Steamwheedle Cartel ports, Ratchet and Booty Bay ("The Maiden's Fancy") (entry 20808)
+591      3031   # Orgrimmar, Durotar and Undercity, Tirisfal Glades ("The Thundercaller") (entry 164871)
+589      3031   # Orgrimmar, Durotar and Grom'gol Base Camp, Stranglethorn Vale ("The Iron Eagle") (entry 175080)
+584      3015   # Menethil Harbor, Wetlands and Theramore Isle, Dustwallow Marsh ("The Lady Mehley") (entry 176231)
+582      7087   # Rut'theran Village, Teldrassil and Auberdine, Darkshore ("The Moonspray") (entry 176244)
+588      3015   # Stormwind Harbor and Auberdine, Darkshore ("Ship (The Bravery)") (entry 176310)
+590      3031   # Undercity, Tirisfal Glades and Grom'gol Base Camp, Stranglethorn Vale ("The Purple Princess") (entry 176495)
+587      7087   # The Forgotten Coast, Feralas and Feathermoon Stronghold, Sardor Isle, Feralas ("Feathermoon Ferry") (entry 177233)
+1181646  7087   # Valaar's Berth, Azuremyst Isle and Auberdine, Darkshore ("Elune's Blessing") (entry 181646)
+1181688  7446   # Menethil Harbor, Wetlands and Valgarde, Howling Fjord ("Northspear") (entry 181688)
+1181689  7546   # Undercity, Tirisfal Glades and Vengeance Landing, Howling Fjord ("Zeppelin, Horde (Cloudkisser)") (entry 181689)
+592      7546   # Orgrimmar, Durotar and Warsong Hold, Borean Tundra ("Zeppelin, Horde (The Mighty Wind)") (entry 186238)
+1186371  3031   # Westguard Keep in Howling Fjord to bombard pirate ("Zeppelin") (entry 186371)
+594      7570   # Not Boardable - Cyrcling in Howling Fjord ("Sister Mercy") (entry 187038)
+1187568  7636   # Unu'pe, Borean Tundra and Moa'ki Harbor, Dragonblight ("Turtle (Walker of Waves)") (entry 187568)
+1188511  7636   # Moa'ki Harbor and Kamagua ("Turtle (Green Island)") (entry 188511)
+1190536  7446   # Stormwing Harbor and Valiance Keep, Borean Tundra ("The Kraken") (entry 190536)
+1190549  3031   # Orgrimmar and Thunder Bluff (entry 190549)
+622      8253   # Not boardable - Horde gunship patrolling above Icecrown ("Orgrim's Hammer") (entry 192241)
+623      8254   # Not boardable - Alliance gunship patrolling above Icecrown ("The Skybreaker") (entry 192242)
+1195121  9002   # IOC - Alliance Gunship (entry 195121)
+1195276  9001   # IOC - Horde Gunship (entry 195276)
+1201580  9150   # ICC Raid, The Skybreaker (entry 201580)
+1201581  9151   # ICC Raid, Orgrim's Hammer (entry 201581)
+1201598  9002   # The Skybreaker (entry 201598)
+718      7546   # Zeppelin, Horde (The Mighty Wind) (Icecrown Raid) (entry 201834)

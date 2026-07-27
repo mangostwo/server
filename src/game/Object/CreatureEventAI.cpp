@@ -1267,7 +1267,7 @@ void CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
                     m_creature->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
-                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), float(action.changeMovement.wanderDistance));
+                    m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->Where().X(), m_creature->Where().Y(), m_creature->Where().Z(), float(action.changeMovement.wanderDistance));
                     break;
                 case WAYPOINT_MOTION_TYPE:
                     m_creature->GetMotionMaster()->MoveWaypoint();
@@ -1649,7 +1649,7 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
                 float fMaxAllowedRange = (float)(*itr).Event.ooc_los.maxRange;
 
                 // if range is ok and we are actually in LOS
-                if (m_creature->IsWithinDistInMap(who, fMaxAllowedRange) && m_creature->IsWithinLOSInMap(who))
+                if (InReach(*m_creature, *who, fMaxAllowedRange) && HasLineOfSight(*m_creature, *who))
                 {
                     // if friendly event&&who is not hostile OR hostile event&&who is hostile
                     if (((*itr).Event.ooc_los.noHostile && !m_creature->IsHostileTo(who)) ||
@@ -1670,13 +1670,13 @@ void CreatureEventAI::MoveInLineOfSight(Unit* who)
     if (m_creature->CanInitiateAttack() && who->IsTargetableForAttack() &&
         m_creature->IsHostileTo(who) && who->isInAccessablePlaceFor(m_creature))
     {
-        if (!m_creature->CanFly() && m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+        if (!m_creature->CanFly() && m_creature->Where().HeightGapTo(who->Where()) > CREATURE_Z_ATTACK_RANGE)
         {
             return;
         }
 
         float attackRadius = m_creature->GetAttackDistance(who);
-        if (m_creature->IsWithinDistInMap(who, attackRadius) && m_creature->IsWithinLOSInMap(who))
+        if (InReach(*m_creature, *who, attackRadius) && HasLineOfSight(*m_creature, *who))
         {
             if (!m_creature->getVictim())
             {
@@ -1779,8 +1779,8 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
                 case EVENT_T_RANGE:
                     if (Combat)
                     {
-                        if (m_creature->getVictim() && m_creature->IsInMap(m_creature->getVictim()))
-                            if (m_creature->IsInRange(m_creature->getVictim(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
+                        if (m_creature->getVictim() && CanInteract(*m_creature, *(m_creature->getVictim())))
+                            if (m_creature->Where().WithinRange((m_creature->getVictim())->Where(), (float)(*i).Event.range.minDist, (float)(*i).Event.range.maxDist))
                             {
                                 ProcessEvent(*i);
                             }
@@ -1813,7 +1813,7 @@ void CreatureEventAI::UpdateAI(const uint32 diff)
  */
 bool CreatureEventAI::IsVisible(Unit* pl) const
 {
-    return m_creature->IsWithinDist(pl, sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
+    return m_creature->Where().WithinDist(pl->Where(), sWorld.getConfig(CONFIG_FLOAT_SIGHT_MONSTER))
            && pl->IsVisibleForOrDetect(m_creature, m_creature, true);
 }
 
@@ -2130,7 +2130,7 @@ bool CreatureEventAI::SpawnedEventConditionsCheck(CreatureEventAI_Event const& e
         {
             // zone ID check
             uint32 zone, area;
-            m_creature->GetZoneAndAreaId(zone, area);
+            m_creature->GetTerrain()->GetZoneAndAreaId(zone, area, m_creature->Where().X(), m_creature->Where().Y(), m_creature->Where().Z());
             return zone == event.spawned.conditionValue1 || area == event.spawned.conditionValue1;
         }
         default:

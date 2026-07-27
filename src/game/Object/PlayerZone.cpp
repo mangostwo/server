@@ -108,15 +108,21 @@ void Player::CheckAreaExploreAndOutdoor()
         return;
     }
 
+    // Asked of the map that HAS an area table: aboard a vessel that is the one it sails,
+    // at the vessel's own pose. Nothing on a deck is explored, and a deck names no area.
+    uint32 anchorMap;
+    float anchorX, anchorY, anchorZ;
+    GetWorldAnchor(anchorMap, anchorX, anchorY, anchorZ);
+
     bool isOutdoor;
-    uint16 areaFlag = GetTerrain()->GetAreaFlag(GetPositionX(), GetPositionY(), GetPositionZ(), &isOutdoor);
+    uint16 areaFlag = AnchorTerrain()->GetAreaFlag(anchorX, anchorY, anchorZ, &isOutdoor);
 
     if (isOutdoor)
     {
         if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() == REST_TYPE_IN_TAVERN)
         {
             AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(inn_trigger_id);
-            if (!at || !IsPointInAreaTriggerZone(at, GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ()))
+            if (!at || !IsPointInAreaTriggerZone(at, anchorMap, anchorX, anchorY, anchorZ))
             {
                 // Player left inn (REST_TYPE_IN_CITY overrides REST_TYPE_IN_TAVERN, so just clear rest)
                 SetRestType(REST_TYPE_NO);
@@ -155,7 +161,7 @@ void Player::CheckAreaExploreAndOutdoor()
 
     if (offset >= PLAYER_EXPLORED_ZONES_SIZE)
     {
-        sLog.outError("Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < %u ).", areaFlag, GetPositionX(), GetPositionY(), offset, offset, PLAYER_EXPLORED_ZONES_SIZE);
+        sLog.outError("Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < %u ).", areaFlag, Where().X(), Where().Y(), offset, offset, PLAYER_EXPLORED_ZONES_SIZE);
         return;
     }
 
@@ -171,7 +177,7 @@ void Player::CheckAreaExploreAndOutdoor()
         AreaTableEntry const* p = GetAreaEntryByAreaFlagAndMap(areaFlag, GetMapId());
         if (!p)
         {
-            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), GetPositionX(), GetPositionY(), GetMapId());
+            sLog.outError("PLAYER: Player %u discovered unknown area (x: %f y: %f map: %u", GetGUIDLow(), Where().X(), Where().Y(), GetMapId());
         }
         else if (p->ExplorationLevel > 0)
         {

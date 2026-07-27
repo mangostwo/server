@@ -270,7 +270,7 @@ void WorldSession::HandleWhoOpcode(WorldPacket& recv_data)
             return;
         }
 
-        uint32 pzoneid = pl->GetZoneId();
+        uint32 pzoneid = pl->GetTerrain()->GetZoneId(pl->Where().X(), pl->Where().Y(), pl->Where().Z());
         uint8 gender = pl->getGender();
 
         bool z_show = true;
@@ -397,8 +397,8 @@ void WorldSession::HandleLogoutRequestOpcode(WorldPacket& /*recv_data*/)
     // not set flags if player can't free move to prevent lost state at logout cancel
     if (GetPlayer()->CanFreeMove())
     {
-        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(), GetPlayer()->GetPositionX(), GetPlayer()->GetPositionY(), GetPlayer()->GetPositionZ());
-        if ((GetPlayer()->GetPositionZ() < height + 0.1f) && !(GetPlayer()->IsInWater()))
+        float height = GetPlayer()->GetMap()->GetHeight(GetPlayer()->GetPhaseMask(), GetPlayer()->Where().X(), GetPlayer()->Where().Y(), GetPlayer()->Where().Z());
+        if ((GetPlayer()->Where().Z() < height + 0.1f) && !(GetPlayer()->IsInWater()))
         {
             GetPlayer()->SetStandState(UNIT_STAND_STATE_SIT);
         }
@@ -505,7 +505,7 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recv_data)
 
     // use server side data
     uint32 newzone, newarea;
-    GetPlayer()->GetZoneAndAreaId(newzone, newarea);
+    GetPlayer()->GetTerrain()->GetZoneAndAreaId(newzone, newarea, GetPlayer()->Where().X(), GetPlayer()->Where().Y(), GetPlayer()->Where().Z());
     GetPlayer()->UpdateZone(newzone, newarea);
 }
 
@@ -655,7 +655,7 @@ void WorldSession::HandleReclaimCorpseOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (!corpse->IsWithinDistInMap(GetPlayer(), CORPSE_RECLAIM_RADIUS, true))
+    if (!InReach(*corpse, *(GetPlayer()), CORPSE_RECLAIM_RADIUS, true))
     {
         return;
     }
@@ -732,7 +732,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket& recv_data)
     const float delta = 5.0f;
 
     // check if player in the range of areatrigger
-    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), delta))
+    if (!IsPointInAreaTriggerZone(atEntry, player->GetMapId(), player->Where().X(), player->Where().Y(), player->Where().Z(), delta))
     {
         DEBUG_LOG("Player '%s' (GUID: %u) too far, ignore Area Trigger ID: %u", player->GetName(), player->GetGUIDLow(), Trigger_ID);
         return;
@@ -1409,7 +1409,7 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
     {
         uint32 gameObjectId = 0;
         Player *pPlayer = GetPlayer();
-        Position position = pPlayer->GetPosition();
+        Geometry::Placement const& position = pPlayer->Where();
         Map *pMap = pPlayer->GetMap();
 
         msg >> gameObjectId;
@@ -1438,7 +1438,7 @@ void WorldSession::CreateGameObjectHandler(WorldPacket &msg)
             }
 
             GameObject *pGameObj = new GameObject;  /* Object is freed from memory in Map::Remove */
-            if (!pGameObj->Create(db_lowGUID, gInfo->id, pMap, pPlayer->GetPhaseMaskForSpawn(), position.x, position.y, position.z, position.o))
+            if (!pGameObj->Create(db_lowGUID, gInfo->id, pMap, pPlayer->GetPhaseMaskForSpawn(), position.X(), position.Y(), position.Z(), position.Facing()))
             {
                 delete pGameObj;
                 SendNotification("Failed to create game object");
@@ -1803,7 +1803,7 @@ void WorldSession::HandleHearthandResurrect(WorldPacket& /*recv_data*/)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_HEARTH_AND_RESURRECT");
 
-    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetAreaId());
+    AreaTableEntry const* atEntry = sAreaStore.LookupEntry(_player->GetTerrain()->GetAreaId(_player->Where().X(), _player->Where().Y(), _player->Where().Z()));
     if (!atEntry || !(atEntry->Flags & AREA_FLAG_CAN_HEARTH_AND_RES))
     {
         return;

@@ -31,6 +31,7 @@
 
 #include "Platform/Define.h"
 #include "Utilities/UnorderedMapSet.h"
+#include <set>
 
 //  memory management
 inline void* dtCustomAlloc(size_t size, dtAllocHint /*hint*/)
@@ -100,6 +101,7 @@ namespace MMAP
             uint32 packTileID(int32 x, int32 y);
 
             MMapDataSet loadedMMaps;
+            std::set<uint32> failedMMaps;   ///< maps with no mmap file, so we stop retrying
             uint32 loadedTiles;
     };
 

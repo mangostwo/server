@@ -160,6 +160,7 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     }
 
     player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE);
+    player->RefreshBoundingRadius();
     player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f);
 
     player->setFactionForRace(player->getRace());

@@ -100,7 +100,6 @@ source_group("Dynamic" FILES ${SRC_GRP_DYNAMIC})
 
 set(SRC_GRP_GAMESYSTEM
   GameSystem/Grid.h
-  GameSystem/GridLoader.h
   GameSystem/GridRefManager.h
   GameSystem/GridReference.h
   GameSystem/NGrid.h
@@ -270,6 +269,9 @@ target_include_directories(shared
 target_compile_definitions(shared
     PUBLIC
         ${MANGOS_EXP}
+        # Selects UringServer over the epoll reactor in Server.hpp. Without it the
+        # backend compiles and links but is never chosen, so WITH_IO_URING is inert.
+        $<$<BOOL:${MANGOS_USE_IO_URING}>:MANGOS_USE_IO_URING>
         $<$<CONFIG:Debug>:MANGOS_DEBUG>
         MANGOS_ENDIAN=${ENDIAN_VALUE}
         $<$<BOOL:${ENDIAN_VALUE}>:ARCH_IS_BIG_ENDIAN>

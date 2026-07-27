@@ -2239,8 +2239,10 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK19            = 0x00040000,       // ? Related to vehicle/siege weapons?
     CREATURE_TYPEFLAGS_UNK20            = 0x00080000,       // may be has something to do with missiles
     CREATURE_TYPEFLAGS_UNK21            = 0x00100000,       // no idea, but it used by client, may be related to rendering
+                                                            // (see CREATURE_TYPEFLAGS_TRANSPORT_FORBIDDEN below)
     CREATURE_TYPEFLAGS_UNK22            = 0x00200000,       // may be has something to do with animation (disable animation?)
     CREATURE_TYPEFLAGS_UNK23            = 0x00400000,       // this one probably controls some creature visual
+                                                            // (see CREATURE_TYPEFLAGS_TRANSPORT_FORBIDDEN below)
     CREATURE_TYPEFLAGS_SQUIRE           = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
     CREATURE_TYPEFLAGS_UNK25            = 0x01000000,       // pet sounds related?
     CREATURE_TYPEFLAGS_UNK26            = 0x02000000,       // this one probably controls some creature visual
@@ -2251,6 +2253,24 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_UNK31            = 0x40000000,
     CREATURE_TYPEFLAGS_QUEST_BOSS       = 0x80000000,       // Lua_UnitIsQuestBoss
 };
+
+/**
+ * @brief A CREATURE CARRYING BOTH OF THESE MAY NOT SAIL.
+ *
+ * Set together, they kill every client that can see the creature the moment the transport it
+ * stands on gets under way -- in the client's own render path, reading a wild pointer.
+ * Stationary nothing happens: a transport's attachments are only walked while it moves.
+ *
+ * BOTH are required. Either bit alone was put on a deck and sailed with no complaint; the two
+ * together were fatal every time. They reach the client in SMSG_CREATURE_QUERY_RESPONSE and
+ * are cached there per ENTRY, so this cannot be masked per creature on the wire -- the
+ * creature simply does not go aboard. See TransportMap::EnlistCrew.
+ *
+ * In the whole world database exactly one template carries the pair, and it is not content:
+ * the `.wp add` waypoint marker, which is why laying a path on a deck used to kill everyone
+ * in the harbour.
+ */
+#define CREATURE_TYPEFLAGS_TRANSPORT_FORBIDDEN     (CREATURE_TYPEFLAGS_UNK21 | CREATURE_TYPEFLAGS_UNK23)
 
 enum CreatureEliteType
 {

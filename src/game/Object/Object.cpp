@@ -185,6 +185,7 @@ void Object::_Create(uint32 guidlow, uint32 entry, HighGuid guidhigh)
 void Object::SetObjectScale(float newScale)
 {
     SetFloatValue(OBJECT_FIELD_SCALE_X, newScale);
+    OnScaleChanged();
 }
 
 
@@ -251,6 +252,7 @@ WorldObject::WorldObject() :
     m_transportInfo(NULL),
     m_currMap(NULL),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
+    m_placement(DEFAULT_WORLD_OBJECT_SIZE),
     m_isActiveObject(false),
     m_visibilityDistanceOverride(0.0f)
 {

@@ -1113,7 +1113,9 @@ LivingWorld.AnchorPolicyMask              = 0
 #        Commands .npc add/.gobject add can be used only for guids from this reserve and required server restart if all guids
 #        from reserve used before above commands can be used in like case. Less size increase amount guids for dynamic spawns
 #        in game from other side
-#        Default: 100
+#        Transport crew (.npc trans add and vessels loaded from creature_transport) also draw creature guids from this reserve
+#        and hold theirs for the whole session, so size the creature reserve above the peak crew count plus expected .npc add use.
+#        Default: 1000 (Creature), 100 (GameObject)
 #
 ################################################################################
 
@@ -1152,7 +1154,7 @@ ListenRange.Say                           = 40
 ListenRange.TextEmote                     = 40
 ListenRange.Yell                          = 300
 
-GuidReserveSize.Creature                  = 100
+GuidReserveSize.Creature                  = 1000
 GuidReserveSize.GameObject                = 100
 
 ################################################################################

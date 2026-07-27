@@ -11,6 +11,8 @@
 #include "Geometry/GeometryMath.h"
 #include "Geometry/Vector3.h"
 
+#include <cstdint>
+
 #include <cmath>
 
 namespace Geometry
@@ -71,4 +73,31 @@ namespace Geometry
     };
 
     inline Quat operator*(float s, const Quat& q) { return q * s; }
+
+    /// The yaw a rotation carries, in [0, 2*PI) -- the only component a server-side
+    /// facing has, since everything the core places stands upright.
+    inline float YawOf(const Quat& q)
+    {
+        const double t1 = +2.0 * (double(q.w) * q.z + double(q.x) * q.y);
+        const double t2 = +1.0 - 2.0 * (double(q.y) * q.y + double(q.z) * q.z);
+        const float yaw = float(std::atan2(t1, t2));
+        return wrap(yaw, 0.0f, 2.0f * pif());
+    }
+
+    /// A rotation squeezed into the 3x21-bit field the 3.3.5 client reads
+    /// (GAMEOBJECT_ROTATION). The sign of w is folded into each axis.
+    inline int64_t PackRotation(const Quat& q)
+    {
+        enum
+        {
+            PACK_COEFF_YZ = 1 << 20,
+            PACK_COEFF_X = 1 << 21,
+        };
+
+        const int sign = (q.w >= 0.0f ? 1 : -1);
+        const int64_t x = int64_t(int32_t(q.x * PACK_COEFF_X) * sign & ((1 << 22) - 1));
+        const int64_t y = int64_t(int32_t(q.y * PACK_COEFF_YZ) * sign & ((1 << 21) - 1));
+        const int64_t z = int64_t(int32_t(q.z * PACK_COEFF_YZ) * sign & ((1 << 21) - 1));
+        return z | (y << 21) | (x << 42);
+    }
 }

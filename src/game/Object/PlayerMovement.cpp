@@ -132,7 +132,7 @@ void Player::SetLevitate(bool enable)
 
     data.Initialize(MSG_MOVE_GRAVITY_CHNG, 64);
     data << GetPackGUID();
-    m_movementInfo.Write(data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
@@ -159,7 +159,7 @@ void Player::SetCanFly(bool enable)
 
     data.Initialize(MSG_MOVE_UPDATE_CAN_FLY, 64);
     data << GetPackGUID();
-    m_movementInfo.Write(data);
+    WriteMovementInfo(data);
     SendMessageToSet(&data, false);
 }
 
@@ -187,7 +187,7 @@ void Player::SetFeatherFall(bool enable)
     // start fall from current height
     if (!enable)
     {
-        SetFallInformation(0, GetPositionZ());
+        SetFallInformation(0, Where().Z());
     }
 }
 

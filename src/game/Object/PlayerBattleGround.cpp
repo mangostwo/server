@@ -124,7 +124,7 @@ void Player::SetBattleGroundEntryPoint()
         m_bgData.taxiPath[1] = m_taxi.GetTaxiDestination();
 
         // On taxi we don't need check for dungeon
-        m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        m_bgData.joinPos = WorldLocation(GetMapId(), Where().X(), Where().Y(), Where().Z(), Where().Facing());
         m_bgData.m_needSave = true;
         return;
     }
@@ -149,7 +149,10 @@ void Player::SetBattleGroundEntryPoint()
         // If map is dungeon find linked graveyard
         if (GetMap()->IsDungeon())
         {
-            if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
+            uint32 graveMap;
+            float graveX, graveY, graveZ;
+            GetWorldAnchor(graveMap, graveX, graveY, graveZ);
+            if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(graveX, graveY, graveZ, graveMap, GetTeam()))
             {
                 m_bgData.joinPos = WorldLocation(entry->Continent, entry->LocX, entry->LocY, entry->LocZ, 0.0f);
                 m_bgData.m_needSave = true;
@@ -163,7 +166,7 @@ void Player::SetBattleGroundEntryPoint()
         // If new entry point is not BG or arena set it
         else if (!GetMap()->IsBattleGroundOrArena())
         {
-            m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+            m_bgData.joinPos = WorldLocation(GetMapId(), Where().X(), Where().Y(), Where().Z(), Where().Facing());
             m_bgData.m_needSave = true;
             return;
         }

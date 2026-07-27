@@ -107,11 +107,11 @@ void OutdoorPvPZM::HandleCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
         case NPC_PVP_BEAM_RED:
-            if (creature->GetPositionY() < 7000.0f)         // East Beam
+            if (creature->Where().Y() < 7000.0f)         // East Beam
             {
                 m_beamTowerRed[0] = creature->GetObjectGuid();
             }
-            else if (creature->GetPositionY() < 7300.0f)    // Center Beam
+            else if (creature->Where().Y() < 7300.0f)    // Center Beam
             {
                 m_beamGraveyardRed = creature->GetObjectGuid();
             }
@@ -121,11 +121,11 @@ void OutdoorPvPZM::HandleCreatureCreate(Creature* creature)
             }
             break;
         case NPC_PVP_BEAM_BLUE:
-            if (creature->GetPositionY() < 7000.0f)         // East Beam
+            if (creature->Where().Y() < 7000.0f)         // East Beam
             {
                 m_beamTowerBlue[0] = creature->GetObjectGuid();
             }
-            else if (creature->GetPositionY() < 7300.0f)    // Center Beam
+            else if (creature->Where().Y() < 7300.0f)    // Center Beam
             {
                 m_beamGraveyardBlue = creature->GetObjectGuid();
             }
@@ -170,7 +170,7 @@ void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player)
         {
             // check capture point range
             GameObjectInfo const* info = capturePoint->GetGOInfo();
-            if (info && player->IsWithinDistInMap(capturePoint, info->capturePoint.radius))
+            if (info && InReach(*player, *capturePoint, info->capturePoint.radius))
             {
                 // check capture point team
                 if (player->GetTeam() == m_towerOwner[i])

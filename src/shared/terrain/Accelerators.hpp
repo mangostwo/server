@@ -71,6 +71,19 @@ namespace world::terrain
         std::optional<float> Raycast(const TriSoup& soup, const Vec3& o, const Vec3& d,
                                      float tMax, uint32_t* hitTri = nullptr) const;
 
+        struct Crossing
+        {
+            float t = 0.f;
+            uint32_t tri = 0;
+        };
+
+        // Every triangle the ray crosses, not just the first. A nearest-hit walk shrinks
+        // its box test against the best t found so far and prunes the rest of the column;
+        // this one cannot, so it is the more expensive of the two and exists for the one
+        // question that needs the whole column rather than its top.
+        void RaycastAll(const TriSoup& soup, const Vec3& o, const Vec3& d, float tMax,
+                        std::vector<Crossing>& out) const;
+
         const std::vector<Node>& Nodes() const { return m_nodes; }
         void Adopt(std::vector<Node> nodes) { m_nodes = std::move(nodes); }
 

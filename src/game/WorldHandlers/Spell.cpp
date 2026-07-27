@@ -109,6 +109,8 @@ SpellCastTargets::SpellCastTargets()
     m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0.0f;
+    m_srcTransOffsetX = m_srcTransOffsetY = m_srcTransOffsetZ = 0.0f;
+    m_destTransOffsetX = m_destTransOffsetY = m_destTransOffsetZ = 0.0f;
     m_strTarget.clear();
     m_targetMask = 0;
 }
@@ -129,9 +131,9 @@ void SpellCastTargets::setUnitTarget(Unit* target)
         return;
     }
 
-    m_destX = target->GetPositionX();
-    m_destY = target->GetPositionY();
-    m_destZ = target->GetPositionZ();
+    m_destX = target->Where().X();
+    m_destY = target->Where().Y();
+    m_destZ = target->Where().Z();
     m_unitTarget = target;
     m_unitTargetGUID = target->GetObjectGuid();
     m_targetMask |= TARGET_FLAG_UNIT;
@@ -149,6 +151,8 @@ void SpellCastTargets::setDestination(float x, float y, float z)
     m_destX = x;
     m_destY = y;
     m_destZ = z;
+    // A world point set by the server, not read off a deck.
+    m_destTransportGUID = ObjectGuid();
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
@@ -164,6 +168,7 @@ void SpellCastTargets::setSource(float x, float y, float z)
     m_srcX = x;
     m_srcY = y;
     m_srcZ = z;
+    m_srcTransportGUID = ObjectGuid();
     m_targetMask |= TARGET_FLAG_SOURCE_LOCATION;
 }
 
@@ -272,9 +277,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
 
     if (m_targetMask == TARGET_FLAG_SELF)
     {
-        m_destX = caster->GetPositionX();
-        m_destY = caster->GetPositionY();
-        m_destZ = caster->GetPositionZ();
+        m_destX = caster->Where().X();
+        m_destY = caster->Where().Y();
+        m_destZ = caster->Where().Z();
         m_unitTarget = caster;
         m_unitTargetGUID = caster->GetObjectGuid();
         return;
@@ -301,10 +306,18 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
         data >> m_CorpseTargetGUID.ReadAsPacked();
     }
 
+    // When the cast comes off a deck the coordinates ARE the local offset -- the client
+    // sends them with the vessel's guid, and the server keeps them local. Nothing is
+    // composed into a world position: a deck effect is searched in the vessel's own frame
+    // (see Spell::FillAreaTargets and DynamicObject), and the world position of a point on
+    // a moving hull is exactly the thing the server does not know.
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
         data >> m_srcTransportGUID.ReadAsPacked();
         data >> m_srcX >> m_srcY >> m_srcZ;
+        m_srcTransOffsetX = m_srcX;
+        m_srcTransOffsetY = m_srcY;
+        m_srcTransOffsetZ = m_srcZ;
         if (!MaNGOS::IsValidMapCoord(m_srcX, m_srcY, m_srcZ))
         {
             throw ByteBufferException(false, data.rpos(), 0, data.size());
@@ -315,6 +328,9 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     {
         data >> m_destTransportGUID.ReadAsPacked();
         data >> m_destX >> m_destY >> m_destZ;
+        m_destTransOffsetX = m_destX;
+        m_destTransOffsetY = m_destY;
+        m_destTransOffsetZ = m_destZ;
         if (!MaNGOS::IsValidMapCoord(m_destX, m_destY, m_destZ))
         {
             throw ByteBufferException(false, data.rpos(), 0, data.size());
@@ -385,16 +401,34 @@ void SpellCastTargets::write(ByteBuffer& data) const
         }
     }
 
+    // The wire carries the vessel guid and, with it, the DECK OFFSET -- never the composed
+    // world position. That is what parents the effect to the deck at every client: it
+    // reads the coords as local exactly because the guid is set. Sending the world x/y/z
+    // here would put the effect at a fixed point in the sea the ship is leaving behind.
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
         data << m_srcTransportGUID.WriteAsPacked();
-        data << m_srcX << m_srcY << m_srcZ;
+        if (m_srcTransportGUID)
+        {
+            data << m_srcTransOffsetX << m_srcTransOffsetY << m_srcTransOffsetZ;
+        }
+        else
+        {
+            data << m_srcX << m_srcY << m_srcZ;
+        }
     }
 
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         data << m_destTransportGUID.WriteAsPacked();
-        data << m_destX << m_destY << m_destZ;
+        if (m_destTransportGUID)
+        {
+            data << m_destTransOffsetX << m_destTransOffsetY << m_destTransOffsetZ;
+        }
+        else
+        {
+            data << m_destX << m_destY << m_destZ;
+        }
     }
 
     if (m_targetMask & TARGET_FLAG_STRING)
@@ -599,10 +633,10 @@ void Spell::prepare(SpellCastTargets const* targets, Aura* triggeredByAura)
 {
     m_targets = *targets;
 
-    m_castPositionX = m_caster->GetPositionX();
-    m_castPositionY = m_caster->GetPositionY();
-    m_castPositionZ = m_caster->GetPositionZ();
-    m_castOrientation = m_caster->GetOrientation();
+    m_castPositionX = m_caster->Where().X();
+    m_castPositionY = m_caster->Where().Y();
+    m_castPositionZ = m_caster->Where().Z();
+    m_castOrientation = m_caster->Where().Facing();
 
     if (triggeredByAura)
     {
@@ -1370,7 +1404,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
 
         // zone check
         uint32 zone, area;
-        target->GetZoneAndAreaId(zone, area);
+        target->GetTerrain()->GetZoneAndAreaId(zone, area, target->Where().X(), target->Where().Y(), target->Where().Z());
 
         SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(pSpell, target->GetMapId(), zone, area, target->GetCharmerOrOwnerPlayerOrPlayerItself());
         if (locRes != SPELL_CAST_OK || !((Player*)target)->CanStartFlyInArea(target->GetMapId(), zone, area))

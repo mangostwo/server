@@ -587,6 +587,7 @@ class ChatHandler
         bool HandleTeleGroupCommand(char* args);
         bool HandleTeleNameCommand(char* args);
 
+
         bool HandleTitlesAddCommand(char* args);
         bool HandleTitlesCurrentCommand(char* args);
         bool HandleTitlesRemoveCommand(char* args);
