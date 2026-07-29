@@ -33,6 +33,7 @@
  * - Character customization
  */
 
+#include <list>
 #include <string>
 #include <sstream>
 #include "Common/Locales.h"

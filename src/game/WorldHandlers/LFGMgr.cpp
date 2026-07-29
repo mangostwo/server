@@ -36,7 +36,6 @@
 #include "SharedDefines.h"
 #include "WorldSession.h"
 
-INSTANTIATE_SINGLETON_1(LFGMgr);
 
 LFGMgr::LFGMgr()
 {

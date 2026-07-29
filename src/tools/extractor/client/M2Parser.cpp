@@ -1,3 +1,4 @@
+#include <string>
 #include "M2Parser.hpp"
 #include "ChunkReaders.hpp"
 

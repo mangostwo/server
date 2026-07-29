@@ -25,7 +25,7 @@
 #ifndef MANGOS_CREATURE_EAI_H
 #define MANGOS_CREATURE_EAI_H
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Platform/Define.h"
 #include <vector>
 #include <list>
@@ -73,7 +73,8 @@ enum EventAI_Type
     EVENT_T_TARGET_MISSING_AURA     = 28,                   // Param1 = SpellID, Param2 = Number of time stacked expected, Param3/4 Repeat Min/Max
     EVENT_T_TIMER_GENERIC           = 29,                   // InitialMin, InitialMax, RepeatMin, RepeatMax
     EVENT_T_RECEIVE_AI_EVENT        = 30,                   // AIEventType, Sender-Entry, unused, unused
-    EVENT_T_ENERGY                  = 31,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
+    EVENT_T_REACHED_WAYPOINT        = 31,                   // positionX, positionY, positionZ, distance (distance from the waypoint)
+    EVENT_T_ENERGY                  = 32,                   // EnergyMax%, EnergyMin%, RepeatMin, RepeatMax
 
     EVENT_T_END,
 };
@@ -488,7 +489,7 @@ struct CreatureEventAI_Event
         // EVENT_T_MANA                                     = 3
         // EVENT_T_TARGET_HP                                = 12
         // EVENT_T_TARGET_MANA                              = 18
-        // EVENT_T_ENERGY                                   = 31
+        // EVENT_T_ENERGY                                   = 32
         struct
         {
             uint32 percentMax;
@@ -604,6 +605,14 @@ struct CreatureEventAI_Event
             uint32 unused1;
             uint32 unused2;
         } receiveAIEvent;
+        // EVENT_T_REACHED_WAYPOINT                         = 31
+        struct
+        {
+            int positionX;
+            int positionY;
+            int positionZ;
+            int distance;                                   // Distance from the waypoint
+        } reached_waypoint;
         // RAW
         struct
         {
@@ -621,7 +630,7 @@ struct CreatureEventAI_Event
 
 // Event_Map
 typedef std::vector<CreatureEventAI_Event> CreatureEventAI_Event_Vec;
-typedef UNORDERED_MAP<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;
+typedef std::unordered_map<uint32, CreatureEventAI_Event_Vec > CreatureEventAI_Event_Map;
 
 struct CreatureEventAI_Summon
 {
@@ -635,7 +644,7 @@ struct CreatureEventAI_Summon
 };
 
 // EventSummon_Map
-typedef UNORDERED_MAP<uint32, CreatureEventAI_Summon> CreatureEventAI_Summon_Map;
+typedef std::unordered_map<uint32, CreatureEventAI_Summon> CreatureEventAI_Summon_Map;
 
 struct CreatureEventAIHolder
 {

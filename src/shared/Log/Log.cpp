@@ -71,7 +71,6 @@
 #include <utility>
 
 
-INSTANTIATE_SINGLETON_1(Log);
 
 LogFilterData logFilterData[LOG_FILTER_COUNT] =
 {

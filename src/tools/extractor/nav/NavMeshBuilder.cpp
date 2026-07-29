@@ -1,3 +1,5 @@
+#include <string>
+#include <vector>
 #include "nav/NavMeshBuilder.hpp"
 
 #include "terrain/TileSerializer.hpp"

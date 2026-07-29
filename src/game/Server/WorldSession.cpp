@@ -378,18 +378,22 @@ bool WorldSession::Update(PacketFilter& updater)
                     }
                     break;
                 case STATUS_AUTHED:
-                    // prevent cheating with skip queue wait
+                    // Prevent skipping the queue -- but a queued client's own heartbeats
+                    // are STATUS_AUTHED too, and dropping them times it out.
                     if (m_inQueue &&
-                        !IsAllowedWhileLoginQueued(packet->GetOpcode()))
+                        packet->GetOpcode() != CMSG_PING &&
+                        packet->GetOpcode() != CMSG_KEEP_ALIVE)
                     {
                         LogUnexpectedOpcode(packet, "the player not pass queue yet");
                         break;
                     }
 
-                    // single from authed time opcodes send in to after logout time
-                    // and before other STATUS_LOGGEDIN_OR_RECENTLY_LOGGOUT opcodes.
+                    // A heartbeat is not activity, so it must not close the
+                    // recently-logged-out window. Same opcodes as the gate above by
+                    // coincidence, not by rule.
                     if (packet->GetOpcode() != CMSG_SET_ACTIVE_VOICE_CHANNEL &&
-                        !IsAllowedWhileLoginQueued(packet->GetOpcode()))
+                        packet->GetOpcode() != CMSG_PING &&
+                        packet->GetOpcode() != CMSG_KEEP_ALIVE)
                     {
                         m_playerRecentlyLogout = false;
                     }

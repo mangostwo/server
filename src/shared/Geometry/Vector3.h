@@ -4,15 +4,22 @@
 // (dot/cross/length/lerp/...) matches the former g3dlite behavior bit-for-bit. Only the
 // subset the game core actually used is provided. See [[project_g3d_removal]].
 //
-// Layout note: x,y,z must stay the first (and only) data members with no virtuals, so
-// operator[] and reinterpret_cast in Quat::imag() are valid.
+// Layout note: x,y,z must stay the first (and only) data members with no virtuals.
+// operator[] and Quat::imag() reinterpret_cast over them, and -- the one that is
+// invisible if it breaks -- packet_builder bulk-appends a whole spline straight into
+// a movement packet with data.append<Vector3>(&spline.getPoint(2), count). That is a
+// memcpy of count * sizeof(Vector3) onto the wire. Add a member, a base or a virtual
+// and it still compiles, still links, and the client receives garbage paths.
+// The assertions at the bottom of this file are what make that unwritable.
 
 #include "Geometry/GeometryMath.h"
 #include "Geometry/Vector2.h"
 
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <string>
+#include <type_traits>
 
 namespace Geometry
 {
@@ -107,4 +114,12 @@ namespace Geometry
     };
 
     inline Vector3 operator*(float s, const Vector3& v) { return v * s; }
+
+    static_assert(sizeof(Vector3) == 3 * sizeof(float),
+                  "Vector3 is memcpy'd into movement packets; it must be three bare floats");
+    static_assert(std::is_standard_layout<Vector3>::value,
+                  "Vector3 is memcpy'd into movement packets; it must be standard layout");
+    static_assert(offsetof(Vector3, x) == 0 && offsetof(Vector3, y) == sizeof(float) &&
+                  offsetof(Vector3, z) == 2 * sizeof(float),
+                  "Vector3 members must stay in x,y,z order with no padding");
 }

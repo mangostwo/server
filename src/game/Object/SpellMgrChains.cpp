@@ -27,7 +27,7 @@
  * @brief Cohesion split of SpellMgr.cpp -- spell rank-chain and learn-skill / learn-spell loaders.
  */
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Utilities/Errors.h"
 #include "SpellMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -35,7 +35,7 @@
 #include "ProgressBar.h"
 #include "DBCStores.h"
 
-typedef UNORDERED_MAP<uint32, uint32> AbilitySpellPrevMap;
+typedef std::unordered_map<uint32, uint32> AbilitySpellPrevMap;
 
 /**
  * @brief Recursively builds spell chain links from ability rank data.

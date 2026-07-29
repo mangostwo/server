@@ -60,7 +60,6 @@
  */
 extern DatabaseType LoginDatabase;
 
-INSTANTIATE_SINGLETON_1(AccountMgr);
 
 /**
  * @brief Construct AccountMgr singleton

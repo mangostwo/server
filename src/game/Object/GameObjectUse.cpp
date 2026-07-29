@@ -29,6 +29,7 @@
  *        no behaviour change.
  */
 
+#include <sstream>
 #include <cmath>
 #include "Utilities/MathDefines.h"
 #include "Utilities/Errors.h"

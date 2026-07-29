@@ -22,7 +22,15 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <memory>
 #include "TestHarness.h"
+
+#ifdef _WIN32
+#include <process.h>
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "terrain/FusedTerrain.hpp"
 #include "terrain/TileSerializer.hpp"
@@ -48,6 +56,16 @@ using namespace world::terrain;
 
 namespace
 {
+    /// Process id, for a temp name no concurrent run can collide with.
+    unsigned long GetCurrentPid()
+    {
+#ifdef _WIN32
+        return static_cast<unsigned long>(::GetCurrentProcessId());
+#else
+        return static_cast<unsigned long>(::getpid());
+#endif
+    }
+
     std::string TempPath(const char* leaf)
     {
         const char* dir = std::getenv("TMPDIR");
@@ -59,7 +77,11 @@ namespace
         {
             dir = "/tmp";
         }
-        return std::string(dir) + "/mangos_tile_" + leaf;
+        // The pid is not decoration: the name used to be fixed, so two test binaries
+        // on one machine -- a CI matrix, or two builds side by side -- truncated each
+        // other's file and the reader correctly accepted what looked like a prefix.
+        return std::string(dir) + "/mangos_tile_" + std::to_string(GetCurrentPid()) +
+               "_" + leaf;
     }
 
     struct ScopedFile

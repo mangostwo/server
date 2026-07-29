@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,35 +22,21 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
-#ifndef MANGOS_H_ADDONHANDLER
-#define MANGOS_H_ADDONHANDLER
-
-#include "Policies/Singleton.h"
-#include "WorldPacket.h"
+#ifndef MANGOS_COMPAT_ELUNA_UTILITIES_WORLDPACKET_H
+#define MANGOS_COMPAT_ELUNA_UTILITIES_WORLDPACKET_H
 
 /**
- * @brief Addon handler class
+ * @file
+ * @brief TEMPORARY -- answers Eluna's `#include "Utilities/WorldPacket.h"`.
+ *
+ * WorldPacket moved to src/proto, beside the Opcodes.h it depends on: it was a header in
+ * `shared` including one from `proto`, which links `shared`. Eluna is shared with cores
+ * that still keep it under Utilities/, so it still spells the old path; this supplies the
+ * name and forwards.
+ *
+ * Visible to the Eluna target only. Delete once Eluna spells the new path.
  */
-class AddonHandler
-{
-    public:
-        /**
-         * @brief Constructor
-         */
-        AddonHandler();
 
-        /**
-         * @brief Destructor
-         */
-        ~AddonHandler();
+#include "WorldPacket.h"
 
-        /**
-         * @brief Build addon packet
-         * @param Source Source packet
-         * @param Target Target packet
-         * @return True if successful
-         */
-        bool BuildAddonPacket(WorldPacket* Source, WorldPacket* Target);
-};
-#define sAddOnHandler MaNGOS::Singleton<AddonHandler>::Instance()
-#endif
+#endif // MANGOS_COMPAT_ELUNA_UTILITIES_WORLDPACKET_H

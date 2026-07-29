@@ -25,6 +25,7 @@
 #ifndef SQLSTORAGE_IMPL_H
 #define SQLSTORAGE_IMPL_H
 
+#include <cstring>
 #include <cassert>
 #include "Utilities/ProgressBar.h"
 #include "Log/Log.h"
@@ -42,7 +43,8 @@ template<class S, class D>
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert(uint32 /*field_pos*/, S src, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
         //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(src);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));
@@ -103,7 +105,8 @@ template<class D>
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::convert_from_str(uint32 /*field_pos*/, char const* /*src*/, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
        //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(0);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));
@@ -126,7 +129,8 @@ template<class S, class D>
 void SQLStorageLoaderBase<DerivedLoader, StorageClass>::default_fill(uint32 /*field_pos*/, S src, D& dst)
 {
 #if defined(__arm__)
-    if (((unsigned) &dst) % sizeof(D)) {
+    if (((unsigned) &dst) % sizeof(D))
+    {
        //The address is not aligned. Use memcpy to avoid ARM unaligned trap
        D converted(src);
        memcpy((void*) &dst, (void*) &converted, sizeof(D));

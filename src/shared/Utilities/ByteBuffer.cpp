@@ -30,6 +30,7 @@
  * class, including hex dumps and formatted storage displays.
  */
 
+#include <cstdio>
 #include "ByteBuffer.h"
 #include "Log/Log.h"
 

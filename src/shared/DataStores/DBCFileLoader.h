@@ -25,6 +25,9 @@
 #ifndef DBC_FILE_LOADER_H
 #define DBC_FILE_LOADER_H
 
+#include <cstddef>
+#include <cstdint>
+#include "Common/Locales.h"
 #include "Platform/Define.h"
 #include "Utilities/ByteConverter.h"
 #include <cassert>

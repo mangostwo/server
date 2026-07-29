@@ -10,7 +10,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
 file(READ "${SOURCE_ROOT}/CMakeLists.txt" ROOT_CMAKE)
@@ -29,8 +29,12 @@ foreach(REQUIRED_TEXT
   endif()
 endforeach()
 
+# The provider manager is a Meyers singleton in mangos_two and an RAII local in
+# the other three cores. Either spelling is accepted; what is not negotiable is
+# that a failed crypto init leaves through `return 1`. Returning 0 tells a
+# supervisor the process exited cleanly, so nothing restarts it.
 string(REGEX MATCH
-  "if \\(!OpenSSLProviderManager::Instance\\(\\)\\.IsInitialized\\(\\)\\)[^\n]*[\r\n]+[^\n]*\\{[\r\n]+[^\n]*Log::WaitBeforeContinueIfNeed\\(\\);[\r\n]+[^\n]*return 1;"
+  "if \\(![A-Za-z_:.()]*IsInitialized\\(\\)\\)[^\n]*[\r\n]+[^\n]*\\{[\r\n]+[^\n]*Log::WaitBeforeContinueIfNeed\\(\\);[\r\n]+[^\n]*return 1;"
   PROVIDER_FAILURE "${MANGOSD_SOURCE}")
 if(NOT PROVIDER_FAILURE)
   message(FATAL_ERROR "mangosd provider failure must return 1")

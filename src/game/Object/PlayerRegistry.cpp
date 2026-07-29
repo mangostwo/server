@@ -30,7 +30,6 @@
 
 #include <cstring>
 
-INSTANTIATE_SINGLETON_1(PlayerRegistry);
 
 Player* PlayerRegistry::Find(ObjectGuid guid, bool inWorld /* = true */) const
 {

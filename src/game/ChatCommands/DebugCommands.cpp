@@ -647,7 +647,7 @@ bool ChatHandler::HandleDebugGetLootRecipientCommand(char* /*args*/)
  */
 bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
 {
-    uint32 msg = atol(args);
+    uint32 msg = std::strtoul(args, NULL, 10);
     m_session->GetPlayer()->SendCanTakeQuestResponse(msg);
     return true;
 }

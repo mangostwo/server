@@ -35,7 +35,6 @@
 #include "Policies/Singleton.h"
 #include "Player.h"
 
-INSTANTIATE_SINGLETON_1(GMTicketMgr);
 
 /**
  * @brief Stores GM survey answers from a received packet.

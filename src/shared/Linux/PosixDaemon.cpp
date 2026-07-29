@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdlib>
 #include <cstdint>
 #include <string>
 #include "Config/Config.h"
@@ -38,14 +39,19 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-pid_t parent_pid = 0, sid = 0;
+// volatile sig_atomic_t, not pid_t: these are read from a signal handler, and that
+// is the only type a handler is allowed to touch.
+static volatile sig_atomic_t parent_pid = 0;
+static volatile sig_atomic_t sid = 0;
 
 /**
  * Handles daemon lifecycle signals during process startup and shutdown.
  */
 void daemonSignal(int s)
 {
-
+    // _exit(), never exit(): this runs from a signal handler, and exit() would run
+    // atexit handlers and flush stdio. Arriving inside malloc or a FILE lock, that
+    // deadlocks. getpid(), kill() and _exit() are all async-signal-safe.
     if (getpid() != parent_pid)
     {
         return;
@@ -53,15 +59,15 @@ void daemonSignal(int s)
 
     if (s == SIGUSR1)
     {
-        exit(EXIT_SUCCESS);
+        _exit(EXIT_SUCCESS);
     }
 
     if (sid)
     {
-        kill(sid, s);
+        kill(static_cast<pid_t>(sid), s);
     }
 
-    exit(EXIT_FAILURE);
+    _exit(EXIT_FAILURE);
 }
 
 /**
@@ -86,9 +92,11 @@ void startDaemon(uint32_t timeout)
 
     if (pid > 0)
     {
+        // The forked parent leaves through _exit() as well: exit() would flush stdio
+        // buffers the child inherited at the fork, writing whatever was pending twice.
         alarm(timeout);
         pause();
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     }
 
     umask(0);

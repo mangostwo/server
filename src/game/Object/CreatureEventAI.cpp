@@ -557,6 +557,20 @@ bool CreatureEventAI::ProcessEvent(CreatureEventAIHolder& pHolder, Unit* pAction
         }
         case EVENT_T_RECEIVE_AI_EVENT:
             break;
+        case EVENT_T_REACHED_WAYPOINT:
+            if (!m_creature->Where().WithinBox(
+                    Geometry::Vector3(event.reached_waypoint.positionX,
+                                      event.reached_waypoint.positionY,
+                                      event.reached_waypoint.positionZ),
+                    Geometry::Vector3(event.reached_waypoint.distance,
+                                      event.reached_waypoint.distance,
+                                      event.reached_waypoint.distance)))
+            {
+                return false;
+            }
+
+            LOG_PROCESS_EVENT;
+            break;
         case EVENT_T_ENERGY:
         {
             if (!m_creature->IsInCombat() || !m_creature->GetMaxPower(POWER_ENERGY))

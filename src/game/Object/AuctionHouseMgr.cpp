@@ -54,7 +54,6 @@
  * \file
  */
 
-INSTANTIATE_SINGLETON_1(AuctionHouseMgr);
 
 /**
  * @brief Initializes the auction house manager.

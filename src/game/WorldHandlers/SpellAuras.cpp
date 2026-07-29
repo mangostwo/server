@@ -42,6 +42,7 @@
  * @see Spell for spell casting
  */
 
+#include "Geometry/Placement.h"
 #include <iterator>
 #include "Utilities/Errors.h"
 #include "Platform/Define.h"
@@ -1471,7 +1472,7 @@ void Aura::TriggerSpell()
                             newAngle -= M_PI_F / 40;
                         }
 
-                        newAngle = MapManager::NormalizeOrientation(newAngle);
+                        newAngle = Geometry::Placement::NormalizeOrientation(newAngle);
 
                         target->SetFacingTo(newAngle);
 
@@ -1753,7 +1754,7 @@ void Aura::TriggerSpell()
                             newAngle -= 2 * M_PI_F / 100;
                         }
 
-                        newAngle = MapManager::NormalizeOrientation(newAngle);
+                        newAngle = Geometry::Placement::NormalizeOrientation(newAngle);
 
                         target->SetFacingTo(newAngle);
 
@@ -3887,7 +3888,7 @@ void Aura::PeriodicDummyTick()
                         newAngle -= 0.09f;
                     }
 
-                    newAngle = MapManager::NormalizeOrientation(newAngle);
+                    newAngle = Geometry::Placement::NormalizeOrientation(newAngle);
 
                     target->SetFacingTo(newAngle);
 
@@ -4234,7 +4235,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     else
     {
         // remove this assert when not unit casters will be supported
-        MANGOS_ASSERT(caster->isType(TYPEMASK_UNIT))
+        MANGOS_ASSERT(caster->isType(TYPEMASK_UNIT));
         m_casterGuid = caster->GetObjectGuid();
     }
 

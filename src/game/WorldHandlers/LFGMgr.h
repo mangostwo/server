@@ -25,7 +25,7 @@
 #ifndef __MANGOS_LFGMGR_H
 #define __MANGOS_LFGMGR_H
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Platform/Define.h"
 #include "Common/TimeConstants.h"
 #include <ctime>
@@ -241,19 +241,19 @@ typedef std::set<uint32> dailyEntries;                                   // for 
 typedef std::set<ObjectGuid> queueSet;                                   // List of players / groups in the queue
 typedef std::set<ObjectGuid> groupSet;                                   // List of groups doing a dungeon via the finder
 
-typedef UNORDERED_MAP<uint32, uint32> dungeonEntries;                    // ID, Entry
-typedef UNORDERED_MAP<uint32, uint32> dungeonForbidden;                  // Entry, LFGForbiddenTypes
-typedef UNORDERED_MAP<uint32, LFGProposal> proposalMap;                  // Proposal ID, info on a proposal
-typedef UNORDERED_MAP<uint32, LFGWait> waitTimeMap;                      // DungeonID, wait info
-typedef UNORDERED_MAP<ObjectGuid, dungeonForbidden> partyForbidden;      // ObjectGuid of player, map of locked dungeons
-typedef UNORDERED_MAP<ObjectGuid, uint8> roleMap;                        // ObjectGuid of player, role(s) selected
-typedef UNORDERED_MAP<ObjectGuid, LFGRoleCheck> roleCheckMap;            // ObjectGuid of group, role information
-typedef UNORDERED_MAP<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // ObjectGuid of player, info on specific players only
-typedef UNORDERED_MAP<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
-typedef UNORDERED_MAP<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
-typedef UNORDERED_MAP<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
-typedef UNORDERED_MAP<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
-typedef UNORDERED_MAP<ObjectGuid, LFGBoot> bootStatusMap;                // ObjectGuid of group, boot vote status
+typedef std::unordered_map<uint32, uint32> dungeonEntries;                    // ID, Entry
+typedef std::unordered_map<uint32, uint32> dungeonForbidden;                  // Entry, LFGForbiddenTypes
+typedef std::unordered_map<uint32, LFGProposal> proposalMap;                  // Proposal ID, info on a proposal
+typedef std::unordered_map<uint32, LFGWait> waitTimeMap;                      // DungeonID, wait info
+typedef std::unordered_map<ObjectGuid, dungeonForbidden> partyForbidden;      // ObjectGuid of player, map of locked dungeons
+typedef std::unordered_map<ObjectGuid, uint8> roleMap;                        // ObjectGuid of player, role(s) selected
+typedef std::unordered_map<ObjectGuid, LFGRoleCheck> roleCheckMap;            // ObjectGuid of group, role information
+typedef std::unordered_map<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // ObjectGuid of player, info on specific players only
+typedef std::unordered_map<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
+typedef std::unordered_map<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
+typedef std::unordered_map<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
+typedef std::unordered_map<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
+typedef std::unordered_map<ObjectGuid, LFGBoot> bootStatusMap;                // ObjectGuid of group, boot vote status
 
 // End Section: Constants & Definitions
 

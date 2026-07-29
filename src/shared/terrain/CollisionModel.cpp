@@ -1,3 +1,4 @@
+#include <vector>
 #include "terrain/CollisionModel.hpp"
 
 namespace world::terrain

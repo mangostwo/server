@@ -27,6 +27,7 @@
  * @brief Implementation of RAII wrappers for OpenSSL providers
  */
 
+#include <string>
 #include "OpenSSLProvider.h"
 #include "Log/Log.h"
 

@@ -25,6 +25,8 @@
 #ifndef DBCSTORE_H
 #define DBCSTORE_H
 
+#include <cstdint>
+#include "Common/Locales.h"
 #include <cassert>
 #include <list>
 #include <map>

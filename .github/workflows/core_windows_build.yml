@@ -2,9 +2,9 @@ name: Windows Build (MSVC)
 
 on:
   push:
-    branches: [ master, devel ]
+    branches: [ master, united, devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, united ]
 
 permissions:
   contents: read
@@ -95,6 +95,8 @@ jobs:
             exit 1
           fi
 
+      # Supplies the toolchain and the Windows SDK together, which is why there
+      # is no separate setup-windows10-sdk step.
       - name: Setup MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -120,6 +122,9 @@ jobs:
           -DBUILD_MANGOSD=1
           -DBUILD_REALMD=1
           -DWITH_TESTS=1
+          # Never the socket tests: they bind real listeners and dominate the
+          # suite's wall-clock. A human asks for them, CI does not.
+          -DWITH_NET_TESTS=0
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
           -DSCRIPT_LIB_SD3=1

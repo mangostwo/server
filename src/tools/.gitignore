@@ -16,7 +16,3 @@ debug
 release
 *.ilk
 ad_debug.exe
-
-MangosStrings_LanguageHGenerator/php-cli/includes/config.inc.php
-MangosStrings_LanguageHGenerator/out/
-MangosStrings_LanguageHGenerator/.vs

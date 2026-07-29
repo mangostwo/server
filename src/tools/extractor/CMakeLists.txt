@@ -129,6 +129,9 @@ target_include_directories(mangos-extractor
 target_link_libraries(mangos-extractor
     PRIVATE
         extractor_mpq
+        # The baker threads its per-tile work; relying on another target's link line to
+        # drag in the thread library is an accident, not a dependency.
+        Threads::Threads
         # SHBrowseForFolder and the COM apartment it needs.
         $<$<BOOL:${WIN32}>:shell32>
         $<$<BOOL:${WIN32}>:ole32>
@@ -148,4 +151,32 @@ install(TARGETS mangos-extractor DESTINATION ${BIN_DIR}/tools)
 
 # Beside the binary, because that is where the tool looks for it when `--vessels` is
 # not given. It is data, not configuration: it changes when the client does.
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vessels.txt DESTINATION ${BIN_DIR}/tools)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/vessels.txt
+              ${CMAKE_CURRENT_SOURCE_DIR}/offmesh.txt
+        DESTINATION ${BIN_DIR}/tools)
+
+# And beside the BUILT binary as well, not only the installed one. The tool resolves
+# both defaults relative to its own executable, so a build tree that lacks them is a
+# baker that silently runs without the hand-authored input -- which for offmesh.txt
+# means a navmesh missing exactly the links nobody thinks to test.
+add_custom_command(TARGET mangos-extractor POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/vessels.txt
+        ${CMAKE_CURRENT_SOURCE_DIR}/offmesh.txt
+        $<TARGET_FILE_DIR:mangos-extractor>)
+
+# A window in front of the baker, Windows only. It SPAWNS mangos-extractor and reads its
+# stdout -- it links nothing of the baker, so the two cannot drift into each other.
+if(WIN32)
+    add_executable(mangos-extractor-gui WIN32
+        ExtractorGui.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/mangos-extractor-gui.rc)
+    target_link_libraries(mangos-extractor-gui PRIVATE shell32 ole32 comctl32 comdlg32)
+    # The .rc includes revision_data.h, which genrev writes into the build tree.
+    target_include_directories(mangos-extractor-gui PRIVATE ${CMAKE_BINARY_DIR}/src/shared)
+    if(TARGET revision_data.h)
+        add_dependencies(mangos-extractor-gui revision_data.h)
+    endif()
+    set_target_properties(mangos-extractor-gui PROPERTIES FOLDER "tools")
+    install(TARGETS mangos-extractor-gui DESTINATION ${BIN_DIR}/tools)
+endif()

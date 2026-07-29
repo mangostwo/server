@@ -37,7 +37,6 @@
 #include <ctime>
 #include <forward_list>
 
-INSTANTIATE_SINGLETON_1(CorpseManager);
 
 CorpseManager::~CorpseManager()
 {

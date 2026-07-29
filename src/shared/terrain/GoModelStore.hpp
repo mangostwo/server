@@ -6,6 +6,7 @@
 // hundreds of times and its geometry is held once. A miss is remembered as a null so a
 // display id with no collision costs one failed open, not one per spawn.
 
+#include <string>
 #include "terrain/ICollisionModel.hpp"
 
 #include <cstdint>

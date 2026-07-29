@@ -1,3 +1,5 @@
+#include <vector>
+#include <array>
 #include "terrain/Accelerators.hpp"
 
 #include <algorithm>

@@ -25,7 +25,7 @@
 #ifndef MANGOS_H_GUILDMGR
 #define MANGOS_H_GUILDMGR
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Platform/Define.h"
 #include <string>
 #include "Policies/Singleton.h"
@@ -37,7 +37,7 @@ class ObjectGuid;
 
 class GuildMgr
 {
-        typedef UNORDERED_MAP<uint32, Guild*> GuildMap;
+        typedef std::unordered_map<uint32, Guild*> GuildMap;
 
         GuildMap m_GuildMap;
         // Serializes structural access to m_GuildMap. Required because

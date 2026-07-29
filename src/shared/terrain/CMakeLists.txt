@@ -33,9 +33,9 @@ add_library(terrain STATIC
     Column.hpp
     FusedTerrain.cpp
     FusedTerrain.hpp
+    Geometry.hpp
     GoModelStore.cpp
     GoModelStore.hpp
-    Geometry.hpp
     ICollisionModel.hpp
     ILiveGeometry.hpp
     ModelTileSource.hpp
@@ -46,6 +46,7 @@ add_library(terrain STATIC
     WmoModel.hpp
 )
 
+# Consumers spell it #include "terrain/Terrain.hpp", so the root is src/shared.
 target_include_directories(terrain
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/..

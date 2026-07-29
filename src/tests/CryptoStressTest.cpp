@@ -22,9 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <algorithm>
 #include "TestHarness.h"
 
-#include "Auth/AuthCrypt.h"
+#include "Auth/ARC4.h"
 #include "Auth/BigNumber.h"
 #include "Auth/HMACSHA1.h"
 #include "Auth/Md5.h"
@@ -48,12 +49,7 @@
  *
  * The vectors are from RFC 1321 (MD5), RFC 3174 (SHA-1) and RFC 2202 (HMAC).
  *
- * The stream-cipher cases test a different property, and the one the packet
- * codec depends on: encrypting in one call and encrypting the same bytes a few
- * at a time must produce identical output. A stream cipher advances its
- * keystream per byte, so anything that re-keys or double-processes on a
- * fragment boundary desynchronises the connection from that point on -- and
- * fragmentation only happens under real network conditions, never on loopback.
+ * The session cipher's own fragmentation property lives in AuthCryptTest.cpp.
  */
 
 namespace
@@ -78,16 +74,6 @@ namespace
             testing::ReportFailure(__FILE__, __LINE__,
                 std::string(what) + ": got " + got + ", expected " + expected);
         }
-    }
-
-    /// A session key of the shape the login handshake produces.
-    BigNumber MakeSessionKey(unsigned seed)
-    {
-        BigNumber k;
-        k.SetRand(40 * 8);
-        // SetRand is fine for the stream tests; seed only documents intent.
-        (void)seed;
-        return k;
     }
 }
 
@@ -214,130 +200,6 @@ TEST(Crypto_incremental_hashing_matches_one_shot)
 }
 
 // ---------------------------------------------------------------------------
-// The stream cipher
-// ---------------------------------------------------------------------------
-
-TEST(Crypto_authcrypt_round_trips)
-{
-    // Not "encrypt then decrypt": EncryptSend and DecryptRecv are keyed with two
-    // *different* constants by design, one per direction, so one can never undo
-    // the other. The server holds the server-side half of each pair; the real
-    // client holds the mirror. What can be checked from this side alone is the
-    // property that makes the two ends agree at all -- the keystream is a pure
-    // function of the session key, and RC4 is an XOR stream, so the same
-    // operation applied twice by two identically keyed instances is the
-    // identity. If the keystreams ever diverged, this would not close.
-    BigNumber key = MakeSessionKey(1);
-
-    AuthCrypt server;
-    AuthCrypt client;
-    server.Init(&key);
-    client.Init(&key);
-
-    CHECK(server.IsInitialized());
-
-    std::mt19937 rng(0xA11Cu);
-    std::uniform_int_distribution<int> byteDist(0, 255);
-
-    int mismatches = 0;
-
-    for (int packet = 0; packet < 2000; ++packet)
-    {
-        std::vector<uint8> plain(6);
-        for (uint8& b : plain)
-        {
-            b = uint8(byteDist(rng));
-        }
-
-        std::vector<uint8> wire = plain;
-        server.EncryptSend(wire.data(), wire.size());
-        client.EncryptSend(wire.data(), wire.size());
-
-        if (wire != plain)
-        {
-            ++mismatches;
-        }
-    }
-
-    CHECK_EQ(mismatches, 0);
-}
-
-TEST(Crypto_authcrypt_keystream_is_continuous_across_fragments)
-{
-    // The property the packet codec depends on, and the reason it decrypts a
-    // header exactly once rather than as its bytes arrive.
-    //
-    // Encrypt 4096 bytes in one call with one cipher, and the same bytes one or
-    // two at a time with another keyed identically. The outputs must be
-    // identical. If anything in the cipher re-keys or reprocesses at a call
-    // boundary, this diverges -- and on a live server it would present as a
-    // connection that works until the first TCP split, then produces garbage
-    // for good.
-    BigNumber key = MakeSessionKey(2);
-
-    AuthCrypt oneShot;
-    AuthCrypt fragmented;
-    oneShot.Init(&key);
-    fragmented.Init(&key);
-
-    const size_t SIZE = 4096;
-
-    std::vector<uint8> a(SIZE);
-    for (size_t i = 0; i < SIZE; ++i)
-    {
-        a[i] = uint8(i * 17u);
-    }
-    std::vector<uint8> b = a;
-
-    oneShot.EncryptSend(a.data(), a.size());
-
-    std::mt19937 rng(0xF4A6u);
-    std::uniform_int_distribution<size_t> chunkDist(1, 3);
-
-    size_t offset = 0;
-    while (offset < SIZE)
-    {
-        const size_t chunk = std::min(chunkDist(rng), SIZE - offset);
-        fragmented.EncryptSend(&b[offset], chunk);
-        offset += chunk;
-    }
-
-    CHECK(a == b);
-}
-
-TEST(Crypto_authcrypt_send_and_recv_keystreams_are_independent)
-{
-    // Inbound and outbound use separate cipher state. Encrypting must not
-    // advance the decrypt keystream, or the two directions drift apart as soon
-    // as traffic is not perfectly symmetric -- which it never is.
-    BigNumber key = MakeSessionKey(3);
-
-    AuthCrypt reference;
-    AuthCrypt disturbed;
-    reference.Init(&key);
-    disturbed.Init(&key);
-
-    std::vector<uint8> noise(256, 0x5A);
-    disturbed.EncryptSend(noise.data(), noise.size());
-
-    std::vector<uint8> a(64, 0x11);
-    std::vector<uint8> b = a;
-
-    reference.DecryptRecv(a.data(), a.size());
-    disturbed.DecryptRecv(b.data(), b.size());
-
-    CHECK(a == b);
-}
-
-TEST(Crypto_authcrypt_uninitialised_is_inert)
-{
-    // Before the session key is agreed the crypt must not touch the bytes: the
-    // auth challenge and the client's first packet are exchanged in clear.
-    AuthCrypt crypt;
-    CHECK(!crypt.IsInitialized());
-}
-
-// ---------------------------------------------------------------------------
 // BigNumber under load
 // ---------------------------------------------------------------------------
 
@@ -407,28 +269,17 @@ TEST(Crypto_bignumber_fixed_width_output_is_always_that_width)
     CHECK_EQ(wrong, 0);
 }
 
-TEST(Crypto_warden_module_id_is_stable)
+TEST(Crypto_arc4_matches_the_published_vector)
 {
-    // Warden identifies a client module by the MD5 of its compressed image. The
-    // same input must always give the same id -- this is the call that moved off
-    // the deprecated MD5_* API, and a wrong id makes the client refuse the
-    // module with nothing useful logged.
-    std::vector<uint8> module(64 * 1024);
-    for (size_t i = 0; i < module.size(); ++i)
-    {
-        module[i] = uint8((i * 7u) ^ 0xA5u);
-    }
+    // The provider test next door asserts that RC4 can be FETCHED. That is not the same
+    // as producing the right keystream: a cipher that initialises and encrypts to
+    // something else still fetches perfectly, and the symptom is a client that connects
+    // and then fails to decode a single packet.
+    uint8 key[] = {'K', 'e', 'y'};
+    uint8 data[] = {'P', 'l', 'a', 'i', 'n', 't', 'e', 'x', 't'};
 
-    Md5Hash first;
-    first.UpdateData(module.data(), module.size());
-    first.Finalize();
-    const std::string a = ToHex(first.GetDigest(), 16);
-
-    Md5Hash second;
-    second.UpdateData(module.data(), module.size());
-    second.Finalize();
-    const std::string b = ToHex(second.GetDigest(), 16);
-
-    CHECK(a == b);
-    CHECK_EQ(int(a.size()), 32);
+    ARC4 rc4(key, static_cast<uint8>(sizeof(key)));
+    rc4.UpdateData(sizeof(data), data);
+    CHECK_HEX(data, sizeof(data), "bbf316e8d940af0ad3");
 }
+

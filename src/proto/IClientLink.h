@@ -25,7 +25,7 @@
 #ifndef MANGOS_PROTO_ICLIENTLINK_H
 #define MANGOS_PROTO_ICLIENTLINK_H
 
-#include "Utilities/WorldPacket.h"
+#include "WorldPacket.h"
 
 #include <string>
 

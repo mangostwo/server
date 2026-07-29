@@ -10,7 +10,6 @@
 # Placeholder files for directories needed to be inside git but empty
 !.gitignore
 !.gitattributes
-!.travis.yml
 
 # JetBrains - project settings
 /.idea/
@@ -25,6 +24,9 @@
 /*.sublime-build
 /*.sublime-project
 /*.sublime-workspace
+
+# Visual Studio Code - project settings
+.vscode
 
 # Numerous always-ignore extensions
 *.a
@@ -59,11 +61,13 @@ Thumbs.db
 
 # Configuration files to be customized
 
-# Build directories
+# Build directories. Anchored at the root: an unanchored "build" also swallows
+# dep/recastnavigation/RecastDemo/Build on case-insensitive filesystems.
 /bin/
 _build
 /build/
 /install/
+/database/
 
 # Generated files
 *.ncb
@@ -82,14 +86,15 @@ ipch
 cmake.cmd
 msbuild.cmd
 
-
 # recastnavigation directory needs exception
 !/dep/recastnavigation/RecastDemo/Build/
-/database/
 
 /src/tools/Extractor_Binaries/*.exe
 
-# Skip Git Revision created file
+# AI assistant scratch. Agent config belongs to the workspace, not to a core;
+# docs/superpowers was a pure artifact (it ignored its own entire contents).
+.claude/
+docs/superpowers/
 
 # Compiler caches. CCACHE_DIR/SCCACHE_DIR in the CI workflows point outside the
 # checkout, which is the actual fix; this is a safety net, because the cache

@@ -26,9 +26,6 @@
 
 #include "PacketCodec.h"
 
-#include "Auth/AuthCrypt.h"
-#include "Auth/BigNumber.h"
-
 #include <algorithm>
 #include <cstring>
 #include <random>
@@ -231,84 +228,6 @@ TEST(CodecStress_boundary_payload_sizes)
         }
     }
 }
-
-TEST(CodecStress_encrypted_headers_round_trip)
-{
-    // The full inbound path with the cipher armed: encrypt each header the way a
-    // client would, deliver the stream a few bytes at a time, and decrypt through
-    // the codec's hook. This is where a keystream that advances at the wrong time
-    // shows up -- the first packet decodes and every later one is garbage.
-    BigNumber key;
-    key.SetRand(40 * 8);
-
-    AuthCrypt clientSide;
-    AuthCrypt serverSide;
-    clientSide.Init(&key);
-    serverSide.Init(&key);
-
-    proto::PacketCodec codec([&serverSide](uint8* header, size_t len)
-    {
-        serverSide.DecryptRecv(header, len);
-    });
-
-    std::mt19937 rng(0xE11Au);
-    std::uniform_int_distribution<uint32> sizeDist(0, 200);
-    std::uniform_int_distribution<size_t> chunkDist(1, 5);
-
-    const int COUNT = 500;
-
-    std::vector<uint16> opcodes;
-    std::vector<uint8>  stream;
-
-    for (int i = 0; i < COUNT; ++i)
-    {
-        const uint16 opcode = uint16(0x100 + (i % 200));
-        opcodes.push_back(opcode);
-
-        std::vector<uint8> payload(sizeDist(rng), uint8(i));
-        std::vector<uint8> framed = Frame(opcode, payload);
-
-        // The client encrypts only the header; the payload goes in clear.
-        //
-        // DecryptRecv, not EncryptSend: the incoming direction is keyed with the
-        // client-decrypt constant, and the codec under test will call DecryptRecv
-        // on it. RC4 is an XOR stream, so running that same operation here with a
-        // second identically keyed instance produces exactly the ciphertext the
-        // real client would have put on the wire.
-        clientSide.DecryptRecv(framed.data(), proto::CLIENT_HEADER_SIZE);
-
-        stream.insert(stream.end(), framed.begin(), framed.end());
-    }
-
-    std::vector<WorldPacket> out;
-    size_t offset = 0;
-    bool   rejected = false;
-
-    while (offset < stream.size() && !rejected)
-    {
-        const size_t chunk = std::min(chunkDist(rng), stream.size() - offset);
-        rejected = codec.Feed(&stream[offset], chunk, out)
-                   == proto::DecodeStatus::Malformed;
-        offset += chunk;
-    }
-
-    CHECK(!rejected);
-    CHECK_EQ(int(out.size()), COUNT);
-
-    int wrongOpcode = 0;
-    for (int i = 0; i < COUNT && i < int(out.size()); ++i)
-    {
-        if (uint16(out[i].GetOpcode()) != opcodes[i])
-        {
-            ++wrongOpcode;
-        }
-    }
-    CHECK_EQ(wrongOpcode, 0);
-}
-
-// ---------------------------------------------------------------------------
-// Bad path
-// ---------------------------------------------------------------------------
 
 TEST(CodecStress_every_undersized_size_field_is_rejected)
 {

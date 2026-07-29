@@ -47,7 +47,7 @@
 #ifndef MANGOSSERVER_CREATURE_H
 #define MANGOSSERVER_CREATURE_H
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Platform/Define.h"
 #include <ctime>
 #include <string>
@@ -480,7 +480,7 @@ struct TrainerSpell
     bool IsCastable() const { return learnedSpell != spell; }
 };
 
-typedef UNORDERED_MAP < uint32 /*spellid*/, TrainerSpell > TrainerSpellMap;
+typedef std::unordered_map < uint32 /*spellid*/, TrainerSpell > TrainerSpellMap;
 
 struct TrainerSpellData
 {

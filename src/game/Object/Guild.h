@@ -28,7 +28,7 @@
 #define WITHDRAW_MONEY_UNLIMITED    0xFFFFFFFF
 #define WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Platform/Define.h"
 #include <cstring>
 #include <ctime>
@@ -317,7 +317,7 @@ class Guild
         void Disband();
 
         void DeleteGuildBankItems(bool alsoInDB = false);
-        typedef UNORDERED_MAP<uint32, MemberSlot> MemberList;
+        typedef std::unordered_map<uint32, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
 
         uint32 GetId() { return m_Id; }

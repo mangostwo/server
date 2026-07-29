@@ -72,7 +72,6 @@
 #include "InstanceData.h"
 #include "ProgressBar.h"
 
-INSTANTIATE_SINGLETON_1(MapPersistentStateManager);
 
 static uint32 resetEventTypeDelay[MAX_RESET_EVENT_TYPE] = { 0,                  // not used
                                                             3600, 900, 300, 60, // (seconds) normal and official timer delay to inform player about instance reset

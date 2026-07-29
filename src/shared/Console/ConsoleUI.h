@@ -126,6 +126,10 @@ namespace Console
              */
             bool PollInput(std::string& line);
 
+            /// Terminal width in columns, for a caller that wants to lay text out
+            /// itself. 0 before Start().
+            int Columns() const;
+
             /// Build a frame and emit the changed rows. Render thread only.
             void Render();
 

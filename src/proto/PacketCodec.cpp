@@ -140,6 +140,8 @@ namespace proto
                                            const HeaderEncryptor& encryptor)
     {
         // The size field counts the two opcode bytes along with the payload.
+        // Over 0x7FFF the header grows to five bytes with 0x80 set in the first --
+        // a WotLK addition, which is why CLASSIC and TBC compile it out.
         const uint32 size  = uint32(packet.size()) + 2;
         const bool   large = size > 0x7FFF;
 

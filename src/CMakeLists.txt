@@ -49,11 +49,31 @@ endif()
 # Build the mangos realm authentication server
 if(BUILD_REALMD)
     add_subdirectory(realmd)
+
+    # realmd is a SUBMODULE and is never edited here. Its own test executables
+    # compile Auth/PatchArtifact.cpp, which includes Auth/Md5.h -- a header this
+    # core owns, under src/shared. The realmd library reaches it by linking
+    # `shared`; the test targets link neither, so the path is attached from the
+    # outside, which is the only place a submodule may be adapted from.
+    foreach(realmd_test IN ITEMS
+            realmd_patch_safety_tests
+            realmd_auth_protocol_tests
+            realmd_realm_snapshot_tests
+            realmd_client_build_policy_tests)
+        if(TARGET ${realmd_test})
+            target_include_directories(${realmd_test} PRIVATE
+                ${CMAKE_SOURCE_DIR}/src/shared)
+        endif()
+    endforeach()
 endif()
 
 # The client-data parsers are configured unconditionally: the unit tests link them
 # without the tools. The baker executable itself is gated on BUILD_TOOLS, inside.
 add_subdirectory(tools/extractor)
+
+# Scores those tiles against the world database's own ground-only creature spawns.
+# A clean parse is not correct geometry; this is what says whether it is.
+add_subdirectory(tools/height-check)
 
 if (BUILD_MANGOSD OR BUILD_REALMD)
     if(WIN32)
@@ -64,6 +84,6 @@ if (BUILD_MANGOSD OR BUILD_REALMD)
     endif()
 endif()
 
-if(WITH_TESTS)
+if(WITH_TESTS OR WITH_NET_TESTS)
     add_subdirectory(tests)
 endif()

@@ -32,7 +32,6 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 
-INSTANTIATE_SINGLETON_1(CalendarMgr);
 
 //////////////////////////////////////////////////////////////////////////
 // CalendarEvent Class to store single event informations

@@ -25,7 +25,10 @@
 #ifndef MANGOS_TESTHARNESS_H
 #define MANGOS_TESTHARNESS_H
 
+#include <algorithm>
+#include <cstdint>
 #include <cstdio>
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -185,5 +188,73 @@ namespace testing
                 + std::to_string(lhs_) + " vs " + std::to_string(rhs_));      \
         }                                                                     \
     } while (0)
+
+// CHECK_EQ renders both sides with std::to_string, which has no std::string overload.
+// This is the same check for things that are already text.
+#define CHECK_STR(A, B)                                                       \
+    do {                                                                      \
+        const std::string lhs_ = (A);                                         \
+        const std::string rhs_ = (B);                                         \
+        if (lhs_ != rhs_)                                                     \
+        {                                                                     \
+            testing::ReportFailure(__FILE__, __LINE__,                        \
+                std::string(#A " == " #B ", got \"") + lhs_ + "\" vs \""      \
+                + rhs_ + "\"");                                               \
+        }                                                                     \
+    } while (0)
+
+// Byte comparisons, from the harness this one replaced. Crypto and protocol tests
+// compare buffers, and "expected: memcmp(a, b, n) == 0" tells you nothing about which
+// byte went wrong -- these print both sides as hex.
+namespace testing
+{
+    inline std::string BytesToHex(const uint8_t* data, std::size_t length)
+    {
+        static const char* digits = "0123456789abcdef";
+        std::string out;
+        out.reserve(length * 2);
+        for (std::size_t i = 0; i < length; ++i)
+        {
+            out += digits[data[i] >> 4];
+            out += digits[data[i] & 0x0F];
+        }
+        return out;
+    }
+
+    inline void CheckBytes(const uint8_t* actual, std::size_t actualLength,
+                           std::initializer_list<uint8_t> expected,
+                           const char* what, const char* file, int line)
+    {
+        const bool same = actual && actualLength == expected.size() &&
+                          std::equal(expected.begin(), expected.end(), actual);
+        if (same)
+        {
+            return;
+        }
+        ReportFailure(file, line, std::string(what) + " expected=" +
+            BytesToHex(expected.begin(), expected.size()) + " actual=" +
+            (actual ? BytesToHex(actual, actualLength) : std::string("<null>")));
+    }
+
+    inline void CheckHex(const uint8_t* actual, std::size_t actualLength,
+                         const std::string& expected, const char* what,
+                         const char* file, int line)
+    {
+        const std::string got = actual ? BytesToHex(actual, actualLength) : "<null>";
+        if (got != expected)
+        {
+            ReportFailure(file, line, std::string(what) + " expected=" + expected +
+                                      " actual=" + got);
+        }
+    }
+}
+
+#define CHECK_BYTES(ACTUAL, LENGTH, ...)                                      \
+    ::testing::CheckBytes((ACTUAL), (LENGTH), __VA_ARGS__, #ACTUAL,           \
+                          __FILE__, __LINE__)
+
+#define CHECK_HEX(ACTUAL, LENGTH, EXPECTED)                                   \
+    ::testing::CheckHex((ACTUAL), (LENGTH), (EXPECTED), #ACTUAL,              \
+                        __FILE__, __LINE__)
 
 #endif

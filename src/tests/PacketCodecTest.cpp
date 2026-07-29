@@ -205,10 +205,13 @@ TEST(PacketCodec_encode_round_trips_through_decode)
     CHECK_EQ(int(wire[6]), 9);
 }
 
-TEST(PacketCodec_encode_uses_a_three_byte_size_for_large_packets)
+// THE SERVER HEADER IS EXPANSION-SPECIFIC, so this asserts two different things
+// rather than one bent to fit both. The three-byte size arrives in WotLK; before it,
+// a client reads a fixed four-byte header and a five-byte one desynchronises the
+// stream for good. Asserting the WotLK form everywhere is how a wire-format
+// regression gets a green test to hide behind.
+TEST(PacketCodec_encode_sizes_the_header_the_way_this_expansion_does)
 {
-    // Over 0x7FFF the server header grows to five bytes and the first carries
-    // the 0x80 marker.
     WorldPacket packet(0x0001, 0x8000);
     for (int i = 0; i < 0x8000; ++i)
     {
@@ -218,6 +221,19 @@ TEST(PacketCodec_encode_uses_a_three_byte_size_for_large_packets)
     const std::vector<uint8> wire =
         proto::PacketCodec::Encode(packet, proto::PacketCodec::HeaderEncryptor());
 
+    // THE FIRST BYTE CANNOT TELL THE TWO FORMS APART, which is the whole trap. The
+    // size here is 0x8002, so a four-byte header starts 0x80 0x02 -- that 0x80 is the
+    // high byte of the SIZE, not the large-packet marker -- and the five-byte form
+    // starts 0x80 0x80 0x02, where it is. Only the LENGTH distinguishes them, so that
+    // is what gets asserted.
+#if defined(CLASSIC) || defined(TBC)
+    CHECK_EQ(int(wire.size()), 4 + 0x8000);
+    CHECK_EQ(int(wire[0]), 0x80);
+    CHECK_EQ(int(wire[1]), 0x02);
+#else
     CHECK_EQ(int(wire.size()), 5 + 0x8000);
-    CHECK(( wire[0] & 0x80 ) != 0);
+    CHECK_EQ(int(wire[0]), 0x80);
+    CHECK_EQ(int(wire[1]), 0x80);
+    CHECK_EQ(int(wire[2]), 0x02);
+#endif
 }

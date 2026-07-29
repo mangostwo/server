@@ -72,7 +72,6 @@ set(SRC_GRP_DATABASE
   Database/Database.cpp
   Database/Database.h
   Database/DatabaseEnv.h
-  Database/DatabaseImpl.h
   Database/DatabaseMysql.cpp
   Database/DatabaseMysql.h
   Database/Field.cpp
@@ -190,6 +189,7 @@ set(SRC_GRP_UTILITIES
   Utilities/ByteBuffer.h
   Utilities/Errors.h
   Utilities/MathDefines.h
+  Utilities/IdList.h
   Utilities/PackedValues.h
   Utilities/ProgressBar.cpp
   Utilities/ProgressBar.h
@@ -200,7 +200,6 @@ set(SRC_GRP_UTILITIES
   Utilities/Timer.h
   Utilities/Util.cpp
   Utilities/Util.h
-  Utilities/WorldPacket.h
   Utilities/ByteConverter.h
   Utilities/Callback.h
   Utilities/EventProcessor.cpp
@@ -209,7 +208,6 @@ set(SRC_GRP_UTILITIES
   Utilities/LinkedReference/RefManager.h
   Utilities/LinkedReference/Reference.h
   Utilities/TypeList.h
-  Utilities/UnorderedMapSet.h
 )
 source_group("Utilities" FILES ${SRC_GRP_UTILITIES})
 

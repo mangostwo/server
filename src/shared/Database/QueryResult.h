@@ -26,10 +26,10 @@
 #define QUERYRESULT_H
 
 #include "Platform/Define.h"
-#include <string>
-#include <vector>
 #include "Utilities/Errors.h"
 #include "Field.h"
+#include <string>
+#include <vector>
 
 /**
  * @brief Abstract base class for database query results
@@ -47,7 +47,7 @@ class QueryResult
          * @param fieldCount Number of fields per row
          */
         QueryResult(uint64 rowCount, uint32 fieldCount)
-            : mFieldCount(fieldCount), mRowCount(rowCount), mCurrentRow{} {}
+            : mCurrentRow{}, mFieldCount(fieldCount), mRowCount(rowCount) {}
 
         /**
          * @brief Virtual destructor

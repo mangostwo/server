@@ -17,13 +17,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-# Build the mangos script library if enabled
-if(SCRIPT_LIB_SD3)
+# SD3 and Eluna link the `game` library, which only exists when BUILD_MANGOSD.
+# Guard on BOTH the script-lib option AND BUILD_MANGOSD so a server-less
+# configure does not try to build them.
+if(BUILD_MANGOSD AND SCRIPT_LIB_SD3)
     add_subdirectory(SD3)
     mangos_submodule_compat(mangosscript
         "${CMAKE_SOURCE_DIR}/src/shared/Compat/sd3")
 endif()
 
-if(SCRIPT_LIB_ELUNA)
+if(BUILD_MANGOSD AND SCRIPT_LIB_ELUNA)
     add_subdirectory(Eluna)
 endif()

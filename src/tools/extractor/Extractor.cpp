@@ -28,6 +28,7 @@
 // It shares -- does not copy -- the runtime's terrain engine, so the writer and the
 // reader cannot disagree about the tile format.
 
+#include <memory>
 #include "ExtractorConsole.hpp"
 #include "nav/NavMeshBuilder.hpp"
 #include "client/ModelLoaders.hpp"
@@ -38,6 +39,7 @@
 #include "stores/MapDbcStore.hpp"
 #include "terrain/TileSerializer.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <cctype>
@@ -56,7 +58,7 @@ namespace
     {
         std::string src = "Data";
         std::string dest = "extracted_data";
-        std::string locale = "enUS";
+        std::string locale;         ///< empty = detect it from the client
         int mapFilter = -1;
         bool dbc = false;
         bool tiles = false;
@@ -66,10 +68,12 @@ namespace
         std::string vesselList;
 
         // Whether the command line named components itself. Naming them is an
-        // instruction, so it suppresses the menu; leaving them out is a question, so
-        // it asks one -- when there is a terminal to ask through.
+        // instruction and the menu stays shut. Naming none opens it -- but only
+        // where there is a terminal to open it on: a pipe or a CI log bakes
+        // everything instead, so an unattended run needs no arguments at all.
         bool named = false;
         bool noMenu = false;
+        bool help = false;
         std::string offMesh;
         int threads = 0;
     };
@@ -84,24 +88,98 @@ namespace
             std::chrono::duration_cast<std::chrono::seconds>(now - g_started).count()));
     }
 
+    /**
+     * @brief Which locale the client under @p dataDir is, read off the disk.
+     *
+     * A locale directory is only a locale directory if it holds the archive named after
+     * it, so a stray folder cannot be mistaken for one. Several is normal on a client
+     * that has been switched: enUS wins if it is there, otherwise the first found.
+     *
+     * It matters less than it looks -- every ADT, WMO and WDT lives in the
+     * locale-independent archives, and Map.dbc's Directory is an internal path name --
+     * but the DBC set is read from the locale side, and naming the wrong one opens
+     * nothing at all.
+     */
+    std::string DetectLocale(const std::string& dataDir)
+    {
+        std::vector<std::string> found;
+        std::error_code ec;
+        for (const auto& e : std::filesystem::directory_iterator(dataDir, ec))
+        {
+            if (!e.is_directory(ec))
+            {
+                continue;
+            }
+            const std::string name = e.path().filename().string();
+            if (std::filesystem::exists(e.path() / ("locale-" + name + ".MPQ"), ec))
+            {
+                found.push_back(name);
+            }
+        }
+
+        if (found.empty())
+        {
+            return std::string();
+        }
+        for (const std::string& name : found)
+        {
+            if (name == "enUS")
+            {
+                return name;
+            }
+        }
+        std::sort(found.begin(), found.end());
+        return found.front();
+    }
+
     void Usage()
     {
         std::printf(
-            "usage: mangos-extractor [dbc] [tile] [gomodels] [trans] [nav] [all]"
-            " [options]\n"
-            "  --src <dir>     client Data directory (default Data)\n"
-            "  --dest <dir>    output root (default extracted_data)\n"
-            "  --locale <loc>  client locale folder (default enUS)\n"
-            "  --map <id>      bake only this map id\n"
-            "  --vessels <f>   file of \"<mapId> <displayId>\" pairs: give each vessel's\n"
-            "                  Map.dbc id the hull baked for that display id. Reads only\n"
-            "                  baked gomodels, so it needs no client. Defaults to\n"
-            "                  vessels.txt beside the executable, which ships with\n"
-            "                  every vessel the client has.\n"
-            "  --no-menu       never ask; bake everything not already named\n"
-            "\n"
-            "Naming no component opens the interactive menu. Without a terminal to\n"
-            "open it on -- a pipe, a CI log -- everything is baked instead.\n");
+"mangos-extractor -- bakes a WoW client into the caches mangosd reads.\n"
+"\n"
+"  usage: mangos-extractor [component ...] [option ...]\n"
+"\n"
+"COMPONENTS -- name none and it bakes them all.\n"
+"\n"
+"  dbc        the client databases, .dbc and .db2 both, copied out whole.\n"
+"  gomodels   one collision body per game-object display id. Doors, bridges\n"
+"             and ship hulls are models, not terrain, and this is where they\n"
+"             come from. Needed by tile and by trans.\n"
+"  tile       the world itself: ground, liquid, area and static collision\n"
+"             fused into one .tile per map square. The long one.\n"
+"  trans      vessel decks. Each ship's hull is baked as a MAP of its own, so\n"
+"             a passenger stands on real ground rather than on an offset.\n"
+"             Reads baked gomodels only -- no client needed.\n"
+"  nav        the navmesh, built FROM THE TILES, never from the client, so\n"
+"             the pathfinder walks exactly the surface collision answers with.\n"
+"  all        every one of the above, in that order.\n"
+"\n"
+"WHERE\n"
+"\n"
+"  --src <dir>     the client's Data directory              (default: Data)\n"
+"  --dest <dir>    where the caches are written   (default: extracted_data)\n"
+"  --locale <loc>  the client's locale folder            (default: detected)\n"
+"                  Detected by looking for locale-<loc>.MPQ inside a folder\n"
+"                  of that name. Only the DBC set is locale-dependent; all\n"
+"                  terrain and models live in shared archives.\n"
+"\n"
+"AUTHORED INPUT -- both default to a file beside the executable\n"
+"\n"
+"  --vessels <f>   \"<mapId> <displayId>\" per line: which hull to bake into\n"
+"                  which vessel map.                  (default: vessels.txt)\n"
+"  --offmesh <f>   navmesh links the generated mesh cannot bridge -- a jump\n"
+"                  down a dock, a gap over water.     (default: offmesh.txt)\n"
+"\n"
+"OTHER\n"
+"\n"
+"  --map <id>      bake only this map id. For chasing one map, not for a\n"
+"                  real bake.\n"
+"  --threads <n>   worker threads                    (default: all cores)\n"
+"  --no-menu       never ask, even on a terminal.\n"
+"\n"
+"On a terminal, naming no component opens the menu -- that is the front door\n"
+"and it explains every choice. With no terminal to open it on (a pipe, a CI\n"
+"log) everything is baked instead, so an unattended run needs no arguments.\n");
     }
 
     bool ParseArgs(int argc, char** argv, Options& out)
@@ -129,7 +207,7 @@ namespace
             else if (a == "--offmesh" && hasValue) { out.offMesh = argv[++i]; }
             else if (a == "--threads" && hasValue) { out.threads = std::atoi(argv[++i]); }
             else if (a == "--no-menu") { out.noMenu = true; }
-            else if (a == "-h" || a == "--help") { return false; }
+            else if (a == "-h" || a == "--help") { out.help = true; return false; }
             else
             {
                 std::printf("unknown argument: %s\n", a.c_str());
@@ -319,18 +397,37 @@ namespace
      * from. The list changes only when the client does, so having to name it every time was
      * a flag that only ever took one value.
      */
-    std::string DefaultVesselList(const char* argv0)
+    std::string DefaultDataFile(const char* argv0, const char* name)
     {
         std::error_code ec;
         std::filesystem::path exe = std::filesystem::absolute(
             argv0 ? argv0 : "mangos-extractor", ec);
         if (ec)
         {
-            return "vessels.txt";
+            return name;
         }
 
-        const std::filesystem::path beside = exe.parent_path() / "vessels.txt";
-        return std::filesystem::exists(beside, ec) ? beside.string() : std::string("vessels.txt");
+        const std::filesystem::path beside = exe.parent_path() / name;
+        return std::filesystem::exists(beside, ec) ? beside.string() : std::string(name);
+    }
+
+    std::string DefaultVesselList(const char* argv0)
+    {
+        return DefaultDataFile(argv0, "vessels.txt");
+    }
+
+    /**
+     * @brief The off-mesh links that ship with the tool: offmesh.txt beside the executable.
+     *
+     * These are hand-authored jumps the generated mesh cannot bridge -- the Booty Bay dock,
+     * the Blade's Edge Arena pillars -- and they are per-expansion content, not boilerplate.
+     * They had no default path and no install rule, so a nav bake quietly ran without them
+     * unless somebody remembered --offmesh, which is exactly the kind of omission that
+     * leaves a pathfinder unable to cross a gap nobody thinks to test.
+     */
+    std::string DefaultOffMeshList(const char* argv0)
+    {
+        return DefaultDataFile(argv0, "offmesh.txt");
     }
 
     std::vector<VesselMap> ReadVesselMaps(const std::string& path)
@@ -514,13 +611,42 @@ namespace
     }
 }
 
+
+#if defined(_WIN32)
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
+namespace
+{
+    /// True when stdout is NOT a console -- a pipe, a file, a CI log.
+    bool StdoutIsPiped()
+    {
+#if defined(_WIN32)
+        return _isatty(_fileno(stdout)) == 0;
+#else
+        return isatty(fileno(stdout)) == 0;
+#endif
+    }
+}
+
 int main(int argc, char** argv)
 {
+    // Unbuffered when stdout is NOT a terminal. A pipe makes the C runtime buffer in
+    // 4K blocks, so a GUI or a CI log reading this sees nothing for minutes and then
+    // the whole run at once -- which reads as a hang, not as buffering.
+    if (StdoutIsPiped())
+    {
+        std::setvbuf(stdout, nullptr, _IONBF, 0);
+        std::setvbuf(stderr, nullptr, _IONBF, 0);
+    }
+
     Options opt;
     if (!ParseArgs(argc, argv, opt))
     {
         Usage();
-        return 2;
+        return opt.help ? 0 : 2;   // asking is not an error
     }
 
     opt.src = ExtractorConsole::ToUnixPath(opt.src);
@@ -531,16 +657,19 @@ int main(int argc, char** argv)
         opt.vesselList = DefaultVesselList(argc > 0 ? argv[0] : nullptr);
     }
 
-    g_started = std::chrono::steady_clock::now();
-    g_console.Start(opt.src, opt.dest);
+    if (opt.offMesh.empty())
+    {
+        opt.offMesh = DefaultOffMeshList(argc > 0 ? argv[0] : nullptr);
+    }
 
-    // Ask by default, and only when asking is possible. A console that could not be
-    // created is not an error here -- it is the ordinary case for a pipe or a CI log,
-    // and it means the run falls back to the classic "bake everything" behaviour.
+    g_started = std::chrono::steady_clock::now();
+    g_console.Start(opt.src, opt.dest, "3.3.5a");
+
+    // On a terminal the menu is the front door; without one there is nobody to ask.
     if (!opt.named && !opt.noMenu && g_console.Active())
     {
         ExtractorConsole::Choice choice;
-        if (!g_console.RunMenu(choice))
+        if (!g_console.RunMenu(choice, opt.dest))
         {
             g_console.Stop();
             return 0;
@@ -548,6 +677,7 @@ int main(int argc, char** argv)
         opt.dbc = choice.dbc;
         opt.tiles = choice.tiles;
         opt.goModels = choice.goModels;
+        opt.vessels = choice.vessels;
         opt.nav = choice.nav;
         if (choice.mapFilter >= 0)
         {
@@ -564,8 +694,57 @@ int main(int argc, char** argv)
     }
     else if (!opt.named)
     {
-        opt.dbc = opt.tiles = opt.goModels = opt.nav = true;
+        // Bare invocation is "do the whole job", vessels included -- leaving trans out
+        // of this was how 02 shipped a default bake that produced no ship decks.
+        opt.dbc = opt.tiles = opt.goModels = opt.vessels = opt.nav = true;
     }
+
+    // THE SAME REFUSAL THE MENU MAKES, for the command line. "mangos-extractor nav"
+    // with no tiles on disk parses fine, runs, and writes nothing -- a successful run
+    // that produced an empty navmesh. An earlier bake counts: what is checked is whether
+    // the input will exist, not whether it was named on this command line.
+    {
+        const auto baked = [&](const char* dir)
+        {
+            std::error_code ec;
+            auto it = std::filesystem::directory_iterator(opt.dest + dir, ec);
+            return !ec && it != std::filesystem::directory_iterator();
+        };
+        struct Need { bool wanted; bool feeds; const char* who; const char* needs;
+                      const char* dir; };
+        const Need needs[] = {
+            { opt.nav,     opt.tiles,    "nav",   "tile",     "/tiles"    },
+            { opt.tiles,   opt.goModels, "tile",  "gomodels", "/gomodels" },
+            { opt.vessels, opt.goModels, "trans", "gomodels", "/gomodels" },
+        };
+        for (const Need& n : needs)
+        {
+            if (n.wanted && !n.feeds && !baked(n.dir))
+            {
+                g_console.Error(std::string("  ") + n.who + " reads " + n.needs +
+                                " and none is baked under " + opt.dest +
+                                " -- name " + n.needs + " too, or run bare for all");
+                g_console.Stop();
+                return 1;
+            }
+        }
+    }
+
+    // After the menu, because the menu may have changed --src under us.
+    if (opt.locale.empty())
+    {
+        opt.locale = DetectLocale(opt.src);
+        if (opt.locale.empty())
+        {
+            g_console.Detail("  locale: none -- a single-locale client, everything at "
+                             "the Data root");
+        }
+        else
+        {
+            g_console.Detail("  locale: " + opt.locale + " (detected)");
+        }
+    }
+    g_console.SetLocale(opt.locale);
 
     const std::string tileDir = opt.dest + "/tiles";
 

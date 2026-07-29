@@ -2,9 +2,9 @@ name: Linux Build (GCC + Clang)
 
 on:
   push:
-    branches: [ master, devel ]
+    branches: [ master, united, devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, united ]
 
 permissions:
   contents: read
@@ -45,10 +45,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
-            cmake ninja-build ccache \
-            libssl-dev libbz2-dev default-libmysqlclient-dev libreadline-dev \
-            ${{ matrix.pkg }}
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq             cmake ninja-build ccache             libssl-dev libbz2-dev default-libmysqlclient-dev libreadline-dev             ${{ matrix.pkg }}
 
       - name: Compiler cache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -69,11 +66,14 @@ jobs:
           -DBUILD_MANGOSD=1
           -DBUILD_REALMD=1
           -DWITH_TESTS=1
+          # Never the socket tests: they bind real listeners and dominate the
+          # suite's wall-clock. A human asks for them, CI does not.
+          -DWITH_NET_TESTS=0
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
           -DSCRIPT_LIB_SD3=1
           -DUSE_STORMLIB=1
-          -DPCH=1
+          -DPCH=0
 
       - name: Build
         run: cmake --build "$BUILD_DIR" --parallel

@@ -153,16 +153,30 @@ void UringServer::stop() {
 
 void UringServer::acceptLoop() {
     while (true) {
-        int cfd = ::accept4(m_listen, nullptr, nullptr, SOCK_CLOEXEC);
+        // The peer address is captured here or not at all: IOCP and the epoll reactor
+        // both call setPeerAddress(), and a session without it leaves anything keyed on
+        // the client IP -- logging, bans -- with nothing to work with.
+        sockaddr_in peer{};
+        socklen_t peerLen = sizeof(peer);
+        int cfd = ::accept4(m_listen, reinterpret_cast<sockaddr*>(&peer),
+                            &peerLen, SOCK_CLOEXEC);
         if (cfd < 0) {
             if (errno == EINTR) continue;
             break; // listen socket closed on shutdown
+        }
+
+        char peerIp[INET_ADDRSTRLEN] = {};
+        if (peer.sin_family != AF_INET ||
+            !inet_ntop(AF_INET, &peer.sin_addr, peerIp, sizeof(peerIp))) {
+            ::close(cfd);
+            continue;
         }
         int one = 1;
         ::setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 
         auto* conn = new UringConn(m_factory);
         conn->fd = cfd;
+        conn->session->setPeerAddress(peerIp);
 
         // Pick the owning worker up front so the channel can target its eventfd
         // before the session (in onConnect) registers with the world loop.

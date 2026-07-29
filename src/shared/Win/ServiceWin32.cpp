@@ -29,11 +29,6 @@
 #include <windows.h>
 #include <winsvc.h>
 
-// stupid ACE define
-#ifdef main
-#undef main
-#endif
-
 #if !defined(WINADVAPI)
 #if !defined(_ADVAPI32_)
 #define WINADVAPI DECLSPEC_IMPORT
@@ -71,15 +66,22 @@ bool WinServiceInstall()
         return false;
     }
 
-    char path[_MAX_PATH + 10];
-    if (!GetModuleFileName(0, path, sizeof(path) / sizeof(path[0])))
+    // The suffix is appended in place, so the path must be read into a buffer that
+    // still has room for it: GetModuleFileName will happily fill the whole array and,
+    // on truncation, returns exactly the size it was given. Reading into the full
+    // array and then strcat-ing eight more bytes overflows for any install path near
+    // the limit -- which long-path support makes reachable.
+    static const char RUN_SUFFIX[] = " -s run";
+    char path[_MAX_PATH + sizeof(RUN_SUFFIX)];
+    const DWORD pathLen = GetModuleFileName(0, path, _MAX_PATH);
+    if (pathLen == 0 || pathLen >= _MAX_PATH)
     {
         CloseServiceHandle(serviceControlManager);
         sLog.outError("SERVICE: Can't get service binary filename.");
         return false;
     }
 
-    std::strcat(path, " -s run");
+    std::strcat(path, RUN_SUFFIX);
 
     SC_HANDLE service = CreateService(serviceControlManager,
                                       serviceName,          // name of service

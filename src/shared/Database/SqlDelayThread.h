@@ -50,6 +50,15 @@ class SqlDelayThread : public MaNGOS::Runnable
         SqlConnection* m_dbConnection;                      /**< Pointer to DB connection */
         volatile bool m_running; /**< TODO */
 
+    public:
+
+        /// True while the loop is running. CommitTransactionChecked() asks before it
+        /// enqueues: a transaction queued onto a stopped thread is never drained, and
+        /// the caller would block on its promise forever.
+        bool IsRunning() const { return m_running; }
+
+    private:
+
         /**
          * @brief process all enqueued requests
          *

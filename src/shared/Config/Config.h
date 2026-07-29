@@ -106,6 +106,14 @@ class Config
          */
         int32 GetIntDefault(const char* name, const int32 def);
         /**
+         * @brief Retrieves a 64-bit integer configuration value with default fallback
+         *
+         * @param name Key name to look up
+         * @param def Default value if the key is absent or unparsable
+         * @return int64 The configuration value or default value
+         */
+        int64 GetInt64Default(const char* name, const int64 def);
+        /**
          * @brief Retrieves a floating-point configuration value with default fallback
          *
          * Looks up a configuration parameter by name and interprets it as a float.

@@ -1,3 +1,6 @@
+#include <memory>
+#include <string>
+#include <vector>
 #include "MpqTileSource.hpp"
 
 #include "AdtParser.hpp"

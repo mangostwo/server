@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/MathDefines.h"
 #include "MotionFrame.h"
 #include "Map.h"
 #include "MapManager.h"

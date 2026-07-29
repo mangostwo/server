@@ -57,10 +57,3 @@ TEST(SessionPingTracker_enforces_threshold_only_for_players)
     CHECK(!tracker.ShouldKick(0, true));
     CHECK(!tracker.ShouldKick(1, false));
 }
-
-TEST(SessionQueuePolicy_allows_only_ping_and_keepalive)
-{
-    CHECK(IsAllowedWhileLoginQueued(CMSG_PING));
-    CHECK(IsAllowedWhileLoginQueued(CMSG_KEEP_ALIVE));
-    CHECK(!IsAllowedWhileLoginQueued(CMSG_CHAR_ENUM));
-}

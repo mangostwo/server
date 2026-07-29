@@ -25,6 +25,8 @@
 #ifndef MANGOS_H_UTIL
 #define MANGOS_H_UTIL
 
+#include <cstdio>
+#include <cstdarg>
 #include "Common/TimeConstants.h"
 #include "Platform/Define.h"
 

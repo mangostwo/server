@@ -49,11 +49,12 @@ class WorldObject;
  * The invariant that makes this safe: A LEG NEVER SPANS TWO FRAMES. The driver
  * enforces it by dropping its router whenever the frame under it changes.
  *
- * The other half of that invariant is FromWorld/ToWorld. Every anchor a generator
- * captures -- a respawn coord, a DB waypoint, a script's MovePoint -- is WORLD data,
- * because world data is the only kind the database and the script API speak. Under
- * the world frame both calls are the identity, which is why generators may convert
- * unconditionally and pay nothing.
+ * The other half of that invariant is FromWorld. Every anchor a generator captures --
+ * a respawn coord, a DB waypoint, a script's MovePoint -- is WORLD data, because world
+ * data is the only kind the database and the script API speak. Under the world frame it
+ * is the identity, which is why generators may convert unconditionally and pay nothing.
+ * There is no way back: a deck IS a map, so nothing on one is ever composed into the
+ * world, and a frame that could do it would be a frame someone would eventually use.
  */
 namespace Motion
 {

@@ -38,6 +38,7 @@ set(SRC_GRP_PROTO
     Listener.cpp
     Listener.h
     Opcodes.h
+    WorldPacket.h
     PacketCodec.cpp
     PacketCodec.h
 )

@@ -51,10 +51,13 @@
 #ifndef MANGOS_H_PLAYER
 #define MANGOS_H_PLAYER
 
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <deque>
 #include <utility>
 #include <queue>
 #include "Common/ServerDefines.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Utilities/Errors.h"
 #include "Platform/Define.h"
 #include "Common/TimeConstants.h"
@@ -183,8 +186,8 @@ struct PlayerTalent
     PlayerSpellState state;
 };
 
-typedef UNORDERED_MAP<uint32, PlayerSpell> PlayerSpellMap;
-typedef UNORDERED_MAP<uint32, PlayerTalent> PlayerTalentMap;
+typedef std::unordered_map<uint32, PlayerSpell> PlayerSpellMap;
+typedef std::unordered_map<uint32, PlayerTalent> PlayerTalentMap;
 
 // SpellCooldown struct and SpellCooldowns typedef moved to SpellCooldownMgr.h.
 
@@ -598,7 +601,7 @@ struct SkillStatusData
     SkillUpdateState uState; // Update state of the skill
 };
 
-typedef UNORDERED_MAP<uint32, SkillStatusData> SkillStatusMap;
+typedef std::unordered_map<uint32, SkillStatusData> SkillStatusMap;
 
 // Player slots for items
 enum PlayerSlots
@@ -2275,7 +2278,7 @@ class Player : public Unit
         uint8 unReadMails; // Number of unread mails
         time_t m_nextMailDelivereTime; // Time of the next mail delivery
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         ItemMap mMitems; // Map of mailed items
 
@@ -3700,7 +3703,7 @@ class Player : public Unit
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
 
-        typedef UNORDERED_MAP < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
+        typedef std::unordered_map < uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
 
         // Update the homebind time
         void UpdateHomebindTime(uint32 time);

@@ -41,6 +41,7 @@
  * including loading terrain data, spawning objects, and cleanup.
  */
 
+#include <vector>
 #include <cmath>
 #include <set>
 #include "Utilities/Util.h"

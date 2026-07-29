@@ -1,3 +1,5 @@
+#include <string>
+#include <vector>
 #include "StormLibArchive.hpp"
 
 #include <StormLib.h>

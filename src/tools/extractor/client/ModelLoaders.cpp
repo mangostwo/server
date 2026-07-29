@@ -1,3 +1,7 @@
+#include <unordered_map>
+#include <memory>
+#include <string>
+#include <vector>
 #include "ModelLoaders.hpp"
 
 #include "M2Parser.hpp"

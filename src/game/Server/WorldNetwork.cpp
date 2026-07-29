@@ -28,7 +28,6 @@
 #include "Log/Log.h"
 #include "OpcodeTable.h"
 
-INSTANTIATE_SINGLETON_1(WorldNetwork);
 
 WorldNetwork::WorldNetwork()
     : m_gateway(),
