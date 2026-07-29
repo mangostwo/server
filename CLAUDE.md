@@ -134,7 +134,7 @@ Compatibility target is **3.3.5a only**; do **not** introduce 4.x/Cata or later-
 
 - **Database changes go in the separate `mangostwo/database` repo**, not here — as transactional, idempotent
   `Rel##_##_###_*.sql` migrations that chain via `db_version`.
-- Clone/update **recursively**: `dep`, `src/realmd`, `src/modules/{SD3,Eluna}` and `extra/win` are submodules. Never shallow-update a submodule to a non-tip pinned SHA.
+- Clone/update **recursively**: `dep`, `src/realmd`, `src/modules/{SD3,Eluna}` and `win` are submodules. Never shallow-update a submodule to a non-tip pinned SHA.
 - Client data is baked by `src/tools/extractor` (`mangos-extractor`) into `<DataDir>/tiles`,
   `<DataDir>/gomodels` and `<DataDir>/dbc`. It always builds; there is no vmap or .map step.
 - Less-obvious locations: scripting in `src/modules/` (Eluna = Lua, SD3 = C++). The `src/game/` tree is under
@@ -166,7 +166,7 @@ reason to move the build back in.
 Optional: `-DWITH_IO_URING=1` selects the io_uring network backend instead of epoll (Linux only).
 `-DWITH_TESTS=1` builds `mangos_tests`.
 
-Windows: use the EasyBuild helper in `extra/win/`. **A PR MUST keep CI green:** the Linux build compiles with
+Windows: use the EasyBuild helper in `win/`. **A PR MUST keep CI green:** the Linux build compiles with
 **both** GCC and Clang, and Windows builds on AppVeyor.
 
 ## Code style
