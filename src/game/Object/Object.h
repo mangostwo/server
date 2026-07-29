@@ -25,7 +25,7 @@
 #ifndef MANGOS_H_OBJECT
 #define MANGOS_H_OBJECT
 
-#include "Utilities/UnorderedMapSet.h"
+#include <unordered_map>
 #include "Utilities/Errors.h"
 #include "Platform/Define.h"
 #include "Utilities/MathDefines.h"
@@ -111,7 +111,7 @@ class LuaVal;
 class TransportInfo;
 struct MangosStringLocale;
 
-typedef UNORDERED_MAP<Player*, UpdateData> UpdateDataMapType;
+typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 /**
  * @brief Position structure

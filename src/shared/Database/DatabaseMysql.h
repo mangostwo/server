@@ -27,7 +27,6 @@
 #ifndef MANGOS_H_DATABASEMYSQL
 #define MANGOS_H_DATABASEMYSQL
 
-//#include "Common.h"
 #include <string>
 #include "Database.h"
 #include "Policies/Singleton.h"

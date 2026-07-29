@@ -56,14 +56,11 @@
 #  define MANGOS_PATH_MAX 1024
 #endif
 
-// Symbol-visibility spec kept for the DLL-exported module classes (playerbot).
 #if PLATFORM == PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif // DECLSPEC_NORETURN
 #else // PLATFORM != PLATFORM_WINDOWS
-#  define MANGOS_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif // PLATFORM
 
@@ -113,8 +110,8 @@ typedef uint32      DWORD;
 // These used to expand to ACE_UINT64_FORMAT_SPECIFIER and friends, which is why
 // printing a uint64 anywhere in the server pulled in ACE. <cinttypes> is the
 // standard answer to the same problem and is correct on every platform by
-// definition, so the macros survive (there are ~470 uses) but their contents no
-// longer come from a third-party portability layer.
+// definition, so the macros survive but their contents no longer come from a
+// third-party portability layer.
 // ---------------------------------------------------------------------------
 #define UI64FMTD "%" PRIu64
 #define SI64FMTD "%" PRId64

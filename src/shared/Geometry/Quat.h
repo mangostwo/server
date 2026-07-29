@@ -84,6 +84,67 @@ namespace Geometry
         return wrap(yaw, 0.0f, 2.0f * pif());
     }
 
+    /// The rotation of `angle` radians about `axis`. Standard convention:
+    /// (axis.unit() * sin(angle/2), cos(angle/2)).
+    inline Quat FromAxisAngle(const Vector3& axis, float angle)
+    {
+        const Vector3 u = axis.unit();
+        const float s = std::sin(angle * 0.5f);
+        return Quat(u.x * s, u.y * s, u.z * s, std::cos(angle * 0.5f));
+    }
+
+    /**
+     * @brief The rotation Rz(z) * Ry(y) * Rx(x), as G3D's Matrix3-to-Quat produced it.
+     *
+     * A direct port, including which REPRESENTATIVE it picks. A quaternion and its
+     * negation are the same rotation, so the composed product -(qz*qy*qx) is equally
+     * correct geometrically -- but G3D chooses its sign from the largest diagonal
+     * element of the matrix, and that disagrees with the product's sign for some inputs
+     * (the identity is one). Measured against g3dlite before this was written, not
+     * derived: two of seven sample angles differed.
+     *
+     * It does not change what the client draws, because PackRotation folds the sign of
+     * w into each axis. It does change the raw components anything else reads, and
+     * "probably equivalent" is not a thing to leave in a wire format.
+     */
+    inline Quat FromEulerAnglesZYX(float z, float y, float x)
+    {
+        const float cz = std::cos(z), sz = std::sin(z);
+        const float cy = std::cos(y), sy = std::sin(y);
+        const float cx = std::cos(x), sx = std::sin(x);
+
+        // Rz * (Ry * Rx), row-major, exactly as Matrix3::fromEulerAnglesZYX builds it.
+        const float r[3][3] = {
+            { cz * cy,  cz * sy * sx - sz * cx,  cz * sy * cx + sz * sx },
+            { sz * cy,  sz * sy * sx + cz * cx,  sz * sy * cx - cz * sx },
+            { -sy,      cy * sx,                 cy * cx                },
+        };
+
+        static const int plus1mod3[] = { 1, 2, 0 };
+        int i = (r[1][1] > r[0][0]) ? 1 : 0;
+        i = (r[2][2] > r[i][i]) ? 2 : i;
+        const int j = plus1mod3[i];
+        const int k = plus1mod3[j];
+
+        Quat q;
+        float* v = &q.x;
+        v[i] = float(((r[j][j] + r[k][k]) - r[i][i]) - 1.0);
+        q.w  = (r[j][k] - r[k][j]);
+        v[j] = -(r[i][j] + r[j][i]);
+        v[k] = -(r[i][k] + r[k][i]);
+
+        const float len = std::sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
+        if (len > 0.00001f)
+        {
+            q *= 1.0f / len;
+        }
+        else
+        {
+            q = Quat(0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        return q;
+    }
+
     /// A rotation squeezed into the 3x21-bit field the 3.3.5 client reads
     /// (GAMEOBJECT_ROTATION). The sign of w is folded into each axis.
     inline int64_t PackRotation(const Quat& q)

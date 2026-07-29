@@ -16,6 +16,7 @@
 #include <dbghelp.h>
 #include "WheatyExceptionReport.h"
 #include "GitRevision.h"
+#include <cstdarg>
 #define CrashFolder _T("Crashes")
 #pragma comment(linker, "/defaultlib:dbghelp.lib")
 
@@ -83,7 +84,10 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
     ++pos;
 
     TCHAR crash_folder_path[MAX_PATH];
-    sprintf(crash_folder_path, "%s\\%s", module_folder_name, CrashFolder);
+    // snprintf: module_folder_name may itself fill MAX_PATH, so appending a
+    // separator and the subdirectory overflows -- inside the crash handler,
+    // which is the worst place left to corrupt a stack.
+    snprintf(crash_folder_path, sizeof(crash_folder_path), "%s\\%s", module_folder_name, CrashFolder);
     if (!CreateDirectory(crash_folder_path, NULL))
     {
         if (GetLastError() != ERROR_ALREADY_EXISTS)
@@ -94,7 +98,7 @@ LONG WINAPI WheatyExceptionReport::WheatyUnhandledExceptionFilter(
 
     SYSTEMTIME systime;
     GetLocalTime(&systime);
-    sprintf(m_szLogFileName, "%s\\%s_[%u-%u_%u-%u-%u].txt",
+    snprintf(m_szLogFileName, sizeof(m_szLogFileName), "%s\\%s_[%u-%u_%u-%u-%u].txt",
             crash_folder_path, pos, systime.wDay, systime.wMonth, systime.wHour, systime.wMinute, systime.wSecond);
 
     m_hReportFile = CreateFile(m_szLogFileName,

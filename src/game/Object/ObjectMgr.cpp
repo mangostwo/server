@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <sstream>
+#include "Utilities/Util.h"
 #include <utility>
 #include <vector>
 #include <string>
@@ -71,7 +73,6 @@
 #include <limits>
 #include <set>
 
-INSTANTIATE_SINGLETON_1(ObjectMgr);
 
 // Temporary startup accumulator for LivingWorld observability (written during LoadActiveEntities(NULL) only)
 static ObjectMgr::LivingWorldStartupStats s_livingWorldStats;

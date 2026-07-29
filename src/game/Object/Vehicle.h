@@ -37,9 +37,9 @@
 #ifndef MANGOSSERVER_VEHICLE_H
 #define MANGOSSERVER_VEHICLE_H
 
+#include <unordered_map>
 #include "Platform/Define.h"
 #include "Object.h"
-#include "Utilities/UnorderedMapSet.h"
 
 #include <map>
 
@@ -47,7 +47,7 @@ class Unit;
 class TransportInfo;
 class VehicleInfo;
 
-typedef UNORDERED_MAP < WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/ > PassengerMap;
+typedef std::unordered_map < WorldObject* /*passenger*/, TransportInfo* /*passengerInfo*/ > PassengerMap;
 
 struct VehicleEntry;
 struct VehicleSeatEntry;

@@ -41,6 +41,7 @@
  * @see ThreatContainer for threat list management
  */
 
+#include <list>
 #include "Utilities/Errors.h"
 #include "ThreatManager.h"
 #include "Unit.h"

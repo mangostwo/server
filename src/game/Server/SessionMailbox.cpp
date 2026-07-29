@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <memory>
+#include <mutex>
 #include "SessionMailbox.h"
 
 SessionMailbox::~SessionMailbox()

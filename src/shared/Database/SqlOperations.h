@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "LockedQueue/LockedQueue.h"
+#include <future>
 #include <queue>
 #include "Utilities/Callback.h"
 
@@ -59,7 +60,24 @@ class SqlOperation
          * @param conn
          * @return bool
          */
-        virtual bool Execute(SqlConnection* conn) = 0;
+        /**
+         * @brief Run this operation, taking the connection's lock.
+         *
+         * Entry point for a standalone operation (i.e. from SqlDelayThread).
+         */
+        bool Execute(SqlConnection* conn);
+
+        /**
+         * @brief Run this operation with the connection's lock ALREADY held.
+         *
+         * SqlTransaction takes the lock once for the whole transaction and then runs
+         * each queued statement through here. That split is what lets a connection use
+         * a plain mutex: previously the transaction locked the connection and then every
+         * statement inside it locked the same connection again, which only worked because
+         * the mutex was recursive -- and would have deadlocked the first transaction the
+         * moment it stopped being.
+         */
+        virtual bool ExecuteLocked(SqlConnection* conn) = 0;
         /**
          * @brief
          *
@@ -95,7 +113,7 @@ class SqlPlainRequest : public SqlOperation
          * @param conn
          * @return bool
          */
-        bool Execute(SqlConnection* conn) override;
+        bool ExecuteLocked(SqlConnection* conn) override;
 };
 
 /**
@@ -132,7 +150,7 @@ class SqlTransaction : public SqlOperation
          * @param conn
          * @return bool
          */
-        bool Execute(SqlConnection* conn) override;
+        bool ExecuteLocked(SqlConnection* conn) override;
 };
 
 /**
@@ -161,7 +179,7 @@ class SqlPreparedRequest : public SqlOperation
          * @param conn
          * @return bool
          */
-        bool Execute(SqlConnection* conn) override;
+        bool ExecuteLocked(SqlConnection* conn) override;
 
     private:
         const int m_nIndex; /**< TODO */
@@ -173,6 +191,26 @@ class SqlPreparedRequest : public SqlOperation
 class SqlQuery;                                             /// contains a single async query
 class QueryResult;                                          /// the result of one
 class SqlResultQueue;                                       /// queue for thread sync
+/**
+ * @brief A transaction that reports whether it actually committed.
+ *
+ * Owns the transaction detached from the TSS slot; the promise is owned by the caller,
+ * which is parked on the matching future and therefore outlives this operation.
+ */
+class SqlTransactionResultSignal : public SqlOperation
+{
+    private:
+        SqlTransaction* m_trans;        ///< owned wrapped transaction
+        std::promise<bool>* m_result;   ///< caller-owned result channel
+
+    public:
+
+        SqlTransactionResultSignal(SqlTransaction* trans, std::promise<bool>* result)
+            : m_trans(trans), m_result(result) {}
+
+        bool ExecuteLocked(SqlConnection* conn) override;
+};
+
 class SqlQueryHolder;                                       /// groups several async quries
 class SqlQueryHolderEx;                                     /// points to a holder, added to the delay thread
 
@@ -226,7 +264,7 @@ class SqlQuery : public SqlOperation
          * @param conn
          * @return bool
          */
-        bool Execute(SqlConnection* conn) override;
+        bool ExecuteLocked(SqlConnection* conn) override;
 };
 
 /**
@@ -327,6 +365,6 @@ class SqlQueryHolderEx : public SqlOperation
          * @param conn
          * @return bool
          */
-        bool Execute(SqlConnection* conn) override;
+        bool ExecuteLocked(SqlConnection* conn) override;
 };
 #endif                                                      //__SQLOPERATIONS_H

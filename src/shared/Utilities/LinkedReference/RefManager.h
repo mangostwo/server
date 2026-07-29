@@ -31,24 +31,108 @@
 #include "Utilities/LinkedReference/Reference.h"
 
 template <class TO, class FROM>
+
+/**
+ * @brief
+ *
+ */
 class RefManager : public LinkedListHead
 {
     public:
 
+        /**
+         * @brief
+         *
+         */
         typedef LinkedListHead::Iterator<Reference<TO, FROM> > iterator;
-        RefManager() {}
-        virtual ~RefManager() { clearReferences(); }
 
+        /**
+         * @brief
+         *
+         */
+        RefManager() {}
+
+        /**
+         * @brief
+         *
+         */
+        virtual ~RefManager()
+        {
+            clearReferences();
+        }
+
+        /**
+         * @brief
+         *
+         * @return Reference<TO, FROM>
+         */
         Reference<TO, FROM>*       getFirst()       { return ((Reference<TO, FROM>*) LinkedListHead::getFirst()); }
+
+        /**
+         * @brief
+         *
+         * @return const Reference<TO, FROM>
+         */
         Reference<TO, FROM> const* getFirst() const { return ((Reference<TO, FROM> const*) LinkedListHead::getFirst()); }
+
+        /**
+         * @brief
+         *
+         * @return Reference<TO, FROM>
+         */
         Reference<TO, FROM>*       getLast()       { return ((Reference<TO, FROM>*) LinkedListHead::getLast()); }
+
+        /**
+         * @brief
+         *
+         * @return const Reference<TO, FROM>
+         */
         Reference<TO, FROM> const* getLast() const { return ((Reference<TO, FROM> const*) LinkedListHead::getLast()); }
 
-        iterator begin() { return iterator(getFirst()); }
-        iterator end() { return iterator(NULL); }
-        iterator rbegin() { return iterator(getLast()); }
-        iterator rend() { return iterator(NULL); }
+        /**
+         * @brief
+         *
+         * @return iterator
+         */
+        iterator begin()
+        {
+            return iterator(getFirst());
+        }
 
+        /**
+         * @brief
+         *
+         * @return iterator
+         */
+        iterator end()
+        {
+            return iterator(NULL);
+        }
+
+        /**
+         * @brief
+         *
+         * @return iterator
+         */
+        iterator rbegin()
+        {
+            return iterator(getLast());
+        }
+
+        /**
+         * @brief
+         *
+         * @return iterator
+         */
+        iterator rend()
+        {
+            return iterator(NULL);
+        }
+
+        /**
+         * @brief
+         *
+         */
         void clearReferences()
         {
             LinkedListElement* ref;

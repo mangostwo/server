@@ -25,6 +25,9 @@
 #ifndef _WHEATYEXCEPTIONREPORT_
 #define _WHEATYEXCEPTIONREPORT_
 
+// <dbghelp.h> is not self-contained: it is built on the Windows base types and will not
+// parse unless <windows.h> has been seen first.
+#include <windows.h>
 #include <dbghelp.h>
 
 // countof comes from Platform/Define.h as a constexpr function template. This

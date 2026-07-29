@@ -1,19 +1,15 @@
-// Creature's share of the old spatial API, for SD3 and Eluna only. The respawn pose and the
-// leash point are placements now (Spawn(), CombatAnchor()); these are the old spellings.
+// Creature's share of the old spatial API, for ELUNA only. Eluna is shared upstream
+// between several cores and absorbs their differences in its own tree, so it has not
+// followed this fork's rename of the respawn pose to a placement.
+//
+// SD3 no longer needs any of this -- it calls Spawn()/SetSpawn() directly. What is left
+// is the two methods Eluna's CreatureMethods.h actually uses. GetCombatStartPosition,
+// SetCombatStartPosition, ResetRespawnCoord and the reach family all went with it,
+// because nothing called them any more.
+//
+// DELETE THIS FILE as soon as Eluna is updated. There is nothing here worth keeping.
 
 public:
-
-    void SetCombatStartPosition(float x, float y, float z)
-    {
-        SetCombatAnchor(Geometry::Vector3(x, y, z));
-    }
-
-    void GetCombatStartPosition(float& x, float& y, float& z) const
-    {
-        x = CombatAnchor().x;
-        y = CombatAnchor().y;
-        z = CombatAnchor().z;
-    }
 
     void SetRespawnCoord(CreatureCreatePos const& pos) { SetSpawn(pos); }
 
@@ -21,8 +17,6 @@ public:
     {
         SetSpawn(Geometry::Vector3(x, y, z), ori);
     }
-
-    void ResetRespawnCoord() { ResetSpawn(); }
 
     void GetRespawnCoord(float& x, float& y, float& z, float* ori = NULL,
                          float* dist = NULL) const

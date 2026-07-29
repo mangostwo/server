@@ -57,8 +57,8 @@
 #ifndef MANGOS_H_UNIT
 #define MANGOS_H_UNIT
 
+#include <unordered_map>
 #include <utility>
-#include "Utilities/UnorderedMapSet.h"
 #include "Platform/Define.h"
 #include <cmath>
 #include <string>
@@ -1111,7 +1111,7 @@ struct GlobalCooldown
     uint32 cast_time;
 };
 
-typedef UNORDERED_MAP < uint32 /*category*/, GlobalCooldown > GlobalCooldownList;
+typedef std::unordered_map < uint32 /*category*/, GlobalCooldown > GlobalCooldownList;
 
 class GlobalCooldownMgr                                     // Shared by Player and CharmInfo
 {
@@ -4133,10 +4133,6 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void CastSpell(float x, float y, float z, uint32 spell, TR triggered);
         template <typename TR>
         void CastSpell(float x, float y, float z, SpellEntry const* spell, TR triggered);
-
-#ifdef MANGOS_SCRIPT_COMPAT
-#include "Object/ScriptApiCompatUnit.inl"
-#endif
 };
 
 template<typename Func>

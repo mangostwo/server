@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <mutex>
+#include <thread>
 #include "AntiFreezeService.h"
 
 #include "Log.h"

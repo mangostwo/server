@@ -79,7 +79,6 @@ target_link_libraries(mangosd
         $<$<BOOL:${SOAP}>:gsoap>
         Threads::Threads
         mangos_openssl
-    PRIVATE
         mangos_openssl_strict
 )
 

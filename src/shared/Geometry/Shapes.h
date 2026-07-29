@@ -174,8 +174,15 @@ namespace Geometry
         float scale = 1.f;
 
         Transform() = default;
+
+        /// A non-positive or non-finite scale is nonsense, and the damage it does is
+        /// silent: worldToLocal() divides by it, so the point becomes inf or NaN, and
+        /// every later comparison against a NaN is false -- a ray simply misses the
+        /// model instead of failing. Clamped once here, where a model is placed, rather
+        /// than tested on every query.
         Transform(const Vector3& pos, const Mat3& rot, float scale)
-            : pos(pos), rot(rot), scale(scale) {}
+            : pos(pos), rot(rot),
+              scale((scale > 0.0f && Geometry::isFinite(scale)) ? scale : 1.0f) {}
 
         Vector3 localToWorld(const Vector3& p) const
         {

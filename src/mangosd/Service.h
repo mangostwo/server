@@ -25,6 +25,7 @@
 #ifndef MANGOS_H_SERVICE
 #define MANGOS_H_SERVICE
 
+#include <thread>
 #include <string>
 
 /**

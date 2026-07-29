@@ -25,10 +25,11 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include <unordered_map>
+#include <functional>
 #include <vector>
 #include <string>
 #include "Threading/Threading.h"
-#include "Utilities/UnorderedMapSet.h"
 #include "Database/SqlDelayThread.h"
 #include "Threading/ThreadLocalStore.h"
 
@@ -220,17 +221,13 @@ class SqlConnection
         void FreePreparedStatements();
 
     private:
-        /**
-         * @brief
-         *
-         */
-        // Recursive, as ACE_Recursive_Thread_Mutex was, and for the reason the
-        // design requires: SqlTransaction::Execute holds this across the whole
-        // BEGIN..COMMIT so nothing interleaves, then runs each queued
-        // SqlOperation, and every one of those takes it again because each must
-        // also work standalone from the delay queue.
-        typedef std::recursive_mutex LOCK_TYPE;
-        LOCK_TYPE m_mutex; /**< TODO */
+        // A plain mutex, not a recursive one. SqlTransaction takes this lock once for
+        // the whole BEGIN..COMMIT and runs each queued statement through
+        // ExecuteLocked(), so nothing re-enters it. It used to be recursive because
+        // every statement locked the connection again on its way through Execute();
+        // making it recursive once more would hide that design error rather than fix it.
+        typedef std::mutex LOCK_TYPE;
+        LOCK_TYPE m_mutex;
 
         /**
          * @brief
@@ -336,219 +333,29 @@ class Database
          */
         bool DirectPExecute(const char* format, ...) ATTR_PRINTF(2, 3);
 
-        /// Async queries and query holders, implemented in DatabaseImpl.h
 
         // Query / member
-        template<class Class>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param )
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*), const char* sql);
-        template<class Class, typename ParamType1>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1)
-         * @param param1
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql);
-        template<class Class, typename ParamType1, typename ParamType2>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1
-         * @param ParamType2)
-         * @param param1
-         * @param param2
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql);
-        template<class Class, typename ParamType1, typename ParamType2, typename ParamType3>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1
-         * @param ParamType2
-         * @param ParamType3)
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql);
+        /// Async queries and query holders (Database.cpp). The callback runs
+        /// on whichever thread later calls ProcessResultQueue() (typically
+        /// the thread that issued the query), not the worker thread that ran
+        /// the SQL -- bind whatever object/state it needs into the lambda.
+
+        /// Runs sql on a worker thread and invokes callback(result) once done.
+        bool AsyncQuery(std::function<void(QueryResult*)> callback, const char* sql);
+
+        /// printf-style AsyncQuery(): the query text is formatted immediately
+        /// (on the calling thread), only execution is deferred.
+        bool AsyncPQuery(std::function<void(QueryResult*)> callback, const char* format, ...) ATTR_PRINTF(3, 4);
+
+        /// Runs every query already staged in holder on a worker thread, then
+        /// invokes callback(nullptr, holder) once all of them complete --
+        /// results are retrieved from the holder itself (SqlQueryHolder::GetResult()).
+        bool DelayQueryHolder(std::function<void(QueryResult*, SqlQueryHolder*)> callback, SqlQueryHolder* holder);
+
+
         // Query / static
-        template<typename ParamType1>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1)
-         * @param param1
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param1, const char* sql);
-        template<typename ParamType1, typename ParamType2>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1
-         * @param ParamType2)
-         * @param param1
-         * @param param2
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* sql);
-        template<typename ParamType1, typename ParamType2, typename ParamType3>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1
-         * @param ParamType2
-         * @param ParamType3)
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param sql
-         * @return bool
-         */
-        bool AsyncQuery(void (*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* sql);
         // PQuery / member
-        template<class Class>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param )
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(Class* object, void (Class::*method)(QueryResult*), const char* format, ...) ATTR_PRINTF(4, 5);
-        template<class Class, typename ParamType1>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1)
-         * @param param1
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1), ParamType1 param1, const char* format, ...) ATTR_PRINTF(5, 6);
-        template<class Class, typename ParamType1, typename ParamType2>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1
-         * @param ParamType2)
-         * @param param1
-         * @param param2
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* format, ...) ATTR_PRINTF(6, 7);
-        template<class Class, typename ParamType1, typename ParamType2, typename ParamType3>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param ParamType1
-         * @param ParamType2
-         * @param ParamType3)
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(Class* object, void (Class::*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* format, ...) ATTR_PRINTF(7, 8);
         // PQuery / static
-        template<typename ParamType1>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1)
-         * @param param1
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param1, const char* format, ...) ATTR_PRINTF(4, 5);
-        template<typename ParamType1, typename ParamType2>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1
-         * @param ParamType2)
-         * @param param1
-         * @param param2
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(void (*method)(QueryResult*, ParamType1, ParamType2), ParamType1 param1, ParamType2 param2, const char* format, ...) ATTR_PRINTF(5, 6);
-        template<typename ParamType1, typename ParamType2, typename ParamType3>
-        /**
-         * @brief
-         *
-         * @param
-         * @param ParamType1
-         * @param ParamType2
-         * @param ParamType3)
-         * @param param1
-         * @param param2
-         * @param param3
-         * @param format...
-         * @return bool
-         */
-        bool AsyncPQuery(void (*method)(QueryResult*, ParamType1, ParamType2, ParamType3), ParamType1 param1, ParamType2 param2, ParamType3 param3, const char* format, ...) ATTR_PRINTF(6, 7);
-        template<class Class>
-        // QueryHolder
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param )
-         * @param holder
-         * @return bool
-         */
-        bool DelayQueryHolder(Class* object, void (Class::*method)(QueryResult*, SqlQueryHolder*), SqlQueryHolder* holder);
-        template<class Class, typename ParamType1>
-        /**
-         * @brief
-         *
-         * @param object
-         * @param
-         * @param
-         * @param ParamType1)
-         * @param holder
-         * @param param1
-         * @return bool
-         */
-        bool DelayQueryHolder(Class* object, void (Class::*method)(QueryResult*, SqlQueryHolder*, ParamType1), SqlQueryHolder* holder, ParamType1 param1);
 
         /**
          * @brief
@@ -597,6 +404,17 @@ class Database
          * @return bool
          */
         bool CommitTransactionDirect();
+
+        /**
+         * @brief Commit through the delay thread and block for the REAL result.
+         *
+         * CommitTransaction() reports only that the transaction was queued;
+         * CommitTransactionDirect() runs it but discards the result. Use this where the
+         * answer matters -- anything moving items or money.
+         *
+         * @return bool whether the transaction actually committed
+         */
+        bool CommitTransactionChecked();
 
         // PREPARED STATEMENT API
         /**
@@ -836,7 +654,7 @@ class Database
          * @brief
          *
          */
-        typedef UNORDERED_MAP<std::string, int> PreparedStmtRegistry;
+        typedef std::unordered_map<std::string, int> PreparedStmtRegistry;
         PreparedStmtRegistry m_stmtRegistry;                ///< /**< TODO */
 
         int m_iStmtIndex; /**< TODO */

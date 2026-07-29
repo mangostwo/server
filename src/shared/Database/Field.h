@@ -27,6 +27,7 @@
 
 #include "Platform/Define.h"
 #include <cstdlib>
+#include <cstdio>
 #include <string>
 #include <mysql.h>
 
@@ -104,40 +105,42 @@ class Field
          */
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
         /**
-        * @brief Get double value
-        * @return Double value (0.0 if NULL)
-        */
+         * @brief Get double value
+         * @return Double value (0.0 if NULL)
+         */
         double GetDouble() const { return mValue ? static_cast<double>(atof(mValue)) : 0.0f; }
         /**
-        * @brief Get 8-bit signed integer value
-        * @return 8-bit signed integer (0 if NULL)
-        */
-        int8 GetInt8() const { return mValue ? static_cast<int8>(atol(mValue)) : int8(0); }
+         * @brief Get 8-bit signed integer value
+         * @return 8-bit signed integer (0 if NULL)
+         */
+        // strtol/strtoul, not atol: MSVC's long is 32 bits even on x64, so a DB
+        // value above 2^31 overflows atol -- undefined, LONG_MAX in practice.
+        int8 GetInt8() const { return mValue ? static_cast<int8>(std::strtol(mValue, NULL, 10)) : int8(0); }
         /**
          * @brief Get 32-bit signed integer value
          * @return 32-bit signed integer (0 if NULL)
          */
-        int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : int32(0); }
+        int32 GetInt32() const { return mValue ? static_cast<int32>(std::strtol(mValue, NULL, 10)) : int32(0); }
         /**
          * @brief Get 8-bit unsigned integer value
          * @return 8-bit unsigned integer (0 if NULL)
          */
-        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : uint8(0); }
+        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(std::strtoul(mValue, NULL, 10)) : uint8(0); }
         /**
          * @brief Get 16-bit unsigned integer value
          * @return 16-bit unsigned integer (0 if NULL)
          */
-        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : uint16(0); }
+        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(std::strtoul(mValue, NULL, 10)) : uint16(0); }
         /**
          * @brief Get 16-bit signed integer value
          * @return 16-bit signed integer (0 if NULL)
          */
-        int16 GetInt16() const { return mValue ? static_cast<int16>(atol(mValue)) : int16(0); }
+        int16 GetInt16() const { return mValue ? static_cast<int16>(std::strtol(mValue, NULL, 10)) : int16(0); }
         /**
          * @brief Get 32-bit unsigned integer value
          * @return 32-bit unsigned integer (0 if NULL)
          */
-        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : uint32(0); }
+        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(std::strtoul(mValue, NULL, 10)) : uint32(0); }
         /**
          * @brief Get 64-bit unsigned integer value
          * @return 64-bit unsigned integer (0 if NULL)
@@ -153,9 +156,9 @@ class Field
             return value;
         }
         /**
-        * @brief Get 64-bit signed integer value
-        * @return 64-bit signed integer (0 if NULL)
-        */
+         * @brief Get 64-bit signed integer value
+         * @return 64-bit signed integer (0 if NULL)
+         */
         // TODO: should this be int64 not uint64
         uint64 GetInt64() const
         {

@@ -27,6 +27,7 @@
 #if !defined(QUERYRESULTMYSQL_H)
 #define QUERYRESULTMYSQL_H
 
+#include "QueryResult.h"
 #include "Platform/Define.h"
 
 #ifdef WIN32

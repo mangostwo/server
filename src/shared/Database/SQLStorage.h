@@ -25,8 +25,8 @@
 #ifndef SQLSTORAGE_H
 #define SQLSTORAGE_H
 
+#include <unordered_map>
 #include <utility>
-#include "Utilities/UnorderedMapSet.h"
 #include "Platform/Define.h"
 #include <map>
 #include "Database/DatabaseEnv.h"
@@ -445,7 +445,7 @@ class SQLHashStorage : public SQLStorageBase
          * @brief
          *
          */
-        typedef UNORDERED_MAP < uint32 /*recordId*/, char* /*record*/ > RecordMap;
+        typedef std::unordered_map < uint32 /*recordId*/, char* /*record*/ > RecordMap;
         RecordMap m_indexMap; /**< TODO */
 };
 

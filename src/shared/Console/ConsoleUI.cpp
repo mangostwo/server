@@ -22,6 +22,10 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <string>
+#include <vector>
+#include <deque>
+#include <mutex>
 #include "ConsoleUI.h"
 #include "Terminal.h"
 
@@ -798,6 +802,12 @@ void ConsoleUI::ComposeFrame(std::vector<std::string>& frame, int rows, int cols
     ComposeInput(frame, cols);
 
     frame.resize(std::size_t(rows), std::string(SGR_RESET));
+}
+
+int ConsoleUI::Columns() const
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_cols;
 }
 
 void ConsoleUI::Render()

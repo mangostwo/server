@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdlib>
 #include <list>
 #include <string>
 #include "Common/TimeConstants.h"
@@ -5132,9 +5133,9 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     for (iter = tokens.begin(), index = ACTION_BAR_INDEX_START; index < ACTION_BAR_INDEX_END; ++iter, ++index)
     {
         // use unsigned cast to avoid sign negative format use at long-> ActiveStates (int) conversion
-        uint8 type  = (uint8)atol((*iter).c_str());
+        uint8 type  = (uint8)std::strtoul((*iter).c_str(), NULL, 10);
         ++iter;
-        uint32 action = atol((*iter).c_str());
+        uint32 action = std::strtoul((*iter).c_str(), NULL, 10);
 
         PetActionBar[index].SetActionAndType(action, ActiveStates(type));
 

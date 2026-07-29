@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <functional>
+#include <mutex>
 #include <cassert>
 #include <string>
 #include "Common/TimeConstants.h"
@@ -263,6 +265,10 @@ void Database::escape_string(std::string& str)
         return;
     }
 
+    // It DOES matter which connection, and it matters that the lock is held:
+    // mysql_real_escape_string reads the connection's character set, and connection
+    // zero may be running a query on another thread at the same moment. The old
+    // comment said the choice was free -- the sharing was the problem, not the choice.
     std::unique_ptr<char[]> buf(new char[str.size() * 2 + 1]);
     SqlConnection::Lock guard(m_pQueryConnections[0]);
     guard->escape_string(buf.get(), str.c_str(), str.size());
@@ -324,9 +330,10 @@ bool Database::PExecuteLog(const char* format, ...)
     {
         time_t curr;
         time(&curr);                                        // get current time_t value
-        std::tm local = safe_localtime(curr);                        // dereference and assign
+        const std::tm local = safe_localtime(curr);
         char fName[128];
-        sprintf(fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
+        snprintf(fName, sizeof(fName), "%04d-%02d-%02d_logSQL.sql",
+                 local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
 
         FILE* log_file;
         std::string logsDir_fname = m_logsDir + fName;
@@ -462,6 +469,48 @@ bool Database::DirectPExecute(const char* format, ...)
     return DirectExecute(szQuery);
 }
 
+bool Database::AsyncQuery(std::function<void(QueryResult*)> callback, const char* sql)
+{
+    if (!sql || !m_pResultQueue)
+    {
+        return false;
+    }
+
+    return m_threadBody->Delay(new SqlQuery(sql, new MaNGOS::QueryCallback(std::move(callback)), m_pResultQueue));
+}
+
+bool Database::AsyncPQuery(std::function<void(QueryResult*)> callback, const char* format, ...)
+{
+    if (!format)
+    {
+        return false;
+    }
+
+    va_list ap;
+    char szQuery[MAX_QUERY_LEN];
+    va_start(ap, format);
+    int res = vsnprintf(szQuery, MAX_QUERY_LEN, format, ap);
+    va_end(ap);
+
+    if (res == -1)
+    {
+        sLog.outError("SQL Query truncated (and not executed) for format: %s", format);
+        return false;
+    }
+
+    return AsyncQuery(std::move(callback), szQuery);
+}
+
+bool Database::DelayQueryHolder(std::function<void(QueryResult*, SqlQueryHolder*)> callback, SqlQueryHolder* holder)
+{
+    if (!holder || !m_pResultQueue)
+    {
+        return false;
+    }
+
+    return holder->Execute(new MaNGOS::QueryHolderCallback(std::move(callback), holder), m_threadBody, m_pResultQueue);
+}
+
 bool Database::BeginTransaction()
 {
     if (!m_pAsyncConn || !m_TransStorage)
@@ -518,6 +567,52 @@ bool Database::CommitTransactionDirect()
     delete pTrans;
 
     return true;
+}
+
+bool Database::CommitTransactionChecked()
+{
+    if (!m_pAsyncConn)
+    {
+        return false;
+    }
+
+    if (!(*m_TransStorage)->get())
+    {
+        return false;
+    }
+
+    // Async not available (startup, or -t): run it here and return the REAL result.
+    // Not CommitTransactionDirect(), which discards that bool. detach() clears the TSS
+    // slot so the next BeginTransaction() does not trip the assert in TransHelper::init().
+    if (!m_bAllowAsyncTransactions)
+    {
+        SqlTransaction* pTrans = (*m_TransStorage)->detach();
+        bool res = pTrans->Execute(m_pAsyncConn);
+        delete pTrans;
+        return res;
+    }
+
+    // If the delay thread has stopped, enqueuing a blocking transaction onto it would
+    // block this caller forever: nothing will drain the queue or fulfil the promise.
+    // Checked BEFORE the promise is built -- abandoning a stack-frame promise while a
+    // queued op still holds its address is a use-after-free, so a timeout is not an
+    // option. The residual race is closed by shutdown ordering: the world thread is torn
+    // down before the delay thread, so no world caller is here while it stops.
+    if (!m_threadBody->IsRunning())
+    {
+        SqlTransaction* t = (*m_TransStorage)->detach();
+        bool r = t->Execute(m_pAsyncConn);
+        delete t;
+        return r;
+    }
+
+    // Queued like every other write, so ordering holds, then blocked on the result. The
+    // promise and future live on THIS parked frame, which is why they outlive the op.
+    std::promise<bool> prom;
+    std::future<bool> fut = prom.get_future();
+    SqlTransaction* pTrans = (*m_TransStorage)->detach();
+    m_threadBody->Delay(new SqlTransactionResultSignal(pTrans, &prom));
+    return fut.get();
 }
 
 bool Database::RollbackTransaction()

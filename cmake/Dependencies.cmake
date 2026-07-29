@@ -21,10 +21,15 @@
 # Which vendored dependencies this fork builds.
 #
 # `dep` is a submodule and is never modified here, so the choice cannot live in
-# its own CMakeLists: that file still lists g3dlite, which this fork replaced
-# with src/shared/Geometry and no longer links. Adding the subdirectories from
-# the outside is how the selection is attached without touching the submodule --
-# the same mechanism as cmake/SubmoduleCompat.cmake.
+# its own CMakeLists. Adding the subdirectories from the outside is how the
+# selection is attached without touching the submodule -- the same mechanism as
+# cmake/SubmoduleCompat.cmake.
+#
+# It is also what decides the GATING. The submodule builds StormLib only when
+# BUILD_TOOLS is on, which was true when the extractor was an optional extra; it
+# is not, because the extractor is what produces the tiles the server reads. A
+# core without this file inherits the submodule's answer and fails to compile the
+# MPQ reader.
 #
 # Add a dependency here rather than in dep/CMakeLists.txt. Anything left out is
 # simply never configured, so a library the fork has dropped costs no build time

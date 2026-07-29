@@ -65,7 +65,6 @@
 #include "ElunaConfig.h"
 #endif /* ENABLE_ELUNA */
 
-INSTANTIATE_SINGLETON_1(MapManager);
 
 MapManager::MapManager()
     : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_UINT32_INTERVAL_GRIDCLEAN)), m_lock()

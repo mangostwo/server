@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <unordered_set>
+#include <string>
 #include "LineOfSightExemptions.h"
 
 #include <cstdlib>

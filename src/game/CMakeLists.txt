@@ -161,9 +161,9 @@ target_include_directories(game
 target_compile_definitions(game
     PUBLIC
         $<$<BOOL:${SOAP}>:ENABLE_SOAP>
-        # One guard for the old coordinate-owning spatial API, which exists only so the
-        # unmodifiable script submodules compile. See Object/ScriptApiCompat.inl.
-        $<$<OR:$<BOOL:${SCRIPT_LIB_SD3}>,$<BOOL:${SCRIPT_LIB_ELUNA}>>:MANGOS_SCRIPT_COMPAT>
+        # The old coordinate-owning spatial API. SD3 no longer needs it -- it calls
+        # Where()/Place() -- so this is Eluna's alone. See Object/ScriptApiCompat.inl.
+        $<$<BOOL:${SCRIPT_LIB_ELUNA}>:MANGOS_SCRIPT_COMPAT>
         $<$<BOOL:${SCRIPT_LIB_SD3}>:ENABLE_SD3>
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:ENABLE_ELUNA ELUNA_EXPANSION=2 ELUNA_MANGOS>
 )

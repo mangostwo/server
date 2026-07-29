@@ -28,6 +28,7 @@
  *        Same `Spell` class; no behaviour change.
  */
 
+#include <cmath>
 #include "Platform/Define.h"
 #include "Common/TimeConstants.h"
 #include <algorithm>

@@ -25,7 +25,6 @@
 #ifndef LOCKEDQUEUE_H
 #define LOCKEDQUEUE_H
 
-#include <queue>
 #include <deque>
 #include <mutex>
 

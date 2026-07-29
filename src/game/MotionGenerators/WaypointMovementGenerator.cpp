@@ -600,7 +600,6 @@ bool WaypointMovementGenerator::GetResetPosition(Unit& owner, float& x, float& y
         return false;
     }
 
-    // Not const: GetCombatStartPosition is a non-const accessor on Creature.
     Creature& creature = static_cast<Creature&>(owner);
 
     // Prefer resuming from the point where combat pulled the creature off its path rather

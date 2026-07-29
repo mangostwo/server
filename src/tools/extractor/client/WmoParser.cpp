@@ -1,3 +1,4 @@
+#include <string>
 #include "WmoParser.hpp"
 #include "ChunkReaders.hpp"
 

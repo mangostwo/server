@@ -22,6 +22,8 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <memory>
+#include <vector>
 #include "GameObjectModel.h"
 
 

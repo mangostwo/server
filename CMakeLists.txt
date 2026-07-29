@@ -24,6 +24,15 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 # =============================================================================
 project(MaNGOS VERSION 0.22.0 LANGUAGES C CXX)
 
+# Build artefacts never land in the source tree. This is a test, not hygiene:
+# sources here still carry relative includes like "../../dep/foo.h", and an
+# in-source build tree can make those resolve by accident.
+if(CMAKE_BINARY_DIR STREQUAL CMAKE_SOURCE_DIR)
+    message(FATAL_ERROR
+        "In-source builds are not supported. Configure from a separate build "
+        "directory, e.g.  cmake -S . -B ../build")
+endif()
+
 # Use modern CMake policies
 cmake_policy(SET CMP0028 NEW)
 cmake_policy(SET CMP0048 NEW)
@@ -54,7 +63,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Define available cmake options below
 option(BUILD_MANGOSD        "Build the main server"                         ON)
 option(BUILD_REALMD         "Build the login server"                        ON)
-option(BUILD_TOOLS          "Build the map/vmap/mmap extractors"            ON)
+option(BUILD_TOOLS          "Build the client-data extractor"               ON)
 option(USE_STORMLIB         "Use StormLib for reading MPQs"                 ON)
 option(SCRIPT_LIB_ELUNA     "Compile with support for Eluna scripts"        ON)
 option(SCRIPT_LIB_SD3       "Compile with support for ScriptDev3 scripts"   ON)
@@ -62,6 +71,7 @@ option(SOAP                 "Enable remote access via SOAP"                 OFF)
 option(PCH                  "Enable precompiled headers"                    ON)
 option(WITH_IO_URING        "Use the io_uring network backend (Linux, needs liburing)" OFF)
 option(WITH_TESTS           "Build the unit tests"                          OFF)
+option(WITH_NET_TESTS       "Build the socket tests (slow; never in CI)"    OFF)
 option(DEBUG                "Enable debug build (only on non IDEs)"         OFF)
 option(WITHOUT_GIT          "Disable Git revision detection"                OFF)
 #==================================================================================
@@ -73,13 +83,16 @@ message(
     CMAKE_INSTALL_PREFIX    Path where the server should be installed to
     BUILD_MANGOSD           Build the main server
     BUILD_REALMD            Build the login server
-    BUILD_TOOLS             Build the map/vmap/mmap extractors
+    BUILD_TOOLS             Build the client-data extractor
     USE_STORMLIB            Use StormLib for reading MPQs
     SOAP                    Enable remote access via SOAP
     PCH                     Enable use of precompiled headers
     WITH_IO_URING           Use the io_uring network backend instead of epoll (Linux only,
                             requires liburing headers; falls back to epoll if absent)
     WITH_TESTS              Build the unit tests (target: mangos_tests)
+    WITH_NET_TESTS          Build the socket tests as well. Disjoint from WITH_TESTS,
+                            off by default, and deliberately not run in CI: they bind
+                            real sockets and dominate the suite's wall-clock time.
     DEBUG                   Debug build, only for systems without IDE (Linux, *BSD)
     WITHOUT_GIT             Disable Git revision detection
    Scripting engines:
@@ -255,9 +268,9 @@ endif()
 # lists, which still includes g3dlite. See cmake/Dependencies.cmake.
 include(Dependencies)
 
-if(WITH_TESTS)
-  set(BUILD_TESTING ON)
-  enable_testing()
+if(WITH_TESTS OR WITH_NET_TESTS)
+    set(BUILD_TESTING ON)
+    enable_testing()
 endif()
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/CMakeLists.txt")

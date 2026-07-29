@@ -1,10 +1,10 @@
 How to start:
-To start the docker container use the command "docker-compose up" inside the dockercontainer folder
+To start the docker container use the command "docker-compose up" inside the extra/docker folder
 If you need to rebuild the images use "docker-compose build"
 
 Now to setup the server make sure you have the correct configuration and the data folder in the correct location:
-The configuration should be place here "../../etc" from the dockercontainer folder
-The data folder should be place here "../../data" from the dockercontainer folder
+The configuration should be place here "../../etc" from the extra/docker folder
+The data folder should be place here "../../data" from the extra/docker folder
 Note: those paths can be change inside the docker-compose.yml file
 
 Configutation:

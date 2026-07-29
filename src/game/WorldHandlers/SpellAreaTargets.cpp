@@ -28,6 +28,8 @@
  *        Same `Spell` class; no behaviour change.
  */
 
+#include "Geometry/Placement.h"
+#include "Utilities/MathDefines.h"
 #include <vector>
 #include <queue>
 #include "Spell.h"
@@ -244,7 +246,7 @@ void Spell::FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPu
     const float r2 = radius * radius;
     const bool cone = IsConePush(pushType);
     const float half = ConeHalfArc(pushType);
-    const float ref = (pushType == PUSH_IN_BACK) ? MapManager::NormalizeOrientation(lo + M_PI_F) : lo;
+    const float ref = (pushType == PUSH_IN_BACK) ? Geometry::Placement::NormalizeOrientation(lo + M_PI_F) : lo;
 
     const auto consider = [&](Unit* unit)
     {
@@ -271,7 +273,7 @@ void Spell::FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPu
         if (cone)
         {
             float diff = std::atan2(dy, dx) - ref;
-            diff = MapManager::NormalizeOrientation(diff);
+            diff = Geometry::Placement::NormalizeOrientation(diff);
             if (diff > M_PI_F)
             {
                 diff -= 2 * M_PI_F;

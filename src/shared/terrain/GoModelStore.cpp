@@ -1,3 +1,6 @@
+#include <memory>
+#include <string>
+#include <mutex>
 #include "terrain/GoModelStore.hpp"
 #include "terrain/TileSerializer.hpp"
 

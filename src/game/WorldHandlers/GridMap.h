@@ -25,9 +25,9 @@
 #ifndef MANGOS_GRIDMAP_H
 #define MANGOS_GRIDMAP_H
 
+#include <unordered_map>
 #include <mutex>
 #include <atomic>
-#include "Utilities/UnorderedMapSet.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "DBCStructure.h"
@@ -255,7 +255,7 @@ class TerrainInfo : public Referencable<AtomicLong>
 // class for managing TerrainData object and all sort of geometry querying operations
 class TerrainManager : public MaNGOS::Singleton<TerrainManager>
 {
-        typedef UNORDERED_MAP<uint32,  TerrainInfo*> TerrainDataMap;
+        typedef std::unordered_map<uint32,  TerrainInfo*> TerrainDataMap;
         friend class MaNGOS::Singleton<TerrainManager>;
 
     public:

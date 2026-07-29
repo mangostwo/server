@@ -1,3 +1,6 @@
+#include <memory>
+#include <string>
+#include <vector>
 #include "terrain/TileSerializer.hpp"
 #include "terrain/CollisionModel.hpp"
 #include "terrain/WmoModel.hpp"

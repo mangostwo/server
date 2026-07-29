@@ -1,12 +1,17 @@
+#include <string>
 #include "ExtractorConsole.hpp"
 
 #if defined(_WIN32)
 #include <windows.h>
 #include <shlobj.h>
+#include <commdlg.h>
 #endif
 
 #include <chrono>
 #include <cstdio>
+#include <filesystem>
+#include <sstream>
+#include <system_error>
 #include <thread>
 
 namespace world::terrain
@@ -25,7 +30,8 @@ namespace world::terrain
             SLOT_PROGRESS = 1,
             SLOT_ELAPSED = 2,
             SLOT_SOURCE = 3,
-            SLOT_DEST = 4
+            SLOT_DEST = 4,
+            SLOT_LOCALE = 5
         };
 
         std::string Trim(const std::string& in)
@@ -94,16 +100,46 @@ namespace world::terrain
         }
         return picked;
     }
+    bool ExtractorConsole::BrowseForFile(const std::string& title, const char* filter,
+                                         std::string& path)
+    {
+        char chosen[MAX_PATH] = {0};
+
+        OPENFILENAMEA ofn{};
+        ofn.lStructSize = sizeof(ofn);
+        ofn.hwndOwner = GetConsoleWindow();
+        ofn.lpstrFilter = filter;
+        ofn.lpstrFile = chosen;
+        ofn.nMaxFile = sizeof(chosen);
+        ofn.lpstrTitle = title.c_str();
+        // NOCHANGEDIR matters: the tool resolves its own defaults relative to where it
+        // was started, and a dialog that silently moves the working directory would
+        // change what those resolve to.
+        ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+
+        if (!GetOpenFileNameA(&ofn))
+        {
+            return false;
+        }
+        path = ToUnixPath(chosen);
+        return true;
+    }
 #else
     bool ExtractorConsole::BrowseForFolder(const std::string&, std::string&)
     {
         return false;
     }
+
+    bool ExtractorConsole::BrowseForFile(const std::string&, const char*, std::string&)
+    {
+        return false;
+    }
 #endif
 
-    bool ExtractorConsole::Start(const std::string& src, const std::string& dest)
+    bool ExtractorConsole::Start(const std::string& src, const std::string& dest,
+                                 const std::string& client)
     {
-        m_active = Ui().Start("MaNGOS Extractor", "3.3.5a client data");
+        m_active = Ui().Start("MaNGOS Extractor", client + " client data");
         if (!m_active)
         {
             return false;
@@ -119,11 +155,41 @@ namespace world::terrain
 
     void ExtractorConsole::Stop()
     {
-        if (m_active)
+        if (!m_active)
         {
-            Ui().Stop();
-            m_active = false;
+            return;
         }
+
+        // A console that closes on completion takes the only report of what happened
+        // with it -- including the error, which is when it matters most. Hold until the
+        // reader dismisses it, but only if a menu was ever shown: driven from a script
+        // or a command line, nothing should ever block.
+        if (m_interactive)
+        {
+            Ui().PushLog("Finished. Type q and press enter to close.", Style::STYLE_WARN);
+            Ui().SetPrompt("q> ");
+            Ui().SetHint("q closes this window");
+            Draw();
+
+            std::string line;
+            while (true)
+            {
+                if (!Ui().PollInput(line))
+                {
+                    Ui().Render();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(15));
+                    continue;
+                }
+                const std::string cmd = Trim(line);
+                if (cmd == "q" || cmd == "quit" || cmd == "exit")
+                {
+                    break;
+                }
+            }
+        }
+
+        Ui().Stop();
+        m_active = false;
     }
 
     bool ExtractorConsole::Active() const { return m_active; }
@@ -257,38 +323,93 @@ namespace world::terrain
         Draw();
     }
 
-    bool ExtractorConsole::RunMenu(Choice& out)
+    void ExtractorConsole::SetLocale(const std::string& locale)
+    {
+        if (m_active)
+        {
+            Ui().SetStatus(SLOT_LOCALE, "locale",
+                           locale.empty() ? "none (single-locale client)" : locale,
+                           Style::STYLE_DETAIL);
+            Draw();
+        }
+    }
+
+    namespace
+    {
+        /// Whether a previous run already produced this component.
+        bool AlreadyBaked(const std::string& dir)
+        {
+            std::error_code ec;
+            auto it = std::filesystem::directory_iterator(dir, ec);
+            return !ec && it != std::filesystem::directory_iterator();
+        }
+    }
+
+    bool ExtractorConsole::RunMenu(Choice& out, const std::string& dest)
     {
         if (!m_active)
         {
             return true;  // no terminal: whatever the command line asked for stands
         }
 
+        // The menu is the documentation. Someone runs this once, on a machine they do
+        // not develop on, and the thing they need to know is not what the words mean but
+        // WHAT DEPENDS ON WHAT -- baking nav without tiles produces nothing and says so
+        // far too late.
+        //
+        // Laid out as a fixed 66-column block and centred in whatever terminal it lands
+        // in, so the columns stay aligned instead of drifting with the window.
+        // Hard left, not centred: a menu is read down its left edge.
+        const std::string pad("  ");
+
+        auto row = [&](const char* text, Style style)
+        {
+            Ui().PushLog(*text ? pad + text : std::string(), style);
+        };
+
         auto showMenu = [&]()
         {
-            Ui().PushLog("", Style::STYLE_NORMAL);
-            Ui().PushLog("  What should be baked?", Style::STYLE_ACCENT);
-            Ui().PushLog("", Style::STYLE_NORMAL);
-            Ui().PushLog("    1   everything          dbc + tiles + gomodels + nav",
-                         Style::STYLE_NORMAL);
-            Ui().PushLog("    2   dbc                 the raw DBC set the server loads",
-                         Style::STYLE_NORMAL);
-            Ui().PushLog("    3   tiles               fused terrain + static collision",
-                         Style::STYLE_NORMAL);
-            Ui().PushLog("    4   gomodels            door, lift and bridge collision",
-                         Style::STYLE_NORMAL);
-            Ui().PushLog("    5   nav                 the navmesh, from the baked tiles",
-                         Style::STYLE_NORMAL);
-            Ui().PushLog("", Style::STYLE_NORMAL);
-            Ui().PushLog("    src [path]          client Data dir; no path opens a browser",
-                         Style::STYLE_DETAIL);
-            Ui().PushLog("    dest [path]         output dir;      no path opens a browser",
-                         Style::STYLE_DETAIL);
-            Ui().PushLog("    map <id>            restrict the bake to one map",
-                         Style::STYLE_DETAIL);
-            Ui().PushLog("    q                   quit without baking",
-                         Style::STYLE_DETAIL);
-            Ui().PushLog("", Style::STYLE_NORMAL);
+            row("Entry                  Explanation", Style::STYLE_ACCENT);
+            row("1                      Extract all", Style::STYLE_NORMAL);
+            row("2                      Extract DBC/DB2", Style::STYLE_NORMAL);
+            row("3                      Extract gomodels (doors, lifts, ship hulls)",
+                Style::STYLE_NORMAL);
+            row("4                      Extract tiles (ground, water, area, collision)",
+                Style::STYLE_NORMAL);
+            row("5                      Extract transports (needs 3)", Style::STYLE_NORMAL);
+            row("6                      Extract navmesh (needs 4, takes hours)",
+                Style::STYLE_NORMAL);
+            row("src [path, optional]   Set source path (mpq directories)",
+                Style::STYLE_DETAIL);
+            row("dest [path, optional]  Set destination path", Style::STYLE_DETAIL);
+            row("map <id>               Restrict to one map id", Style::STYLE_DETAIL);
+            row("vessels [path, opt.]   Set vessels.txt (which hull -> which map)",
+                Style::STYLE_DETAIL);
+            row("offmesh [path, opt.]   Set offmesh.txt (hand-made navmesh links)",
+                Style::STYLE_DETAIL);
+            row("?                      Show this list", Style::STYLE_DETAIL);
+            row("q                      Quit", Style::STYLE_DETAIL);
+            row("Type any entry above at the bake> prompt and press enter.",
+                Style::STYLE_WARN);
+        };
+
+        auto setFile = [&](const char* what, const char* filter,
+                           const std::string& typed, std::string& slot)
+        {
+            std::string chosen = typed;
+            if (chosen.empty())
+            {
+                if (!BrowseForFile(std::string("Choose ") + what, filter, chosen))
+                {
+                    Ui().PushLog("  cancelled -- or no file dialog on this platform; "
+                                 "type the path instead", Style::STYLE_WARN);
+                    Draw();
+                    return;
+                }
+            }
+            slot = ToUnixPath(chosen);
+            Ui().PushLog(std::string("  ") + what + " = " + slot, Style::STYLE_SUCCESS);
+            Draw();
         };
 
         auto setPath = [&](const char* what, const std::string& typed, std::string& slot)
@@ -312,9 +433,10 @@ namespace world::terrain
             Draw();
         };
 
+        m_interactive = true;
         showMenu();
         Ui().SetPrompt("bake> ");
-        Ui().SetHint("pick a number, or q to leave");
+        Ui().SetHint("a number or a word from the menu, then Enter");
         Draw();
 
         std::string line;
@@ -358,6 +480,20 @@ namespace world::terrain
                         out.dest);
                 continue;
             }
+            if (cmd == "vessels" || cmd.rfind("vessels ", 0) == 0)
+            {
+                setFile("vessels.txt", "Text files\0*.txt\0All files\0*.*\0\0",
+                        cmd.size() > 8 ? Trim(cmd.substr(8)) : std::string(),
+                        out.vesselList);
+                continue;
+            }
+            if (cmd == "offmesh" || cmd.rfind("offmesh ", 0) == 0)
+            {
+                setFile("offmesh.txt", "Text files\0*.txt\0All files\0*.*\0\0",
+                        cmd.size() > 8 ? Trim(cmd.substr(8)) : std::string(),
+                        out.offMesh);
+                continue;
+            }
             if (cmd == "?" || cmd == "help")
             {
                 showMenu();
@@ -365,14 +501,84 @@ namespace world::terrain
                 continue;
             }
 
-            if (cmd == "1") { out.dbc = out.tiles = out.goModels = out.nav = true; }
-            else if (cmd == "2") { out.dbc = true; }
-            else if (cmd == "3") { out.tiles = true; }
-            else if (cmd == "4") { out.goModels = true; }
-            else if (cmd == "5") { out.nav = true; }
-            else
+            // "2 4 6" is one answer, not three. The bake order is fixed by dependency
+            // and not by the order they were typed, so this only collects flags.
+            //
+            // A rejected answer must leave nothing behind, or "6" then "4 6" would bake
+            // the flags of both attempts. The paths and the map filter are not part of
+            // the answer, so they survive the reset.
+            const int keptFilter = out.mapFilter;
+            const std::string keptSrc = out.src;
+            const std::string keptDest = out.dest;
+
+            bool any = false, bad = false;
+            std::istringstream picks(cmd);
+            std::string pick;
+            while (picks >> pick)
             {
-                Ui().PushLog("  not one of the choices", Style::STYLE_WARN);
+                if (pick == "1")
+                {
+                    out.dbc = out.goModels = out.tiles = out.vessels = out.nav = true;
+                }
+                else if (pick == "2") { out.dbc = true; }
+                else if (pick == "3") { out.goModels = true; }
+                else if (pick == "4") { out.tiles = true; }
+                else if (pick == "5") { out.vessels = true; }
+                else if (pick == "6") { out.nav = true; }
+                else
+                {
+                    Ui().PushLog("  \"" + pick + "\" is not one of the choices",
+                                 Style::STYLE_WARN);
+                    bad = true;
+                    break;
+                }
+                any = true;
+            }
+
+            if (bad || !any)
+            {
+                if (!any && !bad)
+                {
+                    Ui().PushLog("  nothing chosen -- type a number, or q to leave",
+                                 Style::STYLE_WARN);
+                }
+                out = Choice();          // a rejected answer leaves nothing behind
+                out.mapFilter = keptFilter;
+                out.src = keptSrc;
+                out.dest = keptDest;
+                Draw();
+                continue;
+            }
+
+            // REFUSE AN IMPOSSIBLE ORDER RATHER THAN BAKE HALF OF IT. nav reads tiles and
+            // tiles read gomodels, so asking for the later one alone produces an empty
+            // result that looks like a successful run. A previous bake counts: what is
+            // being checked is whether the input will EXIST, not whether it was ticked.
+            struct Need { bool wanted; bool feeds; const char* who; const char* needs;
+                          const char* dir; };
+            const Need needs[] = {
+                { out.nav,     out.tiles,    "nav",   "tiles (4)",    "/tiles"    },
+                { out.tiles,   out.goModels, "tiles", "gomodels (3)", "/gomodels" },
+                { out.vessels, out.goModels, "trans", "gomodels (3)", "/gomodels" },
+            };
+
+            bool impossible = false;
+            for (const Need& n : needs)
+            {
+                if (n.wanted && !n.feeds && !AlreadyBaked(dest + n.dir))
+                {
+                    Ui().PushLog(std::string("  ") + n.who + " reads " + n.needs +
+                                 " and there is none baked yet -- add it, or pick 1",
+                                 Style::STYLE_ERROR);
+                    impossible = true;
+                }
+            }
+            if (impossible)
+            {
+                out = Choice();
+                out.mapFilter = keptFilter;
+                out.src = keptSrc;
+                out.dest = keptDest;
                 Draw();
                 continue;
             }

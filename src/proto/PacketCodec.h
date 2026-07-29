@@ -1,6 +1,6 @@
 /**
  * MaNGOS is a full featured server for World of Warcraft, supporting
- * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
+ * the following clients: 1.12.x, 2.4.3, 3.3.5a, 3.3.5aa and 5.4.8
  *
  * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
  *
@@ -27,7 +27,7 @@
 
 #include <utility>
 #include "Platform/Define.h"
-#include "Utilities/WorldPacket.h"
+#include "WorldPacket.h"
 
 #include <cstddef>
 #include <functional>
@@ -36,9 +36,11 @@
 namespace proto
 {
     /// Fixed size of the client -> server header: uint16 size + uint32 opcode.
+    /// Source of truth: WorldSocket.cpp handle_input_header() (ClientPktHeader).
     static const size_t CLIENT_HEADER_SIZE = 6;
 
-    /// Largest packet the 3.3.5a client is ever allowed to send, payload included.
+    /// Largest packet the 3.3.5a client is ever allowed to send, payload
+    /// included. Source: WorldSocket.cpp:654 (`header.size > 10240`).
     static const uint32 MAX_CLIENT_PACKET_SIZE = 10240;
 
     /**
@@ -99,7 +101,8 @@ namespace proto
              *
              * The size field counts the opcode, and packets over 0x7FFF carry a
              * three-byte size with the top bit of the first byte set -- which is why
-             * the outgoing header is 4 or 5 bytes and not a fixed struct.
+             * the outgoing header is 4 or 5 bytes and not a fixed struct. Mirrors
+             * WorldSocket.cpp's ServerPktHeader verbatim.
              *
              * @param packet    Packet to serialise.
              * @param encryptor Header encryption hook; may be empty before the

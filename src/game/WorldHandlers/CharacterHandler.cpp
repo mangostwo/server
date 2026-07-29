@@ -39,6 +39,7 @@
  * appearance customization, and starting location setup.
  */
 
+#include "Database/SqlOperations.h"
 #include "Common/ServerDefines.h"
 #include "Platform/Define.h"
 #include <string>
@@ -58,7 +59,6 @@
 #include "UpdateMask.h"
 #include "PlayerRegistry.h"
 #include "Group.h"
-#include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
 #include "SocialMgr.h"
 #include "Util.h"
@@ -222,7 +222,11 @@ void WorldSession::HandleCharEnum(QueryResult* result)
 void WorldSession::HandleCharEnumOpcode(WorldPacket & /*recv_data*/)
 {
     /// get all the data necessary for loading all characters (along with their pets) on the account
-    CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
+    uint32 accountId = GetAccountId();
+    CharacterDatabase.AsyncPQuery([accountId](QueryResult* result)
+                                  {
+                                      chrHandler.HandleCharEnumCallback(result, accountId);
+                                  },
                                   !sWorld.getConfig(CONFIG_BOOL_DECLINED_NAMES_USED) ?
                                   //   ------- Query Without Declined Names --------
                                   //           0               1                2                3                 4                  5                       6                        7
@@ -686,7 +690,10 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
         return;
     }
 
-    CharacterDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
+    CharacterDatabase.DelayQueryHolder([](QueryResult* result, SqlQueryHolder* h)
+                                       {
+                                           chrHandler.HandlePlayerLoginCallback(result, h);
+                                       }, holder);
 }
 
 /**

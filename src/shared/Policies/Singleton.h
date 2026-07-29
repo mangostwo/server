@@ -2,7 +2,7 @@
  * MaNGOS is a full featured server for World of Warcraft, supporting
  * the following clients: 1.12.x, 2.4.3, 3.3.5a, 4.3.4a and 5.4.8
  *
- * Copyright (C) 2005-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2005-2026 MaNGOS <https://www.getmangos.eu>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,39 +28,41 @@
 namespace MaNGOS
 {
     /**
-     * @brief Lazily constructed, process-wide singleton.
+     * @brief Lazily-constructed process-wide singleton.
      *
-     * Derive and befriend, then reach the instance through the usual accessor:
+     * Derive and befriend, then reach the instance through the usual accessor macro:
      * @code
      *     class World : public MaNGOS::Singleton<World>
      *     {
-     *         friend class MaNGOS::Singleton<World>;
-     *         World();      // may stay private
-     *         ~World();     // likewise
+     *             friend class MaNGOS::Singleton<World>;
+     *             World();      // may stay private
+     *             ~World();     // likewise
      *     };
      *     #define sWorld MaNGOS::Singleton<World>::Instance()
      * @endcode
      *
-     * Befriending the template is what lets the constructor and destructor stay
-     * private: Instance() is then the only thing that can build or destroy the
-     * object, so no caller can quietly make a second one or delete the live one.
-     *
-     * This replaces four headers of policy machinery -- CreationPolicy,
-     * ThreadingModel, ObjectLifeTime and the old Singleton -- with a
-     * function-local static. C++11 onwards guarantees such a static is
-     * initialised exactly once, with concurrent callers blocking until the winner
-     * finishes ([stmt.dcl]/4). The double-checked locking, the explicit
-     * instantiation macros and the hand-rolled lifetime tracking were all paying
-     * for something the language now provides, and getting it subtly wrong along
-     * the way.
-     *
-     * Destruction runs at exit, in reverse order of first use.
+     * @note This replaces a hand-rolled double-checked lock over a threading-model
+     * policy. That version was unsound: it read a plain @c T* outside the lock, so a
+     * thread could observe a non-null pointer to a still-constructing object. Making
+     * the mutex recursive (as two of the singletons did) made it worse rather than
+     * better — had a constructor ever re-entered Instance(), the inner call would
+     * have re-acquired the lock, still seen a null pointer, and built a *second*
+     * instance for the outer call to overwrite. A function-local static has none of
+     * these problems, needs no mutex, and diagnoses recursive initialisation instead
+     * of quietly corrupting.
      */
     template<typename T>
     class Singleton
     {
         public:
 
+            /**
+             * @brief Get the singleton instance, constructing it on first use.
+             *
+             * Initialisation is thread-safe and happens exactly once: concurrent
+             * callers block until the winner finishes ([stmt.dcl]/4). Destruction runs
+             * at exit, in reverse order of first use.
+             */
             static T& Instance()
             {
                 static T instance;
@@ -76,14 +78,5 @@ namespace MaNGOS
             ~Singleton() = default;
     };
 }
-
-// Compatibility shims. A Meyers singleton needs no explicit instantiation, so the
-// former INSTANTIATE_SINGLETON_* macros expand to nothing. They survive only so the
-// historical `INSTANTIATE_SINGLETON_1(Foo);` lines scattered through the .cpp files
-// keep compiling; new code must not use them.
-#define INSTANTIATE_SINGLETON_1(TYPE)
-#define INSTANTIATE_SINGLETON_2(TYPE, THREADINGMODEL)
-#define INSTANTIATE_SINGLETON_3(TYPE, THREADINGMODEL, CREATIONPOLICY)
-#define INSTANTIATE_SINGLETON_4(TYPE, THREADINGMODEL, CREATIONPOLICY, OBJECTLIFETIME)
 
 #endif

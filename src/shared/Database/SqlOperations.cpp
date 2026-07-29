@@ -42,17 +42,12 @@
 #include "SqlOperations.h"
 #include "SqlDelayThread.h"
 #include "DatabaseEnv.h"
-#include "DatabaseImpl.h"
 
-/**
- * @def LOCK_DB_CONN
- * @brief RAII lock macro for database connections
- * @param conn The SqlConnection to lock
- *
- * Creates a SqlConnection::Lock guard that ensures thread-safe
- * access to the database connection during operation execution.
- */
-#define LOCK_DB_CONN(conn) SqlConnection::Lock guard(conn)
+bool SqlOperation::Execute(SqlConnection* conn)
+{
+    SqlConnection::Lock guard(conn);
+    return ExecuteLocked(conn);
+}
 
 /// ---- ASYNC STATEMENTS / TRANSACTIONS ----
 
@@ -65,10 +60,9 @@
  * The connection is locked during execution to ensure thread safety.
  * This is the simplest form of SQL operation with no parameters or results.
  */
-bool SqlPlainRequest::Execute(SqlConnection* conn)
+bool SqlPlainRequest::ExecuteLocked(SqlConnection* conn)
 {
     /// just do it
-    LOCK_DB_CONN(conn);
     return conn->Execute(m_sql);
 }
 
@@ -102,25 +96,29 @@ SqlTransaction::~SqlTransaction()
  *
  * @note Empty transactions return true without doing anything.
  */
-bool SqlTransaction::Execute(SqlConnection* conn)
+bool SqlTransaction::ExecuteLocked(SqlConnection* conn)
 {
     if (m_queue.empty())
     {
         return true;
     }
 
-    LOCK_DB_CONN(conn);
-
-    conn->BeginTransaction();
+    if (!conn->BeginTransaction())
+    {
+        return false;
+    }
 
     const int nItems = m_queue.size();
     for (int i = 0; i < nItems; ++i)
     {
         SqlOperation* pStmt = m_queue[i];
 
-        if (!pStmt->Execute(conn))
+        if (!pStmt->ExecuteLocked(conn))
         {
-            conn->RollbackTransaction();
+            if (!conn->RollbackTransaction())
+            {
+                sLog.outError("SqlTransaction: rollback failed");
+            }
             return false;
         }
     }
@@ -160,9 +158,8 @@ SqlPreparedRequest::~SqlPreparedRequest()
  * given connection. Prepared statements are more efficient than plain
  * SQL for repeated execution with different parameters.
  */
-bool SqlPreparedRequest::Execute(SqlConnection* conn)
+bool SqlPreparedRequest::ExecuteLocked(SqlConnection* conn)
 {
-    LOCK_DB_CONN(conn);
     return conn->ExecuteStmt(m_nIndex, *m_param);
 }
 
@@ -179,14 +176,13 @@ bool SqlPreparedRequest::Execute(SqlConnection* conn)
  *
  * @note The callback and result queue must be valid for this to succeed.
  */
-bool SqlQuery::Execute(SqlConnection* conn)
+bool SqlQuery::ExecuteLocked(SqlConnection* conn)
 {
     if (!m_callback || !m_queue)
     {
         return false;
     }
 
-    LOCK_DB_CONN(conn);
     /// execute the query and store the result in the callback
     m_callback->SetResult(conn->Query(m_sql));
     /// add the callback to the sql result queue of the thread it originated from
@@ -407,14 +403,13 @@ void SqlQueryHolder::SetSize(size_t size)
  *
  * @note This is called internally by SqlDelayThread, not directly by users.
  */
-bool SqlQueryHolderEx::Execute(SqlConnection* conn)
+bool SqlQueryHolderEx::ExecuteLocked(SqlConnection* conn)
 {
     if (!m_holder || !m_callback || !m_queue)
     {
         return false;
     }
 
-    LOCK_DB_CONN(conn);
     /// we can do this, we are friends
     std::vector<SqlQueryHolder::SqlResultPair>& queries = m_holder->m_queries;
     for (size_t i = 0; i < queries.size(); ++i)
@@ -431,4 +426,34 @@ bool SqlQueryHolderEx::Execute(SqlConnection* conn)
     m_queue->add(m_callback);
 
     return true;
+}
+
+bool SqlTransactionResultSignal::ExecuteLocked(SqlConnection* conn)
+{
+    // The promise must be fulfilled on EVERY path -- a missed set_value() hangs the
+    // blocked caller forever -- and the wrapped transaction must always be freed. So an
+    // exception from Execute() is reported and swallowed rather than rethrown: the delay
+    // thread has to survive it, and an unset promise would deadlock the caller anyway.
+    bool ok = false;
+    try
+    {
+        ok = m_trans->ExecuteLocked(conn);
+    }
+    catch (std::exception& e)
+    {
+        sLog.outError("CommitTransactionChecked: exception during transaction execute: %s", e.what());
+        ok = false;
+    }
+    catch (...)
+    {
+        sLog.outError("CommitTransactionChecked: unknown exception during transaction execute");
+        ok = false;
+    }
+
+    delete m_trans;
+    m_trans = NULL;
+    // Set BEFORE the worker deletes this op: the caller's promise lives on its still
+    // blocked stack frame, which is what makes the hand-off race-free.
+    m_result->set_value(ok);
+    return ok;
 }

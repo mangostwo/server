@@ -1,3 +1,4 @@
+#include <vector>
 #include "terrain/WmoModel.hpp"
 
 #include <algorithm>

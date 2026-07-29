@@ -22,6 +22,9 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <cstdint>
+#include "Common/Locales.h"
+#include <cstring>
 #include <cassert>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +32,13 @@
 #include <vector>
 
 #include "DBCFileLoader.h"
+
+
+// Ceilings for the two sizes AutoProduceData takes from file content. Both are far above
+// anything a real client ships -- the largest DBC here is a few megabytes -- and exist so
+// a corrupt file fails the load instead of sizing an allocation.
+static const uint64 MAX_DBC_INDEX       = 16u * 1024u * 1024u;
+static const uint64 MAX_DBC_TABLE_BYTES = 512u * 1024u * 1024u;
 
 DBCFileLoader::DBCFileLoader()
 {
@@ -225,10 +235,18 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
             }
         }
 
+        // maxi comes from record CONTENT, so it is whatever the file says. Refuse a
+        // wrapped or absurd count rather than allocating from it: ++maxi on 0xFFFFFFFF
+        // is 0, which would allocate nothing and then be written through by every row.
+        if (maxi == 0xFFFFFFFFu || uint64(maxi) + 1 > MAX_DBC_INDEX)
+        {
+            return NULL;
+        }
+
         ++maxi;
         records = maxi;
         indexTable = new ptr[maxi];
-        memset(indexTable, 0, maxi * sizeof(ptr));
+        memset(indexTable, 0, size_t(maxi) * sizeof(ptr));
     }
     else
     {
@@ -236,7 +254,18 @@ char* DBCFileLoader::AutoProduceData(const char* format, uint32& records, char**
         indexTable = new ptr[recordCount];
     }
 
-    char* dataTable = new char[recordCount * recordsize];
+    // In 64 bits, so a large record count times a wide format cannot wrap. The header
+    // check bounded recordCount against the FILE's record size; recordsize here is the
+    // FORMAT's, and the two need not agree.
+    const uint64 tableBytes = uint64(recordCount) * recordsize;
+    if (tableBytes > MAX_DBC_TABLE_BYTES)
+    {
+        delete[] indexTable;
+        indexTable = NULL;
+        return NULL;
+    }
+
+    char* dataTable = new char[size_t(tableBytes)];
 
     uint32 offset = 0;
 

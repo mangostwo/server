@@ -38,8 +38,8 @@
 #ifndef MANGOS_H_AUCTION_HOUSE_MGR
 #define MANGOS_H_AUCTION_HOUSE_MGR
 
+#include <unordered_map>
 #include <utility>
-#include "Utilities/UnorderedMapSet.h"
 #include "Utilities/Errors.h"
 #include "Platform/Define.h"
 #include "Common/TimeConstants.h"
@@ -203,7 +203,7 @@ class AuctionHouseMgr
         AuctionHouseMgr();
         ~AuctionHouseMgr();
 
-        typedef UNORDERED_MAP<uint32, Item*> ItemMap;
+        typedef std::unordered_map<uint32, Item*> ItemMap;
 
         AuctionHouseObject* GetAuctionsMap(AuctionHouseType houseType) { return &mAuctions[houseType]; }
         AuctionHouseObject* GetAuctionsMap(AuctionHouseEntry const* house);

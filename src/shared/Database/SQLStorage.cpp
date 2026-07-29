@@ -37,6 +37,8 @@
  * floats, strings, and special field types for DBC-like data structures.
  */
 
+#include <cstring>
+#include <map>
 #include <cassert>
 #include "SQLStorage.h"
 

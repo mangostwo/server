@@ -1,3 +1,8 @@
+#include <memory>
+#include <string>
+#include <vector>
+#include <mutex>
+#include <shared_mutex>
 #include "terrain/FusedTerrain.hpp"
 #include "terrain/TileSerializer.hpp"
 #include "terrain/WmoModel.hpp"

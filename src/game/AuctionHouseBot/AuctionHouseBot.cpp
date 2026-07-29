@@ -581,8 +581,6 @@ class AuctionBotSeller : public AuctionBotAgent
         void LoadItemsQuantity(AHB_Seller_Config& config);
 };
 
-INSTANTIATE_SINGLETON_1(AuctionHouseBot);
-INSTANTIATE_SINGLETON_1(AuctionBotConfig);
 
 //== AuctionBotConfig functions ============================
 

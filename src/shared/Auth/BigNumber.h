@@ -50,9 +50,9 @@ class BigNumber
         BigNumber(const BigNumber& bn);
         /**
          * @brief Constructor from 32-bit unsigned integer
-         * @param uint32 Initial value
+         * @param val Initial value
          */
-        BigNumber(uint32);
+        BigNumber(uint32 val);
         /**
          * @brief Destructor - frees OpenSSL BIGNUM resources
          */
@@ -60,14 +60,14 @@ class BigNumber
 
         /**
          * @brief Set value from 32-bit unsigned integer
-         * @param uint32 Value to set
+         * @param val Value to set
          */
-        void SetDword(uint32);
+        void SetDword(uint32 val);
         /**
          * @brief Set value from 64-bit unsigned integer
-         * @param uint64 Value to set
+         * @param val Value to set
          */
-        void SetQword(uint64);
+        void SetQword(uint64 val);
         /**
          * @brief Set value from binary data
          * @param bytes Pointer to binary data
@@ -189,10 +189,10 @@ class BigNumber
         BigNumber ModExp(const BigNumber& bn1, const BigNumber& bn2);
         /**
          * @brief Exponentiation: this ^ bn
-         * @param Exponent value
+         * @param bn Exponent value
          * @return New BigNumber with result
          */
-        BigNumber Exp(const BigNumber&);
+        BigNumber Exp(const BigNumber& bn);
 
         /**
          * @brief Get the number of bytes needed to represent this value

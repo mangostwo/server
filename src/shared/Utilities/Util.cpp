@@ -22,6 +22,11 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include "Utilities/MathDefines.h"
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
 #include <iterator>
 #include "Common/TimeConstants.h"
 #include "Util.h"
@@ -439,7 +444,7 @@ size_t utf8length(std::string& utf8str)
     {
         return utf8::distance(utf8str.c_str(), utf8str.c_str() + utf8str.size());
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return 0;
@@ -463,7 +468,7 @@ void utf8truncate(std::string& utf8str, size_t len)
         char* oend = utf8::utf16to8(wstr.c_str(), wstr.c_str() + wstr.size(), &utf8str[0]);
         utf8str.resize(oend - (&utf8str[0]));               // remove unused tail
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
     }
@@ -530,7 +535,7 @@ bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize)
         utf8::utf8to16(utf8str, utf8str + csize, wstr);
         wstr[len] = L'\0';
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         if (wsize > 0)
         {
@@ -555,7 +560,7 @@ bool Utf8toWStr(const std::string& utf8str, std::wstring& wstr)
             utf8::utf8to16(utf8str.c_str(), utf8str.c_str() + utf8str.size(), &wstr[0]);
         }
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         wstr = L"";
         return false;
@@ -575,7 +580,7 @@ bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
         utf8str2.resize(oend - (&utf8str2[0]));             // remove unused tail
         utf8str = utf8str2;
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return false;
@@ -595,7 +600,7 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
         utf8str2.resize(oend - (&utf8str2[0]));             // remove unused tail
         utf8str = utf8str2;
     }
-    catch (std::exception)
+    catch (const std::exception&)
     {
         utf8str = "";
         return false;

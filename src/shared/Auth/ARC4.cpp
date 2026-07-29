@@ -69,8 +69,18 @@ ARC4::ARC4(uint8 len) : m_cipherContext()
         return;
     }
 
-    EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len);
+    // Checked, not assumed: a loaded provider does not mean the cipher was fetched.
+    if (EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL) != 1)
+    {
+        sLog.outError("ARC4: Failed to initialize RC4 - is the OpenSSL legacy provider loaded?");
+        return;
+    }
+
+    if (EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len) != 1)
+    {
+        sLog.outError("ARC4: Failed to set the RC4 key length");
+        return;
+    }
 }
 
 /**
@@ -102,9 +112,23 @@ ARC4::ARC4(uint8 *seed, uint8 len) : m_cipherContext()
         return;
     }
 
-    EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL);
-    EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len);
-    EVP_EncryptInit_ex(m_cipherContext.Get(), NULL, NULL, seed, NULL);
+    // Checked, not assumed: a loaded provider does not mean the cipher was fetched.
+    if (EVP_EncryptInit_ex(m_cipherContext.Get(), EVP_rc4(), NULL, NULL, NULL) != 1)
+    {
+        sLog.outError("ARC4: Failed to initialize RC4 - is the OpenSSL legacy provider loaded?");
+        return;
+    }
+
+    if (EVP_CIPHER_CTX_set_key_length(m_cipherContext.Get(), len) != 1)
+    {
+        sLog.outError("ARC4: Failed to set the RC4 key length");
+        return;
+    }
+
+    if (EVP_EncryptInit_ex(m_cipherContext.Get(), NULL, NULL, seed, NULL) != 1)
+    {
+        sLog.outError("ARC4: Failed to seed RC4");
+    }
 }
 
 /**

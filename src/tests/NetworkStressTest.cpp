@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <algorithm>
 #include "TestHarness.h"
 
 #include "PacketCodec.h"

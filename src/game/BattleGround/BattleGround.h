@@ -46,6 +46,7 @@
 #ifndef MANGOS_H_BATTLEGROUND
 #define MANGOS_H_BATTLEGROUND
 
+#include <deque>
 #include <queue>
 #include "Utilities/Errors.h"
 #include "Platform/Define.h"

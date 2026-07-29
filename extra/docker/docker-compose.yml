@@ -6,7 +6,7 @@ services:
   mangosd:
     build:
       context: ..
-      dockerfile: dockercontainer/DockerFile-mangosd
+      dockerfile: docker/DockerFile-mangosd
     depends_on:
       - mysqldb
     restart: always
@@ -23,7 +23,7 @@ services:
   realmd:
     build:
       context: ..
-      dockerfile: dockercontainer/DockerFile-realmd
+      dockerfile: docker/DockerFile-realmd
     depends_on:
       - mysqldb
     restart: always

@@ -25,7 +25,6 @@
 #ifndef MANGOS_H_SESSIONPROTOCOLPOLICY
 #define MANGOS_H_SESSIONPROTOCOLPOLICY
 
-#include "Opcodes.h"
 #include "Platform/Define.h"
 
 #include <chrono>
@@ -63,10 +62,5 @@ class SessionPingTracker
         bool m_hadPing = false;
         uint32 m_fastRun = 0;
 };
-
-inline bool IsAllowedWhileLoginQueued(uint32 opcode)
-{
-    return opcode == CMSG_PING || opcode == CMSG_KEEP_ALIVE;
-}
 
 #endif

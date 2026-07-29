@@ -28,6 +28,7 @@
  *        Same classes; no behaviour change.
  */
 
+#include "Geometry/Placement.h"
 #include <cmath>
 #include "Common/TimeConstants.h"
 #include "Utilities/MathDefines.h"
@@ -276,7 +277,7 @@ namespace MaNGOS
              * @param selector Position selector
              */
             NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float absAngle, ObjectPosSelector& selector)
-                : i_object(obj), i_searcher(searcher), i_absAngle(MapManager::NormalizeOrientation(absAngle)), i_selector(selector) {}
+                : i_object(obj), i_searcher(searcher), i_absAngle(Geometry::Placement::NormalizeOrientation(absAngle)), i_selector(selector) {}
 
             void operator()(Corpse*) const {}
             void operator()(DynamicObject*) const {}

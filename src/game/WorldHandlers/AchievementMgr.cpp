@@ -57,7 +57,6 @@
 
 #include "Policies/Singleton.h"
 
-INSTANTIATE_SINGLETON_1(AchievementGlobalMgr);
 
 namespace MaNGOS
 {

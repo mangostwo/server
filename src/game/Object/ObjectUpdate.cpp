@@ -28,6 +28,8 @@
  *        Same classes; no behaviour change.
  */
 
+#include <vector>
+#include <cstdlib>
 #include "Utilities/Errors.h"
 #include "Object.h"
 #include "SharedDefines.h"
@@ -797,7 +799,7 @@ bool Object::LoadValues(const char* data)
     int index;
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
-        m_uint32Values[index] = atol((*iter).c_str());
+        m_uint32Values[index] = std::strtoul((*iter).c_str(), NULL, 10);
     }
 
     return true;

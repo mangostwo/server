@@ -2,20 +2,25 @@ name: Docker Build
 
 on:
   push:
-    branches: [ master, devel ]
+    branches: [ master, united, devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, united ]
 
+# Builds images and pushes nothing, so read is all the token ever needs -- at the
+# workflow level and again on the job, because a job may widen what the workflow grants
+# but never the other way round.
 permissions:
   contents: read
 
 concurrency:
-  group: docker-${{ github.ref }}
+  group: docker-build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository

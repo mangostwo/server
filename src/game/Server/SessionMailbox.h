@@ -26,7 +26,7 @@
 #define MANGOS_H_SESSIONMAILBOX
 
 #include "LockedQueue/LockedQueue.h"
-#include "Utilities/WorldPacket.h"
+#include "WorldPacket.h"
 
 #include <memory>
 #include <mutex>

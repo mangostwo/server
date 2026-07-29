@@ -30,6 +30,8 @@
  *        change.
  */
 
+#include "Database/SqlOperations.h"
+#include <cstdlib>
 #include <list>
 #include <map>
 #include <string>
@@ -77,7 +79,6 @@
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
-#include "Database/DatabaseImpl.h"
 #include "Spell.h"
 #include "ScriptMgr.h"
 #include "SocialMgr.h"
@@ -287,7 +288,7 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     uint32 index;
     for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
     {
-        m_uint32Values[startOffset + index] = atol((*iter).c_str());
+        m_uint32Values[startOffset + index] = std::strtoul((*iter).c_str(), NULL, 10);
     }
 }
 

@@ -22,6 +22,7 @@
  * and lore are copyrighted by Blizzard Entertainment, Inc.
  */
 
+#include <vector>
 #include <string>
 #include "Utilities/Errors.h"
 #include "CreatureAISelector.h"
@@ -33,8 +34,6 @@
 #include "ScriptMgr.h"
 #include "Pet.h"
 
-INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
-INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
 
 namespace FactorySelector
 {
