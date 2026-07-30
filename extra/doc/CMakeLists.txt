@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
 #Taken from and modified: http://majewsky.wordpress.com/2010/08/14/tip-of-the-day-cmake-and-doxygen/
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

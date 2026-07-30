@@ -1,4 +1,6 @@
 /**
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * @file CommandMgr.cpp
  * @brief GM command localization management
  *
@@ -16,7 +18,7 @@
  */
 
 /*
- * Copyright (C) 2015-2025 MaNGOS <https://www.getmangos.eu>
+ * Copyright (C) 2015-2026 MaNGOS <https://www.getmangos.eu>
  * Copyright (C) 2008-2015 TrinityCore <http://www.trinitycore.org/>
  * Copyright (C) 2005-2009 MaNGOS <http://getmangos.com/>
  *
