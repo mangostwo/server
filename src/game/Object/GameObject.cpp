@@ -1103,7 +1103,7 @@ void GameObject::SetQuaternion(Geometry::Quat const& q)
     SetFloatValue(GAMEOBJECT_ROTATION + 2, q.z);
     SetFloatValue(GAMEOBJECT_ROTATION + 3, q.w);
 
-    if (m_model && GetMap())
+    if (m_model && FindMap())
     {
         GetMap()->RefreshGameObjectModel(*m_model);
     }

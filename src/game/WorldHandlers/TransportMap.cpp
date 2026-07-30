@@ -353,6 +353,14 @@ void TransportMap::Disembark(Player* passenger, float x, float y, float z, float
 
     Remove(passenger, false);
     passenger->Place().MoveTo(x, y, z, o);
+
+    // BEFORE the add, not after. Map::Add sends SendInitTransports, whose loop skips
+    // player->GetTransport() on the assumption that our own vessel already reached us
+    // through SendInitSelf. Stepping ashore is the one case where that is false: leave the
+    // pointer set and the ship he just left is the single vessel never announced to him, so
+    // it vanishes the instant he is off it.
+    passenger->SetTransport(NULL);
+
     sailed->Add(passenger);
 }
 
