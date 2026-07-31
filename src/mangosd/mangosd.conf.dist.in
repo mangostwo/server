@@ -282,6 +282,7 @@ CleanCharacterDB                  = 1
 #    LogFilter_EventAiDev
 #    LogFilter_Calendar
 #    LogFilter_CellEnvelope
+#    LogFilter_DeckMinions
 #        Log filters (active by default - meaning: the filter is active, hence the log is not displayed)
 #        Default: 1 - not include with any log level
 #                 0 - include in log if log level permit
@@ -395,6 +396,7 @@ LogFilter_EventAiDev         = 1
 LogFilter_CellEnvelope       = 1
 LogFilter_GridAdd            = 1
 LogFilter_DbScripts          = 1
+LogFilter_DeckMinions        = 1
 LogFilter_PeriodicAffects    = 1
 LogFilter_PlayerMoves        = 1
 LogFilter_SQLText            = 1
