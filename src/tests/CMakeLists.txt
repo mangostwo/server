@@ -90,12 +90,46 @@ target_link_libraries(mangos_tests
 # A convenience, never a gate: the search is derived from the library that was actually
 # found, and a miss warns rather than failing the configure.
 if(WIN32)
-    get_filename_component(MANGOS_SSL_LIB_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
-    get_filename_component(MANGOS_SSL_ROOT "${MANGOS_SSL_LIB_DIR}" DIRECTORY)
+    # SelectLibraryConfigurations can encode OPENSSL_CRYPTO_LIBRARY as "optimized;<rel>;debug;<dbg>",
+    # so the value is not always a single path -- running get_filename_component over the whole list
+    # yields a directory built from the keyword token. Take the first entry that is not a keyword.
+    set(MANGOS_SSL_LIB "${OPENSSL_CRYPTO_LIBRARY}")
+    foreach(_ssl_entry IN LISTS OPENSSL_CRYPTO_LIBRARY)
+        if(NOT _ssl_entry MATCHES "^(optimized|debug|general)$")
+            set(MANGOS_SSL_LIB "${_ssl_entry}")
+            break()
+        endif()
+    endforeach()
+    get_filename_component(MANGOS_SSL_LIB_DIR "${MANGOS_SSL_LIB}" DIRECTORY)
+
+    # Search the import library's directory and its ancestors, bin/ first at each level. One level
+    # up is not enough: the classic layout is <root>/lib/libcrypto.lib, but the Windows binary
+    # distributions nest per toolchain and runtime -- <root>/lib/VC/x64/MD/libcrypto.lib -- putting
+    # <root>/bin four levels above the import library.
+    set(MANGOS_SSL_HINTS)
+    set(_ssl_dir "${MANGOS_SSL_LIB_DIR}")
+    foreach(_ssl_level RANGE 4)
+        if(NOT _ssl_dir)
+            break()
+        endif()
+        if(_ssl_dir MATCHES "^([A-Za-z]:)?/?$")
+            # The filesystem root itself is not a useful hint, but its bin/ is: master reached
+            # <root>/bin for a drive-root installation such as C:/lib/libcrypto.lib, so stopping
+            # here without it would be a regression.
+            string(REGEX REPLACE "/$" "" _ssl_root "${_ssl_dir}")
+            list(APPEND MANGOS_SSL_HINTS "${_ssl_root}/bin")
+            break()
+        endif()
+        list(APPEND MANGOS_SSL_HINTS "${_ssl_dir}/bin" "${_ssl_dir}")
+        get_filename_component(_ssl_dir "${_ssl_dir}" DIRECTORY)
+    endforeach()
+    if(OPENSSL_ROOT_DIR)
+        list(APPEND MANGOS_SSL_HINTS "${OPENSSL_ROOT_DIR}/bin" "${OPENSSL_ROOT_DIR}")
+    endif()
 
     find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
         NAMES libcrypto-3-x64.dll libcrypto-3.dll libcrypto.dll
-        HINTS "${MANGOS_SSL_ROOT}/bin" "${MANGOS_SSL_LIB_DIR}" "${OPENSSL_ROOT_DIR}/bin")
+        HINTS ${MANGOS_SSL_HINTS})
 
     if(MANGOS_TEST_OPENSSL_CRYPTO_DLL)
         add_custom_command(TARGET mangos_tests POST_BUILD
@@ -124,8 +158,25 @@ endif()
 add_test(NAME mangos_tests COMMAND mangos_tests)
 
 if(WIN32)
-    set_tests_properties(mangos_tests PROPERTIES
-        ENVIRONMENT "OPENSSL_MODULES=${OPENSSL_ROOT_DIR}/bin")
+    # OPENSSL_ROOT_DIR is only a hint to FindOpenSSL, which locates OpenSSL by other means when it
+    # is unset -- so "${OPENSSL_ROOT_DIR}/bin" expanded to "/bin", OPENSSL_MODULES pointed nowhere,
+    # and the legacy provider was never loaded. RC4 lives in that provider, so this surfaced as a
+    # test failure rather than as a configure error. Locate legacy.dll with the same hints and take
+    # the directory from it, setting the variable only when it is actually known.
+    find_file(MANGOS_TEST_OPENSSL_LEGACY_DLL
+        NAMES legacy.dll
+        HINTS ${MANGOS_SSL_HINTS}
+        PATH_SUFFIXES ossl-modules lib/ossl-modules)
+
+    if(MANGOS_TEST_OPENSSL_LEGACY_DLL)
+        get_filename_component(MANGOS_TEST_OPENSSL_MODULES_DIR
+            "${MANGOS_TEST_OPENSSL_LEGACY_DLL}" DIRECTORY)
+        set_tests_properties(mangos_tests PROPERTIES
+            ENVIRONMENT "OPENSSL_MODULES=${MANGOS_TEST_OPENSSL_MODULES_DIR}")
+    else()
+        message(WARNING
+            "OpenSSL legacy provider (legacy.dll) not found; mangos_tests may fail its RC4 cases.")
+    endif()
 endif()
 
 add_test(NAME proto_boundary
