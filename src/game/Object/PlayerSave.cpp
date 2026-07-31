@@ -72,6 +72,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Transports.h"
+#include "TransportMap.h"
 #include "Weather.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
@@ -192,13 +193,30 @@ void Player::SaveToDB()
         float savedX = Where().X(), savedY = Where().Y();
         float savedZ = Where().Z(), savedO = Where().Facing();
 
-        if (m_transport)
+        // The vessel he is aboard, if the boarding relationship is intact -- and otherwise
+        // the one whose deck he is standing on regardless, because a GM `.tele` onto a hull
+        // puts him there with no transport at all. Either way this row must not name a deck
+        // map: written once, it is unloadable for ever, and the character is stuck at the
+        // loading screen with no way back in.
+        Transport* vessel = m_transport;
+        if (!vessel)
         {
-            savedMap = m_transport->GetMapId();
-            savedX = m_transport->Where().X();
-            savedY = m_transport->Where().Y();
-            savedZ = m_transport->Where().Z();
-            savedO = m_transport->Where().Facing();
+            if (Map* on = FindMap())
+            {
+                if (TransportMap* hull = on->AsTransport())
+                {
+                    vessel = hull->Vessel();
+                }
+            }
+        }
+
+        if (vessel)
+        {
+            savedMap = vessel->GetMapId();
+            savedX = vessel->Where().X();
+            savedY = vessel->Where().Y();
+            savedZ = vessel->Where().Z();
+            savedO = vessel->Where().Facing();
         }
 
         uberInsert.addUInt32(savedMap);
