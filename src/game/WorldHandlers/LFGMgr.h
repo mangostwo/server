@@ -604,6 +604,10 @@ public:
     /// Enter or leave the group's validated LFD dungeon.
     void TeleportPlayer(Player* pPlayer, bool out, bool automatic);
 
+    // TEMPORARY LFD SMOKE TEST: remove after the one-player live test.
+    bool IsTesting() const { return m_testing; }
+    void SetTesting(bool testing) { m_testing = testing; }
+
     /// Queue Functions Below
 
     /**
@@ -795,6 +799,9 @@ private:
     uint32 m_proposalId;
     proposalMap m_proposalMap;
     ownerProposalMap m_ownerProposalIds;
+
+    // TEMPORARY LFD SMOKE TEST: never persist or enable by default.
+    bool m_testing;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()
