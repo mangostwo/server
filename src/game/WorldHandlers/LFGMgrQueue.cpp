@@ -352,6 +352,301 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
     }
 }
 
+void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
+    LfgUpdateType updateType)
+{
+    ownerProposalMap::iterator proposalOwnerItr =
+        m_ownerProposalIds.find(sourceOwner);
+    if (proposalOwnerItr != m_ownerProposalIds.end())
+    {
+        proposalMap::const_iterator proposalItr =
+            m_proposalMap.find(proposalOwnerItr->second);
+        if (proposalItr == m_proposalMap.end())
+        {
+            m_ownerProposalIds.erase(proposalOwnerItr);
+        }
+        else if (proposalItr->second.state == LFG_PROPOSAL_INITIATING)
+        {
+            queueSourceMap::const_iterator sourceItr =
+                proposalItr->second.sourceUnits.find(sourceOwner);
+            if (sourceItr == proposalItr->second.sourceUnits.end())
+            {
+                m_ownerProposalIds.erase(proposalOwnerItr);
+                return;
+            }
+            std::set<ObjectGuid> failedPlayers;
+            for (roleMap::const_iterator roleItr =
+                sourceItr->second.selectedRoles.begin();
+                roleItr != sourceItr->second.selectedRoles.end(); ++roleItr)
+            {
+                failedPlayers.insert(roleItr->first);
+            }
+            UnwindProposal(proposalItr->first, failedPlayers);
+            return;
+        }
+        else
+        {
+            // Successful proposals remove members from their old groups while
+            // forming the final LFD group. Those internal moves are not leaves.
+            return;
+        }
+    }
+
+    ObjectGuid aggregateOwner;
+    LFGPlayers aggregate;
+    for (playerData::const_iterator dataItr = m_playerData.begin();
+        dataItr != m_playerData.end(); ++dataItr)
+    {
+        if (dataItr->second.sourceUnits.find(sourceOwner) !=
+            dataItr->second.sourceUnits.end())
+        {
+            aggregateOwner = dataItr->first;
+            aggregate = dataItr->second;
+            break;
+        }
+    }
+    if (!aggregateOwner)
+    {
+        return;
+    }
+
+    m_queueSet.erase(aggregateOwner);
+    m_playerData.erase(aggregateOwner);
+    for (roleMap::const_iterator roleItr = aggregate.currentRoles.begin();
+        roleItr != aggregate.currentRoles.end(); ++roleItr)
+    {
+        m_playerQueueOwners.erase(roleItr->first);
+    }
+
+    for (queueSourceMap::const_iterator sourceItr =
+        aggregate.sourceUnits.begin();
+        sourceItr != aggregate.sourceUnits.end(); ++sourceItr)
+    {
+        LFGQueueSource const& source = sourceItr->second;
+        if (sourceItr->first != sourceOwner)
+        {
+            RestoreQueueSource(source);
+            continue;
+        }
+
+        for (roleMap::const_iterator roleItr = source.selectedRoles.begin();
+            roleItr != source.selectedRoles.end(); ++roleItr)
+        {
+            if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType))
+            {
+                SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
+                    source.isGroup);
+            }
+            m_playerQueueOwners.erase(roleItr->first);
+            m_playerStatusMap.erase(roleItr->first);
+        }
+    }
+}
+
+void LFGMgr::CancelRoleCheck(ObjectGuid groupGuid,
+    LfgUpdateType updateType)
+{
+    roleCheckMap::iterator roleCheckItr = m_roleCheckMap.find(groupGuid);
+    if (roleCheckItr == m_roleCheckMap.end())
+    {
+        return;
+    }
+
+    LFGRoleCheck roleCheck = roleCheckItr->second;
+    roleCheck.state = LFG_ROLECHECK_ABORTED;
+    TransitionQueueUnit(groupGuid, LFG_STATE_NONE, updateType);
+    partyForbidden noLockedDungeons;
+    for (roleMap::const_iterator roleItr = roleCheck.currentRoles.begin();
+        roleItr != roleCheck.currentRoles.end(); ++roleItr)
+    {
+        SendRoleCheckUpdate(roleItr->first, roleCheck);
+        if (roleCheck.leaderGuidRaw == roleItr->first.GetRawValue())
+        {
+            SendLfgJoinResult(roleItr->first, ERR_LFG_ROLE_CHECK_FAILED,
+                LFG_STATE_ROLECHECK, noLockedDungeons);
+        }
+        SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first), true);
+        m_playerQueueOwners.erase(roleItr->first);
+        m_playerStatusMap.erase(roleItr->first);
+    }
+
+    m_queueSet.erase(groupGuid);
+    m_playerData.erase(groupGuid);
+    m_roleCheckMap.erase(roleCheckItr);
+}
+
+void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
+    ObjectGuid playerGuid)
+{
+    if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
+    {
+        FinishBootVote(groupGuid, false);
+    }
+
+    LFGGroupStatus* groupStatus = GetGroupStatus(groupGuid);
+    if (groupStatus)
+    {
+        if (TransitionPlayer(playerGuid, LFG_STATE_NONE, LFG_UPDATE_LEAVE))
+        {
+            SendLfgUpdate(playerGuid, GetPlayerStatus(playerGuid), true);
+        }
+        groupStatus->playerRoles.erase(playerGuid);
+        groupStatus->randomDungeonByPlayer.erase(playerGuid);
+        m_playerQueueOwners.erase(playerGuid);
+        m_playerStatusMap.erase(playerGuid);
+        if (groupStatus->playerRoles.empty())
+        {
+            m_groupStatusMap.erase(groupGuid);
+            m_groupSet.erase(groupGuid);
+        }
+        return;
+    }
+
+    if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+    {
+        CancelRoleCheck(groupGuid, LFG_UPDATE_LEAVE);
+        return;
+    }
+    CancelQueueSource(groupGuid, LFG_UPDATE_LEAVE);
+}
+
+void LFGMgr::OnGroupDisband(ObjectGuid groupGuid)
+{
+    if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
+    {
+        FinishBootVote(groupGuid, false);
+    }
+
+    groupStatusMap::iterator statusItr = m_groupStatusMap.find(groupGuid);
+    if (statusItr != m_groupStatusMap.end())
+    {
+        LFGGroupStatus const status = statusItr->second;
+        for (roleMap::const_iterator roleItr = status.playerRoles.begin();
+            roleItr != status.playerRoles.end(); ++roleItr)
+        {
+            if (TransitionPlayer(roleItr->first, LFG_STATE_NONE,
+                LFG_UPDATE_GROUP_DISBAND))
+            {
+                SendLfgUpdate(roleItr->first,
+                    GetPlayerStatus(roleItr->first), true);
+            }
+            m_playerQueueOwners.erase(roleItr->first);
+            m_playerStatusMap.erase(roleItr->first);
+        }
+        m_groupStatusMap.erase(statusItr);
+        m_groupSet.erase(groupGuid);
+        return;
+    }
+
+    if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+    {
+        CancelRoleCheck(groupGuid, LFG_UPDATE_GROUP_DISBAND);
+        return;
+    }
+    CancelQueueSource(groupGuid, LFG_UPDATE_GROUP_DISBAND);
+}
+
+void LFGMgr::OnGroupLeaderChanged(ObjectGuid groupGuid,
+    ObjectGuid newLeaderGuid)
+{
+    auto setLeader = [newLeaderGuid](roleMap& roles)
+    {
+        for (roleMap::iterator roleItr = roles.begin();
+            roleItr != roles.end(); ++roleItr)
+        {
+            roleItr->second &= ~PLAYER_ROLE_LEADER;
+        }
+        roleMap::iterator newLeaderItr = roles.find(newLeaderGuid);
+        if (newLeaderItr != roles.end())
+        {
+            newLeaderItr->second |= PLAYER_ROLE_LEADER;
+        }
+    };
+
+    groupStatusMap::iterator statusItr = m_groupStatusMap.find(groupGuid);
+    if (statusItr != m_groupStatusMap.end())
+    {
+        statusItr->second.leaderGuid = newLeaderGuid;
+        setLeader(statusItr->second.playerRoles);
+    }
+
+    roleCheckMap::iterator roleCheckItr = m_roleCheckMap.find(groupGuid);
+    if (roleCheckItr != m_roleCheckMap.end())
+    {
+        roleCheckItr->second.leaderGuidRaw = newLeaderGuid.GetRawValue();
+        setLeader(roleCheckItr->second.currentRoles);
+    }
+
+    ownerProposalMap::const_iterator ownerItr =
+        m_ownerProposalIds.find(groupGuid);
+    if (ownerItr != m_ownerProposalIds.end())
+    {
+        proposalMap::iterator proposalItr = m_proposalMap.find(ownerItr->second);
+        if (proposalItr != m_proposalMap.end() &&
+            proposalItr->second.state == LFG_PROPOSAL_INITIATING)
+        {
+            proposalItr->second.groupLeaderGuid = newLeaderGuid.GetRawValue();
+            setLeader(proposalItr->second.currentRoles);
+            queueSourceMap::iterator sourceItr =
+                proposalItr->second.sourceUnits.find(groupGuid);
+            if (sourceItr != proposalItr->second.sourceUnits.end())
+            {
+                setLeader(sourceItr->second.selectedRoles);
+            }
+        }
+    }
+
+    for (playerData::iterator dataItr = m_playerData.begin();
+        dataItr != m_playerData.end(); ++dataItr)
+    {
+        queueSourceMap::iterator sourceItr =
+            dataItr->second.sourceUnits.find(groupGuid);
+        if (sourceItr == dataItr->second.sourceUnits.end())
+        {
+            continue;
+        }
+        setLeader(sourceItr->second.selectedRoles);
+        setLeader(dataItr->second.currentRoles);
+        break;
+    }
+}
+
+bool LFGMgr::OnPlayerLogout(Player* player)
+{
+    if (!player)
+    {
+        return false;
+    }
+
+    ObjectGuid const playerGuid = player->GetObjectGuid();
+    if (Group* group = player->GetGroup())
+    {
+        ObjectGuid const groupGuid = group->GetObjectGuid();
+        LFGGroupStatus* status = GetGroupStatus(groupGuid);
+        if (status && status->playerRoles.find(playerGuid) !=
+            status->playerRoles.end() &&
+            (status->state == LFG_STATE_IN_DUNGEON ||
+                status->state == LFG_STATE_BOOT ||
+                status->state == LFG_STATE_FINISHED_DUNGEON))
+        {
+            return true;
+        }
+
+        if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+        {
+            CancelRoleCheck(groupGuid, LFG_UPDATE_GROUP_MEMBER_OFFLINE);
+        }
+        else
+        {
+            CancelQueueSource(groupGuid, LFG_UPDATE_GROUP_MEMBER_OFFLINE);
+        }
+        return false;
+    }
+
+    CancelQueueSource(playerGuid, LFG_UPDATE_GROUP_MEMBER_OFFLINE);
+    return false;
+}
+
 LFGPlayers* LFGMgr::GetPlayerOrPartyData(ObjectGuid guid)
 {
     playerData::iterator it = m_playerData.find(guid);

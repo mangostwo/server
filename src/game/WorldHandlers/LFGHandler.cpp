@@ -43,6 +43,7 @@
 #include <set>
 #include <string>
 #include "WorldSession.h"
+#include "LFGLogic.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Player.h"
@@ -776,7 +777,9 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
     DEBUG_LOG("SMSG_LFG_BOOT_PLAYER");
 
     ObjectGuid plrGuid = GetPlayer()->GetObjectGuid();
-    LFGProposalAnswer plrAnswer = boot.answers.find(plrGuid)->second;
+    proposalAnswerMap::const_iterator playerAnswer = boot.answers.find(plrGuid);
+    LFGProposalAnswer plrAnswer = playerAnswer == boot.answers.end() ?
+        LFG_ANSWER_PENDING : playerAnswer->second;
 
     uint32 voteCount = 0, yayCount = 0;
     for (proposalAnswerMap::const_iterator it = boot.answers.begin(); it != boot.answers.end(); ++it)
@@ -791,7 +794,8 @@ void WorldSession::SendLfgBootUpdate(LFGBoot const& boot)
         }
     }
 
-    uint32 timeLeft = uint8( ((boot.startTime+LFG_TIME_BOOT)-time(NULL)) / 1000 );
+    uint32 const timeLeft = uint32(LFGLogic::RemainingSeconds(
+        boot.startTime, LFG_TIME_BOOT, time(NULL)));
 
     WorldPacket data(SMSG_LFG_BOOT_PLAYER, 27+boot.reason.length());
 

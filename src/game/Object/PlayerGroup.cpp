@@ -52,6 +52,8 @@
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Group.h"
+#include "LFGLogic.h"
+#include "LFGMgr.h"
 #include "Guild.h"
 #include "GuildMgr.h"
 #include "Pet.h"
@@ -150,7 +152,8 @@ void Player::RemoveFromGroup(Group* group, ObjectGuid guid, ObjectGuid kicker, s
 {
     if (group)
     {
-        if (group->isLFGGroup())
+        if (group->isLFGGroup() && LFGLogic::ShouldVoteKick(
+            guid.GetRawValue(), kicker.GetRawValue()))
         {
             sLFGMgr.AttemptToKickPlayer(group, guid, kicker, reason);
         }
@@ -296,5 +299,4 @@ void Player::SetOriginalGroup(Group* group, int8 subgroup)
         m_originalGroup.setSubGroup((uint8)subgroup);
     }
 }
-
 
