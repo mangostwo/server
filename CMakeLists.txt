@@ -85,7 +85,6 @@ message(
     BUILD_MANGOSD           Build the main server
     BUILD_REALMD            Build the login server
     BUILD_TOOLS             Build the client-data extractor
-    USE_STORMLIB            Use StormLib for reading MPQs
     SOAP                    Enable remote access via SOAP
     PCH                     Enable use of precompiled headers
     WITH_IO_URING           Use the io_uring network backend instead of epoll (Linux only,

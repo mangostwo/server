@@ -72,7 +72,7 @@ jobs:
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
           -DSCRIPT_LIB_SD3=1
-          -DUSE_STORMLIB=1
+          -DPLAYERBOTS=0
           -DPCH=0
 
       - name: Build

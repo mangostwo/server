@@ -154,7 +154,7 @@ sudo apt-get install -y git cmake make build-essential \
 cmake -S . -B ../build-two -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../install-two \
   -DBUILD_TOOLS=1 -DBUILD_MANGOSD=1 -DBUILD_REALMD=1 -DSOAP=1 \
   -DSCRIPT_LIB_ELUNA=1 -DSCRIPT_LIB_SD3=1 \
-  -DUSE_STORMLIB=1 -DPCH=1 -DWITH_TESTS=0
+  -DPCH=1 -DWITH_TESTS=0
 cmake --build ../build-two -j"$(nproc)" && cmake --install ../build-two
 ```
 
