@@ -88,11 +88,23 @@ CMaNGOS LFG subsystem or add a world-database teleport table.
 It must not be repurposed as a client display list. Add
 `playerDungeonMap randomDungeonByPlayer`, mapping each player GUID to a
 requested random category ID, with zero representing a specific request. Add a
-captured `TeamId team` and set `isGroup` correctly in both constructors: false
-for a solo owner and true for a premade owner. `currentRoles` holds each
-player's selected role mask while queued. When queue units merge, their
-candidate sets are intersected and their per-player random maps and role masks
-are merged.
+captured `TeamId team`. The default constructor remains solo/default state; the
+parameterized constructor receives an explicit `bool isGroup` and every call
+site passes false for a solo owner or true for a premade owner. `currentRoles`
+holds each player's selected role mask while queued. When queue units merge,
+their candidate sets are intersected and their per-player random maps and role
+masks are merged.
+
+The new aliases in `LFGMgr.h` are concrete:
+
+```cpp
+typedef std::unordered_map<ObjectGuid, uint32> playerDungeonMap;
+typedef std::unordered_map<ObjectGuid, uint32> ownerProposalMap;
+```
+
+`m_playerQueueOwners` uses the existing `playerGroupMap` alias; its value is the
+solo-player or premade-group owner GUID. `m_ownerProposalIds` uses
+`ownerProposalMap`; its value is the active proposal ID.
 
 Add `playerGroupMap m_playerQueueOwners`, mapping every queued, role-check, or
 proposal player to the solo or group queue owner. It is published and removed
@@ -105,10 +117,15 @@ unwind maintain it atomically with `m_proposalMap`; group cleanup can therefore
 find its proposal directly rather than linearly scanning all proposals.
 
 For a premade role check, `LFGRoleCheck::dungeonList` holds the same actual
-candidate set. Its `currentRoles` map must be completely initialized before the
-role check is inserted into `m_roleCheckMap`. `PerformRoleCheck` must mutate the
-stored object, not a detached copy. Successful, aborted, failed, and timed-out
-checks all have explicit removal paths.
+candidate set. Before insertion into `m_roleCheckMap`, `JoinLFG` enumerates all
+online group members and completely initializes both `currentRoles` (leader's
+submitted mask, zero for members still pending) and a per-player random map
+(the request category for random queueing, zero for a specific request). Only
+then is the role check published. `PerformRoleCheck` mutates that stored object,
+not a detached copy. On success it copies the stored actual candidates,
+per-player random map, and selected roles into `LFGPlayers` before publishing
+the queue unit. Successful, aborted, failed, and timed-out checks all have
+explicit removal paths.
 
 `LFGPlayerStatus::dungeonList` remains the client-facing request list. Random
 players see their category entry; specific players see their selected dungeon
@@ -156,9 +173,10 @@ bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid,
     ObjectGuid playerGuid, LFGGroupUpdateData& data) const;
 ```
 
-It returns false when the group status or player role is absent. `Group` owns a
-separate `uint32 m_updateCounter`, initialized to zero, because the packet
-sequence belongs to the group rather than LFD manager state.
+It returns false when the group status or player role is absent. `Group.h` adds
+a separate `uint32 m_updateCounter` member, initialized to zero by every group
+constructor, because the packet sequence belongs to the group rather than LFD
+manager state.
 
 ## Queue and role-check flow
 
@@ -225,6 +243,15 @@ reverse proposal ownership is removed, compatible surviving source units are
 restored at most once, and disconnected/stale units are cleaned. Thus a missing
 client response cannot leave an indefinite proposal.
 
+All LFD lifecycle timestamps use `time_t` seconds. In addition to correcting
+`LFG_TIME_ROLECHECK`, proposal wait accounting uses
+`time(NULL) - joinTime` directly and never divides that value by
+`IN_MILLISECONDS`. `SendLfgBootUpdate` sends
+`max(0, boot.startTime + LFG_TIME_BOOT - time(NULL))` directly and never divides
+the already-seconds value by 1000. Role-check, proposal, and boot constants are
+therefore consistently 45, 45, and 120 seconds at their comparison and packet
+boundaries.
+
 ## Join validation
 
 Join validation starts from `ERR_LFG_OK` and returns immediately on a decisive
@@ -259,23 +286,43 @@ For `SMSG_GROUP_LIST`, an LFD group sends:
 
 The active/completed values are not speculative: the maintained local CMaNGOS
 WotLK implementation writes `0` for an active LFD group and `2` when its player
-state is `LFG_STATE_FINISHED_DUNGEON`. Read-only IDA inspection of the 12340
-client confirms that `IsInLFGDungeon()` independently resolves the supplied LFG
-dungeon entry and compares its map and difficulty with the current instance.
-The user's smoke test remains the runtime UI confirmation, but no packet-capture
-assumption is needed to choose these values.
+state is `LFG_STATE_FINISHED_DUNGEON`. Read-only IDA inspection provides the
+authoritative 12340 layout: the `SMSG_GROUP_LIST` reader at `0x6D8870` reads the
+group-type byte, subgroup byte, flags byte, and recipient role byte; when
+group-type bit `0x08` (`GROUPTYPE_LFD`) is set it then reads an LFD state byte
+and dungeon-entry dword before the group GUID and counter. It reads one role
+byte at the end of every other-member tuple. The parser passes that conditional
+dungeon dword through `sub_52C0A0` into `dword_BD19A4`, and
+`IsInLFGDungeon()` at `0x555660` resolves that entry and compares its map and
+difficulty with the current instance. The user's smoke test remains the runtime
+UI confirmation, but no fork-derived packet assumption is needed to choose the
+layout or values.
 
-For an LFD group the player's role replaces the existing fourth header byte,
-followed immediately by the LFD state byte and packed dungeon entry. For a
-non-LFD group the fourth byte retains the existing battleground indicator and
-no LFD state/dungeon fields are appended. Each packet emitted by
-`Group::SendUpdate()` writes `m_updateCounter++`. If an LFD group status record
-is unexpectedly absent, the packet uses safe zero values and logs the invariant
-violation; it must not invent a category or map.
+The current fourth-header-byte comment and battleground value are wrong: this
+field is always the recipient role. For an LFD group it contains the assigned
+LFD role, followed immediately by the LFD state byte and packed dungeon entry.
+For a non-LFD group it is zero (no assigned LFD role), and no LFD state/dungeon
+fields are appended. Each packet emitted by `Group::SendUpdate()` writes
+`m_updateCounter++`. If an LFD group status record is unexpectedly absent, the
+packet uses safe zero values and logs the invariant violation; it must not
+invent a category or map.
 
 The actual dungeon entry enables the stock client's `IsInLFGDungeon()` to
-compare its map and difficulty with the player's current instance. Client-facing
-queue update packets continue to use the player's original request entry.
+compare its map and difficulty with the player's current instance. Proposal
+packets already carry the actual selected dungeon; after group creation the
+conditional group-list field is the continuing source of that actual dungeon.
+Client-facing queue update packets therefore continue to use each player's
+original request entry, preserving random-category UI identity rather than
+overwriting it with the selected dungeon.
+
+`SendLfgUpdate` retains the stock layout confirmed by the 12340 client handler
+at `0x55BDC0`: case 871 reads player update type, joined, then (when joined)
+queued, two flag bytes, dungeon count, dungeon dwords, and comment; case 872
+reads party update type, joined, then LFG-joined, queued, two flag bytes, three
+party bytes, dungeon count, dungeon dwords, and comment. The server must,
+however, convert every ID in `LFGPlayerStatus::dungeonList` with
+`GetDungeonEntry(id)` before writing it; sending bare IDs is not the packed
+client slot representation.
 
 Each other-member tuple in `SMSG_GROUP_LIST` also ends with that member's
 assigned LFG role byte. `Group::SendUpdate()` calls `GetGroupUpdateData` for the
@@ -316,6 +363,14 @@ repair. If no trigger exists, teleport fails safely. Maps with multiple valid
 entrances cannot be disambiguated from `LFGDungeons.dbc` alone; exact
 per-dungeon coordinates require the deliberately deferred database enhancement
 and are not claimed as solved here.
+
+The in-scope Two database was checked before implementation:
+`World/Setup/FullDB/areatrigger_teleport.sql` row 101 is "Stormwind Stockades
+Entrance" and targets map 34 at `(54.23, 0.28, -18.34, 6.26)`. The smoke-test
+preflight verifies that this row exists in the installed world database. Its
+absence is reported as a data-install problem rather than worked around with an
+outdoor or hard-coded destination; no database migration is required by this
+repair.
 
 ## Completion, leave, kick, and cleanup
 
@@ -388,9 +443,11 @@ and schedules their stale queue records for cleanup.
 
 ## Temporary `.debug lfd` smoke mode
 
-Add `.debug lfd` beside `.debug bg`, restricted to `SEC_ADMINISTRATOR`. It
-toggles a manager-wide `m_testing` flag initialized to false and prints or
-broadcasts whether one-player LFD testing is enabled.
+Add `.debug lfd` beside `.debug bg`, restricted to `SEC_ADMINISTRATOR`:
+`Chat.cpp` registers `lfd` in `debugCommandTable`, `Chat.h` declares
+`HandleDebugLfdCommand`, and the handler toggles an `LFGMgr::m_testing` flag
+initialized to false and prints or broadcasts whether one-player LFD testing
+is enabled.
 
 When enabled, `AddToQueue` publishes a valid queue unit normally. At the start
 of `FindSpecificQueueMatches`, before comparing it with peer units, an explicit
@@ -497,6 +554,10 @@ namespace LFGLogic
     bool IsTeleportTarget(DungeonCandidate const& dungeon);
     bool ShouldVoteKick(std::uint64_t targetGuid,
         std::uint64_t kickerGuid);
+    std::int64_t ElapsedSeconds(std::int64_t start,
+        std::int64_t now);
+    std::int64_t RemainingSeconds(std::int64_t start,
+        std::int64_t duration, std::int64_t now);
     std::vector<std::uint64_t> CollectExpiredOwners(
         std::vector<TimedOwner> const& owners, std::int64_t now);
 }
@@ -508,6 +569,10 @@ The role constants are local numeric bit values matching the 3.3.5 protocol
 fewest selected roles and then GUID, and uses bounded backtracking over at most
 five players. It succeeds only when every player has one assignment within the
 1/1/3 capacities and returns the remaining capacities as `RoleNeeds`.
+`src/tests/CMakeLists.txt` appends
+`${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp` and
+`LFGLogicTest.cpp` to `SRC_GRP_TESTS`; otherwise the pure implementation would
+not be linked into `mangos_tests`.
 
 Required regression cases:
 
@@ -526,7 +591,10 @@ Required regression cases:
   success/failure/timeout cleanup removes the stored check.
 - Group packet value helpers return actual role, packed actual dungeon entry,
   active/finished state bytes, a changing update counter, and assigned roles
-  for every other-member tuple.
+  for every other-member tuple; non-LFD role/state data remains zero and omits
+  the conditional fields.
+- Player and party LFG update fixtures preserve the IDA-confirmed field order
+  and write packed request entries for both random and specific queues.
 - Teleport eligibility rejects category/map-0/non-instance destinations and
   permits the actual Stockades row on map 34.
 - Completion retains actual dungeon state and selects rewards using the
@@ -541,6 +609,8 @@ Required regression cases:
   compositions.
 - Expired role-check owners are collected before manager erasure, preventing
   active-iterator invalidation.
+- Wait time from 100 to 145 is 45 seconds, and a 120-second boot begun at 100
+  reports 120 at time 100, 60 at time 160, and clamps to zero after expiry.
 - Group member-removal and disband hooks remove their complete LFD ownership
   sets, including `m_ownerProposalIds`, and are safe when called more than once.
 - Explicit logout cancels pre-dungeon ownership but retains an in-dungeon or
