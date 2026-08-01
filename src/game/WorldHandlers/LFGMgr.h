@@ -137,7 +137,7 @@ enum LFGSpells
 
 enum LFGTimes
 {
-    LFG_TIME_ROLECHECK                           = 45*IN_MILLISECONDS,
+    LFG_TIME_ROLECHECK                           = 45,
     LFG_TIME_BOOT                                = 120,
     LFG_TIME_PROPOSAL                            = 45,
 };
@@ -248,17 +248,42 @@ typedef std::unordered_map<uint32, LFGProposal> proposalMap;                  //
 typedef std::unordered_map<uint32, LFGWait> waitTimeMap;                      // DungeonID, wait info
 typedef std::unordered_map<ObjectGuid, dungeonForbidden> partyForbidden;      // ObjectGuid of player, map of locked dungeons
 typedef std::unordered_map<ObjectGuid, uint8> roleMap;                        // ObjectGuid of player, role(s) selected
+typedef std::unordered_map<ObjectGuid, uint32> playerDungeonMap;              // Player, requested random category (zero for specific)
 typedef std::unordered_map<ObjectGuid, LFGRoleCheck> roleCheckMap;            // ObjectGuid of group, role information
 typedef std::unordered_map<ObjectGuid, LFGPlayerStatus> playerStatusMap;      // ObjectGuid of player, info on specific players only
 typedef std::unordered_map<ObjectGuid, LFGPlayers> playerData;                // ObjectGuid of plr/group, info on specific player or group. TODO: rename to queueData
 typedef std::unordered_map<ObjectGuid, LFGProposalAnswer> proposalAnswerMap;  // ObjectGuid of player, answer to proposal
 typedef std::unordered_map<ObjectGuid, ObjectGuid> playerGroupMap;            // ObjectGuid of player, ObjectGuid of group
+typedef std::unordered_map<ObjectGuid, uint32> ownerProposalMap;               // Queue-source owner, active proposal ID
 typedef std::unordered_map<ObjectGuid, LFGGroupStatus> groupStatusMap;        // ObjectGuid of group, group status structure
 typedef std::unordered_map<ObjectGuid, LFGBoot> bootStatusMap;                // ObjectGuid of group, boot vote status
 
 // End Section: Constants & Definitions
 
 // Begin Section: Structures
+
+struct LFGQueueSource
+{
+    ObjectGuid ownerGuid;
+    std::set<uint32> dungeonList;
+    playerDungeonMap randomDungeonByPlayer;
+    roleMap selectedRoles;
+    std::string comment;
+    TeamId team;
+    bool isGroup;
+    time_t joinedTime;
+
+    LFGQueueSource() : team(TEAM_NEUTRAL), isGroup(false), joinedTime(0) {}
+    LFGQueueSource(ObjectGuid OwnerGuid, std::set<uint32> const& DungeonList,
+        playerDungeonMap const& RandomDungeonByPlayer,
+        roleMap const& SelectedRoles, std::string const& Comment, TeamId Team,
+        bool IsGroup, time_t JoinedTime) : ownerGuid(OwnerGuid),
+        dungeonList(DungeonList), randomDungeonByPlayer(RandomDungeonByPlayer),
+        selectedRoles(SelectedRoles), comment(Comment), team(Team),
+        isGroup(IsGroup), joinedTime(JoinedTime) {}
+};
+
+typedef std::unordered_map<ObjectGuid, LFGQueueSource> queueSourceMap;
 
 /// Item rewards taken from DungeonFinderItems in ObjectMgr, parsed by dbc values
 struct ItemRewards
@@ -277,6 +302,9 @@ struct LFGPlayers //TODO: rename to LFGQueueData
     std::set<uint32> dungeonList;           // The dungeons this player or group are queued for (ID, not entry)
     roleMap currentRoles;                   // tank, dps, healer, etc..
     std::string comments;
+    playerDungeonMap randomDungeonByPlayer;
+    queueSourceMap sourceUnits;
+    TeamId team;
     bool isGroup;
 
     time_t joinedTime;
@@ -284,10 +312,18 @@ struct LFGPlayers //TODO: rename to LFGQueueData
     uint8 neededHealers;
     uint8 neededDps;
 
-    LFGPlayers() : currentState(LFG_STATE_NONE), currentRoles(0), isGroup(false) {}
-    LFGPlayers(LFGState state, std::set<uint32> dungeonSelection, roleMap CurrentRoles, std::string comment, bool IsGroup, time_t JoinedTime,
-        uint8 NeededTanks, uint8 NeededHealers, uint8 NeededDps) : currentState(state), dungeonList(dungeonSelection),
-        currentRoles(CurrentRoles), comments(comment), isGroup(IsGroup), joinedTime(JoinedTime), neededTanks(NeededTanks),
+    LFGPlayers() : currentState(LFG_STATE_NONE), team(TEAM_NEUTRAL),
+        isGroup(false), joinedTime(0), neededTanks(0), neededHealers(0),
+        neededDps(0) {}
+    LFGPlayers(LFGState state, std::set<uint32> const& dungeonSelection,
+        roleMap const& CurrentRoles, std::string const& comment, bool IsGroup,
+        time_t JoinedTime, uint8 NeededTanks, uint8 NeededHealers,
+        uint8 NeededDps, playerDungeonMap const& RandomDungeonByPlayer,
+        TeamId Team, queueSourceMap const& SourceUnits) : currentState(state),
+        dungeonList(dungeonSelection), currentRoles(CurrentRoles),
+        comments(comment), randomDungeonByPlayer(RandomDungeonByPlayer),
+        sourceUnits(SourceUnits), team(Team), isGroup(IsGroup),
+        joinedTime(JoinedTime), neededTanks(NeededTanks),
         neededHealers(NeededHealers), neededDps(NeededDps) {}
 };
 
@@ -297,8 +333,12 @@ struct LFGRoleCheck
     roleMap currentRoles;         // map of players to roles
     std::set<uint32> dungeonList; // The dungeons this player or group are queued for
     uint32 randomDungeonID;       // The random dungeon ID
+    playerDungeonMap randomDungeonByPlayer;
     uint64 leaderGuidRaw;         // ObjectGuid(raw) of leader
     time_t waitForRoleTime;       // How long we'll wait for the players to confirm their roles
+
+    LFGRoleCheck() : state(LFG_ROLECHECK_DEFAULT), randomDungeonID(0),
+        leaderGuidRaw(0), waitForRoleTime(0) {}
 };
 
 struct LFGWait
@@ -336,7 +376,7 @@ struct LFGPlayerStatus
     std::set<uint32> dungeonList;
     std::string comment;
 
-    LFGPlayerStatus() { }
+    LFGPlayerStatus() : state(LFG_STATE_NONE), updateType(LFG_UPDATE_DEFAULT) { }
     LFGPlayerStatus(LFGState State, LfgUpdateType UpdateType, std::set<uint32> DungeonList, std::string Comment)
         : state(State), updateType(UpdateType), dungeonList(DungeonList), comment(Comment) { }
 };
@@ -347,11 +387,15 @@ struct LFGGroupStatus //todo: check for this in joinlfg function, not lfgplayers
     LFGState state;        // State of the group
     uint32 dungeonID;      // ID of the dungeon the group should be in
     roleMap playerRoles;   // Container holding each player's objectguid and their roles
+    playerDungeonMap randomDungeonByPlayer;
     ObjectGuid leaderGuid; // The group leader's object guid
 
-    LFGGroupStatus() { }
-    LFGGroupStatus(LFGState State, uint32 DungeonID, roleMap PlayerRoles, ObjectGuid LeaderGuid)
-        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles), leaderGuid(LeaderGuid) { }
+    LFGGroupStatus() : state(LFG_STATE_NONE), dungeonID(0) { }
+    LFGGroupStatus(LFGState State, uint32 DungeonID,
+        roleMap const& PlayerRoles,
+        playerDungeonMap const& RandomDungeonByPlayer, ObjectGuid LeaderGuid)
+        : state(State), dungeonID(DungeonID), playerRoles(PlayerRoles),
+        randomDungeonByPlayer(RandomDungeonByPlayer), leaderGuid(LeaderGuid) { }
 };
 
 /// For SMSG_LFG_PROPOSAL_UPDATE
@@ -365,9 +409,16 @@ struct LFGProposal
     uint64 groupLeaderGuid;    // group leader's guid
     bool isNew;                // is new or old group
     roleMap currentRoles;      // group player's roles
+    playerDungeonMap randomDungeonByPlayer;
+    queueSourceMap sourceUnits;
     proposalAnswerMap answers; // answers to a proposal
     playerGroupMap groups;     // data on which groups players belong/belonged to
     time_t joinedQueue;        // time from when the players joined the queue
+    time_t expiresAt;
+
+    LFGProposal() : id(0), dungeonID(0), state(LFG_PROPOSAL_INITIATING),
+        encounters(0), groupRawGuid(0), groupLeaderGuid(0), isNew(true),
+        joinedQueue(0), expiresAt(0) {}
 };
 
 // For SMSG_LFG_PLAYER_REWARD
@@ -666,6 +717,12 @@ protected:
     /// Get rid of expired role checks
     void RemoveOldRoleChecks();
 
+    /// Keep an aggregate queue record and every member's client status in sync.
+    bool TransitionQueueUnit(ObjectGuid ownerGuid, LFGState state, LfgUpdateType updateType);
+
+    /// Update client-visible state after the aggregate queue record is consumed.
+    bool TransitionPlayer(ObjectGuid playerGuid, LFGState state, LfgUpdateType updateType);
+
 private:
     /// Daily occurences of a player doing X type dungeon
     dailyEntries m_dailyAny;
@@ -679,6 +736,9 @@ private:
 
     /// Dungeon Finder Status for players
     playerStatusMap m_playerStatusMap;
+
+    /// Current queue owner for every player participating in an LFD flow.
+    playerGroupMap m_playerQueueOwners;
 
     groupSet m_groupSet;
     groupStatusMap m_groupStatusMap;
@@ -698,6 +758,7 @@ private:
     /// Proposal information
     uint32 m_proposalId;
     proposalMap m_proposalMap;
+    ownerProposalMap m_ownerProposalIds;
 };
 
 #define sLFGMgr MaNGOS::Singleton<LFGMgr>::Instance()
