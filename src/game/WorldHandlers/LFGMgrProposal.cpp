@@ -739,7 +739,11 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     {
         if (Group* oldGroup = leader->GetGroup())
         {
-            oldGroup->RemoveMember(leaderGuid, 0);
+            if (oldGroup->RemoveMember(leaderGuid, 0) <= 1)
+            {
+                sObjectMgr.RemoveGroup(oldGroup);
+                delete oldGroup;
+            }
         }
         pGroup = new Group();
         if (!pGroup->Create(leaderGuid, leader->GetName()))
@@ -762,7 +766,11 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         Player* player = sPlayerRegistry.Find(itr->first);
         if (Group* oldGroup = player->GetGroup())
         {
-            oldGroup->RemoveMember(itr->first, 0);
+            if (oldGroup->RemoveMember(itr->first, 0) <= 1)
+            {
+                sObjectMgr.RemoveGroup(oldGroup);
+                delete oldGroup;
+            }
         }
         if (!pGroup->AddMember(itr->first, player->GetName()))
         {
@@ -996,6 +1004,11 @@ void LFGMgr::UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime)
 
 void LFGMgr::HandleBossKilled(Player* pPlayer)
 {
+    if (!pPlayer)
+    {
+        return;
+    }
+
     Group* pGroup = pPlayer->GetGroup();
     if (!pGroup)
     {
@@ -1008,110 +1021,114 @@ void LFGMgr::HandleBossKilled(Player* pPlayer)
     {
         return;
     }
-
-    // set each player's lfgstate to LFG_STATE_FINISHED_DUNGEON
-    // fetch reward info, and if it's the first dungeon of the day (per player),
-    //    give them 2x the xp (or 1x if it's not the first), and the reward item
-    //    (special case for 2nd wotlk heroic and +). If no room in inventory, send
-    //    via ingame mail.
-    status->state = LFG_STATE_FINISHED_DUNGEON;
-
-    DungeonTypes type = GetDungeonType(status->dungeonID);
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    if (status->state == LFG_STATE_FINISHED_DUNGEON)
     {
-        if (Player* pGroupPlr = itr->getSource())
+        return;
+    }
+    if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
+    {
+        FinishBootVote(groupGuid, false);
+        status = GetGroupStatus(groupGuid);
+        if (!status)
         {
-            SetPlayerState(pGroupPlr->GetObjectGuid(), LFG_STATE_FINISHED_DUNGEON);
-
-            // check if player did a random dungeon
-            uint32 randomDungeonId = 0;
-            LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-            if (dungeon->TypeID == LFG_TYPE_RANDOM_DUNGEON || IsSeasonal(dungeon->Flags))
-            {
-                randomDungeonId = dungeon->ID;
-            }
-
-            // get rewards
-            uint32 groupPlrLevel = pGroupPlr->getLevel();
-            const DungeonFinderRewards* rewards = sObjectMgr.GetDungeonFinderRewards(groupPlrLevel); // Fetch base xp/money reward
-            ItemRewards itemRewards = GetDungeonItemRewards(status->dungeonID, type);                // fetch item reward
-
-            int32 multiplier;                                                                        // base reward modifier
-            bool hasDoneDaily = HasPlayerDoneDaily(pGroupPlr->GetGUIDLow(), type);                                 // first dungeon of the day?
-            (hasDoneDaily) ? multiplier = 1 : multiplier = 2;
-
-            uint32 xpReward = multiplier*rewards->baseXPReward;                                      // player's xp reward
-            uint32 moneyReward = uint32(multiplier*rewards->baseMonetaryReward);                              // player's money reward
-
-            uint32 itemReward = 0;                                                                   // reward item
-            uint32 itemAmount = 0;                                                                   // amount of item
-            if (hasDoneDaily && (type == DUNGEON_WOTLK_HEROIC))
-            {
-                itemReward = WOTLK_SPECIAL_HEROIC_ITEM;
-                itemAmount = WOTLK_SPECIAL_HEROIC_AMNT;
-            }
-            else if (!hasDoneDaily)
-            {
-                itemReward = itemRewards.itemId;
-                itemAmount = itemRewards.itemAmount;
-            }
-
-            // and then fill a structure corresponding to SMSG_LFG_PLAYER_REWARD and
-            // send one of these to each player
-            LFGRewards reward(randomDungeonId, status->dungeonID, hasDoneDaily, moneyReward, xpReward, itemReward, itemAmount);
-            pGroupPlr->GetSession()->SendLfgRewards(reward);
+            return;
         }
     }
 
-    // now we can remove the group from our maps
-    m_groupStatusMap.erase(groupGuid);
-    m_groupSet.erase(groupGuid);
+    status->state = LFG_STATE_FINISHED_DUNGEON;
+    for (roleMap::const_iterator roleItr = status->playerRoles.begin();
+        roleItr != status->playerRoles.end(); ++roleItr)
+    {
+        TransitionPlayer(roleItr->first, LFG_STATE_FINISHED_DUNGEON,
+            LFG_UPDATE_STATUS);
+    }
+    pGroup->SendUpdate();
+
+    DungeonTypes type = GetDungeonType(status->dungeonID);
+    for (roleMap::const_iterator roleItr = status->playerRoles.begin();
+        roleItr != status->playerRoles.end(); ++roleItr)
+    {
+        Player* pGroupPlr = sPlayerRegistry.Find(roleItr->first);
+        if (!pGroupPlr)
+        {
+            continue;
+        }
+
+        uint32 randomDungeonId = 0;
+        playerDungeonMap::const_iterator randomItr =
+            status->randomDungeonByPlayer.find(roleItr->first);
+        if (randomItr != status->randomDungeonByPlayer.end())
+        {
+            randomDungeonId = randomItr->second;
+        }
+
+        bool const hasDoneDaily = HasPlayerDoneDaily(pGroupPlr->GetGUIDLow(), type);
+        DungeonFinderRewards const* rewards =
+            sObjectMgr.GetDungeonFinderRewards(pGroupPlr->getLevel());
+        if (!rewards)
+        {
+            RegisterPlayerDaily(pGroupPlr->GetGUIDLow(), type);
+            continue;
+        }
+        int32 const multiplier = hasDoneDaily ? 1 : 2;
+        uint32 const xpReward = multiplier * rewards->baseXPReward;
+        uint32 const moneyReward = uint32(multiplier * rewards->baseMonetaryReward);
+        ItemRewards const itemRewards = GetDungeonItemRewards(status->dungeonID, type);
+        uint32 itemReward = 0;
+        uint32 itemAmount = 0;
+        if (hasDoneDaily && type == DUNGEON_WOTLK_HEROIC)
+        {
+            itemReward = WOTLK_SPECIAL_HEROIC_ITEM;
+            itemAmount = WOTLK_SPECIAL_HEROIC_AMNT;
+        }
+        else if (!hasDoneDaily)
+        {
+            itemReward = itemRewards.itemId;
+            itemAmount = itemRewards.itemAmount;
+        }
+
+        LFGRewards reward(randomDungeonId, status->dungeonID, hasDoneDaily,
+            moneyReward, xpReward, itemReward, itemAmount);
+        pGroupPlr->GetSession()->SendLfgRewards(reward);
+        RegisterPlayerDaily(pGroupPlr->GetGUIDLow(), type);
+    }
 }
 
 void LFGMgr::AttemptToKickPlayer(Group* pGroup, ObjectGuid guid, ObjectGuid kicker, std::string reason)
 {
-    ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    LFGGroupStatus* status = GetGroupStatus(groupGuid);
-
-    bootStatusMap::iterator bIt = m_bootStatusMap.find(groupGuid);
-    if (!status)
+    if (!pGroup || !LFGLogic::ShouldVoteKick(guid.GetRawValue(),
+        kicker.GetRawValue()) || !pGroup->IsMember(guid) ||
+        !pGroup->IsMember(kicker))
     {
         return;
     }
 
-    status->state = LFG_STATE_BOOT;
-    m_groupStatusMap[groupGuid] = *status;
-
-    // This function is only called when a group is set/in a dungeon so we can go straight to the boot packets
-    time_t now = time(NULL);
-    proposalAnswerMap votes;
-
-    // safe to say the person attempting to kick them will vote yes, the kick-ee will vote no
-    votes[guid] = LFG_ANSWER_DENY;
-    votes[kicker] = LFG_ANSWER_AGREE;
-
-    // set group state to boot vote, same for player states until it's over
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next()) //todo: check if we will need to use mail or not
+    ObjectGuid groupGuid = pGroup->GetObjectGuid();
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    if (!status || status->state != LFG_STATE_IN_DUNGEON ||
+        m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
     {
-        if (Player* pGroupPlr = itr->getSource())
-        {
-            ObjectGuid pGroupPlrGuid = pGroupPlr->GetObjectGuid();
-
-            SetPlayerState(pGroupPlrGuid, LFG_STATE_BOOT);
-
-            if ( (pGroupPlrGuid != guid) && (pGroupPlrGuid != kicker) )
-            {
-                votes[pGroupPlrGuid] = LFG_ANSWER_PENDING;
-            }
-        }
+        return;
     }
 
-    LFGBoot boot(true, guid, reason, votes, now);
-    m_bootStatusMap[groupGuid] = boot;
-
-    for (GroupReference* it = pGroup->GetFirstMember(); it != NULL; it = it->next())
+    LFGState const previousState = status->state;
+    status->state = LFG_STATE_BOOT;
+    proposalAnswerMap votes;
+    for (roleMap::const_iterator itr = status->playerRoles.begin();
+        itr != status->playerRoles.end(); ++itr)
     {
-        if (Player* groupPlr = it->getSource())
+        ObjectGuid const playerGuid = itr->first;
+        votes[playerGuid] = playerGuid == guid ? LFG_ANSWER_DENY :
+            (playerGuid == kicker ? LFG_ANSWER_AGREE : LFG_ANSWER_PENDING);
+        TransitionPlayer(playerGuid, LFG_STATE_BOOT, LFG_UPDATE_STATUS);
+    }
+
+    LFGBoot boot(true, previousState, guid, reason, votes, time(NULL));
+    m_bootStatusMap[groupGuid] = boot;
+    for (proposalAnswerMap::const_iterator itr = votes.begin();
+        itr != votes.end(); ++itr)
+    {
+        if (Player* groupPlr = sPlayerRegistry.Find(itr->first))
         {
             groupPlr->GetSession()->SendLfgBootUpdate(boot);
         }
@@ -1126,6 +1143,10 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
     }
 
     Group* pGroup = pPlayer->GetGroup();
+    if (!pGroup)
+    {
+        return;
+    }
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
 
     LFGGroupStatus* status = GetGroupStatus(groupGuid);
@@ -1141,11 +1162,20 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
         return;
     }
 
-    LFGBoot boot = it->second;
-    boot.answers[pPlayer->GetObjectGuid()] = LFGProposalAnswer(vote);
+    LFGBoot& boot = it->second;
+    proposalAnswerMap::iterator answerItr =
+        boot.answers.find(pPlayer->GetObjectGuid());
+    if (answerItr == boot.answers.end() ||
+        answerItr->second != LFG_ANSWER_PENDING)
+    {
+        return;
+    }
+    answerItr->second = LFGProposalAnswer(vote);
 
-    int32 yay = 0, nay = 0; // keep a count of votes
-    for (proposalAnswerMap::iterator pIt = boot.answers.begin(); pIt != boot.answers.end(); ++pIt)
+    int32 yay = 0;
+    int32 nay = 0;
+    for (proposalAnswerMap::const_iterator pIt = boot.answers.begin();
+        pIt != boot.answers.end(); ++pIt)
     {
         LFGProposalAnswer answer = pIt->second;
         if (answer == LFG_ANSWER_AGREE)
@@ -1158,43 +1188,91 @@ void LFGMgr::CastVote(Player* pPlayer, bool vote)
         }
     }
 
-    if (yay < REQUIRED_VOTES_FOR_BOOT && nay < REQUIRED_VOTES_FOR_BOOT)
+    if (yay >= REQUIRED_VOTES_FOR_BOOT)
     {
-        m_bootStatusMap[groupGuid] = boot;
+        FinishBootVote(groupGuid, true);
+        return;
+    }
+    if (nay >= REQUIRED_VOTES_FOR_BOOT)
+    {
+        FinishBootVote(groupGuid, false);
         return;
     }
 
-    // if we dont have enough votes to kick or keep plr, don't send packet update
-    // if else, set boot.inProgress to false, set plr + group states back to lfg-state-dungeon,
-    // send packet update to group, kick plr if we had the votes, and then erase entry from boot map
-
-    boot.inProgress = false;
-    status->state = LFG_STATE_IN_DUNGEON;
-
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    for (proposalAnswerMap::const_iterator pIt = boot.answers.begin();
+        pIt != boot.answers.end(); ++pIt)
     {
-        if (Player* pGroupPlr = itr->getSource())
+        if (Player* groupPlayer = sPlayerRegistry.Find(pIt->first))
         {
-            ObjectGuid plrGuid = pGroupPlr->GetObjectGuid();
+            groupPlayer->GetSession()->SendLfgBootUpdate(boot);
+        }
+    }
+}
 
-            if (plrGuid != boot.playerVotedOn)
-            {
-                SetPlayerState(plrGuid, LFG_STATE_IN_DUNGEON);
-                pGroupPlr->GetSession()->SendLfgBootUpdate(boot);
-            }
+void LFGMgr::FinishBootVote(ObjectGuid groupGuid, bool succeeded)
+{
+    bootStatusMap::iterator bootItr = m_bootStatusMap.find(groupGuid);
+    if (bootItr == m_bootStatusMap.end())
+    {
+        return;
+    }
+
+    LFGBoot boot = bootItr->second;
+    m_bootStatusMap.erase(bootItr);
+    boot.inProgress = false;
+
+    LFGGroupStatus* status = GetGroupStatus(groupGuid);
+    if (status)
+    {
+        status->state = boot.previousState;
+    }
+    for (proposalAnswerMap::const_iterator answerItr = boot.answers.begin();
+        answerItr != boot.answers.end(); ++answerItr)
+    {
+        TransitionPlayer(answerItr->first, boot.previousState,
+            LFG_UPDATE_STATUS);
+        if (Player* player = sPlayerRegistry.Find(answerItr->first))
+        {
+            player->GetSession()->SendLfgBootUpdate(boot);
         }
     }
 
-    if (yay == REQUIRED_VOTES_FOR_BOOT)
+    Group* group = sObjectMgr.GetGroupById(groupGuid.GetCounter());
+    if (!group)
     {
-        // kick player from group
-        if (pGroup->RemoveMember(boot.playerVotedOn, 1) <= 1)
+        return;
+    }
+    if (succeeded && group->IsMember(boot.playerVotedOn))
+    {
+        if (group->RemoveMember(boot.playerVotedOn, 1) <= 1)
         {
-            // group->Disband(); already disbanded in RemoveMember
-            sObjectMgr.RemoveGroup(pGroup);
-            delete pGroup;
-            // removemember sets the player's group pointer to NULL
+            sObjectMgr.RemoveGroup(group);
+            delete group;
         }
+    }
+    else
+    {
+        group->SendUpdate();
+    }
+}
+
+void LFGMgr::RemoveOldBoots()
+{
+    time_t const now = time(NULL);
+    std::vector<ObjectGuid> expiredGroups;
+    for (bootStatusMap::const_iterator itr = m_bootStatusMap.begin();
+        itr != m_bootStatusMap.end(); ++itr)
+    {
+        if (LFGLogic::RemainingSeconds(itr->second.startTime,
+            LFG_TIME_BOOT, now) == 0)
+        {
+            expiredGroups.push_back(itr->first);
+        }
+    }
+    for (std::vector<ObjectGuid>::const_iterator itr = expiredGroups.begin();
+        itr != expiredGroups.end(); ++itr)
+    {
+        FinishBootVote(*itr, false);
     }
 }
 

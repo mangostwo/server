@@ -79,6 +79,7 @@ void LFGMgr::Update()
     // remove old role checks
     RemoveOldRoleChecks();
     RemoveOldProposals();
+    RemoveOldBoots();
 
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
@@ -822,7 +823,6 @@ bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
     data.dungeonEntry = values.dungeonEntry;
     return true;
 }
-
 
 
 

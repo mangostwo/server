@@ -453,14 +453,19 @@ struct LFGRewards
 struct LFGBoot
 {
     bool inProgress;           // Is the boot vote still occurring?
+    LFGState previousState;    // Group state restored when the vote ends
     ObjectGuid playerVotedOn;  // ObjectGuid of the player being voted on
     std::string reason;        // Reason stated for the vote
     proposalAnswerMap answers; // Player's votes
     time_t startTime;          // When the vote started
 
-    LFGBoot() { }
-    LFGBoot(bool InProgress, ObjectGuid PlayerVotedOn, std::string Reason, proposalAnswerMap Answers, time_t StartTime)
-        : inProgress(InProgress), playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers), startTime(StartTime) { }
+    LFGBoot() : inProgress(false), previousState(LFG_STATE_NONE), startTime(0) { }
+    LFGBoot(bool InProgress, LFGState PreviousState,
+        ObjectGuid PlayerVotedOn, std::string const& Reason,
+        proposalAnswerMap const& Answers, time_t StartTime)
+        : inProgress(InProgress), previousState(PreviousState),
+        playerVotedOn(PlayerVotedOn), reason(Reason), answers(Answers),
+        startTime(StartTime) { }
 };
 
 // End Section: Structures
@@ -664,6 +669,14 @@ public:
     // Called when a player votes yes or no on a boot vote
     void CastVote(Player* pPlayer, bool vote);
 
+    /// Group lifecycle hooks used by the core group implementation.
+    void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid);
+    void OnGroupDisband(ObjectGuid groupGuid);
+    void OnGroupLeaderChanged(ObjectGuid groupGuid, ObjectGuid newLeaderGuid);
+
+    /// Returns true when logout must retain active LFD group membership.
+    bool OnPlayerLogout(Player* player);
+
 protected:
     bool IsSeasonal(uint32 dbcFlags) { return ((dbcFlags & LFG_FLAG_SEASONAL) != 0) ? true : false; }
 
@@ -727,6 +740,18 @@ protected:
 
     /// Fail proposals whose client-response window expired.
     void RemoveOldProposals();
+
+    /// Resolve one boot vote and restore the group's previous state.
+    void FinishBootVote(ObjectGuid groupGuid, bool succeeded);
+
+    /// Fail expired boot votes.
+    void RemoveOldBoots();
+
+    /// Cancel one immutable queue source and restore unaffected merged sources.
+    void CancelQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType);
+
+    /// Abort and remove one pending party role check.
+    void CancelRoleCheck(ObjectGuid groupGuid, LfgUpdateType updateType);
 
     /// Keep an aggregate queue record and every member's client status in sync.
     bool TransitionQueueUnit(ObjectGuid ownerGuid, LFGState state, LfgUpdateType updateType);

@@ -545,6 +545,11 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 removeMethod)
     if (GetMembersCount() > uint32(isBGGroup() ? 1 : 2))    // in BG group case allow 1 members group
     {
         bool leaderChanged = _removeMember(guid);
+        sLFGMgr.OnGroupMemberRemoved(GetObjectGuid(), guid);
+        if (leaderChanged)
+        {
+            sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), m_memberSlots.front().guid);
+        }
 
         if (Player* player = sObjectMgr.GetPlayer(guid))
         {
@@ -626,6 +631,7 @@ void Group::ChangeLeader(ObjectGuid guid)
 #endif /* ENABLE_ELUNA */
 
     _setLeader(guid);
+    sLFGMgr.OnGroupLeaderChanged(GetObjectGuid(), guid);
 
     WorldPacket data(SMSG_GROUP_SET_LEADER, slot->name.size() + 1);
     data << slot->name;
@@ -640,6 +646,8 @@ void Group::ChangeLeader(ObjectGuid guid)
  */
 void Group::Disband(bool hideDestroy)
 {
+    sLFGMgr.OnGroupDisband(GetObjectGuid());
+
     Player* player;
 
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
@@ -1608,7 +1616,6 @@ void Group::OfflineReadyCheck()
         }
     }
 }
-
 
 
 
