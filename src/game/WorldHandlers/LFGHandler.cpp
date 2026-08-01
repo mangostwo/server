@@ -581,9 +581,10 @@ void WorldSession::SendLfgUpdate(bool isGroup, LFGPlayerStatus status)
         }
 
         data << uint8(dungeonSize);
-        for (std::set<uint32>::iterator it = status.dungeonList.begin(); it != status.dungeonList.end(); ++it)
+        for (std::set<uint32>::const_iterator it = status.dungeonList.begin();
+            it != status.dungeonList.end(); ++it)
         {
-            data << uint32(*it);
+            data << uint32(sLFGMgr.GetDungeonEntry(*it));
         }
 
         data << status.comment;
@@ -637,8 +638,13 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
     if (!roleCheck.currentRoles.empty())
     {
         ObjectGuid leaderGuid = ObjectGuid(roleCheck.leaderGuidRaw);
-        uint8 leaderRoles     = roleCheck.currentRoles.find(leaderGuid)->second;
+        roleMap::const_iterator leaderItr = roleCheck.currentRoles.find(leaderGuid);
         Player* pLeader       = sPlayerRegistry.Find(leaderGuid);
+        if (leaderItr == roleCheck.currentRoles.end() || !pLeader)
+        {
+            return;
+        }
+        uint8 leaderRoles = leaderItr->second;
 
         data << uint64(leaderGuid.GetRawValue());
         data << uint8(leaderRoles > 0);
@@ -659,7 +665,7 @@ void WorldSession::SendLfgRoleCheckUpdate(LFGRoleCheck const& roleCheck)
             data << uint64(plrGuid.GetRawValue());
             data << uint8(rItr->second > 0);
             data << uint32(rItr->second);
-            data << uint8(pPlayer->getLevel());
+            data << uint8(pPlayer ? pPlayer->getLevel() : 0);
         }
     }
 
@@ -679,10 +685,16 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
 {
     Player* pPlayer         = GetPlayer();
     ObjectGuid plrGuid      = pPlayer->GetObjectGuid();
-    ObjectGuid plrGroupGuid = proposal.groups.find(plrGuid)->second;
+    playerGroupMap::const_iterator playerGroupItr = proposal.groups.find(plrGuid);
+    if (playerGroupItr == proposal.groups.end())
+    {
+        return;
+    }
+    ObjectGuid plrGroupGuid = playerGroupItr->second;
 
     uint32 dungeonEntry = sLFGMgr.GetDungeonEntry(proposal.dungeonID);
-    bool showProposal   = !proposal.isNew && proposal.groupRawGuid == plrGroupGuid.GetRawValue();
+    bool silent = !proposal.isNew &&
+        proposal.groupRawGuid == plrGroupGuid.GetRawValue();
 
     WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 15+(9*proposal.currentRoles.size()));
 
@@ -690,7 +702,7 @@ void WorldSession::SendLfgProposalUpdate(LFGProposal const& proposal)
     data << uint8(proposal.state);               // Proposal state
     data << uint32(proposal.id);                 // ID of proposal
     data << uint32(proposal.encounters);         // Encounters done
-    data << uint8(showProposal);                 // Show or hide proposal window [todo-this]
+    data << uint8(silent);                       // Suppress a repeated proposal popup
     data << uint8(proposal.currentRoles.size()); // Size of group
 
     for (playerGroupMap::const_iterator it = proposal.groups.begin(); it != proposal.groups.end(); ++it)
@@ -732,8 +744,9 @@ void WorldSession::SendLfgRewards(LFGRewards const& rewards)
     DEBUG_LOG("SMSG_LFG_PLAYER_REWARD");
 
     WorldPacket data(SMSG_LFG_PLAYER_REWARD, 42);
-    data << uint32(rewards.randomDungeonEntry);
-    data << uint32(rewards.groupDungeonEntry);
+    data << uint32(rewards.randomDungeonEntry ?
+        sLFGMgr.GetDungeonEntry(rewards.randomDungeonEntry) : 0);
+    data << uint32(sLFGMgr.GetDungeonEntry(rewards.groupDungeonEntry));
     data << uint8(rewards.hasDoneDaily);
     data << uint32(1);
     data << uint32(rewards.moneyReward);

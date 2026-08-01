@@ -368,6 +368,15 @@ struct LFGQueueStatus
     uint32 timeSpentInQueue;      // time already spent in the queue
 };
 
+struct LFGGroupUpdateData
+{
+    uint8 role;
+    uint8 state;
+    uint32 dungeonEntry;
+
+    LFGGroupUpdateData() : role(PLAYER_ROLE_NONE), state(0), dungeonEntry(0) { }
+};
+
 /// For CMSG_LFG_GET_STATUS, SMSG_LFG_UPDATE_PARTY, and SMSG_LFG_UPDATE_PLAYER
 struct LFGPlayerStatus
 {
@@ -581,7 +590,11 @@ public:
     dungeonForbidden FindRandomDungeonsNotForPlayer(Player* plr);
 
     /// Given the ID of a dungeon, spit out its entry
-    uint32 GetDungeonEntry(uint32 ID);
+    uint32 GetDungeonEntry(uint32 ID) const;
+
+    /// Fetch the client-facing LFD fields appended to SMSG_GROUP_LIST.
+    bool GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
+        LFGGroupUpdateData& data) const;
 
     /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
     void TeleportPlayer(Player* pPlayer, bool out);

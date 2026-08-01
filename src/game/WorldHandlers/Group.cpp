@@ -56,6 +56,8 @@
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "Group.h"
+#include "LFGLogic.h"
+#include "LFGMgr.h"
 #include "Formulas.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
@@ -116,6 +118,7 @@ RollVoteMask Roll::GetVoteMaskFor(Player* player) const
 //===================================================
 
 Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
+    m_updateCounter(0),
     m_dungeonDifficulty(REGULAR_DIFFICULTY), m_raidDifficulty(REGULAR_DIFFICULTY),
     m_bgGroup(NULL), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
     m_subGroupsCounts(NULL)
@@ -1452,6 +1455,7 @@ void Group::SendTargetIconList(WorldSession* session)
  */
 void Group::SendUpdate()
 {
+    uint32 const updateCounter = m_updateCounter;
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         Player* player = sObjectMgr.GetPlayer(citr->guid);
@@ -1461,17 +1465,22 @@ void Group::SendUpdate()
         }
         // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
+        bool const isLfg = (m_groupType & GROUPTYPE_LFD) != 0;
+        LFGGroupUpdateData recipientLfgData;
+        bool const hasRecipientLfgData = isLfg && sLFGMgr.GetGroupUpdateData(
+            GetObjectGuid(), citr->guid, recipientLfgData);
         data << uint8(m_groupType);                         // group type (flags in 3.3)
         data << uint8(citr->group);                         // groupid
         data << uint8(GetFlags(*citr));                     // group flags
-        data << uint8(isBGGroup() ? 1 : 0);                 // 2.0.x, isBattleGroundGroup?
-        if (m_groupType & GROUPTYPE_LFD)
+        data << uint8(LFGLogic::GroupHeaderRole(isLfg, isBGGroup(),
+            hasRecipientLfgData ? recipientLfgData.role : PLAYER_ROLE_NONE));
+        if (isLfg)
         {
-            data << uint8(0);
-            data << uint32(0);
+            data << uint8(hasRecipientLfgData ? recipientLfgData.state : 0);
+            data << uint32(hasRecipientLfgData ? recipientLfgData.dungeonEntry : 0);
         }
         data << GetObjectGuid();                            // group guid
-        data << uint32(0);                                  // 3.3, this value increments every time SMSG_GROUP_LIST is sent
+        data << uint32(updateCounter);
         data << uint32(GetMembersCount() - 1);
         for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -1488,7 +1497,10 @@ void Group::SendUpdate()
             data << uint8(onlineState);                     // online-state
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
-            data << uint8(0);                               // 3.3, role?
+            LFGGroupUpdateData memberLfgData;
+            bool const hasMemberLfgData = isLfg && sLFGMgr.GetGroupUpdateData(
+                GetObjectGuid(), citr2->guid, memberLfgData);
+            data << uint8(hasMemberLfgData ? memberLfgData.role : PLAYER_ROLE_NONE);
         }
 
         data << m_leaderGuid;                               // leader guid
@@ -1503,6 +1515,7 @@ void Group::SendUpdate()
         }
         player->GetSession()->SendPacket(&data);
     }
+    ++m_updateCounter;
 }
 
 /**
@@ -1595,7 +1608,6 @@ void Group::OfflineReadyCheck()
         }
     }
 }
-
 
 
 

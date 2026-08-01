@@ -725,10 +725,18 @@ void LFGMgr::SendQueueStatus()
             {
                 if (Player* pPlayer = sPlayerRegistry.Find(rItr->first))
                 {
-                    uint32 dungeonId = *queueInfo->dungeonList.begin();
+                    uint32 const dungeonId = *queueInfo->dungeonList.begin();
+                    uint32 displayDungeonId = dungeonId;
+                    playerDungeonMap::const_iterator randomItr =
+                        queueInfo->randomDungeonByPlayer.find(rItr->first);
+                    if (randomItr != queueInfo->randomDungeonByPlayer.end() &&
+                        randomItr->second)
+                    {
+                        displayDungeonId = randomItr->second;
+                    }
 
                     LFGQueueStatus status;
-                    status.dungeonID        = dungeonId;
+                    status.dungeonID        = GetDungeonEntry(displayDungeonId);
                     status.neededTanks      = queueInfo->neededTanks;
                     status.neededHeals      = queueInfo->neededHealers;
                     status.neededDps        = queueInfo->neededDps;
@@ -772,7 +780,7 @@ void LFGMgr::SendQueueStatus()
     }
 }
 
-uint32 LFGMgr::GetDungeonEntry(uint32 ID)
+uint32 LFGMgr::GetDungeonEntry(uint32 ID) const
 {
     LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(ID);
     if (dungeon)
@@ -785,8 +793,35 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
     }
 }
 
+bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
+    LFGGroupUpdateData& data) const
+{
+    groupStatusMap::const_iterator groupItr = m_groupStatusMap.find(groupGuid);
+    if (groupItr == m_groupStatusMap.end())
+    {
+        return false;
+    }
 
+    roleMap::const_iterator roleItr = groupItr->second.playerRoles.find(playerGuid);
+    if (roleItr == groupItr->second.playerRoles.end())
+    {
+        return false;
+    }
 
+    LFGLogic::GroupPacketValues const values = LFGLogic::MakeGroupPacketValues(
+        roleItr->second,
+        groupItr->second.state == LFG_STATE_FINISHED_DUNGEON,
+        GetDungeonEntry(groupItr->second.dungeonID));
+    if (!values.dungeonEntry)
+    {
+        return false;
+    }
+
+    data.role = values.role;
+    data.state = values.state;
+    data.dungeonEntry = values.dungeonEntry;
+    return true;
+}
 
 
 
