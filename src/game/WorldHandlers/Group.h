@@ -614,6 +614,7 @@ class Group
         ObjectGuid          m_mainTankGuid;
         ObjectGuid          m_mainAssistantGuid;
         GroupType           m_groupType;
+        uint32              m_updateCounter;
         Difficulty          m_dungeonDifficulty;
         Difficulty          m_raidDifficulty;
         BattleGround*       m_bgGroup;
