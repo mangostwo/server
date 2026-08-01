@@ -33,12 +33,14 @@
 
 #include <set>
 #include <string>
+#include <vector>
 #include "Common/TimeConstants.h"
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "LFGLogic.h"
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
@@ -50,6 +52,11 @@
 // called each time a player selects their role
 void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
 {
+    if (!pGroup)
+    {
+        return;
+    }
+
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
     ObjectGuid plrGuid = pPlayer? pPlayer->GetObjectGuid() : ObjectGuid();
 
@@ -59,14 +66,18 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
         return; // no role check map found
     }
 
-    LFGRoleCheck roleCheck = it->second;
-    bool roleChosen = roleCheck.state != LFG_ROLECHECK_DEFAULT && plrGuid;
+    LFGRoleCheck& roleCheck = it->second;
+    bool roleChosen = bool(plrGuid);
 
     if (!plrGuid)
     {
-        roleCheck.state = LFG_ROLECHECK_ABORTED;  // aborted if anyone cancels during role check
+        roleCheck.state = LFG_ROLECHECK_ABORTED;
     }
-    else if (roles < PLAYER_ROLE_TANK)            // kind of a sanity check- the client shouldn't allow this to happen
+    else if (roleCheck.currentRoles.find(plrGuid) == roleCheck.currentRoles.end())
+    {
+        return;
+    }
+    else if ((roles & (PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE)) == 0)
     {
         roleCheck.state = LFG_ROLECHECK_NO_ROLE;
     }
@@ -74,34 +85,60 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
     {
         roleCheck.currentRoles[plrGuid] = roles;
 
-        roleMap::iterator rItr = roleCheck.currentRoles.begin();
-        do
+        std::vector<LFGLogic::RoleRequest> requests;
+        requests.reserve(roleCheck.currentRoles.size());
+        for (roleMap::const_iterator rItr = roleCheck.currentRoles.begin();
+            rItr != roleCheck.currentRoles.end(); ++rItr)
         {
-            if (rItr->second != PLAYER_ROLE_NONE)
-            {
-                ++rItr;
-            }
-        } while (rItr != roleCheck.currentRoles.end());
+            requests.push_back({rItr->first.GetRawValue(), rItr->second});
+        }
 
-        if (rItr == roleCheck.currentRoles.end()) // meaning that everyone confirmed their roles
+        if (LFGLogic::AllRolesAnswered(requests))
         {
             roleCheck.state = ValidateGroupRoles(roleCheck.currentRoles) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_MISSING_ROLE;
         }
     }
 
-    std::set<uint32> dungeonBuff;
-    if (roleCheck.randomDungeonID)
+    bool queued = false;
+    if (roleCheck.state == LFG_ROLECHECK_FINISHED)
     {
-        dungeonBuff.insert(roleCheck.randomDungeonID);
+        LFGPlayers* queueInfo = GetPlayerOrPartyData(groupGuid);
+        if (!queueInfo)
+        {
+            roleCheck.state = LFG_ROLECHECK_ABORTED;
+        }
+        else
+        {
+            queueInfo->currentRoles = roleCheck.currentRoles;
+            queueInfo->dungeonList = roleCheck.dungeonList;
+            queueInfo->randomDungeonByPlayer = roleCheck.randomDungeonByPlayer;
+            queueInfo->joinedTime = time(NULL);
+            queueInfo->sourceUnits.clear();
+            queueInfo->sourceUnits[groupGuid] = LFGQueueSource(groupGuid,
+                queueInfo->dungeonList, queueInfo->randomDungeonByPlayer,
+                queueInfo->currentRoles, queueInfo->comments, queueInfo->team,
+                true, queueInfo->joinedTime);
+            m_playerData[groupGuid] = *queueInfo;
+            AddToQueue(groupGuid);
+            queued = m_queueSet.find(groupGuid) != m_queueSet.end();
+            if (!queued)
+            {
+                roleCheck.state = LFG_ROLECHECK_ABORTED;
+            }
+        }
     }
-    else
+
+    bool const terminal = roleCheck.state != LFG_ROLECHECK_INITIALITING;
+    if (terminal && !queued)
     {
-        dungeonBuff = roleCheck.dungeonList;
+        LfgUpdateType const updateType = roleCheck.state == LFG_ROLECHECK_ABORTED ?
+            LFG_UPDATE_ROLECHECK_ABORTED : LFG_UPDATE_ROLECHECK_FAILED;
+        TransitionQueueUnit(groupGuid, LFG_STATE_NONE, updateType);
     }
 
     partyForbidden nullForbidden;
-
-    for (roleMap::iterator itr = roleCheck.currentRoles.begin(); itr != roleCheck.currentRoles.end(); ++itr)
+    for (roleMap::const_iterator itr = roleCheck.currentRoles.begin();
+        itr != roleCheck.currentRoles.end(); ++itr)
     {
         ObjectGuid guidBuff = itr->first;
         if (roleChosen)
@@ -109,89 +146,49 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             SendRoleChosen(guidBuff, plrGuid, roles); // send SMSG_LFG_ROLE_CHOSEN to each player
         }
 
-        // send SMSG_LFG_ROLE_CHECK_UPDATE
         SendRoleCheckUpdate(guidBuff, roleCheck);
-
-        switch (roleCheck.state)
+        if (!terminal)
         {
-            case LFG_ROLECHECK_INITIALITING:
-                continue;
-            case LFG_ROLECHECK_FINISHED:
-                // set current plr's state to queued. then set their role in that struct
-                // then send lfgupdate packet with UPDATETYPE_ADDED_TO_QUEUE
-                SetPlayerState(guidBuff, LFG_STATE_QUEUED);
-                SetPlayerUpdateType(guidBuff, LFG_UPDATE_ADDED_TO_QUEUE);
-                SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
-                break;
-            default:
-                if (roleCheck.leaderGuidRaw == guidBuff.GetRawValue())
-                {
-                    SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED, LFG_STATE_ROLECHECK, nullForbidden);
-                }
-                SetPlayerUpdateType(guidBuff, LFG_UPDATE_ROLECHECK_FAILED);
-                SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
-                break;
+            continue;
         }
-    }
 
-    if (roleCheck.state == LFG_ROLECHECK_FINISHED)
-    {
-        LFGPlayers* queueInfo   = GetPlayerOrPartyData(groupGuid);
-        queueInfo->currentState = LFG_STATE_QUEUED;
-        queueInfo->currentRoles = roleCheck.currentRoles;
-        queueInfo->joinedTime   = time(NULL);
-
-        m_playerData[groupGuid] = *queueInfo;
-
-        AddToQueue(groupGuid);
-    }
-    else if (roleCheck.state != LFG_ROLECHECK_INITIALITING)
-    {
-        // todo: add players back to individual queues if applicable
-        roleCheck.state = LFG_ROLECHECK_NO_ROLE;
-
-        for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
+        if (!queued && roleCheck.leaderGuidRaw == guidBuff.GetRawValue())
         {
-            ObjectGuid plrGuid = roleMapItr->first;
-
-            SetPlayerState(plrGuid, LFG_STATE_NONE);
-
-            SendRoleCheckUpdate(plrGuid, roleCheck);                 // role check failed
-            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);  // not in lfg system anymore
+            SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED,
+                LFG_STATE_ROLECHECK, nullForbidden);
         }
-        m_roleCheckMap.erase(groupGuid);
+        SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
     }
+
+    if (!terminal)
+    {
+        return;
+    }
+
+    if (!queued)
+    {
+        for (roleMap::const_iterator roleItr = roleCheck.currentRoles.begin();
+            roleItr != roleCheck.currentRoles.end(); ++roleItr)
+        {
+            m_playerQueueOwners.erase(roleItr->first);
+        }
+        m_playerData.erase(groupGuid);
+    }
+    m_roleCheckMap.erase(it);
 }
 
 bool LFGMgr::ValidateGroupRoles(roleMap groupMap)
 {
-    if (groupMap.empty()) // sanity check
+    std::vector<LFGLogic::RoleRequest> requests;
+    requests.reserve(groupMap.size());
+    for (roleMap::const_iterator it = groupMap.begin(); it != groupMap.end(); ++it)
     {
-        return false;
+        requests.push_back({it->first.GetRawValue(), it->second});
     }
 
-    uint8 tankCount = 0, dpsCount = 0, healCount = 0;
-
-    for (roleMap::iterator it = groupMap.begin(); it != groupMap.end(); ++it)
-    {
-        uint8 withoutLeader = it->second;
-        withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-        switch (withoutLeader)
-        {
-            case PLAYER_ROLE_TANK:
-                ++tankCount;
-                break;
-            case PLAYER_ROLE_HEALER:
-                ++healCount;
-                break;
-            case PLAYER_ROLE_DAMAGE:
-                ++dpsCount;
-                break;
-        }
-    }
-
-    return (tankCount + dpsCount + healCount == groupMap.size()) ? true : false;
+    std::vector<LFGLogic::RoleAssignment> assignments;
+    LFGLogic::RoleNeeds needs;
+    return LFGLogic::ResolveRoles(requests, assignments, needs);
 }
 
 //todo: remove from queue, update queue average settings
@@ -573,7 +570,9 @@ void LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 
     // Add group to our group set and group map, then teleport to the dungeon
     ObjectGuid groupGuid = pGroup->GetObjectGuid();
-    LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID, proposal->currentRoles, pGroup->GetLeaderGuid());
+    LFGGroupStatus groupStatus(LFG_STATE_IN_DUNGEON, dungeon->ID,
+        proposal->currentRoles, proposal->randomDungeonByPlayer,
+        pGroup->GetLeaderGuid());
 
     m_groupSet.insert(groupGuid);
     m_groupStatusMap[groupGuid] = groupStatus;
@@ -1096,26 +1095,48 @@ void LFGMgr::SendLfgJoinResult(ObjectGuid plrGuid, LfgJoinResult result, LFGStat
 
 void LFGMgr::RemoveOldRoleChecks()
 {
-    for (roleCheckMap::iterator roleItr = m_roleCheckMap.begin(); roleItr != m_roleCheckMap.end(); ++roleItr)
+    time_t const now = time(NULL);
+    std::vector<ObjectGuid> expiredGroups;
+    for (roleCheckMap::const_iterator roleItr = m_roleCheckMap.begin();
+        roleItr != m_roleCheckMap.end(); ++roleItr)
     {
-        ObjectGuid groupGuid = roleItr->first;
-
-        LFGRoleCheck roleCheck = roleItr->second;
-        if ((roleCheck.waitForRoleTime - time(NULL)) <= 0) // no time left
+        if (roleItr->second.waitForRoleTime <= now)
         {
-            roleCheck.state = LFG_ROLECHECK_NO_ROLE;
+            expiredGroups.push_back(roleItr->first);
+        }
+    }
 
-            for (roleMap::iterator roleMapItr = roleCheck.currentRoles.begin(); roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
+    for (std::vector<ObjectGuid>::const_iterator groupItr = expiredGroups.begin();
+        groupItr != expiredGroups.end(); ++groupItr)
+    {
+        roleCheckMap::iterator roleItr = m_roleCheckMap.find(*groupItr);
+        if (roleItr == m_roleCheckMap.end())
+        {
+            continue;
+        }
+
+        ObjectGuid const groupGuid = roleItr->first;
+        LFGRoleCheck& roleCheck = roleItr->second;
+        roleCheck.state = LFG_ROLECHECK_NO_ROLE;
+        TransitionQueueUnit(groupGuid, LFG_STATE_NONE, LFG_UPDATE_ROLECHECK_FAILED);
+        partyForbidden nullForbidden;
+
+        for (roleMap::const_iterator roleMapItr = roleCheck.currentRoles.begin();
+            roleMapItr != roleCheck.currentRoles.end(); ++roleMapItr)
+        {
+            ObjectGuid const plrGuid = roleMapItr->first;
+            if (roleCheck.leaderGuidRaw == plrGuid.GetRawValue())
             {
-                ObjectGuid plrGuid = roleMapItr->first;
-
-                SetPlayerState(plrGuid, LFG_STATE_NONE);
-
-                SendRoleCheckUpdate(plrGuid, roleCheck);                 // role check failed
-                SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);  // not in lfg system anymore
+                SendLfgJoinResult(plrGuid, ERR_LFG_ROLE_CHECK_FAILED,
+                    LFG_STATE_ROLECHECK, nullForbidden);
             }
 
-            m_roleCheckMap.erase(groupGuid);
+            SendRoleCheckUpdate(plrGuid, roleCheck);
+            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
+            m_playerQueueOwners.erase(plrGuid);
         }
+
+        m_playerData.erase(groupGuid);
+        m_roleCheckMap.erase(roleItr);
     }
 }

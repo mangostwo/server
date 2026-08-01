@@ -24,11 +24,13 @@
  */
 
 #include <set>
+#include <vector>
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "GameEventMgr.h"
 #include "Group.h"
+#include "LFGLogic.h"
 #include "LFGMgr.h"
 #include "Object.h"
 #include "Player.h"
@@ -54,9 +56,11 @@ LFGMgr::~LFGMgr()
     m_queueSet.clear();
 
     m_playerStatusMap.clear();
+    m_playerQueueOwners.clear();
     m_groupStatusMap.clear();
     m_groupSet.clear();
     m_proposalMap.clear();
+    m_ownerProposalIds.clear();
 
     m_roleCheckMap.clear();
 
@@ -394,67 +398,50 @@ dungeonForbidden LFGMgr::FindRandomDungeonsNotForPlayer(Player* plr)
 
 void LFGMgr::UpdateNeededRoles(ObjectGuid guid, LFGPlayers* information)
 {
-    uint8 tankCount = 0, dpsCount = 0, healCount = 0;
-    for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
+    if (!information)
     {
-        uint8 withoutLeader = it->second;
-        withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-        switch (withoutLeader)
-        {
-            case PLAYER_ROLE_TANK:
-                ++tankCount;
-                break;
-            case PLAYER_ROLE_HEALER:
-                ++healCount;
-                break;
-            case PLAYER_ROLE_DAMAGE:
-                ++dpsCount;
-                break;
-        }
+        return;
     }
 
-    std::set<uint32>::iterator itr = information->dungeonList.begin();
-
-    // check dungeon type for max of each role [normal heroic etc.]
-    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(*itr);
-    if (dungeon)
+    std::vector<LFGLogic::RoleRequest> requests;
+    requests.reserve(information->currentRoles.size());
+    for (roleMap::const_iterator it = information->currentRoles.begin();
+        it != information->currentRoles.end(); ++it)
     {
-        // atm we're just handling DUNGEON_DIFFICULTY_NORMAL
-        if (dungeon->Difficulty == DUNGEON_DIFFICULTY_NORMAL)
-        {
-            information->neededTanks = NORMAL_TANK_OR_HEALER_COUNT - tankCount;
-            information->neededHealers = NORMAL_TANK_OR_HEALER_COUNT - healCount;
-            information->neededDps = NORMAL_DAMAGE_COUNT - dpsCount;
-        }
+        requests.push_back({it->first.GetRawValue(), it->second});
     }
 
+    std::vector<LFGLogic::RoleAssignment> assignments;
+    LFGLogic::RoleNeeds needs;
+    LFGLogic::ResolveRoles(requests, assignments, needs);
+    information->neededTanks = needs.tanks;
+    information->neededHealers = needs.healers;
+    information->neededDps = needs.damage;
     m_playerData[guid] = *information;
 }
 
 void LFGMgr::AddToQueue(ObjectGuid guid)
 {
     LFGPlayers* information = GetPlayerOrPartyData(guid);
-    if (!information)
+    if (!information || information->dungeonList.empty())
     {
         return;
     }
 
-    // This will be necessary for finding matches in the queue
     UpdateNeededRoles(guid, information);
+    information = GetPlayerOrPartyData(guid);
+    if (!information || !TransitionQueueUnit(guid, LFG_STATE_QUEUED,
+        LFG_UPDATE_ADDED_TO_QUEUE))
+    {
+        return;
+    }
 
-    // put info into wait time maps for starters
     for (roleMap::iterator it = information->currentRoles.begin(); it != information->currentRoles.end(); ++it)
     {
         AddToWaitMap(it->second, information->dungeonList);
     }
 
-    // just in case someone's already been in the queue.
-    queueSet::iterator qItr = m_queueSet.find(guid);
-    if (qItr == m_queueSet.end())
-    {
-        m_queueSet.insert(guid);
-    }
+    m_queueSet.insert(guid);
 }
 
 void LFGMgr::RemoveFromQueue(ObjectGuid guid)
@@ -466,69 +453,45 @@ void LFGMgr::RemoveFromQueue(ObjectGuid guid)
 
 void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 {
-    // use withoutLeader for switch operator
-    uint8 withoutLeader = role;
-    withoutLeader &= ~PLAYER_ROLE_LEADER;
-
-    switch (withoutLeader)
+    std::vector<std::uint8_t> const selectedRoles =
+        LFGLogic::SelectedCombatRoles(role);
+    for (std::uint8_t selectedRole : selectedRoles)
     {
-        case PLAYER_ROLE_TANK:
+        waitTimeMap* waitTimes = NULL;
+        if (selectedRole == PLAYER_ROLE_TANK)
         {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
-            {
-                waitTimeMap::iterator it = m_tankWaitTime.find(*itr);
-                if (it != m_tankWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_tankWaitTime[*itr] = waitInfo;
-                }
-            }
-        } break;
-        case PLAYER_ROLE_HEALER:
+            waitTimes = &m_tankWaitTime;
+        }
+        else if (selectedRole == PLAYER_ROLE_HEALER)
         {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
-            {
-                waitTimeMap::iterator it = m_healerWaitTime.find(*itr);
-                if (it != m_healerWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_healerWaitTime[*itr] = waitInfo;
-                }
-            }
-        } break;
-        case PLAYER_ROLE_DAMAGE:
+            waitTimes = &m_healerWaitTime;
+        }
+        else if (selectedRole == PLAYER_ROLE_DAMAGE)
         {
-            for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+            waitTimes = &m_dpsWaitTime;
+        }
+
+        if (!waitTimes)
+        {
+            continue;
+        }
+
+        for (std::set<uint32>::const_iterator itr = dungeons.begin();
+            itr != dungeons.end(); ++itr)
+        {
+            waitTimeMap::iterator waitItr = waitTimes->find(*itr);
+            if (waitItr != waitTimes->end())
             {
-                waitTimeMap::iterator it = m_dpsWaitTime.find(*itr);
-                if (it != m_dpsWaitTime.end())
-                {
-                    // Increment current player count by one
-                    ++it->second.playerCount;
-                }
-                else
-                {
-                    LFGWait waitInfo(QUEUE_DEFAULT_TIME, -1, 1, false);
-                    m_dpsWaitTime[*itr] = waitInfo;
-                }
+                ++waitItr->second.playerCount;
             }
-        } break;
-        default:
-            break;
+            else
+            {
+                (*waitTimes)[*itr] = LFGWait(QUEUE_DEFAULT_TIME, -1, 1, false);
+            }
+        }
     }
 
-    // insert the average time regardless of role
-    for (std::set<uint32>::iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
+    for (std::set<uint32>::const_iterator itr = dungeons.begin(); itr != dungeons.end(); ++itr)
     {
         waitTimeMap::iterator it = m_avgWaitTime.find(*itr);
         if (it != m_avgWaitTime.end())
@@ -762,7 +725,6 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
         return 0;
     }
 }
-
 
 
 
