@@ -106,10 +106,43 @@ typedef std::unordered_map<ObjectGuid, uint32> ownerProposalMap;
 solo-player or premade-group owner GUID. `m_ownerProposalIds` uses
 `ownerProposalMap`; its value is the active proposal ID.
 
+Queue units also preserve their pre-merge ownership boundary:
+
+```cpp
+struct LFGQueueSource
+{
+    ObjectGuid ownerGuid;
+    std::set<uint32> dungeonList;
+    playerDungeonMap randomDungeonByPlayer;
+    roleMap selectedRoles;
+    std::string comment;
+    TeamId team;
+    bool isGroup;
+    time_t joinedTime;
+};
+
+typedef std::unordered_map<ObjectGuid, LFGQueueSource> queueSourceMap;
+```
+
+Every newly published solo or premade `LFGPlayers` unit starts with one
+immutable `sourceUnits` entry containing the original actual candidates,
+per-player random identities, selected multi-role masks, comment, team,
+ownership kind, and queue time. `MergeGroups` unions these source entries
+without rewriting them while its top-level candidate set and roles become the
+compatible merged view. This is the information boundary required to undo a
+failed proposal.
+
 Add `playerGroupMap m_playerQueueOwners`, mapping every queued, role-check, or
 proposal player to the solo or group queue owner. It is published and removed
 with the queue transition, supplies deterministic logout cleanup, and avoids
 searching live `Player` objects merely to discover ownership.
+
+Its value is phase-specific but never ambiguous: during role check or queue it
+is the current top-level `m_playerData` owner, and a merge rewrites every merged
+member to the surviving aggregate owner. `BeginProposal` uses `sourceUnits` to
+rewrite each player to that player's immutable source owner; that owner then
+resolves through `m_ownerProposalIds`. Restore republishes the source owner as
+the top-level queue owner, while success/discard clears the player mapping.
 
 Add `ownerProposalMap m_ownerProposalIds`, mapping every source queue owner
 (solo player or premade group) to its active proposal ID. Proposal creation and
@@ -137,19 +170,27 @@ entries. This keeps queue UI semantics separate from match candidates.
 
 `LFGProposal::dungeonID` is always the selected actual dungeon ID. Add
 `playerDungeonMap randomDungeonByPlayer` and
-`std::set<ObjectGuid> sourceOwners`. The latter records every solo-player or
-premade-group queue owner consumed by this proposal, because one proposal may
-combine multiple owners; creation populates both `sourceOwners` and
-`m_ownerProposalIds`, while unwind/expiry removes the reverse entry for each
-owner symmetrically. `currentRoles` contains the resolved protocol role mask
-assigned to every player, not the original multi-role selection.
+`queueSourceMap sourceUnits`. The latter snapshots every solo-player or
+premade-group queue source consumed by this proposal, because one proposal may
+combine multiple owners and the resolved `currentRoles` cannot reconstruct the
+original multi-role selections. `BeginProposal` copies the merged queue unit's
+source map before erasing queue ownership and publishes
+`m_ownerProposalIds[owner]` for every source key. `currentRoles` contains the
+resolved protocol role mask assigned to every player, not the original
+multi-role selection.
 Proposal creation selects uniformly from the compatible actual candidate set
 using the core random-number helper. Empty candidate sets cannot create
 proposals. Add `time_t expiresAt`, set to `time(NULL) + LFG_TIME_PROPOSAL`.
 
-The proposal carries the per-player requested-random map. Decline, timeout, or
-group-creation failure restores or clears each source queue consistently and
-does not lose the request identity required by later rewards.
+The proposal carries the per-player requested-random map. Decline and timeout
+classify a source as failed when it contains a player who declined or remained
+pending at expiry; that complete solo/premade source leaves LFD. Sources whose
+members agreed are restored once from their immutable snapshots after
+revalidating that all members are online, available, and still share an actual
+candidate. A group-creation failure restores every still-valid source. Every
+path removes the proposal and all of its reverse owner mappings exactly once.
+Thus restoration retains original selected masks, source boundaries, candidate
+sets, random identities, team, comment, ownership kind, and joined time.
 
 ### In-dungeon group data
 
@@ -236,7 +277,11 @@ as eligible for every role bit selected until the proposal fixes one assignment.
 `AddToWaitMap` iterates the ordered combat-role bits returned by
 `LFGLogic::SelectedCombatRoles(mask)` and inserts the player in each selected
 role map; it never switches on the whole multi-role mask. After acceptance,
-`UpdateWaitMap` receives only the player's resolved single combat role.
+`UpdateWaitMap` receives only the player's resolved single combat role. It
+accepts a zero-second sample, updates that role's wait map, and always updates
+the actual dungeon's `m_avgWaitTime` with the same sample; a shared internal
+sample helper replaces the current role `switch` default that updates only one
+map.
 The stored `neededTanks`, `neededHealers`, and `neededDps` are display/wait-time
 data only. `RoleMapsAreCompatible` concatenates the two units' selected-role
 masks and reruns `ResolveRoles` on the combined unit; it never accepts or rejects
@@ -262,6 +307,16 @@ same decline/unwind path as a negative response: player statuses are updated,
 reverse proposal ownership is removed, compatible surviving source units are
 restored at most once, and disconnected/stale units are cleaned. Thus a missing
 client response cannot leave an indefinite proposal.
+
+Decline, timeout, and group-creation failure call one
+`UnwindProposal(proposalId, failedPlayers)` helper. It moves a proposal snapshot
+out of `m_proposalMap` before restoration, removes each `sourceUnits` key from
+`m_ownerProposalIds`, clears every source member's stale
+`m_playerQueueOwners`, and then either republishes or discards each source once.
+Successful group creation performs the same reverse-map cleanup without
+restoration before erasing the proposal. No path retains an owner-to-proposal
+or player-to-queue mapping after that owner has been consumed into an LFD
+group.
 
 All LFD lifecycle timestamps use `time_t` seconds. In addition to correcting
 `LFG_TIME_ROLECHECK`, proposal wait accounting uses
@@ -348,10 +403,20 @@ however, convert every ID in `LFGPlayerStatus::dungeonList` with
 client slot representation.
 
 `SMSG_LFG_QUEUE_STATUS` follows the same packed-slot rule. Manager queue state
-continues to store a raw actual candidate ID, but `SendQueueStatus` converts the
-selected status ID with `GetDungeonEntry(id)` before assigning
-`LFGQueueStatus::dungeonID`; `WorldSession::SendLfgQueueStatus` then serializes
-that packed value unchanged.
+continues to store raw actual candidate IDs for matching, but status is chosen
+per recipient: a random player uses
+`queueInfo->randomDungeonByPlayer[playerGuid]`, while a specific-queue player
+uses the guarded first entry of that player's client-facing
+`LFGPlayerStatus::dungeonList`. `SendQueueStatus` converts that request ID with
+`GetDungeonEntry(id)` before assigning `LFGQueueStatus::dungeonID`;
+`WorldSession::SendLfgQueueStatus` then serializes that packed value unchanged.
+The actual candidate remains the key for internal role/average wait maps.
+
+`SendLfgRoleCheckUpdate` likewise stops reading the removed scalar
+`randomDungeonID`. It uses the leader's nonzero
+`roleCheck.randomDungeonByPlayer[leaderGuid]` as the single displayed random
+category; otherwise it sends the role check's specific request dungeon set.
+Every emitted entry is converted with `GetDungeonEntry`.
 
 Each other-member tuple in `SMSG_GROUP_LIST` also ends with that member's
 assigned LFG role byte. `Group::SendUpdate()` calls `GetGroupUpdateData` for the
@@ -428,12 +493,29 @@ same object-manager deletion used by an ordinary group when the remaining count
 requires it. Only `guid != kicker` routes to `AttemptToKickPlayer`. Kicking a
 different member therefore retains the vote-kick flow.
 
+Boot votes have a bounded lifecycle rather than leaving the group in
+`LFG_STATE_BOOT`. `AttemptToKickPlayer` accepts only an
+`LFG_STATE_IN_DUNGEON` group with no active boot and valid distinct target and
+kicker members; finished groups cannot start a vote. `LFGBoot` records the
+previous group state and `expiresAt = time(NULL) + LFG_TIME_BOOT`. `CastVote`
+accepts a response only for a pending voter. Success, mathematical failure, or
+timeout calls one `FinishBootVote(groupGuid, succeeded)` helper, which sends the
+final boot packet, restores every surviving member and the group to the saved
+state, performs the successful kick if applicable, and erases
+`m_bootStatusMap[groupGuid]` exactly once. `RemoveOldBoots`, called by
+`LFGMgr::Update`, first collects expired group GUIDs and then fails each vote
+outside map iteration. If dungeon completion occurs during a boot, it first
+finishes the vote as failed and then performs the idempotent completion
+transition.
+
 The lifecycle hooks are explicit:
 
 ```cpp
 void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
     ObjectGuid playerGuid);
 void LFGMgr::OnGroupDisband(ObjectGuid groupGuid);
+void LFGMgr::OnGroupLeaderChanged(ObjectGuid groupGuid,
+    ObjectGuid newLeaderGuid);
 ```
 
 `Group::RemoveMember` calls `OnGroupMemberRemoved` after a successful direct
@@ -447,19 +529,26 @@ membership, boot vote, player status, reverse queue owner, group status, and
 group-set record owned by the group. The hooks tolerate already-removed records,
 so the two-member path that enters `Disband` does not double-clean or
 dereference invalid state. Existing teleport or homebind behavior remains in
-the group removal code.
+the group removal code. `Group::ChangeLeader` calls the leader hook after
+updating `m_leaderGuid`; it clears `PLAYER_ROLE_LEADER` from every saved LFD role
+mask, sets it on the new leader's assigned combat role, and sends the refreshed
+group list.
 
 Add `bool LFGMgr::OnPlayerLogout(Player* player)`, called from
 `WorldSession::LogoutPlayer` before the player is removed from the registry and
 before its normal non-raid group-removal branch. The hook first examines the
 live `player->GetGroup()` and `m_groupStatusMap`; it returns true only when the
-player belongs to an LFD group whose status is `LFG_STATE_IN_DUNGEON` or
-`LFG_STATE_FINISHED_DUNGEON`. `LogoutPlayer` uses that return value as
+player belongs to an LFD group whose status is `LFG_STATE_IN_DUNGEON`,
+`LFG_STATE_BOOT`, or `LFG_STATE_FINISHED_DUNGEON`. `LogoutPlayer` uses that return value as
 `retainLfgGroup` and skips its generic `RemoveFromGroup()` path when true. This
 preserves the offline member and LFD group on explicit logout; clean disconnect
 already skips that generic path, while the hook still performs the LFD state
 cleanup described below. Neither path depends on queue-only reverse ownership
 to recognize an in-dungeon group.
+
+During `LFG_STATE_BOOT`, logout retains group membership and any already-cast
+vote; a pending offline vote remains pending and the normal 120-second expiry
+guarantees resolution. It does not cancel or silently pass the vote.
 
 For pre-dungeon states the hook returns false after using
 `m_playerQueueOwners`: a solo queue is cancelled; a premade role check or queue
@@ -603,6 +692,11 @@ The role constants are local numeric bit values matching the 3.3.5 protocol
 Live adapters set `DungeonCandidate::fivePlayerDungeon` from
 `MapEntry::IsNonRaidDungeon()`, not `MaxPlayers`, and both
 `FilterRandomCandidates` and `IsTeleportTarget` require it.
+They set `DungeonCandidate::category` when `LfgDungeonsEntry::TypeID` is neither
+`LFG_TYPE_DUNGEON` nor `LFG_TYPE_HEROIC_DUNGEON`; a seasonal flag by itself
+does not turn an otherwise actual dungeon row into a category.
+`IsTeleportTarget` is exactly
+`!dungeon.category && dungeon.mapId != 0 && dungeon.fivePlayerDungeon`.
 `AllRolesAnswered` requires at least one combat-role bit for every request; a
 zero mask or leader-only mask is invalid rather than complete.
 `SelectedCombatRoles` returns selected tank, healer, and damage bits in that
@@ -631,7 +725,9 @@ Required regression cases:
 - A logged-out solo or premade member is removed from active matching before
   registry removal, and team comparison uses captured queue data.
 - Merging queue units intersects candidates and preserves each player's random
-  category independently.
+  category and immutable source snapshot independently; decline/timeout removes
+  the failed source and restores each agreed source with its original selected
+  masks and candidates exactly once.
 - Premade role-check initialization contains every member before publication,
   the all-answered scan terminates on pending roles, and
   success/failure/timeout cleanup removes the stored check.
@@ -641,6 +737,8 @@ Required regression cases:
   the conditional fields.
 - Player and party LFG update fixtures preserve the IDA-confirmed field order
   and write packed request entries for both random and specific queues.
+- Role-check and queue-status packets show a random recipient's packed category
+  while internal matching and wait maps remain keyed by actual dungeon IDs.
 - Teleport eligibility rejects category/map-0/non-instance destinations and
   permits the actual Stockades row on map 34.
 - Completion retains actual dungeon state and selects rewards using the
@@ -662,6 +760,10 @@ Required regression cases:
   active-iterator invalidation.
 - Wait time from 100 to 145 is 45 seconds, and a 120-second boot begun at 100
   reports 120 at time 100, 60 at time 160, and clamps to zero after expiry.
+- Zero-second matches update both the resolved role wait map and average map.
+- Boot success, failure, timeout, completion-during-boot, and logout-during-boot
+  restore deterministic state and erase the boot record; a leader change moves
+  the sole leader bit to the new leader.
 - Group member-removal and disband hooks remove their complete LFD ownership
   sets, including `m_ownerProposalIds`, and are safe when called more than once.
 - Explicit logout cancels pre-dungeon ownership but retains an in-dungeon or
@@ -688,8 +790,8 @@ runtime claim is made until the user performs the one-player smoke test.
 - Random rewards retain the original category while specific-queue players do
   not receive random-category credit.
 - Solo and premade restrictions, role checks, proposals, decline/timeout,
-  logout, self-leave, kick, completion, daily registration, and cleanup have
-  deterministic regression coverage.
+  logout, self-leave, kick/boot timeout, leader change, completion, daily
+  registration, and cleanup have deterministic regression coverage.
 - `.debug lfd` enables the user to complete the normal proposal and dungeon
   path alone, is administrator-only, defaults off, and is visibly temporary.
 - Targeted tests and phase-end MSVC, GCC, and Clang server gates succeed from
