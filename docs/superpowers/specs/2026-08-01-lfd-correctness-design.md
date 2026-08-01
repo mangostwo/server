@@ -99,6 +99,11 @@ proposal player to the solo or group queue owner. It is published and removed
 with the queue transition, supplies deterministic logout cleanup, and avoids
 searching live `Player` objects merely to discover ownership.
 
+Add `ownerProposalMap m_ownerProposalIds`, mapping every source queue owner
+(solo player or premade group) to its active proposal ID. Proposal creation and
+unwind maintain it atomically with `m_proposalMap`; group cleanup can therefore
+find its proposal directly rather than linearly scanning all proposals.
+
 For a premade role check, `LFGRoleCheck::dungeonList` holds the same actual
 candidate set. Its `currentRoles` map must be completely initialized before the
 role check is inserted into `m_roleCheckMap`. `PerformRoleCheck` must mutate the
@@ -116,7 +121,7 @@ entries. This keeps queue UI semantics separate from match candidates.
 single role assigned to every player, not the original multi-role mask.
 Proposal creation selects uniformly from the compatible actual candidate set
 using the core random-number helper. Empty candidate sets cannot create
-proposals.
+proposals. Add `time_t expiresAt`, set to `time(NULL) + LFG_TIME_PROPOSAL`.
 
 The proposal carries the per-player requested-random map. Decline, timeout, or
 group-creation failure restores or clears each source queue consistently and
@@ -176,7 +181,8 @@ sequence belongs to the group rather than LFD manager state.
    failed, aborted, and timed-out checks erase the stored role-check record.
    `RemoveOldRoleChecks` first collects expired group GUIDs, then processes and
    erases each record by key outside iteration. It never erases the active
-   unordered-map iterator.
+   unordered-map iterator. Because the field is compared with `time(NULL)`,
+   `LFG_TIME_ROLECHECK` is corrected from `45 * IN_MILLISECONDS` to 45 seconds.
 7. Matching intersects actual candidate sets and combines per-player selected
    role masks and request identities. A bounded backtracking resolver assigns
    each player one selected role without exceeding one tank, one healer, and
@@ -193,6 +199,11 @@ five-player candidate, including normal and heroic difficulties. It does not
 read `*dungeonList.begin()` or special-case normal difficulty. An empty
 candidate set fails before this function. Wait-time accounting treats a player
 as eligible for every role bit selected until the proposal fixes one assignment.
+The stored `neededTanks`, `neededHealers`, and `neededDps` are display/wait-time
+data only. `RoleMapsAreCompatible` concatenates the two units' selected-role
+masks and reruns `ResolveRoles` on the combined unit; it never accepts or rejects
+a merge by comparing the cached needs from two independently chosen partial
+assignments.
 
 Queue publication, merge, and proposal transitions use one manager helper to
 update the internal queue record and every affected `LFGPlayerStatus`. The
@@ -200,6 +211,19 @@ status retains that player's original client-facing selection, while its state,
 update type, comment, and queue membership change atomically with the internal
 candidate intersection. A merge must not leave `CMSG_LFG_GET_STATUS` describing
 the pre-merge state.
+
+`FindQueueMatches` iterates a snapshot of owner GUIDs rather than live
+`m_queueSet` iterators. `FindSpecificQueueMatches` likewise snapshots candidate
+owners and rechecks each owner still exists and is queued before use. After a
+merge or `BeginProposal` it returns immediately because either transition can
+erase queue-set entries and invalidate queue-data pointers.
+
+`RemoveOldProposals`, called from `LFGMgr::Update`, collects expired proposal IDs
+before modifying maps. A pending proposal expires after 45 seconds and uses the
+same decline/unwind path as a negative response: player statuses are updated,
+reverse proposal ownership is removed, compatible surviving source units are
+restored at most once, and disconnected/stale units are cleaned. Thus a missing
+client response cannot leave an indefinite proposal.
 
 ## Join validation
 
@@ -209,6 +233,9 @@ checks cannot be overwritten by a final unconditional success. For a party,
 each member is checked in a stable order; the first failure is retained, and a
 later valid member cannot reset it. Offline-member and group-size failures are
 reported after the checks needed to establish those conditions.
+
+The minimum level 15 rule is applied to the solo player as well as every party
+member before queue publication.
 
 Selection validation is defense in depth: the join handler validates input,
 proposal creation validates the chosen row, and teleport validates the stored
@@ -229,6 +256,14 @@ For `SMSG_GROUP_LIST`, an LFD group sends:
 - LFD state byte `0` while active and `2` after dungeon completion.
 - The packed actual LFG dungeon entry for the selected dungeon.
 - A monotonically increasing group-update counter rather than a constant zero.
+
+The active/completed values are not speculative: the maintained local CMaNGOS
+WotLK implementation writes `0` for an active LFD group and `2` when its player
+state is `LFG_STATE_FINISHED_DUNGEON`. Read-only IDA inspection of the 12340
+client confirms that `IsInLFGDungeon()` independently resolves the supplied LFG
+dungeon entry and compares its map and difficulty with the current instance.
+The user's smoke test remains the runtime UI confirmation, but no packet-capture
+assumption is needed to choose these values.
 
 For an LFD group the player's role replaces the existing fourth header byte,
 followed immediately by the LFD state byte and packed dungeon entry. For a
@@ -293,6 +328,11 @@ first applicable reward it calls `RegisterPlayerDaily` for that player and
 dungeon type, so `HasPlayerDoneDaily` changes for subsequent runs. It does not
 erase the group status immediately.
 
+`SMSG_LFG_PLAYER_REWARD` receives packed entries, not bare IDs. A nonzero
+per-player random category is converted with `GetDungeonEntry(randomId)` and the
+actual group dungeon with `GetDungeonEntry(status->dungeonID)` before building
+`LFGRewards`; a specific-queue player's random entry remains zero.
+
 Queue cancellation remains `CMSG_LFG_LEAVE` behavior for role check, queue, and
 proposal states. In-dungeon exit continues to use `CMSG_LFG_TELEPORT(true)`.
 
@@ -324,16 +364,27 @@ so the two-member path that enters `Disband` does not double-clean or
 dereference invalid state. Existing teleport or homebind behavior remains in
 the group removal code.
 
-Add `void LFGMgr::OnPlayerLogout(ObjectGuid playerGuid)`, called from
-`WorldSession::LogoutPlayer` before the player is removed from the registry. It
-uses `m_playerQueueOwners`: a solo queue is cancelled; a premade role check or
-queue is cancelled for the whole premade because its required member is no
-longer available; a pending proposal is declined through the normal proposal
-unwind; an already in-dungeon group retains its group record and offline member
-role until ordinary leave/disband cleanup. `MatchesAreOfSameTeam` compares the
-captured `LFGPlayers::team` values and never dereferences registry players. A
-missing owner/state makes units incompatible and schedules their stale queue
-records for cleanup.
+Add `bool LFGMgr::OnPlayerLogout(Player* player)`, called from
+`WorldSession::LogoutPlayer` before the player is removed from the registry and
+before its normal non-raid group-removal branch. The hook first examines the
+live `player->GetGroup()` and `m_groupStatusMap`; it returns true only when the
+player belongs to an LFD group whose status is `LFG_STATUS_IN_DUNGEON` or
+`LFG_STATUS_FINISHED_DUNGEON`. `LogoutPlayer` uses that return value as
+`retainLfgGroup` and skips its generic `RemoveFromGroup()` path when true. This
+preserves the offline member and LFD group on explicit logout; clean disconnect
+already skips that generic path, while the hook still performs the LFD state
+cleanup described below. Neither path depends on queue-only reverse ownership
+to recognize an in-dungeon group.
+
+For pre-dungeon states the hook returns false after using
+`m_playerQueueOwners`: a solo queue is cancelled; a premade role check or queue
+is cancelled for the whole premade because its required member is no longer
+available; and a pending proposal is declined through the normal proposal
+unwind. An in-dungeon or finished group retains its group record, player role,
+and per-player random category until ordinary leave/disband cleanup.
+`MatchesAreOfSameTeam` compares captured `LFGPlayers::team` values and never
+dereferences registry players. A missing owner/state makes units incompatible
+and schedules their stale queue records for cleanup.
 
 ## Temporary `.debug lfd` smoke mode
 
@@ -491,14 +542,17 @@ Required regression cases:
 - Expired role-check owners are collected before manager erasure, preventing
   active-iterator invalidation.
 - Group member-removal and disband hooks remove their complete LFD ownership
-  sets and are safe when called more than once.
+  sets, including `m_ownerProposalIds`, and are safe when called more than once.
+- Explicit logout cancels pre-dungeon ownership but retains an in-dungeon or
+  finished LFD group by bypassing the generic non-raid group-removal path.
 
 Each production behavior change follows red-green-refactor: add one failing
 test, observe the expected failure, implement the minimum change, and rerun the
 focused test before proceeding. At phase end, run the complete available C++
-test target and build the server from the isolated worktree using a fresh or
-verified build directory. No live runtime claim is made until the user performs
-the one-player smoke test.
+test target and the repository's supported compiler gates: a Windows MSVC
+server build plus Linux GCC and Clang configure/build/test equivalents of the
+CI workflows, each from a fresh or source-verified build directory. No live
+runtime claim is made until the user performs the one-player smoke test.
 
 ## Acceptance criteria
 
@@ -517,8 +571,8 @@ the one-player smoke test.
   deterministic regression coverage.
 - `.debug lfd` enables the user to complete the normal proposal and dungeon
   path alone, is administrator-only, defaults off, and is visibly temporary.
-- Targeted tests and the phase-end Windows server build succeed from the
-  isolated worktree without changing the source checkout or database repo.
+- Targeted tests and phase-end MSVC, GCC, and Clang server gates succeed from
+  the isolated worktree without changing the source checkout or database repo.
 
 ## Existing completion trigger
 
