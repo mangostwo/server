@@ -132,6 +132,12 @@ without rewriting them while its top-level candidate set and roles become the
 compatible merged view. This is the information boundary required to undo a
 failed proposal.
 
+`LFGPlayers` explicitly adds `queueSourceMap sourceUnits` alongside
+`randomDungeonByPlayer` and `team`. Its parameterized constructor accepts
+`playerDungeonMap const&`, `TeamId`, and `queueSourceMap const&` and initializes
+all three members. Initial solo/premade publication constructs a one-entry map
+keyed by its owner; merged construction passes the union.
+
 Add `playerGroupMap m_playerQueueOwners`, mapping every queued, role-check, or
 proposal player to the solo or group queue owner. It is published and removed
 with the queue transition, supplies deterministic logout cleanup, and avoids
@@ -186,11 +192,16 @@ The proposal carries the per-player requested-random map. Decline and timeout
 classify a source as failed when it contains a player who declined or remained
 pending at expiry; that complete solo/premade source leaves LFD. Sources whose
 members agreed are restored once from their immutable snapshots after
-revalidating that all members are online, available, and still share an actual
-candidate. A group-creation failure restores every still-valid source. Every
+revalidating that all members are online and available. Revalidation starts
+from the snapshot's actual candidates, intersects them with every member's
+current `GetJoinResult` and `FindRandomDungeonsNotForPlayer` eligibility, and
+publishes only that current nonempty intersection; if any member fails or the
+intersection becomes empty, the entire source is discarded. A group-creation
+failure restores every still-valid source. Every
 path removes the proposal and all of its reverse owner mappings exactly once.
 Thus restoration retains original selected masks, source boundaries, candidate
-sets, random identities, team, comment, ownership kind, and joined time.
+provenance, random identities, team, comment, ownership kind, and joined time,
+while its actual candidates reflect current eligibility.
 
 ### In-dungeon group data
 
@@ -198,7 +209,9 @@ sets, random identities, team, comment, ownership kind, and joined time.
 `playerDungeonMap randomDungeonByPlayer`; its existing `playerRoles` contains
 the assigned protocol role masks. A mask contains exactly one combat-role bit
 (tank, healer, or damage) and additionally `PLAYER_ROLE_LEADER` for the one
-player selected as group leader. The record survives
+player selected as group leader. Its parameterized constructor adds a
+`playerDungeonMap const&` argument and initializes the new member;
+`CreateDungeonGroup` passes `proposal.randomDungeonByPlayer`. The record survives
 the transition from `LFG_STATE_IN_DUNGEON` to
 `LFG_STATE_FINISHED_DUNGEON` and is removed only when the LFD group is fully
 cleaned up after member leave or disband. Teleporting out alone does not remove
@@ -341,9 +354,14 @@ All LFD lifecycle timestamps use `time_t` seconds. In addition to correcting
 `time(NULL) - joinTime` directly and never divides that value by
 `IN_MILLISECONDS`. `SendLfgBootUpdate` sends
 `LFGLogic::RemainingSeconds(boot.startTime, LFG_TIME_BOOT, time(NULL))` and
-never divides the already-seconds value by 1000. Role-check, proposal, and boot constants are
-therefore consistently 45, 45, and 120 seconds at their comparison and packet
-boundaries.
+never divides the already-seconds value by 1000. Role-check, proposal, and boot
+constants are therefore consistently 45, 45, and 120 seconds at their
+comparison and packet boundaries.
+
+Each `LFGMgr::Update` tick calls `RemoveOldRoleChecks()`,
+`RemoveOldProposals()`, and `RemoveOldBoots()` before queue matching, then runs
+`FindQueueMatches()` and `SendQueueStatus()`. Each cleanup helper independently
+collects keys before erasing manager maps.
 
 ## Join validation
 
@@ -403,6 +421,11 @@ value across later calls. If an LFD group status record is unexpectedly absent,
 the packet uses safe zero values and logs the invariant violation; it must not
 invent a category or map.
 
+Implementation captures `uint32 counter = m_updateCounter` before the recipient
+loop, writes `counter` into every packet built in that loop, and executes
+`++m_updateCounter` once after the loop. Every `Group` constructor initializes
+the member to zero.
+
 The actual dungeon entry enables the stock client's `IsInLFGDungeon()` to
 compare its map and difficulty with the player's current instance. Proposal
 packets already carry the actual selected dungeon; after group creation the
@@ -418,7 +441,9 @@ reads party update type, joined, then LFG-joined, queued, two flag bytes, three
 party bytes, dungeon count, dungeon dwords, and comment. The server must,
 however, convert every ID in `LFGPlayerStatus::dungeonList` with
 `GetDungeonEntry(id)` before writing it; sending bare IDs is not the packed
-client slot representation.
+client slot representation. The conversion occurs inside
+`WorldSession::SendLfgUpdate`, immediately before each dungeon dword is appended;
+the manager-owned status list remains raw.
 
 `SMSG_LFG_QUEUE_STATUS` follows the same packed-slot rule. Manager queue state
 continues to store raw actual candidate IDs for matching, but status is chosen
@@ -438,6 +463,12 @@ It never indexes wait maps with the packed request entry or a random category.
 `roleCheck.randomDungeonByPlayer[leaderGuid]` as the single displayed random
 category; otherwise it sends the role check's specific request dungeon set.
 Every emitted entry is converted with `GetDungeonEntry`.
+
+`partyForbidden` remains the client-bound exception to raw internal dungeon
+keys: `FindRandomDungeonsNotForPlayer` stores packed `dungeon->Entry()` keys and
+`SMSG_LFG_JOIN_RESULT` serializes them unchanged. Join filtering masks each key
+to its raw 24-bit ID only for removal from the internal actual-candidate set; it
+does not rewrite the stored locked-dungeon key to a bare ID.
 
 In `SMSG_LFG_PROPOSAL_UPDATE`, the byte currently named `showProposal` is the
 opposite: the 12340 handler logs it as `silent`, and client `sub_552900` emits
@@ -468,9 +499,12 @@ Teleport-out ignores the destination-policy flag.
 - Resolve the actual dungeon row and reject category rows, map 0, or a
   map that is not `MapEntry::IsNonRaidDungeon()`. This rejects raids,
   battlegrounds, and arenas even though all can be `Instanceable()`.
+- If the player is already on the selected actual map, return successfully
+  without relocating or overwriting the saved entry point.
 - For automatic teleport immediately after proposal acceptance, use an
-  existing group member already on the selected map as the destination;
-  otherwise use `GetMapEntranceTrigger(actualMapId)`.
+  online group leader already on the selected map as the destination; otherwise
+  use the first online member on that map in stable group-member order, then
+  fall back to `GetMapEntranceTrigger(actualMapId)`.
 - For opcode-driven `CMSG_LFG_TELEPORT(false)`, always use the selected
   dungeon's entrance trigger rather than another member's live position.
 - Save the player's battleground-style entry point only when entering from a
@@ -750,6 +784,10 @@ five players. It succeeds only when every player has one assignment within the
 remaining needs. With `testing == true`, it additionally accepts one player
 after the caller has enforced the debug-solo conditions and successful
 `AllRolesAnswered`/`ResolveRoles`; it does not encode premade state.
+`ElapsedSeconds(start, now)` returns `max(0, now - start)` and
+`RemainingSeconds(start, duration, now)` clamps to the inclusive range
+`[0, duration]`. Queue status casts the elapsed result to `uint32` only after
+that clamp, so a backward wall-clock adjustment cannot underflow.
 `src/tests/CMakeLists.txt` appends
 `${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp` and
 `LFGLogicTest.cpp` to `SRC_GRP_TESTS`; otherwise the pure implementation would
