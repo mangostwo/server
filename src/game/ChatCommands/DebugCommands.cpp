@@ -36,6 +36,7 @@
 
 #include "OpcodeTable.h"
 #include "Platform/Define.h"
+#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -51,6 +52,7 @@
 #include "GossipDef.h"
 #include "Language.h"
 #include "BattleGround/BattleGroundMgr.h"
+#include "LFGMgr.h"
 #include <fstream>
 #include "ObjectMgr.h"
 #include "ObjectGuid.h"
@@ -995,6 +997,50 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
 {
     sBattleGroundMgr.ToggleTesting();
+    return true;
+}
+
+// TEMPORARY LFD SMOKE TEST: remove this command after the one-player live test.
+bool ChatHandler::HandleDebugLfdCommand(char* /*args*/)
+{
+    if (sLFGMgr.IsTesting())
+    {
+        sLFGMgr.SetTesting(false);
+        SendSysMessage("Temporary one-player LFD smoke mode disabled.");
+        return true;
+    }
+
+    float const tolerance = 0.01f;
+    AreaTrigger const* entrance = sObjectMgr.GetMapEntranceTrigger(34);
+    bool const validEntrance = entrance && entrance->target_mapId == 34 &&
+        std::fabs(entrance->target_X - 54.23f) <= tolerance &&
+        std::fabs(entrance->target_Y - 0.28f) <= tolerance &&
+        std::fabs(entrance->target_Z - (-18.34f)) <= tolerance &&
+        std::fabs(entrance->target_Orientation - 6.26f) <= tolerance;
+    if (!validEntrance)
+    {
+        sLFGMgr.SetTesting(false);
+        SendSysMessage("ERROR: one-player LFD smoke mode remains disabled: "
+            "GetMapEntranceTrigger(34) did not resolve Stockades row 101.");
+        if (entrance)
+        {
+            PSendSysMessage("Resolved target: map %u, %.3f %.3f %.3f %.3f; "
+                "expected map 34, 54.230 0.280 -18.340 6.260.",
+                entrance->target_mapId, entrance->target_X,
+                entrance->target_Y, entrance->target_Z,
+                entrance->target_Orientation);
+        }
+        else
+        {
+            SendSysMessage("No entrance trigger targeting map 34 is loaded; "
+                "check the installed areatrigger_teleport data.");
+        }
+        return true;
+    }
+
+    sLFGMgr.SetTesting(true);
+    SendSysMessage("Temporary one-player LFD smoke mode enabled. "
+        "Stockades entrance preflight passed.");
     return true;
 }
 

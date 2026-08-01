@@ -43,6 +43,8 @@
 LFGMgr::LFGMgr()
 {
     m_proposalId = 0;
+    // TEMPORARY LFD SMOKE TEST: remove after the one-player live test.
+    m_testing = false;
 }
 
 LFGMgr::~LFGMgr()
@@ -556,9 +558,14 @@ void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
     }
     std::vector<LFGLogic::RoleAssignment> currentAssignments;
     LFGLogic::RoleNeeds currentNeeds;
+    bool const testingSolo = m_testing && !queueInfo->isGroup &&
+        currentRequests.size() == 1 && !queueInfo->dungeonList.empty() &&
+        LFGLogic::AllRolesAnswered(currentRequests);
+    // TEMPORARY LFD SMOKE TEST: testingSolo is intentionally narrower than
+    // production readiness and still uses the normal proposal path.
     if (LFGLogic::ResolveRoles(currentRequests, currentAssignments,
         currentNeeds) && LFGLogic::IsProposalReady(currentRequests.size(),
-        false, currentNeeds))
+        testingSolo, currentNeeds))
     {
         BeginProposal(guid);
         return;
@@ -823,7 +830,6 @@ bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
     data.dungeonEntry = values.dungeonEntry;
     return true;
 }
-
 
 
 
