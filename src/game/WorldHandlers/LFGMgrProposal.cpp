@@ -785,132 +785,163 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 
     m_groupSet.insert(groupGuid);
     m_groupStatusMap[groupGuid] = groupStatus;
-    TeleportToDungeon(dungeon->ID, pGroup);
+    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL;
+        itr = itr->next())
+    {
+        if (Player* player = itr->getSource())
+        {
+            TeleportPlayer(player, false, true);
+        }
+    }
 
     pGroup->SendUpdate();
     return true;
 }
 
-void LFGMgr::TeleportToDungeon(uint32 dungeonID, Group* pGroup)
+void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
 {
-    // if the group's leader is already in the dungeon, teleport anyone not in dungeon to them
-    // if nobody is in the dungeon, teleport all to beginning of dungeon (sObjectMgr.GetMapEntranceTrigger(mapid [not dungeonid]))
-    LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(dungeonID);
-    if (!dungeon || !pGroup)
+    if (!pPlayer)
     {
         return;
     }
 
-    uint32 mapID = (uint32)dungeon->MapID;
-    float x, y, z, o;
-    LFGTeleportError err = LFG_TELEPORTERROR_OK;
-
-    Player* pGroupLeader = sPlayerRegistry.Find(pGroup->GetLeaderGuid());
-
-    if (pGroupLeader && pGroupLeader->GetMapId() == mapID) // Already in the dungeon
+    auto sendError = [pPlayer](LFGTeleportError error)
     {
-        // set teleport location to that of the group leader
-        x = pGroupLeader->Where().X();
-        y = pGroupLeader->Where().Y();
-        z = pGroupLeader->Where().Z();
-        o = pGroupLeader->Where().Facing();
-    }
-    else
-    {
-        if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapID))
-        {
-            x = at->target_X;
-            y = at->target_Y;
-            z = at->target_Z;
-            o = at->target_Orientation;
-        }
-        else
-        {
-            err = LFG_TELEPORTERROR_INVALID_LOCATION;
-        }
-    }
+        pPlayer->GetSession()->SendLfgTeleportError(uint8(error));
+    };
 
-    dungeonForbidden lockedDungeons;
-    for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        if (Player* pGroupPlr = itr->getSource())
-        {
-            // further checks: player is dead, in vehicle, in battleground, on taxi, etc
-            LFGTeleportError plrErr = LFG_TELEPORTERROR_OK;
-
-            if (pGroupPlr->IsDead())
-            {
-                plrErr = LFG_TELEPORTERROR_PLAYER_DEAD;
-            }
-            if (pGroupPlr->IsFalling())
-            {
-                plrErr = LFG_TELEPORTERROR_FALLING;
-            }
-            if (pGroupPlr->GetVehicleInfo())
-            {
-                plrErr = LFG_TELEPORTERROR_IN_VEHICLE;
-            }
-
-            lockedDungeons = FindRandomDungeonsNotForPlayer(pGroupPlr);
-            if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
-            {
-                plrErr = LFG_TELEPORTERROR_INVALID_LOCATION;
-            }
-
-            if (err == LFG_TELEPORTERROR_OK && plrErr == LFG_TELEPORTERROR_OK && pGroupPlr->GetMapId() != mapID)
-            {
-                if (pGroupPlr->GetMap() && !pGroupPlr->GetMap()->IsDungeon() && !pGroupPlr->GetMap()->IsRaid() && !pGroupPlr->InBattleGround())
-                {
-                    pGroupPlr->SetBattleGroundEntryPoint(); // store current position and such
-                }
-
-                if (!pGroupPlr->TeleportTo(mapID, x, y, z, o))
-                {
-                    plrErr = LFG_TELEPORTERROR_INVALID_LOCATION;
-                }
-            }
-
-            if (err != LFG_TELEPORTERROR_OK)
-            {
-                pGroupPlr->GetSession()->SendLfgTeleportError(err);
-            }
-            else if (plrErr != LFG_TELEPORTERROR_OK)
-            {
-                pGroupPlr->GetSession()->SendLfgTeleportError(plrErr);
-            }
-            else
-            {
-                SetPlayerState(pGroupPlr->GetObjectGuid(), LFG_STATE_IN_DUNGEON);
-            }
-        }
-    }
-}
-
-void LFGMgr::TeleportPlayer(Player* pPlayer, bool out)
-{
-    // Fetch necessary data first
     Group* pGroup = pPlayer->GetGroup();
     if (!pGroup)
     {
-        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
         return;
     }
 
     LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
     if (!status)
     {
-        pPlayer->GetSession()->SendLfgTeleportError((uint8)LFG_TELEPORTERROR_INVALID_LOCATION);
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
         return;
     }
 
-    // Get dungeon info and then teleport the player out if applicable
+    LfgDungeonsEntry const* dungeon =
+        sLfgDungeonsStore.LookupEntry(status->dungeonID);
+    MapEntry const* map = dungeon && dungeon->MapID > 0 ?
+        sMapStore.LookupEntry(uint32(dungeon->MapID)) : NULL;
+    bool const isActual = dungeon &&
+        (dungeon->TypeID == LFG_TYPE_DUNGEON ||
+            dungeon->TypeID == LFG_TYPE_HEROIC_DUNGEON);
+    LFGLogic::DungeonCandidate const candidate = {
+        dungeon ? dungeon->ID : 0,
+        dungeon ? dungeon->Group_ID : 0,
+        dungeon ? dungeon->MapID : 0,
+        dungeon ? dungeon->Difficulty : 0,
+        !isActual,
+        map && map->IsNonRaidDungeon(),
+        map && map->Instanceable()
+    };
+    if (!dungeon || !LFGLogic::IsTeleportTarget(candidate,
+        uint32(pGroup->GetDungeonDifficulty())))
+    {
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+        return;
+    }
+
+    uint32 const mapID = uint32(dungeon->MapID);
     if (out)
     {
-        LfgDungeonsEntry const* dungeon = sLfgDungeonsStore.LookupEntry(status->dungeonID);
-        if (dungeon && pPlayer->GetMapId() == dungeon->MapID)
+        if (pPlayer->GetMapId() != mapID || !pPlayer->TeleportToBGEntryPoint())
         {
-            pPlayer->TeleportToBGEntryPoint();
+            sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
         }
+        return;
+    }
+
+    if (pPlayer->GetMapId() == mapID)
+    {
+        return;
+    }
+    if (pPlayer->IsDead())
+    {
+        sendError(LFG_TELEPORTERROR_PLAYER_DEAD);
+        return;
+    }
+    if (pPlayer->IsFalling())
+    {
+        sendError(LFG_TELEPORTERROR_FALLING);
+        return;
+    }
+    if (pPlayer->GetVehicleInfo())
+    {
+        sendError(LFG_TELEPORTERROR_IN_VEHICLE);
+        return;
+    }
+    dungeonForbidden const lockedDungeons = FindRandomDungeonsNotForPlayer(pPlayer);
+    if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
+    {
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+        return;
+    }
+
+    Map* currentMap = pPlayer->GetMap();
+    if (!currentMap || currentMap->IsDungeon() || currentMap->IsRaid() ||
+        currentMap->IsBattleGroundOrArena())
+    {
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+        return;
+    }
+
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float o = 0.0f;
+    bool destinationFound = false;
+    if (automatic)
+    {
+        Player* destinationPlayer = sPlayerRegistry.Find(pGroup->GetLeaderGuid());
+        if (!destinationPlayer || destinationPlayer->GetMapId() != mapID)
+        {
+            destinationPlayer = NULL;
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL;
+                itr = itr->next())
+            {
+                Player* member = itr->getSource();
+                if (member && member->GetMapId() == mapID)
+                {
+                    destinationPlayer = member;
+                    break;
+                }
+            }
+        }
+
+        if (destinationPlayer)
+        {
+            x = destinationPlayer->Where().X();
+            y = destinationPlayer->Where().Y();
+            z = destinationPlayer->Where().Z();
+            o = destinationPlayer->Where().Facing();
+            destinationFound = true;
+        }
+    }
+
+    if (!destinationFound)
+    {
+        AreaTrigger const* entrance = sObjectMgr.GetMapEntranceTrigger(mapID);
+        if (!entrance)
+        {
+            sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+            return;
+        }
+        x = entrance->target_X;
+        y = entrance->target_Y;
+        z = entrance->target_Z;
+        o = entrance->target_Orientation;
+    }
+
+    pPlayer->SetBattleGroundEntryPoint();
+    if (!pPlayer->TeleportTo(mapID, x, y, z, o))
+    {
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
     }
 }
 

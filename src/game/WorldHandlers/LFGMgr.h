@@ -596,8 +596,8 @@ public:
     bool GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
         LFGGroupUpdateData& data) const;
 
-    /// Teleports a player out of a dungeon (called by CMSG_LFG_TELEPORT)
-    void TeleportPlayer(Player* pPlayer, bool out);
+    /// Enter or leave the group's validated LFD dungeon.
+    void TeleportPlayer(Player* pPlayer, bool out, bool automatic);
 
     /// Queue Functions Below
 
@@ -690,9 +690,6 @@ protected:
 
     /// Creates a group so they can enter a dungeon together
     bool CreateDungeonGroup(LFGProposal* proposal);
-
-    /// Sends a group to the dungeon assigned to them
-    void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
 
     /**
      * @brief Merges two players/groups/etc into one for dungeon assignment.
