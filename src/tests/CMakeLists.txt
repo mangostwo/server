@@ -49,10 +49,12 @@ set(SRC_GRP_TESTS
     NavBinningTest.cpp
     DynamicCollisionTest.cpp
     PlacementTest.cpp
+    LFGLogicTest.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These two know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
