@@ -226,7 +226,9 @@ bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid,
 It returns false when the group status or player role is absent. `Group.h` adds
 a separate `uint32 m_updateCounter` member, initialized to zero by every group
 constructor, because the packet sequence belongs to the group rather than LFD
-manager state.
+manager state. On success, `GetGroupUpdateData` converts the stored raw
+`status->dungeonID` with `GetDungeonEntry` and returns that packed value in
+`dungeonEntry`; `Group::SendUpdate` serializes it unchanged.
 
 ## Queue and role-check flow
 
@@ -295,11 +297,27 @@ update type, comment, and queue membership change atomically with the internal
 candidate intersection. A merge must not leave `CMSG_LFG_GET_STATUS` describing
 the pre-merge state.
 
+Concretely, `TransitionQueueUnit(ownerGuid, state, updateType)` resolves the
+live aggregate through `m_playerData`, sets its `currentState`, and updates the
+state/update type of every member status in the same operation. Queue and role-
+check code stops calling the current player-only `SetPlayerState` and
+`SetPlayerUpdateType` helpers. After `BeginProposal` has erased the aggregate,
+proposal/group paths use an explicitly player-only status helper because no
+queue record remains to synchronize. Missing owner or member status aborts and
+cleans the transition rather than partially updating one side.
+
 `FindQueueMatches` iterates a snapshot of owner GUIDs rather than live
 `m_queueSet` iterators. `FindSpecificQueueMatches` likewise snapshots candidate
 owners and rechecks each owner still exists and is queued before use. After a
 merge or `BeginProposal` it returns immediately because either transition can
 erase queue-set entries and invalidate queue-data pointers.
+
+`MergeGroups` erases the consumed buffer owner from `m_queueSet` before erasing
+`m_playerData[bufferOwner]`, then rewrites all merged player reverse mappings to
+the surviving aggregate owner. `BeginProposal` copies `sourceUnits` and all
+proposal data first, erases the aggregate owner from both `m_queueSet` and
+`m_playerData`, and only then publishes proposal/reverse state. Neither success
+nor unwind can therefore expose a stale aggregate queue record.
 
 `RemoveOldProposals`, called from `LFGMgr::Update`, collects expired proposal IDs
 before modifying maps. A pending proposal expires after 45 seconds and uses the
@@ -322,8 +340,8 @@ All LFD lifecycle timestamps use `time_t` seconds. In addition to correcting
 `LFG_TIME_ROLECHECK`, proposal wait accounting uses
 `time(NULL) - joinTime` directly and never divides that value by
 `IN_MILLISECONDS`. `SendLfgBootUpdate` sends
-`max(0, boot.startTime + LFG_TIME_BOOT - time(NULL))` directly and never divides
-the already-seconds value by 1000. Role-check, proposal, and boot constants are
+`LFGLogic::RemainingSeconds(boot.startTime, LFG_TIME_BOOT, time(NULL))` and
+never divides the already-seconds value by 1000. Role-check, proposal, and boot constants are
 therefore consistently 45, 45, and 120 seconds at their comparison and packet
 boundaries.
 
@@ -378,12 +396,12 @@ field is always the recipient role. For an LFD group it contains the assigned
 LFD role, followed immediately by the LFD state byte and packed dungeon entry.
 For a non-LFD group it is zero (no assigned LFD role), and no LFD state/dungeon
 fields are appended. Each packet emitted by `Group::SendUpdate()` writes
-the current `m_updateCounter` and post-increments it for that recipient packet;
-different recipients in one `SendUpdate` call therefore receive successive
-values, and each recipient observes a monotonically increasing sequence across
-updates. If an LFD group status record is unexpectedly absent, the packet uses
-safe zero values and logs the invariant violation; it must not invent a
-category or map.
+the call's current `m_updateCounter`. The method increments the counter once
+after sending that update to all recipients, so every recipient gets the same
+sequence value for one logical update and observes a monotonically increasing
+value across later calls. If an LFD group status record is unexpectedly absent,
+the packet uses safe zero values and logs the invariant violation; it must not
+invent a category or map.
 
 The actual dungeon entry enables the stock client's `IsInLFGDungeon()` to
 compare its map and difficulty with the player's current instance. Proposal
@@ -410,13 +428,24 @@ uses the guarded first entry of that player's client-facing
 `LFGPlayerStatus::dungeonList`. `SendQueueStatus` converts that request ID with
 `GetDungeonEntry(id)` before assigning `LFGQueueStatus::dungeonID`;
 `WorldSession::SendLfgQueueStatus` then serializes that packed value unchanged.
-The actual candidate remains the key for internal role/average wait maps.
+`SendQueueStatus` uses two explicitly named variables: `requestDungeonEntry`
+for that client field and a separately guarded raw `actualDungeonId` from
+`queueInfo->dungeonList` for all tank/healer/damage/average wait-map lookups.
+It never indexes wait maps with the packed request entry or a random category.
 
 `SendLfgRoleCheckUpdate` likewise stops reading the removed scalar
 `randomDungeonID`. It uses the leader's nonzero
 `roleCheck.randomDungeonByPlayer[leaderGuid]` as the single displayed random
 category; otherwise it sends the role check's specific request dungeon set.
 Every emitted entry is converted with `GetDungeonEntry`.
+
+In `SMSG_LFG_PROPOSAL_UPDATE`, the byte currently named `showProposal` is the
+opposite: the 12340 handler logs it as `silent`, and client `sub_552900` emits
+`LFG_PROPOSAL_SHOW` only when that value is zero. Rename the local to `silent`.
+Normal newly matched proposals set `LFGProposal::isNew = true`, making
+`silent = !proposal.isNew && proposal.groupRawGuid == recipientOriginalGroup`
+false so the proposal window is shown. The field must not be inverted to one
+for new proposals. Backfill/continue semantics are outside this repair.
 
 Each other-member tuple in `SMSG_GROUP_LIST` also ends with that member's
 assigned LFG role byte. `Group::SendUpdate()` calls `GetGroupUpdateData` for the
@@ -425,7 +454,13 @@ retained in `LFGGroupStatus::playerRoles`, not a hard-coded zero.
 
 ## Teleport behavior
 
-`TeleportPlayer(player, false)` enters the selected actual dungeon:
+The manager interface becomes
+`void TeleportPlayer(Player* player, bool out, bool automatic)`. The
+post-proposal `TeleportToDungeon` path passes `automatic = true`; the
+`CMSG_LFG_TELEPORT` handler passes `automatic = false` for both directions.
+Teleport-out ignores the destination-policy flag.
+
+`TeleportPlayer(player, false, automatic)` enters the selected actual dungeon:
 
 - Require a current LFD group and valid group status.
 - Reject dead, falling, fatigued, vehicle, charming, and combat-invalid states
@@ -441,7 +476,7 @@ retained in `LFGGroupStatus::playerRoles`, not a hard-coded zero.
 - Save the player's battleground-style entry point only when entering from a
   non-instance world location.
 
-`TeleportPlayer(player, true)` leaves the dungeon:
+`TeleportPlayer(player, true, false)` leaves the dungeon:
 
 - Require the player to be on the selected actual dungeon map.
 - Restore the saved entry point.
@@ -496,8 +531,9 @@ different member therefore retains the vote-kick flow.
 Boot votes have a bounded lifecycle rather than leaving the group in
 `LFG_STATE_BOOT`. `AttemptToKickPlayer` accepts only an
 `LFG_STATE_IN_DUNGEON` group with no active boot and valid distinct target and
-kicker members; finished groups cannot start a vote. `LFGBoot` records the
-previous group state and `expiresAt = time(NULL) + LFG_TIME_BOOT`. `CastVote`
+kicker members; finished groups cannot start a vote. `LFGBoot` retains its
+seconds-based `startTime = time(NULL)` and adds the previous group state;
+expiration is always `startTime + LFG_TIME_BOOT`. `CastVote`
 accepts a response only for a pending voter. Success, mathematical failure, or
 timeout calls one `FinishBootVote(groupGuid, succeeded)` helper, which sends the
 final boot packet, restores every surviving member and the group to the saved
@@ -566,7 +602,8 @@ Add `.debug lfd` beside `.debug bg`, restricted to `SEC_ADMINISTRATOR`:
 `Chat.cpp` registers `lfd` in `debugCommandTable`, `Chat.h` declares
 `HandleDebugLfdCommand`, and the handler toggles an `LFGMgr::m_testing` flag
 initialized to false and prints or broadcasts whether one-player LFD testing
-is enabled.
+is enabled. Public `bool IsTesting() const` and `void SetTesting(bool)` methods
+are the command's only access to the private flag.
 
 When enabled, `AddToQueue` publishes a valid queue unit normally. At the start
 of `FindSpecificQueueMatches`, before comparing it with peer units, an explicit
@@ -576,8 +613,9 @@ set is non-empty, `AllRolesAnswered` accepts the selected mask, and
 `ResolveRoles` yields one combat-role assignment. It then calls one shared
 `BeginProposal(ownerGuid)` transition. Testing bypasses only the missing four
 players; a zero or leader-only mask cannot enter a proposal.
-`BeginProposal` erases the owner from `m_queueSet`, changes the queue record and
-every player status to proposal, and only then calls `SendDungeonProposal`.
+`BeginProposal` snapshots the queue data, erases the aggregate queue record and
+queue-set owner, changes every player status to proposal, and only then calls
+`SendDungeonProposal` with the owned snapshot.
 Normal full-group matching uses the same transition. Repeated update ticks see
 neither a queued state nor a queue-set member and cannot create duplicates. The
 solo unit still must pass normal join
@@ -695,6 +733,9 @@ Live adapters set `DungeonCandidate::fivePlayerDungeon` from
 They set `DungeonCandidate::category` when `LfgDungeonsEntry::TypeID` is neither
 `LFG_TYPE_DUNGEON` nor `LFG_TYPE_HEROIC_DUNGEON`; a seasonal flag by itself
 does not turn an otherwise actual dungeon row into a category.
+Before constructing the dependency-free candidate vector, the manager adapter
+uses `IsSeasonActive` to omit any row whose seasonal flag is inactive; the pure
+`FilterRandomCandidates` never attempts to query world-event state.
 `IsTeleportTarget` is exactly
 `!dungeon.category && dungeon.mapId != 0 && dungeon.fivePlayerDungeon`.
 `AllRolesAnswered` requires at least one combat-role bit for every request; a
@@ -738,9 +779,14 @@ Required regression cases:
 - Player and party LFG update fixtures preserve the IDA-confirmed field order
   and write packed request entries for both random and specific queues.
 - Role-check and queue-status packets show a random recipient's packed category
-  while internal matching and wait maps remain keyed by actual dungeon IDs.
+  while internal matching and wait maps remain keyed by a separate actual
+  dungeon ID.
+- New proposals serialize `silent = 0` and cause the stock client to emit
+  `LFG_PROPOSAL_SHOW`; queue-unit transitions leave manager and player status in
+  the same state.
 - Teleport eligibility rejects category/map-0/non-instance destinations and
-  permits the actual Stockades row on map 34.
+  permits the actual Stockades row on map 34; automatic formation may use an
+  existing member while opcode re-entry always uses the entrance trigger.
 - Completion retains actual dungeon state and selects rewards using the
   per-player random category; a second completion callback grants nothing, and
   the first completion registers the player's daily run.
