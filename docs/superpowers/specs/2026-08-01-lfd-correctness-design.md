@@ -409,11 +409,19 @@ difficulty with the current instance. The user's smoke test remains the runtime
 UI confirmation, but no fork-derived packet assumption is needed to choose the
 layout or values.
 
-The current fourth-header-byte comment and battleground value are wrong: this
-field is always the recipient role. For an LFD group it contains the assigned
-LFD role, followed immediately by the LFD state byte and packed dungeon entry.
-For a non-LFD group it is zero (no assigned LFD role), and no LFD state/dungeon
-fields are appended. Each packet emitted by `Group::SendUpdate()` writes
+The current fourth-header-byte comment is wrong: this field is consumed as the
+recipient role. This is verified for both packet branches because `0x6D8870`
+unconditionally reads the byte into `byte_BD198A`, while only the following
+state and dungeon fields are conditional on `GROUPTYPE_LFD`. The client helper
+at `0x52C860` returns `byte_BD198A` for the local player, and its caller at
+`0x60C810` tests bits `0x02`, `0x04`, and `0x08` as tank, healer, and damage.
+For an LFD group the server therefore writes the assigned LFD role, followed
+immediately by the LFD state byte and packed dungeon entry. For a non-LFD
+group, including a battleground group, the server preserves the existing
+fourth-byte value (`isBGGroup() ? 1 : 0`) and appends no LFD state/dungeon
+fields; this avoids changing an unrelated legacy packet path even though the
+12340 client does not interpret that value as a combat role. Each packet
+emitted by `Group::SendUpdate()` writes
 the call's current `m_updateCounter`. The method increments the counter once
 after sending that update to all recipients, so every recipient gets the same
 sequence value for one logical update and observes a monotonically increasing
@@ -499,6 +507,8 @@ Teleport-out ignores the destination-policy flag.
 - Resolve the actual dungeon row and reject category rows, map 0, or a
   map that is not `MapEntry::IsNonRaidDungeon()`. This rejects raids,
   battlegrounds, and arenas even though all can be `Instanceable()`.
+- Require `dungeon->Difficulty == pGroup->GetDungeonDifficulty()`; a mismatch
+  fails with `LFG_TELEPORTERROR_INVALID_LOCATION` before choosing a destination.
 - If the player is already on the selected actual map, return successfully
   without relocating or overwriting the saved entry point.
 - For automatic teleport immediately after proposal acceptance, use an
@@ -512,6 +522,10 @@ Teleport-out ignores the destination-policy flag.
 
 `TeleportPlayer(player, true, false)` leaves the dungeon:
 
+- Resolve the same actual dungeon row and require its difficulty to match
+  `pGroup->GetDungeonDifficulty()`; a mismatch fails with
+  `LFG_TELEPORTERROR_INVALID_LOCATION` rather than trusting inconsistent group
+  state.
 - Require the player to be on the selected actual dungeon map.
 - Restore the saved entry point.
 - Keep LFD group identity intact so the player can teleport back in while the
@@ -530,11 +544,14 @@ and are not claimed as solved here.
 
 The in-scope Two database was checked before implementation:
 `World/Setup/FullDB/areatrigger_teleport.sql` row 101 is "Stormwind Stockades
-Entrance" and targets map 34 at `(54.23, 0.28, -18.34, 6.26)`. The smoke-test
-preflight verifies that this row exists in the installed world database. Its
-absence is reported as a data-install problem rather than worked around with an
-outdoor or hard-coded destination; no database migration is required by this
-repair.
+Entrance" and targets map 34 at `(54.23, 0.28, -18.34, 6.26)`. Because
+`GetMapEntranceTrigger` selects by target map and requirement ordering rather
+than by trigger ID, the smoke-test preflight calls
+`sObjectMgr.GetMapEntranceTrigger(34)` and compares the returned map and target
+coordinates (with normal floating-point tolerance) to row 101. A missing row
+or a different selected trigger is reported as a data-install/selection problem
+rather than worked around with an outdoor or hard-coded destination; no
+database migration is required by this repair.
 
 ## Completion, leave, kick, and cleanup
 
@@ -599,10 +616,12 @@ membership, boot vote, player status, reverse queue owner, group status, and
 group-set record owned by the group. The hooks tolerate already-removed records,
 so the two-member path that enters `Disband` does not double-clean or
 dereference invalid state. Existing teleport or homebind behavior remains in
-the group removal code. `Group::ChangeLeader` calls the leader hook after
-updating `m_leaderGuid`; it clears `PLAYER_ROLE_LEADER` from every saved LFD role
-mask, sets it on the new leader's assigned combat role, and sends the refreshed
-group list.
+the group removal code. Both `Group::ChangeLeader` and the automatic promotion
+branch of `Group::RemoveMember` call the leader hook after `_setLeader` has
+updated `m_leaderGuid`; the removal path passes the newly promoted
+`m_memberSlots.front().guid`. The hook clears `PLAYER_ROLE_LEADER` from every
+saved LFD role mask, sets it on the new leader's assigned combat role, and sends
+the refreshed group list.
 
 Add `bool LFGMgr::OnPlayerLogout(Player* player)`, called from
 `WorldSession::LogoutPlayer` before the player is removed from the registry and
@@ -694,6 +713,7 @@ namespace LFGLogic
         std::uint32_t id;
         std::uint32_t groupId;
         std::int32_t mapId;
+        std::uint32_t difficulty;
         bool category;
         bool fivePlayerDungeon;
         bool instanceable;
@@ -747,7 +767,10 @@ namespace LFGLogic
         RoleNeeds const& needs);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);
-    bool IsTeleportTarget(DungeonCandidate const& dungeon);
+    std::uint8_t GroupHeaderRole(bool lfd, bool battleground,
+        std::uint8_t assignedRole);
+    bool IsTeleportTarget(DungeonCandidate const& dungeon,
+        std::uint32_t groupDifficulty);
     bool ShouldVoteKick(std::uint64_t targetGuid,
         std::uint64_t kickerGuid);
     std::int64_t ElapsedSeconds(std::int64_t start,
@@ -770,8 +793,10 @@ does not turn an otherwise actual dungeon row into a category.
 Before constructing the dependency-free candidate vector, the manager adapter
 uses `IsSeasonActive` to omit any row whose seasonal flag is inactive; the pure
 `FilterRandomCandidates` never attempts to query world-event state.
-`IsTeleportTarget` is exactly
-`!dungeon.category && dungeon.mapId != 0 && dungeon.fivePlayerDungeon`.
+`GroupHeaderRole` returns the assigned role for LFD groups and preserves the
+legacy `1`/`0` battleground value for non-LFD groups. `IsTeleportTarget` is
+exactly `!dungeon.category && dungeon.mapId != 0 &&
+dungeon.fivePlayerDungeon && dungeon.difficulty == groupDifficulty`.
 `AllRolesAnswered` requires at least one combat-role bit for every request; a
 zero mask or leader-only mask is invalid rather than complete.
 `SelectedCombatRoles` returns selected tank, healer, and damage bits in that
@@ -812,8 +837,9 @@ Required regression cases:
   success/failure/timeout cleanup removes the stored check.
 - Group packet value helpers return actual role, packed actual dungeon entry,
   active/finished state bytes, a changing update counter, and assigned roles
-  for every other-member tuple; non-LFD role/state data remains zero and omits
-  the conditional fields.
+  for every other-member tuple. Header fixtures cover an LFD recipient role and
+  preservation of the existing non-LFD battleground byte; non-LFD packets omit
+  the conditional state/dungeon fields.
 - Player and party LFG update fixtures preserve the IDA-confirmed field order
   and write packed request entries for both random and specific queues.
 - Role-check and queue-status packets show a random recipient's packed category
@@ -822,9 +848,11 @@ Required regression cases:
 - New proposals serialize `silent = 0` and cause the stock client to emit
   `LFG_PROPOSAL_SHOW`; queue-unit transitions leave manager and player status in
   the same state.
-- Teleport eligibility rejects category/map-0/non-instance destinations and
-  permits the actual Stockades row on map 34; automatic formation may use an
-  existing member while opcode re-entry always uses the entrance trigger.
+- Teleport eligibility rejects category/map-0/non-instance destinations and a
+  dungeon/group difficulty mismatch, and permits the actual Stockades row on
+  map 34. Automatic formation may use an existing member while opcode re-entry
+  always uses the entrance trigger. Smoke preflight verifies that
+  `GetMapEntranceTrigger(34)` resolves row 101's target coordinates.
 - Completion retains actual dungeon state and selects rewards using the
   per-player random category; a second completion callback grants nothing, and
   the first completion registers the player's daily run.
@@ -846,8 +874,9 @@ Required regression cases:
   reports 120 at time 100, 60 at time 160, and clamps to zero after expiry.
 - Zero-second matches update both the resolved role wait map and average map.
 - Boot success, failure, timeout, completion-during-boot, and logout-during-boot
-  restore deterministic state and erase the boot record; a leader change moves
-  the sole leader bit to the new leader.
+  restore deterministic state and erase the boot record. Explicit leader
+  change and member-removal auto-promotion each move the sole leader bit to the
+  new leader.
 - Group member-removal and disband hooks remove their complete LFD ownership
   sets, including `m_ownerProposalIds`, and are safe when called more than once.
 - Explicit logout cancels pre-dungeon ownership but retains an in-dungeon or
