@@ -115,6 +115,24 @@ Read-only manager queries expose the actual dungeon entry, per-player role, and
 finished state needed by `Group::SendUpdate()` without exposing mutable map
 storage to `Group`.
 
+The concrete packet seam is:
+
+```cpp
+struct LFGGroupUpdateData
+{
+    uint8 role;
+    uint8 state;
+    uint32 dungeonEntry;
+};
+
+bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid,
+    ObjectGuid playerGuid, LFGGroupUpdateData& data) const;
+```
+
+It returns false when the group status or player role is absent. `Group` owns a
+separate `uint32 m_updateCounter`, initialized to zero, because the packet
+sequence belongs to the group rather than LFD manager state.
+
 ## Queue and role-check flow
 
 1. Reject an empty request before reading its first element.
@@ -128,13 +146,24 @@ storage to `Group`.
    does not enqueue it.
 5. For premades, initialize all member role slots, candidate dungeons, and
    random-request identities before publishing the role check.
-6. After successful role confirmation, enqueue the actual candidates and
-   persist the confirmed roles. Remove the role-check record.
+6. `PerformRoleCheck` takes a reference to the object stored in
+   `m_roleCheckMap`. A single bounded scan checks every member exactly once and
+   returns pending as soon as it sees `PLAYER_ROLE_NONE`; it never uses the
+   current unbounded `do-while` loop. After successful role confirmation,
+   enqueue the actual candidates and persist the confirmed roles. Successful,
+   failed, aborted, and timed-out checks erase the stored role-check record.
 7. Matching intersects actual candidate sets and combines per-player roles and
    request identities. Normal readiness remains one tank, one healer, and three
    damage roles.
 8. Proposal creation randomly selects one actual compatible dungeon and
    carries request identity forward unchanged.
+
+Queue publication, merge, and proposal transitions use one manager helper to
+update the internal queue record and every affected `LFGPlayerStatus`. The
+status retains that player's original client-facing selection, while its state,
+update type, comment, and queue membership change atomically with the internal
+candidate intersection. A merge must not leave `CMSG_LFG_GET_STATUS` describing
+the pre-merge state.
 
 ## Join validation
 
@@ -159,9 +188,13 @@ For `SMSG_GROUP_LIST`, an LFD group sends:
 - The packed actual LFG dungeon entry for the selected dungeon.
 - A monotonically increasing group-update counter rather than a constant zero.
 
-Non-LFD and battleground group packet behavior remains unchanged. If an LFD
-group status record is unexpectedly absent, the packet uses safe zero values
-and logs the invariant violation; it must not invent a category or map.
+For an LFD group the player's role replaces the existing fourth header byte,
+followed immediately by the LFD state byte and packed dungeon entry. For a
+non-LFD group the fourth byte retains the existing battleground indicator and
+no LFD state/dungeon fields are appended. Each packet emitted by
+`Group::SendUpdate()` writes `m_updateCounter++`. If an LFD group status record
+is unexpectedly absent, the packet uses safe zero values and logs the invariant
+violation; it must not invent a category or map.
 
 The actual dungeon entry enables the stock client's `IsInLFGDungeon()` to
 compare its map and difficulty with the player's current instance. Client-facing
@@ -176,8 +209,11 @@ queue update packets continue to use the player's original request entry.
   using the existing LFG teleport errors where available.
 - Resolve the actual dungeon row and reject category rows, map 0, or a
   non-instanceable map.
-- Use an existing group member already on the selected map as the destination
-  when appropriate; otherwise use `GetMapEntranceTrigger(actualMapId)`.
+- For automatic teleport immediately after proposal acceptance, use an
+  existing group member already on the selected map as the destination;
+  otherwise use `GetMapEntranceTrigger(actualMapId)`.
+- For opcode-driven `CMSG_LFG_TELEPORT(false)`, always use the selected
+  dungeon's entrance trigger rather than another member's live position.
 - Save the player's battleground-style entry point only when entering from a
   non-instance world location.
 
@@ -189,8 +225,15 @@ queue update packets continue to use the player's original request entry.
   LFD group remains active, including after completion until group cleanup.
 
 Automatic teleport after proposal acceptance uses the same actual-dungeon
-validation and destination resolution as opcode-driven teleport-in, avoiding
-two divergent implementations.
+validation as opcode-driven teleport-in, with the destination-policy difference
+passed explicitly (automatic group formation versus player-requested re-entry)
+instead of duplicating the safety checks.
+
+`GetMapEntranceTrigger` remains the coordinate source in this server-only
+repair. If no trigger exists, teleport fails safely. Maps with multiple valid
+entrances cannot be disambiguated from `LFGDungeons.dbc` alone; exact
+per-dungeon coordinates require the deliberately deferred database enhancement
+and are not claimed as solved here.
 
 ## Completion, leave, kick, and cleanup
 
@@ -203,11 +246,28 @@ Queue cancellation remains `CMSG_LFG_LEAVE` behavior for role check, queue, and
 proposal states. In-dungeon exit continues to use `CMSG_LFG_TELEPORT(true)`.
 
 An LFD member selecting ordinary Leave Party removes that member rather than
-starting a vote against themselves. Kicking a different member still uses the
-vote-kick flow. The removal path clears the departing player's LFD status and
-request identity, teleports or homebinds them through existing group removal
-rules, and cleans the group status when the group is disbanded or no LFD
-members remain. Repeated cleanup calls are harmless.
+starting a vote against themselves. In `Player::RemoveFromGroup`, an LFD call
+where `guid == kicker` calls `Group::RemoveMember(guid, 0)` and performs the
+same object-manager deletion used by an ordinary group when the remaining count
+requires it. Only `guid != kicker` routes to `AttemptToKickPlayer`. Kicking a
+different member therefore retains the vote-kick flow.
+
+The lifecycle hooks are explicit:
+
+```cpp
+void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
+    ObjectGuid playerGuid);
+void LFGMgr::OnGroupDisband(ObjectGuid groupGuid);
+```
+
+`Group::RemoveMember` calls `OnGroupMemberRemoved` after a successful direct
+member removal. `Group::Disband` calls `OnGroupDisband` once before clearing its
+member slots. The member hook clears that player's status and request identity;
+the disband hook clears every role check, queue unit, proposal membership, boot
+vote, player status, group status, and group-set record owned by the group. The
+hooks tolerate already-removed records, so the two-member path that enters
+`Disband` does not double-clean or dereference invalid state. Existing teleport
+or homebind behavior remains in the group removal code.
 
 Logout does not manufacture a new LFD state. Existing group membership remains
 authoritative, and stale queue, proposal, role-check, boot, player-status, and
@@ -220,12 +280,16 @@ Add `.debug lfd` beside `.debug bg`, restricted to `SEC_ADMINISTRATOR`. It
 toggles a manager-wide `m_testing` flag initialized to false and prints or
 broadcasts whether one-player LFD testing is enabled.
 
-When enabled, a queue unit containing exactly one player may be considered
-ready without satisfying the five-player role composition. It still must pass
-normal join validation, have a non-empty actual candidate set, accept a normal
-proposal, create an LFD group, and execute the production packet, teleport,
-completion, reward, teleport-out, and leave paths. Premade groups and merged
-multi-player queue units continue to use normal readiness rules.
+When enabled, `AddToQueue` publishes a valid queue unit normally. At the start
+of `FindSpecificQueueMatches`, before comparing it with peer units, an explicit
+`m_testing && currentRoles.size() == 1 && !isGroup` branch verifies that its
+actual candidate set is non-empty and calls `SendDungeonProposal` directly.
+The proposal transition removes it from normal matching so repeated update
+ticks cannot create duplicate proposals. It still must pass normal join
+validation, accept a normal proposal, create an LFD group, and execute the
+production packet, teleport, completion, reward, teleport-out, and leave paths.
+Premade groups and merged multi-player queue units continue to use normal
+readiness rules.
 
 The testing flag never persists to the database or configuration and defaults
 off on every server start. The command and flag are deliberately isolated so a
@@ -234,10 +298,16 @@ readiness branch without changing production matching.
 
 ## Test strategy
 
-Introduce a focused LFD logic test target/file under the existing C++ test
-harness. Extract only pure decisions needed for deterministic coverage rather
-than constructing `Player`, `Group`, `WorldSession`, or map services in unit
-tests.
+Introduce `src/game/WorldHandlers/LFGLogic.h` and `LFGLogic.cpp` as a dependency-
+free unit containing the primitive/container decisions for category filtering,
+indexed selection, first-failure aggregation, role-answer completion, queue
+readiness, packet values, teleport-row eligibility, and self-leave versus
+vote-kick. The game build already includes this file through its
+`WorldHandlers/*.cpp` source glob. `src/tests/CMakeLists.txt` explicitly compiles
+the same `LFGLogic.cpp` into `mangos_tests`, and `src/tests/LFGLogicTest.cpp`
+tests it through the existing harness without linking `game.lib` or constructing
+`Player`, `Group`, `WorldSession`, `ObjectMgr`, or DBC stores. Integration code
+adapts live objects into the pure inputs and owns side effects.
 
 Required regression cases:
 
@@ -250,7 +320,8 @@ Required regression cases:
 - Merging queue units intersects candidates and preserves each player's random
   category independently.
 - Premade role-check initialization contains every member before publication,
-  and success/failure/timeout cleanup removes the stored check.
+  the all-answered scan terminates on pending roles, and
+  success/failure/timeout cleanup removes the stored check.
 - Group packet value helpers return actual role, packed actual dungeon entry,
   active/finished state bytes, and a changing update counter.
 - Teleport eligibility rejects category/map-0/non-instance destinations and
@@ -260,6 +331,8 @@ Required regression cases:
 - Self-leave is distinguished from kicking another member.
 - Testing mode allows exactly one solo queue unit to become proposal-ready;
   normal mode and all multi-player units retain the production role rules.
+- Group member-removal and disband hooks remove their complete LFD ownership
+  sets and are safe when called more than once.
 
 Each production behavior change follows red-green-refactor: add one failing
 test, observe the expected failure, implement the minimum change, and rerun the
@@ -287,3 +360,10 @@ the one-player smoke test.
   path alone, is administrator-only, defaults off, and is visibly temporary.
 - Targeted tests and the phase-end Windows server build succeed from the
   isolated worktree without changing the source checkout or database repo.
+
+## Existing completion trigger
+
+`HandleBossKilled` is currently invoked by dungeon-category completion in
+`AchievementMgr::CompletedAchievement`, despite its name. This repair preserves
+that trigger and makes its state/reward handling idempotent; replacing it with a
+new boss-death or instance-script completion system is outside scope.
