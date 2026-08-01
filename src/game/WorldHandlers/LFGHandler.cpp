@@ -339,7 +339,7 @@ void WorldSession::HandleLfgTeleportRequest(WorldPacket& recv_data)
     bool out;
     recv_data >> out;  // exit instance
 
-    sLFGMgr.TeleportPlayer(GetPlayer(), out);
+    sLFGMgr.TeleportPlayer(GetPlayer(), out, false);
 }
 
 void WorldSession::HandleLfgBootVote(WorldPacket& recv_data)
