@@ -548,10 +548,10 @@ Entrance" and targets map 34 at `(54.23, 0.28, -18.34, 6.26)`. Because
 `GetMapEntranceTrigger` selects by target map and requirement ordering rather
 than by trigger ID, the smoke-test preflight calls
 `sObjectMgr.GetMapEntranceTrigger(34)` and compares the returned map and target
-coordinates (with normal floating-point tolerance) to row 101. A missing row
-or a different selected trigger is reported as a data-install/selection problem
-rather than worked around with an outdoor or hard-coded destination; no
-database migration is required by this repair.
+coordinates and orientation (with normal floating-point tolerance) to row 101.
+A missing row or a different selected trigger is reported as a
+data-install/selection problem rather than worked around with an outdoor or
+hard-coded destination; no database migration is required by this repair.
 
 ## Completion, leave, kick, and cleanup
 
@@ -619,9 +619,14 @@ dereference invalid state. Existing teleport or homebind behavior remains in
 the group removal code. Both `Group::ChangeLeader` and the automatic promotion
 branch of `Group::RemoveMember` call the leader hook after `_setLeader` has
 updated `m_leaderGuid`; the removal path passes the newly promoted
-`m_memberSlots.front().guid`. The hook clears `PLAYER_ROLE_LEADER` from every
-saved LFD role mask, sets it on the new leader's assigned combat role, and sends
-the refreshed group list.
+`m_memberSlots.front().guid`. In the removal path,
+`OnGroupMemberRemoved` runs first, then `OnGroupLeaderChanged`, both before the
+existing `SendUpdate()`. The leader hook updates `LFGGroupStatus::leaderGuid`,
+clears `PLAYER_ROLE_LEADER` from every saved LFD role mask, and sets it on the
+new leader's assigned combat role. It does not send a packet: the existing
+single `SendUpdate()` at the end of `Group::RemoveMember` and
+`Group::ChangeLeader` serializes the refreshed state without a duplicate
+`SMSG_GROUP_LIST`.
 
 Add `bool LFGMgr::OnPlayerLogout(Player* player)`, called from
 `WorldSession::LogoutPlayer` before the player is removed from the registry and
@@ -787,6 +792,8 @@ The role constants are local numeric bit values matching the 3.3.5 protocol
 Live adapters set `DungeonCandidate::fivePlayerDungeon` from
 `MapEntry::IsNonRaidDungeon()`, not `MaxPlayers`, and both
 `FilterRandomCandidates` and `IsTeleportTarget` require it.
+They set `DungeonCandidate::difficulty` directly from
+`LfgDungeonsEntry::Difficulty`.
 They set `DungeonCandidate::category` when `LfgDungeonsEntry::TypeID` is neither
 `LFG_TYPE_DUNGEON` nor `LFG_TYPE_HEROIC_DUNGEON`; a seasonal flag by itself
 does not turn an otherwise actual dungeon row into a category.
@@ -852,7 +859,8 @@ Required regression cases:
   dungeon/group difficulty mismatch, and permits the actual Stockades row on
   map 34. Automatic formation may use an existing member while opcode re-entry
   always uses the entrance trigger. Smoke preflight verifies that
-  `GetMapEntranceTrigger(34)` resolves row 101's target coordinates.
+  `GetMapEntranceTrigger(34)` resolves row 101's target coordinates and
+  orientation.
 - Completion retains actual dungeon state and selects rewards using the
   per-player random category; a second completion callback grants nothing, and
   the first completion registers the player's daily run.
@@ -876,7 +884,8 @@ Required regression cases:
 - Boot success, failure, timeout, completion-during-boot, and logout-during-boot
   restore deterministic state and erase the boot record. Explicit leader
   change and member-removal auto-promotion each move the sole leader bit to the
-  new leader.
+  new leader, update `LFGGroupStatus::leaderGuid`, and produce one group-list
+  update rather than two.
 - Group member-removal and disband hooks remove their complete LFD ownership
   sets, including `m_ownerProposalIds`, and are safe when called more than once.
 - Explicit logout cancels pre-dungeon ownership but retains an in-dungeon or
