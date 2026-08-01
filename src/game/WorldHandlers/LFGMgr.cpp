@@ -78,6 +78,7 @@ void LFGMgr::Update()
 
     // remove old role checks
     RemoveOldRoleChecks();
+    RemoveOldProposals();
 
     // go through a waitTimeMap::iterator for each wait map and update times based on player count
     for (waitTimeMap::iterator tankItr = m_tankWaitTime.begin(); tankItr != m_tankWaitTime.end(); ++tankItr)
@@ -442,6 +443,21 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
     }
 
     m_queueSet.insert(guid);
+
+    std::vector<LFGLogic::RoleRequest> requests;
+    requests.reserve(information->currentRoles.size());
+    for (roleMap::const_iterator itr = information->currentRoles.begin();
+        itr != information->currentRoles.end(); ++itr)
+    {
+        requests.push_back({itr->first.GetRawValue(), itr->second});
+    }
+    std::vector<LFGLogic::RoleAssignment> assignments;
+    LFGLogic::RoleNeeds needs;
+    if (LFGLogic::ResolveRoles(requests, assignments, needs) &&
+        LFGLogic::IsProposalReady(information->currentRoles.size(), false, needs))
+    {
+        BeginProposal(guid);
+    }
 }
 
 void LFGMgr::RemoveFromQueue(ObjectGuid guid)
@@ -508,148 +524,188 @@ void LFGMgr::AddToWaitMap(uint8 role, std::set<uint32> dungeons)
 
 void LFGMgr::FindQueueMatches()
 {
-    // Fetch information on all the queued players/groups
-    for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+    std::vector<ObjectGuid> owners(m_queueSet.begin(), m_queueSet.end());
+    for (std::vector<ObjectGuid>::const_iterator itr = owners.begin();
+        itr != owners.end(); ++itr)
     {
-        FindSpecificQueueMatches(*itr);
+        LFGPlayers* queueInfo = GetPlayerOrPartyData(*itr);
+        if (m_queueSet.find(*itr) != m_queueSet.end() && queueInfo &&
+            queueInfo->currentState == LFG_STATE_QUEUED)
+        {
+            FindSpecificQueueMatches(*itr);
+        }
     }
 }
 
 void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
 {
-    uint64 rawGuid = guid.GetRawValue();
     LFGPlayers* queueInfo = GetPlayerOrPartyData(guid);
-    if (queueInfo)
+    if (!queueInfo || queueInfo->currentState != LFG_STATE_QUEUED ||
+        m_queueSet.find(guid) == m_queueSet.end())
     {
-        // compare to everyone else in queue for compatibility
-        // after a match is found call UpdateNeededRoles
-        // Use the roleMap to store player guid/role information; merge into queueInfo struct & delete other struct/map entry
-        for (queueSet::iterator itr = m_queueSet.begin(); itr != m_queueSet.end(); ++itr)
+        return;
+    }
+
+    std::vector<LFGLogic::RoleRequest> currentRequests;
+    currentRequests.reserve(queueInfo->currentRoles.size());
+    for (roleMap::const_iterator roleItr = queueInfo->currentRoles.begin();
+        roleItr != queueInfo->currentRoles.end(); ++roleItr)
+    {
+        currentRequests.push_back({roleItr->first.GetRawValue(), roleItr->second});
+    }
+    std::vector<LFGLogic::RoleAssignment> currentAssignments;
+    LFGLogic::RoleNeeds currentNeeds;
+    if (LFGLogic::ResolveRoles(currentRequests, currentAssignments,
+        currentNeeds) && LFGLogic::IsProposalReady(currentRequests.size(),
+        false, currentNeeds))
+    {
+        BeginProposal(guid);
+        return;
+    }
+
+    std::vector<ObjectGuid> candidates(m_queueSet.begin(), m_queueSet.end());
+    for (std::vector<ObjectGuid>::const_iterator itr = candidates.begin();
+        itr != candidates.end(); ++itr)
+    {
+        if (*itr == guid)
         {
-            if (*itr == guid)
+            continue;
+        }
+
+        queueInfo = GetPlayerOrPartyData(guid);
+        LFGPlayers* matchInfo = GetPlayerOrPartyData(*itr);
+        if (!queueInfo || queueInfo->currentState != LFG_STATE_QUEUED ||
+            m_queueSet.find(guid) == m_queueSet.end())
+        {
+            return;
+        }
+        if (!matchInfo || matchInfo->currentState != LFG_STATE_QUEUED ||
+            m_queueSet.find(*itr) == m_queueSet.end())
+        {
+            continue;
+        }
+
+        std::set<uint32> compatibleDungeons;
+        for (std::set<uint32>::const_iterator dItr = matchInfo->dungeonList.begin();
+            dItr != matchInfo->dungeonList.end(); ++dItr)
+        {
+            if (queueInfo->dungeonList.find(*dItr) != queueInfo->dungeonList.end())
             {
-                continue;
+                compatibleDungeons.insert(*dItr);
             }
+        }
 
-            LFGPlayers* matchInfo = GetPlayerOrPartyData(*itr);
-            if (matchInfo)
-            {
-                // 1. iterate through queueInfo's dungeon set and search the matchInfo for a matching entry.
-                // 2. if an(y) entry is found, great and proceed!
-                // 2a. if an entry is found and the amounts of players-to-roles are compatible, make
-                //     a new map of only the inter-compatible dungeons and use that if the other checks pass
-                // 3. Regardless of outcome, after the end of calculations send a LFGQueueStatus packet
-                bool fullyCompatible = false;
-                std::set<uint32> compatibleDungeons;
-
-                for (std::set<uint32>::iterator dItr = matchInfo->dungeonList.begin(); dItr != matchInfo->dungeonList.end(); ++dItr)
-                {
-                    if (queueInfo->dungeonList.find(*dItr) != queueInfo->dungeonList.end())
-                    {
-                        compatibleDungeons.insert(*dItr);
-                    }
-                }
-
-                if (!compatibleDungeons.empty())
-                {
-                    // check for player / role count and also team compatibility
-                    // if function returns true, then merge groups into one
-                    if (RoleMapsAreCompatible(queueInfo, matchInfo) && MatchesAreOfSameTeam(queueInfo, matchInfo))
-                    {
-                        MergeGroups(guid, *itr, compatibleDungeons);
-                    }
-                }
-            }
+        if (!compatibleDungeons.empty() &&
+            RoleMapsAreCompatible(queueInfo, matchInfo) &&
+            MatchesAreOfSameTeam(queueInfo, matchInfo))
+        {
+            MergeGroups(guid, *itr, compatibleDungeons);
+            return;
         }
     }
 }
 
 bool LFGMgr::RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo)
 {
-    // When this is called we already know that the dungeons match, so just focus on roles
-    // compare: neededX(role) from each struct and the amount of people per role in the roleMap
-    if ((groupOne->currentRoles.size() + groupTwo->currentRoles.size()) > NORMAL_TOTAL_ROLE_COUNT)
+    if (!groupOne || !groupTwo ||
+        groupOne->currentRoles.size() + groupTwo->currentRoles.size() >
+            NORMAL_TOTAL_ROLE_COUNT)
     {
         return false;
     }
-    else
+
+    std::vector<LFGLogic::RoleRequest> requests;
+    requests.reserve(groupOne->currentRoles.size() + groupTwo->currentRoles.size());
+    for (roleMap::const_iterator itr = groupOne->currentRoles.begin();
+        itr != groupOne->currentRoles.end(); ++itr)
     {
-        // make sure we don't have too many players of a certain role here
-        if (((NORMAL_DAMAGE_COUNT - groupOne->neededDps) + (NORMAL_DAMAGE_COUNT - groupTwo->neededDps)) > NORMAL_DAMAGE_COUNT)
-        {
-            return false;
-        }
-        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededHealers) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededHealers)) > NORMAL_TANK_OR_HEALER_COUNT)
-        {
-            return false;
-        }
-        else if (((NORMAL_TANK_OR_HEALER_COUNT - groupOne->neededTanks) + (NORMAL_TANK_OR_HEALER_COUNT - groupTwo->neededTanks)) > NORMAL_TANK_OR_HEALER_COUNT)
-        {
-            return false;
-        }
-        else
-        {
-            return true; // the player/role counts line up!
-        }
+        requests.push_back({itr->first.GetRawValue(), itr->second});
     }
-    return false;
+    for (roleMap::const_iterator itr = groupTwo->currentRoles.begin();
+        itr != groupTwo->currentRoles.end(); ++itr)
+    {
+        requests.push_back({itr->first.GetRawValue(), itr->second});
+    }
+
+    std::vector<LFGLogic::RoleAssignment> assignments;
+    LFGLogic::RoleNeeds needs;
+    return LFGLogic::ResolveRoles(requests, assignments, needs);
 }
 
 bool LFGMgr::MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo)
 {
-    // we should safely be able to compare any two players from each struct to
-    // determine compatibility
-    roleMap::iterator it1 = groupOne->currentRoles.begin();
-    roleMap::iterator it2 = groupTwo->currentRoles.begin();
-
-    // now we find the players from the maps
-    Player* pPlayer1 = sPlayerRegistry.Find(it1->first);
-    Player* pPlayer2 = sPlayerRegistry.Find(it2->first);
-
-    // todo: disable this if a config option is set
-    if (pPlayer1->GetTeamId() == pPlayer2->GetTeamId())
-    {
-        return true;
-    }
-
-    return false;
+    return groupOne && groupTwo && groupOne->team == groupTwo->team;
 }
 
-void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32> compatibleDungeons)
+void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo,
+    std::set<uint32> const& compatibleDungeons)
 {
-    // merge into the entry for rawGuidOne, then see if they are
-    // able to enter the dungeon at this point or not
-    LFGPlayers* mainGroup   = GetPlayerOrPartyData(guidOne);
+    LFGPlayers* mainGroup = GetPlayerOrPartyData(guidOne);
     LFGPlayers* bufferGroup = GetPlayerOrPartyData(guidTwo);
-
-    if (!mainGroup || !bufferGroup)
+    if (!mainGroup || !bufferGroup || compatibleDungeons.empty())
     {
         return;
     }
 
-    // update the dungeon selection with the compatible ones
-    mainGroup->dungeonList.clear();
+    LFGPlayers const bufferSnapshot = *bufferGroup;
     mainGroup->dungeonList = compatibleDungeons;
+    mainGroup->currentRoles.insert(bufferSnapshot.currentRoles.begin(),
+        bufferSnapshot.currentRoles.end());
+    mainGroup->randomDungeonByPlayer.insert(
+        bufferSnapshot.randomDungeonByPlayer.begin(),
+        bufferSnapshot.randomDungeonByPlayer.end());
+    mainGroup->sourceUnits.insert(bufferSnapshot.sourceUnits.begin(),
+        bufferSnapshot.sourceUnits.end());
+    mainGroup->isGroup = mainGroup->isGroup || bufferSnapshot.isGroup;
 
-    // move players / roles into a single roleMap
-    for (roleMap::iterator it = bufferGroup->currentRoles.begin(); it != bufferGroup->currentRoles.end(); ++it)
-    {
-        mainGroup->currentRoles[it->first] = it->second;
-    }
-
-    // update the role count / needed role info
-    UpdateNeededRoles(guidOne, mainGroup);
-
-    // being safe
-    //mainGroup = GetPlayerOrPartyData(rawGuidOne);
-
-    // Then do the following:
-    if ((mainGroup->neededTanks == 0) && (mainGroup->neededHealers == 0) && (mainGroup->neededDps == 0))
-    {
-        SendDungeonProposal(mainGroup);
-    }
-
+    m_queueSet.erase(guidTwo);
     m_playerData.erase(guidTwo);
+    for (roleMap::const_iterator itr = mainGroup->currentRoles.begin();
+        itr != mainGroup->currentRoles.end(); ++itr)
+    {
+        m_playerQueueOwners[itr->first] = guidOne;
+    }
+
+    UpdateNeededRoles(guidOne, mainGroup);
+    mainGroup = GetPlayerOrPartyData(guidOne);
+    if (!mainGroup || !TransitionQueueUnit(guidOne, LFG_STATE_QUEUED,
+        LFG_UPDATE_ADDED_TO_QUEUE))
+    {
+        queueSourceMap sources;
+        if (mainGroup)
+        {
+            sources = mainGroup->sourceUnits;
+        }
+        m_queueSet.erase(guidOne);
+        m_playerData.erase(guidOne);
+        for (queueSourceMap::const_iterator sourceItr = sources.begin();
+            sourceItr != sources.end(); ++sourceItr)
+        {
+            for (roleMap::const_iterator roleItr =
+                sourceItr->second.selectedRoles.begin();
+                roleItr != sourceItr->second.selectedRoles.end(); ++roleItr)
+            {
+                m_playerQueueOwners.erase(roleItr->first);
+            }
+            RestoreQueueSource(sourceItr->second);
+        }
+        return;
+    }
+
+    std::vector<LFGLogic::RoleRequest> requests;
+    requests.reserve(mainGroup->currentRoles.size());
+    for (roleMap::const_iterator itr = mainGroup->currentRoles.begin();
+        itr != mainGroup->currentRoles.end(); ++itr)
+    {
+        requests.push_back({itr->first.GetRawValue(), itr->second});
+    }
+    std::vector<LFGLogic::RoleAssignment> assignments;
+    LFGLogic::RoleNeeds needs;
+    if (LFGLogic::ResolveRoles(requests, assignments, needs) &&
+        LFGLogic::IsProposalReady(mainGroup->currentRoles.size(), false, needs))
+    {
+        BeginProposal(guidOne);
+    }
 }
 
 void LFGMgr::SendQueueStatus()
@@ -662,7 +718,8 @@ void LFGMgr::SendQueueStatus()
     {
         // make sure it's not a false entry
         LFGPlayers* queueInfo = GetPlayerOrPartyData(*itr);
-        if (queueInfo && queueInfo->currentState == LFG_STATE_QUEUED)
+        if (queueInfo && queueInfo->currentState == LFG_STATE_QUEUED &&
+            !queueInfo->dungeonList.empty())
         {
             for (roleMap::iterator rItr = queueInfo->currentRoles.begin(); rItr != queueInfo->currentRoles.end(); ++rItr)
             {
@@ -675,15 +732,17 @@ void LFGMgr::SendQueueStatus()
                     status.neededTanks      = queueInfo->neededTanks;
                     status.neededHeals      = queueInfo->neededHealers;
                     status.neededDps        = queueInfo->neededDps;
-                    status.timeSpentInQueue = uint32(timeNow - queueInfo->joinedTime);
+                    status.timeSpentInQueue = uint32(LFGLogic::ElapsedSeconds(
+                        queueInfo->joinedTime, timeNow));
 
                     int32 playerWaitTime;
 
-                    // strip leader flag from role
-                    uint8 withoutLeader = rItr->second;
-                    withoutLeader &= ~PLAYER_ROLE_LEADER;
+                    std::vector<std::uint8_t> const selectedRoles =
+                        LFGLogic::SelectedCombatRoles(rItr->second);
+                    uint8 const selectedRole = selectedRoles.empty() ?
+                        PLAYER_ROLE_NONE : selectedRoles.front();
 
-                    switch (withoutLeader)
+                    switch (selectedRole)
                     {
                         case PLAYER_ROLE_TANK:
                             playerWaitTime = m_tankWaitTime[dungeonId].time;
@@ -725,13 +784,6 @@ uint32 LFGMgr::GetDungeonEntry(uint32 ID)
         return 0;
     }
 }
-
-
-
-
-
-
-
 
 
 

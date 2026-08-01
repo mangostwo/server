@@ -666,26 +666,17 @@ protected:
     /// Add the player to their respective waiting map for their dungeon
     void AddToWaitMap(uint8 role, std::set<uint32> dungeons);
 
-    /// Checks if any players have the leader flag for their roles
-    bool HasLeaderFlag(roleMap const& roles);
-
     /// Compares two groups/players to see if their role combinations are compatible
     bool RoleMapsAreCompatible(LFGPlayers* groupOne, LFGPlayers* groupTwo);
 
     /// Checks whether or not two combinations of players/groups are on the same team (alliance/horde)
     bool MatchesAreOfSameTeam(LFGPlayers* groupOne, LFGPlayers* groupTwo);
 
-    /// Are the players in a proposal already grouped up?
-    bool IsProposalSameGroup(LFGProposal const& proposal);
-
-    /// Update a proposal after a player refused to join
-    void ProposalDeclined(ObjectGuid guid, LFGProposal* proposal);
-
     /// Updates a wait map with the amount of time it took the last player to join
     void UpdateWaitMap(LFGRoles role, uint32 dungeonID, time_t waitTime);
 
     /// Creates a group so they can enter a dungeon together
-    void CreateDungeonGroup(LFGProposal* proposal);
+    bool CreateDungeonGroup(LFGProposal* proposal);
 
     /// Sends a group to the dungeon assigned to them
     void TeleportToDungeon(uint32 dungeonID, Group* pGroup);
@@ -697,10 +688,17 @@ protected:
      * @param guidTwo The guid assigned to the second group in m_playerData
      * @param compatibleDungeons The dungeons that both players or groups agreed to doing
      */
-    void MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo, std::set<uint32> compatibleDungeons);
+    void MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo,
+        std::set<uint32> const& compatibleDungeons);
 
-    /// Send a proposal to each member of a group
-    void SendDungeonProposal(LFGPlayers* lfgGroup);
+    /// Consume a complete queue aggregate and publish one proposal atomically.
+    bool BeginProposal(ObjectGuid ownerGuid);
+
+    /// Remove one failed proposal and restore each still-valid source at most once.
+    void UnwindProposal(uint32 proposalId, std::set<ObjectGuid> const& failedPlayers);
+
+    /// Revalidate and republish one immutable queue source.
+    bool RestoreQueueSource(LFGQueueSource const& source);
 
     /// Tell a group member that someone else just confirmed their role
     void SendRoleChosen(ObjectGuid plrGuid, ObjectGuid confirmedGuid, uint8 roles);
@@ -716,6 +714,9 @@ protected:
 
     /// Get rid of expired role checks
     void RemoveOldRoleChecks();
+
+    /// Fail proposals whose client-response window expired.
+    void RemoveOldProposals();
 
     /// Keep an aggregate queue record and every member's client status in sync.
     bool TransitionQueueUnit(ObjectGuid ownerGuid, LFGState state, LfgUpdateType updateType);
