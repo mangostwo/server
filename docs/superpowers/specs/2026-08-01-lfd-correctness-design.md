@@ -117,9 +117,11 @@ unwind maintain it atomically with `m_proposalMap`; group cleanup can therefore
 find its proposal directly rather than linearly scanning all proposals.
 
 For a premade role check, `LFGRoleCheck::dungeonList` holds the same actual
-candidate set. Before insertion into `m_roleCheckMap`, `JoinLFG` enumerates all
-online group members and completely initializes both `currentRoles` (leader's
-submitted mask, zero for members still pending) and a per-player random map
+candidate set and the struct adds
+`playerDungeonMap randomDungeonByPlayer`. Before insertion into
+`m_roleCheckMap`, `JoinLFG` enumerates all online group members and completely
+initializes both `currentRoles` (leader's submitted mask, zero for members still
+pending) and `randomDungeonByPlayer`
 (the request category for random queueing, zero for a specific request). Only
 then is the role check published. `PerformRoleCheck` mutates that stored object,
 not a detached copy. On success it copies the stored actual candidates,
@@ -134,8 +136,13 @@ entries. This keeps queue UI semantics separate from match candidates.
 ### Proposal data
 
 `LFGProposal::dungeonID` is always the selected actual dungeon ID. Add
-`playerDungeonMap randomDungeonByPlayer`. `currentRoles` contains the resolved
-single role assigned to every player, not the original multi-role mask.
+`playerDungeonMap randomDungeonByPlayer` and
+`std::set<ObjectGuid> sourceOwners`. The latter records every solo-player or
+premade-group queue owner consumed by this proposal, because one proposal may
+combine multiple owners; creation populates both `sourceOwners` and
+`m_ownerProposalIds`, while unwind/expiry removes the reverse entry for each
+owner symmetrically. `currentRoles` contains the resolved protocol role mask
+assigned to every player, not the original multi-role selection.
 Proposal creation selects uniformly from the compatible actual candidate set
 using the core random-number helper. Empty candidate sets cannot create
 proposals. Add `time_t expiresAt`, set to `time(NULL) + LFG_TIME_PROPOSAL`.
@@ -148,7 +155,9 @@ does not lose the request identity required by later rewards.
 
 `LFGGroupStatus::dungeonID` is the actual selected dungeon ID. Add
 `playerDungeonMap randomDungeonByPlayer`; its existing `playerRoles` contains
-the assigned single roles. The record survives
+the assigned protocol role masks. A mask contains exactly one combat-role bit
+(tank, healer, or damage) and additionally `PLAYER_ROLE_LEADER` for the one
+player selected as group leader. The record survives
 the transition from `LFG_STATE_IN_DUNGEON` to
 `LFG_STATE_FINISHED_DUNGEON` and is removed only when the LFD group is fully
 cleaned up after member leave or disband. Teleporting out alone does not remove
@@ -185,7 +194,9 @@ manager state.
    incompatible mixed types, and multiple selections containing a random
    category.
 3. For a random request, record the category separately, expand by its DBC
-   group, and keep only non-category dungeon/heroic rows.
+   group, and keep only non-category dungeon/heroic rows whose map satisfies
+   `MapEntry::IsNonRaidDungeon()`. `Instanceable()` alone is insufficient
+   because it also accepts raids, battlegrounds, and arenas.
 4. Apply every party member's lock and eligibility filters to the actual
    candidates. Failure leaves the category intact for the join-result UI but
    does not enqueue it.
@@ -207,8 +218,13 @@ manager state.
    three damage. It handles multi-role masks rather than switching on the whole
    mask. A partial unit is compatible when every current player can be assigned
    within those capacities; a five-player unit is ready only when the exact
-   1/1/3 composition is resolved. The resolved single roles are copied into the
-   proposal and group status.
+   1/1/3 composition is resolved. The solver returns one combat-role bit per
+   player. Before proposal publication, leader selection preserves the leader
+   of a reused premade group; otherwise it chooses the lowest-GUID player who
+   requested `PLAYER_ROLE_LEADER`, falling back to the lowest GUID. Exactly that
+   player's combat role is ORed with `PLAYER_ROLE_LEADER`. These final protocol
+   masks are copied into the proposal and group status and are used by proposal
+   and group-list packets.
 8. Proposal creation randomly selects one actual compatible dungeon and
    carries request identity forward unchanged.
 
@@ -217,6 +233,10 @@ five-player candidate, including normal and heroic difficulties. It does not
 read `*dungeonList.begin()` or special-case normal difficulty. An empty
 candidate set fails before this function. Wait-time accounting treats a player
 as eligible for every role bit selected until the proposal fixes one assignment.
+`AddToWaitMap` iterates the ordered combat-role bits returned by
+`LFGLogic::SelectedCombatRoles(mask)` and inserts the player in each selected
+role map; it never switches on the whole multi-role mask. After acceptance,
+`UpdateWaitMap` receives only the player's resolved single combat role.
 The stored `neededTanks`, `neededHealers`, and `neededDps` are display/wait-time
 data only. `RoleMapsAreCompatible` concatenates the two units' selected-role
 masks and reruns `ResolveRoles` on the combined unit; it never accepts or rejects
@@ -303,9 +323,12 @@ field is always the recipient role. For an LFD group it contains the assigned
 LFD role, followed immediately by the LFD state byte and packed dungeon entry.
 For a non-LFD group it is zero (no assigned LFD role), and no LFD state/dungeon
 fields are appended. Each packet emitted by `Group::SendUpdate()` writes
-`m_updateCounter++`. If an LFD group status record is unexpectedly absent, the
-packet uses safe zero values and logs the invariant violation; it must not
-invent a category or map.
+the current `m_updateCounter` and post-increments it for that recipient packet;
+different recipients in one `SendUpdate` call therefore receive successive
+values, and each recipient observes a monotonically increasing sequence across
+updates. If an LFD group status record is unexpectedly absent, the packet uses
+safe zero values and logs the invariant violation; it must not invent a
+category or map.
 
 The actual dungeon entry enables the stock client's `IsInLFGDungeon()` to
 compare its map and difficulty with the player's current instance. Proposal
@@ -324,6 +347,12 @@ however, convert every ID in `LFGPlayerStatus::dungeonList` with
 `GetDungeonEntry(id)` before writing it; sending bare IDs is not the packed
 client slot representation.
 
+`SMSG_LFG_QUEUE_STATUS` follows the same packed-slot rule. Manager queue state
+continues to store a raw actual candidate ID, but `SendQueueStatus` converts the
+selected status ID with `GetDungeonEntry(id)` before assigning
+`LFGQueueStatus::dungeonID`; `WorldSession::SendLfgQueueStatus` then serializes
+that packed value unchanged.
+
 Each other-member tuple in `SMSG_GROUP_LIST` also ends with that member's
 assigned LFG role byte. `Group::SendUpdate()` calls `GetGroupUpdateData` for the
 recipient header and for every listed member; offline members use the role
@@ -337,7 +366,8 @@ retained in `LFGGroupStatus::playerRoles`, not a hard-coded zero.
 - Reject dead, falling, fatigued, vehicle, charming, and combat-invalid states
   using the existing LFG teleport errors where available.
 - Resolve the actual dungeon row and reject category rows, map 0, or a
-  non-instanceable map.
+  map that is not `MapEntry::IsNonRaidDungeon()`. This rejects raids,
+  battlegrounds, and arenas even though all can be `Instanceable()`.
 - For automatic teleport immediately after proposal acceptance, use an
   existing group member already on the selected map as the destination;
   otherwise use `GetMapEntranceTrigger(actualMapId)`.
@@ -423,8 +453,8 @@ Add `bool LFGMgr::OnPlayerLogout(Player* player)`, called from
 `WorldSession::LogoutPlayer` before the player is removed from the registry and
 before its normal non-raid group-removal branch. The hook first examines the
 live `player->GetGroup()` and `m_groupStatusMap`; it returns true only when the
-player belongs to an LFD group whose status is `LFG_STATUS_IN_DUNGEON` or
-`LFG_STATUS_FINISHED_DUNGEON`. `LogoutPlayer` uses that return value as
+player belongs to an LFD group whose status is `LFG_STATE_IN_DUNGEON` or
+`LFG_STATE_FINISHED_DUNGEON`. `LogoutPlayer` uses that return value as
 `retainLfgGroup` and skips its generic `RemoveFromGroup()` path when true. This
 preserves the offline member and LFD group on explicit logout; clean disconnect
 already skips that generic path, while the hook still performs the LFD state
@@ -453,7 +483,10 @@ When enabled, `AddToQueue` publishes a valid queue unit normally. At the start
 of `FindSpecificQueueMatches`, before comparing it with peer units, an explicit
 `currentState == LFG_STATE_QUEUED && m_testing &&
 currentRoles.size() == 1 && !isGroup` branch verifies that its actual candidate
-set is non-empty and calls one shared `BeginProposal(ownerGuid)` transition.
+set is non-empty, `AllRolesAnswered` accepts the selected mask, and
+`ResolveRoles` yields one combat-role assignment. It then calls one shared
+`BeginProposal(ownerGuid)` transition. Testing bypasses only the missing four
+players; a zero or leader-only mask cannot enter a proposal.
 `BeginProposal` erases the owner from `m_queueSet`, changes the queue record and
 every player status to proposal, and only then calls `SendDungeonProposal`.
 Normal full-group matching uses the same transition. Repeated update ticks see
@@ -545,10 +578,12 @@ namespace LFGLogic
     std::uint32_t FirstFailure(std::vector<std::uint32_t> const& results,
         std::uint32_t okResult);
     bool AllRolesAnswered(std::vector<RoleRequest> const& requests);
+    std::vector<std::uint8_t> SelectedCombatRoles(
+        std::uint8_t selectedRoles);
     bool ResolveRoles(std::vector<RoleRequest> const& requests,
         std::vector<RoleAssignment>& assignments, RoleNeeds& needs);
-    bool IsProposalReady(std::size_t playerCount, bool isPremade,
-        bool testing, RoleNeeds const& needs);
+    bool IsProposalReady(std::size_t playerCount, bool testing,
+        RoleNeeds const& needs);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);
     bool IsTeleportTarget(DungeonCandidate const& dungeon);
@@ -565,10 +600,21 @@ namespace LFGLogic
 
 The role constants are local numeric bit values matching the 3.3.5 protocol
 (`leader=0x01`, `tank=0x02`, `healer=0x04`, `damage=0x08`).
+Live adapters set `DungeonCandidate::fivePlayerDungeon` from
+`MapEntry::IsNonRaidDungeon()`, not `MaxPlayers`, and both
+`FilterRandomCandidates` and `IsTeleportTarget` require it.
+`AllRolesAnswered` requires at least one combat-role bit for every request; a
+zero mask or leader-only mask is invalid rather than complete.
+`SelectedCombatRoles` returns selected tank, healer, and damage bits in that
+stable order and ignores the leader bit.
 `ResolveRoles` strips the leader bit, orders the search deterministically by
 fewest selected roles and then GUID, and uses bounded backtracking over at most
 five players. It succeeds only when every player has one assignment within the
 1/1/3 capacities and returns the remaining capacities as `RoleNeeds`.
+`IsProposalReady` returns true for production only at five players with zero
+remaining needs. With `testing == true`, it additionally accepts one player
+after the caller has enforced the debug-solo conditions and successful
+`AllRolesAnswered`/`ResolveRoles`; it does not encode premade state.
 `src/tests/CMakeLists.txt` appends
 `${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp` and
 `LFGLogicTest.cpp` to `SRC_GRP_TESTS`; otherwise the pure implementation would
@@ -577,7 +623,7 @@ not be linked into `mangos_tests`.
 Required regression cases:
 
 - Random Classic entry 258 expands to actual group-1 dungeon IDs and excludes
-  entry 258 and every other category row.
+  entry 258, every other category row, raids, battlegrounds, and arenas.
 - A selected proposal dungeon is a member of the compatible candidate set;
   deterministic injected/random-index boundaries cover first and last entries.
 - Empty and unknown selections fail without dereference.
@@ -607,6 +653,11 @@ Required regression cases:
 - Multi-role selections resolve to a valid single-role assignment when one
   exists for normal and heroic five-player candidates, and reject impossible
   compositions.
+- Multi-role queue entries are added to every selected combat-role wait map;
+  the resolved proposal mask has one combat role, and exactly the selected
+  group leader also has the leader bit.
+- Queue-status and player/party update dungeon values are packed entries, not
+  raw IDs.
 - Expired role-check owners are collected before manager erasure, preventing
   active-iterator invalidation.
 - Wait time from 100 to 145 is 45 seconds, and a 120-second boot begun at 100
