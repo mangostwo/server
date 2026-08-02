@@ -44,7 +44,8 @@ $installText = Get-Content -Raw .\install_script.txt
 $failures = @()
 if ($buildText -notmatch 'Join-Path \$DestinationDirectory "ossl-modules"') { $failures += 'standard ossl-modules destination missing' }
 if ($buildText -match 'Write-Warning "No OpenSSL provider modules') { $failures += 'provider is still optional' }
-if ($buildText -notmatch 'Assert-PathExists "\$serverStage\\ossl-modules\\legacy\.dll"') { $failures += 'staged legacy provider assertion missing' }
+if ($buildText -notmatch '\$serverStage\\ossl-modules\\legacy\.dll') { $failures += 'staged legacy provider path missing' }
+if ($buildText -notmatch 'Assert-PathExists \$requiredReleasePath') { $failures += 'staged release assertions missing' }
 if ($buildText -match 'default\.dll') { $failures += 'default provider is still packaged' }
 if ($installText -notmatch 'legacy\.dll') { $failures += 'install dependency validation omits legacy provider' }
 if ($failures.Count -ne 0) { throw ($failures -join '; ') }
@@ -98,11 +99,34 @@ $sslImportPaths = @(
 )
 ```
 
-An OpenSSL root is usable only when its header and all five artifact categories resolve. This replaces recursive first-match selection for packaged files.
+Also resolve `openssl.exe` from `bin\openssl.exe` and then `openssl.exe`.
+
+In `install_script.txt`, resolve the header plus both import libraries, both
+runtime DLLs, `legacy.dll`, and `openssl.exe` inside the existing-installation
+branch. If any resolution throws, treat that root as unusable and perform the
+existing clean fallback install; after fallback installation, resolve all seven
+artifacts again without catching the exception so the install phase fails
+immediately when incomplete.
+
+In `build_script.txt`, iterate `$openSslRootCandidates` in order and call
+`Resolve-OpenSslArtifact` for all seven artifacts inside a `try` block. Select a
+root only after every call succeeds, retaining the resolved paths in an object
+used by `Copy-OpenSslRuntime`. If no candidate passes, throw with every checked
+root. This replaces the current header-plus-recursive-libcrypto root test and
+recursive first-match selection for packaged files.
 
 - [ ] **Step 3: Stage only the required files**
 
 Change `Copy-OpenSslRuntime` in `build_script.txt` to copy the resolved crypto and SSL runtime DLLs to `$out`, create `$out\ossl-modules`, and copy only the resolved `legacy.dll` there. Delete the broad recursive provider search, `default.dll` handling, and warning-only branch.
+
+Before staging, prove the selected runtime supplies the default provider
+internally: create a unique directory under `$env:TEMP`, copy only the resolved
+`legacy.dll` into it, temporarily set the process `OPENSSL_MODULES` to that
+directory, and run the resolved `openssl.exe list -providers -provider default
+-provider legacy` through `Invoke-Native`. Restore the prior environment value
+in `finally` and remove only that explicit temporary directory. A non-zero exit
+must abort packaging; this prevents silently relying on an unshipped
+`default.dll`.
 
 After copying `$out` into `$serverStage`, add exact assertions before 7-Zip:
 
@@ -151,7 +175,7 @@ Report the two exact local paths and the required resulting ZIP layout to the us
 
 - [ ] **Step 1: Change CMake test staging before production code**
 
-Find both `libcrypto-3-x64.dll` and `libssl-3-x64.dll` from the existing `MANGOS_SSL_HINTS`. Copy both beside `mangos_tests`. Find `legacy.dll`, then add a post-build command that creates `$<TARGET_FILE_DIR:mangos_tests>/ossl-modules` and copies it there as `legacy.dll`. Replace the current test environment path with:
+Find both `libcrypto-3-x64.dll` and `libssl-3-x64.dll` from the existing `MANGOS_SSL_HINTS`. Copy both beside `mangos_tests`. Find `legacy.dll` using `PATH_SUFFIXES "" bin/ossl-modules ossl-modules lib/ossl-modules`, then add a post-build command that creates `$<TARGET_FILE_DIR:mangos_tests>/ossl-modules` and copies it there as `legacy.dll`. Replace the current test environment path with:
 
 ```cmake
 set_tests_properties(mangos_tests PROPERTIES ENVIRONMENT "OPENSSL_MODULES=")
@@ -161,14 +185,23 @@ Keep warning behavior at configure time when a developer machine lacks the optio
 
 - [ ] **Step 2: Assert the test environment remains empty**
 
-In `OpenSSLProviderTest.cpp`, include `<cstdlib>` and add to the provider initialization test before obtaining the singleton:
+In `OpenSSLProviderTest.cpp`, include `<cstdlib>` and add to the provider initialization test around singleton construction:
 
 ```cpp
 const char* modules = std::getenv("OPENSSL_MODULES");
-CHECK(modules == nullptr || modules[0] == '\0');
+std::string modulesBefore = modules ? modules : "";
+REQUIRE(modulesBefore.empty());
+
+OpenSSLProviderManager& manager =
+    OpenSSLProviderManager::Instance();
+
+const char* modulesAfter = std::getenv("OPENSSL_MODULES");
+CHECK_EQ(std::string(modulesAfter ? modulesAfter : ""), modulesBefore);
 ```
 
-This protects the requirement that the fallback does not mutate the environment.
+This proves both the CTest premise and that manager initialization does not
+mutate the environment. Remove the test's existing duplicate manager
+declaration when inserting the block.
 
 - [ ] **Step 3: Build and verify RED**
 
@@ -196,11 +229,14 @@ Expected: build succeeds, the staged `ossl-modules\legacy.dll` exists, and `mang
 Under the existing OpenSSL 3 anonymous namespace, add Windows-only helpers that:
 
 ```cpp
+#ifdef WIN32
 std::wstring ReadWindowsEnvironment(const wchar_t* name);
 std::filesystem::path GetExecutableDirectory();
+bool ConvertWideToAnsi(const std::wstring& value, std::string& converted);
 bool ConvertForOpenSSL(const std::filesystem::path& directory,
                        std::string& converted);
 void ConfigureBundledProviderSearchPath();
+#endif
 OpenSSLProvider LoadLegacyProvider();
 ```
 
@@ -208,10 +244,13 @@ Implementation requirements:
 
 - `ReadWindowsEnvironment` grows a `std::vector<wchar_t>` around `GetEnvironmentVariableW` and returns a copied value.
 - `GetExecutableDirectory` grows a `std::vector<wchar_t>` around `GetModuleFileNameW`; it never uses the current directory.
-- `ConvertForOpenSSL` uses `WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, ...)`, rejects `usedDefaultChar`, and rejects a provider path whose appended `\legacy.dll` reaches `MAX_PATH`. On failure it retries with `GetShortPathNameW` and the same checks.
-- `ConfigureBundledProviderSearchPath` returns immediately for a non-empty override, verifies `ossl-modules\legacy.dll` is a regular file, then requires `OSSL_PROVIDER_set_default_search_path(nullptr, converted.c_str()) == 1`.
+- `ConvertWideToAnsi` produces an owned narrow string with `WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, ...)` and rejects `usedDefaultChar`; use it for both OpenSSL paths and Windows diagnostic text.
+- `ConvertForOpenSSL` passes `directory.native()` (the Windows `std::wstring`) to `ConvertWideToAnsi` and rejects a provider path whose appended `\legacy.dll` reaches `MAX_PATH`. On failure it retries with `GetShortPathNameW` and the same checks.
+- `ConfigureBundledProviderSearchPath` returns immediately for a non-empty override and verifies `ossl-modules\legacy.dll` is a regular file. If `OSSL_PROVIDER_set_default_search_path(nullptr, converted.c_str()) != 1`, it logs the failure and returns without throwing; the following provider load then retains existing fail-closed behavior.
 - `LoadLegacyProvider` calls configuration first and returns `OpenSSLProvider("legacy")`.
-- Non-Windows compilation keeps `LoadLegacyProvider` as a direct wrapper returning `OpenSSLProvider("legacy")`.
+- Wrap Windows helper definitions and calls in `#ifdef WIN32`; the single cross-platform `LoadLegacyProvider` calls `ConfigureBundledProviderSearchPath()` only inside that guard and always returns `OpenSSLProvider("legacy")`.
+
+Add `<filesystem>` and `<vector>` plus `#ifdef WIN32`-guarded `<windows.h>` to `OpenSSLProvider.cpp`.
 
 - [ ] **Step 2: Guarantee initialization order**
 
@@ -233,7 +272,7 @@ The factory configures the search path before constructing the first provider; t
 
 - [ ] **Step 3: Correct failure diagnostics**
 
-Replace the hard-coded `C:\OpenSSL-Win64\bin` advice with a message that expects `ossl-modules\legacy.dll` beside the daemon or an explicit `OPENSSL_MODULES` directory containing `legacy.dll`. On Windows, use a copied `ReadWindowsEnvironment(L"OPENSSL_MODULES")` value for the version-mismatch diagnostic; on other platforms copy `std::getenv` immediately into `std::string`.
+Replace the hard-coded `C:\OpenSSL-Win64\bin` advice with a message that expects `ossl-modules\legacy.dll` beside the daemon or an explicit `OPENSSL_MODULES` directory containing `legacy.dll`. On Windows, convert the copied `ReadWindowsEnvironment(L"OPENSSL_MODULES")` value through `ConvertWideToAnsi` before passing its owned `std::string::c_str()` to `%s`; if conversion fails, log `<unrepresentable>`. Under `#else`, copy `std::getenv` immediately into `std::string`. Never pass a `wchar_t*` to `sLog`.
 
 - [ ] **Step 4: Build and verify GREEN**
 
@@ -279,11 +318,67 @@ Apply only correctness, regression, security, or compatibility fixes that reprod
 
 - [ ] **Step 3: Run phase-end build and tests once**
 
-Run the existing MSVC full build and CTest suite, then the existing clang-cl compilation gate used by the LFD branch. Record exact commands, exit codes, test counts, and binary revision metadata.
+Run:
+
+```powershell
+cmake --build E:\Mangos\WIP\Two\LFDSystemsRepair\build-msvc --config RelWithDebInfo --parallel
+ctest --test-dir E:\Mangos\WIP\Two\LFDSystemsRepair\build-msvc -C RelWithDebInfo --output-on-failure
+cmake --build E:\Mangos\WIP\Two\LFDSystemsRepair\build-clangcl --parallel
+```
+
+Expected: all three commands exit zero. Record the CTest count and binary
+revision metadata.
 
 - [ ] **Step 4: Refresh install and Testing deployment**
 
-Install from the rebased feature build into `E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc`, include the exact AppVeyor OpenSSL layout, and copy the resulting production-clean files to `E:\Mangos\WIP\Two\Testing\server_install`. Verify source/install/deployment hashes and confirm no temporary solo-LFD command is present.
+Run:
+
+```powershell
+cmake --install E:\Mangos\WIP\Two\LFDSystemsRepair\build-msvc --config RelWithDebInfo
+New-Item -ItemType Directory -Force E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\ossl-modules | Out-Null
+Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\libcrypto-3-x64.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
+Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\libssl-3-x64.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
+Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\legacy.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\ossl-modules -Force
+Copy-Item -Path E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\* -Destination E:\Mangos\WIP\Two\Testing\server_install -Recurse -Force
+```
+
+Then enumerate every installed file, derive its relative path, and require the
+SHA256 at the corresponding Testing path to match. Verify the deployed
+`mangosd.exe`, `realmd.exe`, runtime DLLs, and
+`ossl-modules\legacy.dll` explicitly, and confirm the temporary solo-LFD command
+is absent from source before reporting.
+
+```powershell
+$installRoot = (Resolve-Path E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc).Path.TrimEnd('\')
+$deployRoot = (Resolve-Path E:\Mangos\WIP\Two\Testing\server_install).Path.TrimEnd('\')
+$mismatches = @()
+foreach ($sourceFile in Get-ChildItem -LiteralPath $installRoot -File -Recurse) {
+    $relative = $sourceFile.FullName.Substring($installRoot.Length).TrimStart('\')
+    $deployed = Join-Path $deployRoot $relative
+    if (-not (Test-Path -LiteralPath $deployed -PathType Leaf)) {
+        $mismatches += "missing: $relative"
+        continue
+    }
+    if ((Get-FileHash -Algorithm SHA256 -LiteralPath $sourceFile.FullName).Hash -ne
+        (Get-FileHash -Algorithm SHA256 -LiteralPath $deployed).Hash) {
+        $mismatches += "hash: $relative"
+    }
+}
+if ($mismatches.Count -ne 0) { throw ($mismatches -join '; ') }
+
+foreach ($required in @(
+    'mangosd.exe', 'realmd.exe', 'libcrypto-3-x64.dll',
+    'libssl-3-x64.dll', 'ossl-modules\legacy.dll'
+)) {
+    if (-not (Test-Path -LiteralPath (Join-Path $deployRoot $required) -PathType Leaf)) {
+        throw "Missing deployed release artifact: $required"
+    }
+}
+
+$temporaryLfdMatches = rg -n 'HandleDebugLfd|debug lfd|solo LFD' src
+if ($LASTEXITCODE -eq 0) { throw "Temporary LFD smoke code remains:`n$temporaryLfdMatches" }
+if ($LASTEXITCODE -ne 1) { throw "rg failed with exit code $LASTEXITCODE" }
+```
 
 - [ ] **Step 5: Stop short of publishing**
 

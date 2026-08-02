@@ -37,7 +37,10 @@ The files must come from the same OpenSSL installation used to link the
 binaries. A missing runtime DLL or `legacy.dll` is a packaging failure, not a
 warning. The default provider is not packaged because OpenSSL 3 supplies it
 internally on the supported distribution; only the dynamically loaded legacy
-provider is required.
+provider is required. AppVeyor proves this for the selected runtime by running
+its `openssl.exe` with a temporary module directory containing only the chosen
+`legacy.dll` and requiring both `default` and `legacy` providers to load before
+the archive is created.
 
 ### Runtime discovery
 
