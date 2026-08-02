@@ -81,6 +81,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
     }
     else if ((roles & (PLAYER_ROLE_TANK | PLAYER_ROLE_HEALER | PLAYER_ROLE_DAMAGE)) == 0)
     {
+        roleCheck.currentRoles[plrGuid] &= PLAYER_ROLE_LEADER;
         roleCheck.state = LFG_ROLECHECK_NO_ROLE;
     }
     else
