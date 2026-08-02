@@ -225,6 +225,8 @@ bool LFGMgr::BeginProposal(ObjectGuid ownerGuid)
         sourceItr != aggregate.sourceUnits.end(); ++sourceItr)
     {
         LFGQueueSource const& source = sourceItr->second;
+        Group* sourceGroup = NULL;
+        bool invalidSource = false;
         for (roleMap::const_iterator roleItr = source.selectedRoles.begin();
             roleItr != source.selectedRoles.end(); ++roleItr)
         {
@@ -233,8 +235,23 @@ bool LFGMgr::BeginProposal(ObjectGuid ownerGuid)
                 player->GetGroup()->GetObjectGuid() != source.ownerGuid)) ||
                 (!source.isGroup && player->GetGroup()))
             {
-                return false;
+                invalidSource = true;
+                break;
             }
+            if (source.isGroup)
+            {
+                sourceGroup = player->GetGroup();
+            }
+        }
+        if (source.isGroup && (!sourceGroup || source.selectedRoles.size() !=
+            sourceGroup->GetMembersCount()))
+        {
+            invalidSource = true;
+        }
+        if (invalidSource)
+        {
+            CancelQueueSource(source.ownerGuid, LFG_UPDATE_LEAVE);
+            return false;
         }
     }
 
@@ -420,6 +437,7 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
     }
 
     std::set<uint32> candidates = source.dungeonList;
+    Group* sourceGroup = NULL;
     for (roleMap::const_iterator itr = source.selectedRoles.begin();
         itr != source.selectedRoles.end(); ++itr)
     {
@@ -434,6 +452,10 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
         {
             return false;
         }
+        if (source.isGroup)
+        {
+            sourceGroup = player->GetGroup();
+        }
         if (!source.isGroup && player->GetGroup())
         {
             return false;
@@ -445,6 +467,11 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
         {
             candidates.erase(lockedItr->first & 0x00FFFFFF);
         }
+    }
+    if (source.isGroup && (!sourceGroup || source.selectedRoles.size() !=
+        sourceGroup->GetMembersCount()))
+    {
+        return false;
     }
     if (candidates.empty())
     {

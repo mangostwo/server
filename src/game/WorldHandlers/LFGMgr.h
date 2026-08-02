@@ -671,6 +671,7 @@ public:
     void CastVote(Player* pPlayer, bool vote);
 
     /// Group lifecycle hooks used by the core group implementation.
+    void OnGroupMemberAdded(ObjectGuid groupGuid, ObjectGuid playerGuid);
     void OnGroupMemberRemoved(ObjectGuid groupGuid, ObjectGuid playerGuid);
     void OnGroupDisband(ObjectGuid groupGuid);
     void OnGroupLeaderChanged(ObjectGuid groupGuid, ObjectGuid newLeaderGuid);
@@ -755,6 +756,12 @@ protected:
     void CancelQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,
         ObjectGuid playerPacketGuid = ObjectGuid(),
         bool publishTerminalUpdate = true);
+
+    /// Cancel changed sources together and restore only unaffected sources.
+    void CancelQueueSources(std::set<ObjectGuid> const& sourceOwners,
+        LfgUpdateType updateType,
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        ObjectGuid silentSourceOwner = ObjectGuid());
 
     /// Publish a terminal update and erase one source's player state.
     void DiscardQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,

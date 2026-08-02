@@ -486,6 +486,8 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
         return false;
     }
 
+    sLFGMgr.OnGroupMemberAdded(GetObjectGuid(), guid);
+
     SendUpdate();
 
     if (Player* player = sObjectMgr.GetPlayer(guid))
@@ -1616,7 +1618,6 @@ void Group::OfflineReadyCheck()
         }
     }
 }
-
 
 
 

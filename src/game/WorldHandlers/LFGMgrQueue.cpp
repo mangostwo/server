@@ -33,6 +33,7 @@
 
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 #include "DBCEnums.h"
 #include "DBCStores.h"
@@ -352,90 +353,150 @@ void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
     LfgUpdateType updateType, ObjectGuid playerPacketGuid,
     bool publishTerminalUpdate)
 {
-    ownerProposalMap::iterator proposalOwnerItr =
-        m_ownerProposalIds.find(sourceOwner);
-    if (proposalOwnerItr != m_ownerProposalIds.end())
+    std::set<ObjectGuid> sourceOwners;
+    sourceOwners.insert(sourceOwner);
+    CancelQueueSources(sourceOwners, updateType, playerPacketGuid,
+        publishTerminalUpdate ? ObjectGuid() : sourceOwner);
+}
+
+void LFGMgr::CancelQueueSources(
+    std::set<ObjectGuid> const& sourceOwners, LfgUpdateType updateType,
+    ObjectGuid playerPacketGuid, ObjectGuid silentSourceOwner)
+{
+    std::set<ObjectGuid> pendingOwners = sourceOwners;
+    std::map<uint32, std::set<ObjectGuid> > proposalSources;
+    for (std::set<ObjectGuid>::const_iterator ownerItr = sourceOwners.begin();
+        ownerItr != sourceOwners.end(); ++ownerItr)
     {
+        ownerProposalMap::iterator proposalOwnerItr =
+            m_ownerProposalIds.find(*ownerItr);
+        if (proposalOwnerItr == m_ownerProposalIds.end())
+        {
+            continue;
+        }
         proposalMap::const_iterator proposalItr =
             m_proposalMap.find(proposalOwnerItr->second);
         if (proposalItr == m_proposalMap.end())
         {
             m_ownerProposalIds.erase(proposalOwnerItr);
+            continue;
         }
         else if (proposalItr->second.state == LFG_PROPOSAL_INITIATING)
         {
             queueSourceMap::const_iterator sourceItr =
-                proposalItr->second.sourceUnits.find(sourceOwner);
+                proposalItr->second.sourceUnits.find(*ownerItr);
             if (sourceItr == proposalItr->second.sourceUnits.end())
             {
                 m_ownerProposalIds.erase(proposalOwnerItr);
-                DiscardQueueSource(sourceOwner, updateType, playerPacketGuid,
-                    publishTerminalUpdate);
-                return;
+                continue;
             }
-            std::set<ObjectGuid> failedPlayers;
-            for (roleMap::const_iterator roleItr =
-                sourceItr->second.selectedRoles.begin();
-                roleItr != sourceItr->second.selectedRoles.end(); ++roleItr)
-            {
-                failedPlayers.insert(roleItr->first);
-            }
-            UnwindProposal(proposalItr->first, failedPlayers,
-                playerPacketGuid, publishTerminalUpdate ? ObjectGuid() :
-                    sourceOwner);
-            return;
+            proposalSources[proposalItr->first].insert(*ownerItr);
         }
         else
         {
             // Successful proposals remove members from their old groups while
             // forming the final LFD group. Those internal moves are not leaves.
-            return;
+            pendingOwners.erase(*ownerItr);
         }
     }
 
-    ObjectGuid aggregateOwner;
-    LFGPlayers aggregate;
+    std::vector<std::pair<ObjectGuid, LFGPlayers> > detachedAggregates;
     for (playerData::const_iterator dataItr = m_playerData.begin();
         dataItr != m_playerData.end(); ++dataItr)
     {
-        if (dataItr->second.sourceUnits.find(sourceOwner) !=
-            dataItr->second.sourceUnits.end())
+        bool containsTarget = false;
+        for (std::set<ObjectGuid>::const_iterator ownerItr =
+            pendingOwners.begin(); ownerItr != pendingOwners.end(); ++ownerItr)
         {
-            aggregateOwner = dataItr->first;
-            aggregate = dataItr->second;
-            break;
+            if (dataItr->second.sourceUnits.find(*ownerItr) !=
+                dataItr->second.sourceUnits.end())
+            {
+                containsTarget = true;
+                break;
+            }
+        }
+        if (containsTarget)
+        {
+            detachedAggregates.push_back(std::make_pair(dataItr->first,
+                dataItr->second));
         }
     }
-    if (!aggregateOwner)
+    for (std::vector<std::pair<ObjectGuid, LFGPlayers> >::const_iterator
+        aggregateItr = detachedAggregates.begin(); aggregateItr !=
+        detachedAggregates.end(); ++aggregateItr)
     {
-        DiscardQueueSource(sourceOwner, updateType, playerPacketGuid,
-            publishTerminalUpdate);
-        return;
-    }
-
-    m_queueSet.erase(aggregateOwner);
-    m_playerData.erase(aggregateOwner);
-    for (roleMap::const_iterator roleItr = aggregate.currentRoles.begin();
-        roleItr != aggregate.currentRoles.end(); ++roleItr)
-    {
-        m_playerQueueOwners.erase(roleItr->first);
-    }
-
-    for (queueSourceMap::const_iterator sourceItr =
-        aggregate.sourceUnits.begin();
-        sourceItr != aggregate.sourceUnits.end(); ++sourceItr)
-    {
-        LFGQueueSource const& source = sourceItr->second;
-        if (sourceItr->first != sourceOwner)
+        m_queueSet.erase(aggregateItr->first);
+        m_playerData.erase(aggregateItr->first);
+        for (roleMap::const_iterator roleItr =
+            aggregateItr->second.currentRoles.begin(); roleItr !=
+            aggregateItr->second.currentRoles.end(); ++roleItr)
         {
-            if (!RestoreQueueSource(source))
-            {
-                DiscardQueueSource(source, LFG_UPDATE_PROPOSAL_FAILED);
-            }
+            m_playerQueueOwners.erase(roleItr->first);
+        }
+    }
+
+    for (std::map<uint32, std::set<ObjectGuid> >::const_iterator proposalItr =
+        proposalSources.begin(); proposalItr != proposalSources.end();
+        ++proposalItr)
+    {
+        proposalMap::const_iterator storedProposalItr =
+            m_proposalMap.find(proposalItr->first);
+        if (storedProposalItr == m_proposalMap.end())
+        {
             continue;
         }
-        DiscardQueueSource(source, updateType, playerPacketGuid,
-            publishTerminalUpdate);
+        std::set<ObjectGuid> failedPlayers;
+        for (std::set<ObjectGuid>::const_iterator ownerItr =
+            proposalItr->second.begin(); ownerItr != proposalItr->second.end();
+            ++ownerItr)
+        {
+            queueSourceMap::const_iterator sourceItr =
+                storedProposalItr->second.sourceUnits.find(*ownerItr);
+            if (sourceItr != storedProposalItr->second.sourceUnits.end())
+            {
+                for (roleMap::const_iterator roleItr =
+                    sourceItr->second.selectedRoles.begin(); roleItr !=
+                    sourceItr->second.selectedRoles.end(); ++roleItr)
+                {
+                    failedPlayers.insert(roleItr->first);
+                }
+            }
+            pendingOwners.erase(*ownerItr);
+        }
+        ObjectGuid const silentOwner = proposalItr->second.find(
+            silentSourceOwner) != proposalItr->second.end() ?
+            silentSourceOwner : ObjectGuid();
+        UnwindProposal(proposalItr->first, failedPlayers, playerPacketGuid,
+            silentOwner);
+    }
+
+    for (std::vector<std::pair<ObjectGuid, LFGPlayers> >::const_iterator
+        aggregateItr = detachedAggregates.begin(); aggregateItr !=
+        detachedAggregates.end(); ++aggregateItr)
+    {
+        for (queueSourceMap::const_iterator sourceItr =
+            aggregateItr->second.sourceUnits.begin(); sourceItr !=
+            aggregateItr->second.sourceUnits.end(); ++sourceItr)
+        {
+            LFGQueueSource const& source = sourceItr->second;
+            if (pendingOwners.erase(sourceItr->first) == 0)
+            {
+                if (!RestoreQueueSource(source))
+                {
+                    DiscardQueueSource(source, LFG_UPDATE_PROPOSAL_FAILED);
+                }
+                continue;
+            }
+            DiscardQueueSource(source, updateType, playerPacketGuid,
+                sourceItr->first != silentSourceOwner);
+        }
+    }
+
+    for (std::set<ObjectGuid>::const_iterator ownerItr = pendingOwners.begin();
+        ownerItr != pendingOwners.end(); ++ownerItr)
+    {
+        DiscardQueueSource(*ownerItr, updateType, playerPacketGuid,
+            *ownerItr != silentSourceOwner);
     }
 }
 
@@ -598,6 +659,35 @@ bool LFGMgr::RestoreActiveGroupStatus(ObjectGuid groupGuid,
         }
     }
     return true;
+}
+
+void LFGMgr::OnGroupMemberAdded(ObjectGuid groupGuid,
+    ObjectGuid playerGuid)
+{
+    bool const restoreActiveStatus = GetGroupStatus(groupGuid) != NULL;
+    bool groupSourceCancelled = false;
+    std::set<ObjectGuid> changedSources;
+    if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+    {
+        CancelRoleCheck(groupGuid, LFG_UPDATE_LEAVE, ObjectGuid(),
+            !restoreActiveStatus);
+        groupSourceCancelled = true;
+    }
+    else if (HasPendingQueueSource(groupGuid))
+    {
+        changedSources.insert(groupGuid);
+        groupSourceCancelled = true;
+    }
+    if (HasPendingQueueSource(playerGuid))
+    {
+        changedSources.insert(playerGuid);
+    }
+    CancelQueueSources(changedSources, LFG_UPDATE_LEAVE, ObjectGuid(),
+        restoreActiveStatus ? groupGuid : ObjectGuid());
+    if (restoreActiveStatus && groupSourceCancelled)
+    {
+        RestoreActiveGroupStatus(groupGuid);
+    }
 }
 
 void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
