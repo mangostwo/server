@@ -159,6 +159,9 @@ endif()
 add_test(NAME mangos_tests COMMAND mangos_tests)
 
 if(WIN32)
+    set_tests_properties(mangos_tests PROPERTIES
+        ENVIRONMENT "OPENSSL_MODULES=")
+
     # Match the release layout and leave OPENSSL_MODULES empty: provider discovery
     # must work from ossl-modules beside the executable, not from the build host.
     find_file(MANGOS_TEST_OPENSSL_LEGACY_DLL
@@ -174,8 +177,6 @@ if(WIN32)
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${MANGOS_TEST_OPENSSL_LEGACY_DLL}"
                 "$<TARGET_FILE_DIR:mangos_tests>/ossl-modules/legacy.dll")
-        set_tests_properties(mangos_tests PROPERTIES
-            ENVIRONMENT "OPENSSL_MODULES=")
     else()
         message(WARNING
             "OpenSSL legacy provider (legacy.dll) not found; mangos_tests may fail its RC4 cases.")
