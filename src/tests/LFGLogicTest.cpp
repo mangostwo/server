@@ -212,6 +212,16 @@ TEST(LFG_ReplacementQueuePreservesRandomDungeonProvenance)
         std::uint32_t(258));
 }
 
+TEST(LFG_SeasonalConcreteDungeonRetainsRewardProvenance)
+{
+    CHECK_EQ(LFGLogic::QueueRewardProvenance(false, true, 285),
+        std::uint32_t(285));
+    CHECK_EQ(LFGLogic::QueueRewardProvenance(true, false, 258),
+        std::uint32_t(258));
+    CHECK_EQ(LFGLogic::QueueRewardProvenance(false, false, 12),
+        std::uint32_t(0));
+}
+
 TEST(LFG_CompletedDungeonTransitionReturnsMembersFromThePreviousMap)
 {
     CHECK(LFGLogic::ShouldReturnFromCompletedDungeon(true, 34, 34));

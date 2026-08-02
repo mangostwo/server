@@ -99,18 +99,27 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
 
             bool const isActual = dungeon->TypeID == LFG_TYPE_DUNGEON ||
                 dungeon->TypeID == LFG_TYPE_HEROIC_DUNGEON;
+            bool const isRandomCategory =
+                dungeon->TypeID == LFG_TYPE_RANDOM_DUNGEON;
+            bool const seasonal = IsSeasonal(dungeon->Flags);
+            uint32 const rewardProvenance =
+                LFGLogic::QueueRewardProvenance(isRandomCategory, seasonal,
+                    dungeon->ID);
+            if (rewardProvenance && requestedDungeons.size() != 1)
+            {
+                result = ERR_LFG_INVALID_SLOT;
+                break;
+            }
+            randomDungeonID = rewardProvenance;
             if (!isActual)
             {
-                bool const isCategory = dungeon->TypeID == LFG_TYPE_RANDOM_DUNGEON ||
-                    IsSeasonal(dungeon->Flags);
-                if (!isCategory || requestedDungeons.size() != 1)
+                if (!rewardProvenance)
                 {
                     result = ERR_LFG_INVALID_SLOT;
                     break;
                 }
 
                 randomCategory = dungeon;
-                randomDungeonID = dungeon->ID;
                 continue;
             }
 

@@ -100,6 +100,8 @@ namespace LFGLogic
     std::uint32_t RequeueRandomDungeon(bool hasActiveProvenance,
         std::uint32_t activeRandomDungeonId,
         std::uint32_t requestedRandomDungeonId);
+    std::uint32_t QueueRewardProvenance(bool randomCategory, bool seasonal,
+        std::uint32_t dungeonId);
     bool ShouldReturnFromCompletedDungeon(bool finished,
         std::int32_t currentMapId, std::int32_t previousDungeonMapId);
     bool ShouldRestoreActiveGroupStatus(bool terminal, bool queued,

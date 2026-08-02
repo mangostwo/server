@@ -253,6 +253,12 @@ std::uint32_t LFGLogic::RequeueRandomDungeon(bool hasActiveProvenance,
         requestedRandomDungeonId;
 }
 
+std::uint32_t LFGLogic::QueueRewardProvenance(bool randomCategory,
+    bool seasonal, std::uint32_t dungeonId)
+{
+    return randomCategory || seasonal ? dungeonId : 0;
+}
+
 bool LFGLogic::ShouldReturnFromCompletedDungeon(bool finished,
     std::int32_t currentMapId, std::int32_t previousDungeonMapId)
 {
