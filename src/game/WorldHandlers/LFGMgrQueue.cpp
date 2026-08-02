@@ -60,17 +60,22 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     LFGPlayers* currentInfo = GetPlayerOrPartyData(guid);
     if (currentInfo)
     {
-        bool groupCurrentlyInDungeon = pGroup && pGroup->isLFGGroup() && currentInfo->currentState != LFG_STATE_FINISHED_DUNGEON;
         if (currentInfo->currentState == LFG_STATE_QUEUED)
         {
             RemoveFromQueue(guid);
         }
+    }
 
-        if (groupCurrentlyInDungeon && !currentInfo->dungeonList.empty())
+    uint32 activeDungeonId = 0;
+    if (pGroup && pGroup->isLFGGroup())
+    {
+        LFGGroupStatus* status = GetGroupStatus(guid);
+        if (status && status->state != LFG_STATE_FINISHED_DUNGEON)
         {
-            dungeons = currentInfo->dungeonList;
+            activeDungeonId = status->dungeonID;
         }
     }
+    dungeons = LFGLogic::RequeueDungeons(dungeons, activeDungeonId);
 
     LfgJoinResult result = GetJoinResult(plr);
     std::set<uint32> requestedDungeons = dungeons;

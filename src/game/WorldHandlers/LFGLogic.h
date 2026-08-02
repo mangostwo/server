@@ -75,6 +75,10 @@ namespace LFGLogic
     bool ResolveRoles(std::vector<RoleRequest> const& requests,
         std::vector<RoleAssignment>& assignments, RoleNeeds& needs);
     bool IsProposalReady(std::size_t playerCount, RoleNeeds const& needs);
+    std::set<std::uint32_t> RequeueDungeons(
+        std::set<std::uint32_t> const& requestedDungeons,
+        std::uint32_t activeDungeonId);
+    bool IsQueueOwnerPublished(bool queued, bool proposing);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);
     std::uint8_t GroupHeaderRole(bool lfd, bool battleground,

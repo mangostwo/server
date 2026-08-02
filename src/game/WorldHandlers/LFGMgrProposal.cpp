@@ -452,7 +452,10 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
     }
 
     AddToQueue(source.ownerGuid);
-    if (m_queueSet.find(source.ownerGuid) == m_queueSet.end())
+    bool const queued = m_queueSet.find(source.ownerGuid) != m_queueSet.end();
+    bool const proposing = m_ownerProposalIds.find(source.ownerGuid) !=
+        m_ownerProposalIds.end();
+    if (!LFGLogic::IsQueueOwnerPublished(queued, proposing))
     {
         m_playerData.erase(source.ownerGuid);
         for (roleMap::const_iterator itr = source.selectedRoles.begin();
@@ -541,6 +544,7 @@ void LFGMgr::UnwindProposal(uint32 proposalId,
                 SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
                     source.isGroup);
             }
+            m_playerStatusMap.erase(roleItr->first);
         }
     }
 }
@@ -883,6 +887,11 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
     if (pPlayer->GetVehicleInfo())
     {
         sendError(LFG_TELEPORTERROR_IN_VEHICLE);
+        return;
+    }
+    if (pPlayer->IsInCombat())
+    {
+        sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
         return;
     }
     dungeonForbidden const lockedDungeons = FindRandomDungeonsNotForPlayer(pPlayer);

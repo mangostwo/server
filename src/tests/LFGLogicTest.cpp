@@ -175,6 +175,21 @@ TEST(LFG_ProposalReadinessRequiresCompleteFivePlayerComposition)
     CHECK(!LFGLogic::IsProposalReady(5, incomplete));
 }
 
+TEST(LFG_RequeuePreservesTheActiveDungeon)
+{
+    CHECK(LFGLogic::RequeueDungeons({10, 11}, 34) ==
+        std::set<std::uint32_t>({34}));
+    CHECK(LFGLogic::RequeueDungeons({10, 11}, 0) ==
+        std::set<std::uint32_t>({10, 11}));
+}
+
+TEST(LFG_QueueOwnerCanBePublishedByAnImmediateProposal)
+{
+    CHECK(LFGLogic::IsQueueOwnerPublished(true, false));
+    CHECK(LFGLogic::IsQueueOwnerPublished(false, true));
+    CHECK(!LFGLogic::IsQueueOwnerPublished(false, false));
+}
+
 TEST(LFG_GroupPacketValuesPreserveRoleStateAndPackedEntry)
 {
     LFGLogic::GroupPacketValues const active =

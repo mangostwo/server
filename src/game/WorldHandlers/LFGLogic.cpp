@@ -218,6 +218,19 @@ bool LFGLogic::IsProposalReady(std::size_t playerCount, RoleNeeds const& needs)
         needs.damage == 0;
 }
 
+std::set<std::uint32_t> LFGLogic::RequeueDungeons(
+    std::set<std::uint32_t> const& requestedDungeons,
+    std::uint32_t activeDungeonId)
+{
+    return activeDungeonId == 0 ? requestedDungeons :
+        std::set<std::uint32_t>{activeDungeonId};
+}
+
+bool LFGLogic::IsQueueOwnerPublished(bool queued, bool proposing)
+{
+    return queued || proposing;
+}
+
 LFGLogic::GroupPacketValues LFGLogic::MakeGroupPacketValues(std::uint8_t role,
     bool finished, std::uint32_t dungeonEntry)
 {
