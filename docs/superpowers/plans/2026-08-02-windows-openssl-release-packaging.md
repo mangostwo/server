@@ -4,7 +4,7 @@
 
 **Goal:** Make the Windows release ZIP self-contained so direct `realmd.exe`, `mangosd.exe`, and Windows-service startup load the bundled OpenSSL 3 legacy provider without a global OpenSSL installation or user-set environment variable.
 
-**Architecture:** AppVeyor deterministically packages matching OpenSSL runtime DLLs beside the daemons and only `legacy.dll` under `ossl-modules`. Before constructing the legacy provider on Windows, the core preserves a non-empty administrator override or configures OpenSSL's default library context to search the executable-relative module directory. Existing provider validation remains fail-closed.
+**Architecture:** AppVeyor deterministically packages the matching OpenSSL crypto runtime DLL beside the daemons and only `legacy.dll` under `ossl-modules`. Before constructing the legacy provider on Windows, the core preserves a non-empty administrator override or configures OpenSSL's default library context to search the executable-relative module directory. Existing provider validation remains fail-closed.
 
 **Tech Stack:** PowerShell 5.1, Windows batch-free ZIP layout, CMake 4.x/MSVC multi-config builds, C++17, Win32 path/environment APIs, OpenSSL 3 provider API, existing MaNGOS test harness.
 
@@ -32,7 +32,7 @@
 
 **Interfaces:**
 - Consumes: one selected x64 OpenSSL root passed to CMake as `OPENSSL_ROOT_DIR`.
-- Produces: `server\libcrypto-3-x64.dll`, `server\libssl-3-x64.dll`, and `server\ossl-modules\legacy.dll`; throws before archive creation if any are unavailable.
+- Produces: `server\libcrypto-3-x64.dll` and `server\ossl-modules\legacy.dll`; throws before archive creation if either is unavailable. PE import-table inspection confirms neither daemon imports `libssl-3-x64.dll`.
 
 - [ ] **Step 1: Run the failing packaging contract**
 
@@ -108,6 +108,10 @@ existing clean fallback install; after fallback installation, resolve all seven
 artifacts again without catching the exception so the install phase fails
 immediately when incomplete.
 
+`libssl-3-x64.dll` is retained only as a dependency of the temporary
+`openssl.exe` provider probe. It is not copied to the release because neither
+daemon imports it.
+
 In `build_script.txt`, iterate `$openSslRootCandidates` in order and call
 `Resolve-OpenSslArtifact` for all seven artifacts inside a `try` block. Select a
 root only after every call succeeds, retaining the resolved paths in an object
@@ -142,7 +146,6 @@ foreach ($requiredReleasePath in @(
     "$serverStage\mangosd.exe",
     "$serverStage\realmd.exe",
     "$serverStage\libcrypto-3-x64.dll",
-    "$serverStage\libssl-3-x64.dll",
     "$serverStage\ossl-modules\legacy.dll"
 )) {
     Assert-PathExists $requiredReleasePath "Required release artifact"
@@ -177,15 +180,14 @@ Report the two exact local paths and the required resulting ZIP layout to the us
 - Test: `mangos_tests`
 
 **Interfaces:**
-- Consumes: `MANGOS_TEST_OPENSSL_LEGACY_DLL`, the selected OpenSSL runtime DLLs, and `$<TARGET_FILE_DIR:mangos_tests>`.
+- Consumes: `MANGOS_TEST_OPENSSL_LEGACY_DLL`, the selected OpenSSL crypto runtime DLL, and `$<TARGET_FILE_DIR:mangos_tests>`.
 - Produces: a test layout matching the release ZIP while `OPENSSL_MODULES` is empty.
 
 - [ ] **Step 1: Change CMake test staging before production code**
 
-Find `libcrypto` with the existing names and find `libssl` using `NAMES
-libssl-3-x64.dll libssl-3.dll libssl.dll`, both from `MANGOS_SSL_HINTS`. Copy
-both beside `mangos_tests`. Find `legacy.dll` using `PATH_SUFFIXES ""
-bin/ossl-modules ossl-modules lib/ossl-modules`, then add a post-build command
+Find `libcrypto` with the existing names from `MANGOS_SSL_HINTS` and copy it
+beside `mangos_tests`. Find `legacy.dll` using `PATH_SUFFIXES
+bin/ossl-modules ossl-modules lib/ossl-modules ""`, then add a post-build command
 that creates `$<TARGET_FILE_DIR:mangos_tests>/ossl-modules` and copies it there
 as `legacy.dll`. Replace the current test environment path with:
 
@@ -361,7 +363,6 @@ function Resolve-LocalOpenSslArtifact([string[]]$RelativePaths) {
 }
 
 $localCrypto = Resolve-LocalOpenSslArtifact @('bin\libcrypto-3-x64.dll', 'libcrypto-3-x64.dll')
-$localSsl = Resolve-LocalOpenSslArtifact @('bin\libssl-3-x64.dll', 'libssl-3-x64.dll')
 $localLegacy = Resolve-LocalOpenSslArtifact @(
     'bin\ossl-modules\legacy.dll', 'bin\legacy.dll',
     'lib\ossl-modules\legacy.dll', 'ossl-modules\legacy.dll')
@@ -376,7 +377,7 @@ Copy-Item -Path E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\* -Destination E
 
 Then enumerate every installed file, derive its relative path, and require the
 SHA256 at the corresponding Testing path to match. Verify the deployed
-`mangosd.exe`, `realmd.exe`, runtime DLLs, and
+`mangosd.exe`, `realmd.exe`, the crypto runtime DLL, and
 `ossl-modules\legacy.dll` explicitly, and confirm the temporary solo-LFD command
 is absent from source before reporting.
 
@@ -400,7 +401,7 @@ if ($mismatches.Count -ne 0) { throw ($mismatches -join '; ') }
 
 foreach ($required in @(
     'mangosd.exe', 'realmd.exe', 'libcrypto-3-x64.dll',
-    'libssl-3-x64.dll', 'ossl-modules\legacy.dll'
+    'ossl-modules\legacy.dll'
 )) {
     if (-not (Test-Path -LiteralPath (Join-Path $deployRoot $required) -PathType Leaf)) {
         throw "Missing deployed release artifact: $required"

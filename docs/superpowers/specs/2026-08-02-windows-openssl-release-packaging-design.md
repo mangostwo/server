@@ -2,7 +2,7 @@
 
 ## Problem
 
-The Windows release archive contains the OpenSSL runtime DLLs but does not
+The Windows release archive contains the OpenSSL crypto runtime DLL but does not
 guarantee a usable OpenSSL 3 legacy provider. The AppVeyor script treats a
 missing `legacy.dll` as a warning, stages modules under the non-standard
 `openssl-modules` name, and publishes the archive without proving that the
@@ -28,7 +28,6 @@ server/
   mangosd.exe
   realmd.exe
   libcrypto-3-x64.dll
-  libssl-3-x64.dll
   ossl-modules/
     legacy.dll
 ```
@@ -81,7 +80,7 @@ survives initialization.
 
 ### Build and release packaging
 
-The external AppVeyor script will copy the runtime DLLs and `legacy.dll` from
+The external AppVeyor script will copy the crypto runtime DLL and `legacy.dll` from
 the same OpenSSL root supplied to CMake. It will use `ossl-modules` and verify
 all staged archive inputs before invoking 7-Zip. This prevents a stale or
 minimal AppVeyor OpenSSL cache from publishing a broken archive.
@@ -130,8 +129,8 @@ remedy and says an explicit `OPENSSL_MODULES` must point to the directory that
 contains `legacy.dll`; it no longer assumes `C:\OpenSSL-Win64\bin`.
 
 The Windows test CMake rules copy the selected `legacy.dll` into
-`$<TARGET_FILE_DIR:mangos_tests>/ossl-modules`, co-locate both matching OpenSSL
-runtime DLLs, and run `mangos_tests` with `OPENSSL_MODULES` empty. They no longer
+`$<TARGET_FILE_DIR:mangos_tests>/ossl-modules`, co-locate the matching OpenSSL
+crypto runtime DLL, and run `mangos_tests` with `OPENSSL_MODULES` empty. They no longer
 make the test pass by setting `OPENSSL_MODULES` to the machine installation.
 
 ## Scope
