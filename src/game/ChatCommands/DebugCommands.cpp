@@ -52,7 +52,6 @@
 #include "Language.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include <fstream>
-#include "ObjectMgr.h"
 #include "ObjectGuid.h"
 #include "SpellMgr.h"
 #include "Pet.h"
