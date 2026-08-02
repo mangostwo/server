@@ -56,12 +56,34 @@ On Windows, before loading either provider, MaNGOS will:
 This does not modify the process environment, does not override administrator
 configuration, and does not change non-Windows provider discovery.
 
+The ordering is explicit: a small factory used to initialize
+`m_legacyProvider` first configures the search path and then constructs the
+legacy-provider wrapper. `m_defaultProvider` is constructed afterward. Search
+path configuration therefore occurs before either call to
+`OSSL_PROVIDER_load`, rather than in the manager constructor body after member
+initialization has already completed.
+
+Executable-path resolution uses `GetModuleFileNameW` with a dynamically grown
+buffer up to the Windows extended-path limit. It constructs
+`<executable-directory>\ossl-modules` as a wide filesystem path, checks
+`legacy.dll` without consulting the current working directory, and converts the
+directory to UTF-8 for `OSSL_PROVIDER_set_default_search_path`. A non-empty
+override is detected through the Windows environment API and copied only for
+diagnostics; no borrowed environment pointer survives initialization.
+
 ### Build and release packaging
 
 The external AppVeyor script will copy the runtime DLLs and `legacy.dll` from
 the same OpenSSL root supplied to CMake. It will use `ossl-modules` and verify
 all staged archive inputs before invoking 7-Zip. This prevents a stale or
 minimal AppVeyor OpenSSL cache from publishing a broken archive.
+
+Artifact lookup uses an ordered list of supported paths beneath that selected
+x64 OpenSSL root: `bin` for runtime DLLs, followed by the root for distributions
+that place them there; and `bin`, `lib\ossl-modules`, then `ossl-modules` for
+`legacy.dll`. It does not recursively select an arbitrary first match. The
+dependency check also requires both crypto and SSL import libraries before a
+root is considered usable.
 
 The AppVeyor install script will validate `legacy.dll` as well as the runtime
 and development libraries so a bad dependency cache fails before compilation.
@@ -82,7 +104,8 @@ No database changes or configuration-file migration are required.
    absent even when a matching `ossl-modules/legacy.dll` is staged beside the
    test executable.
 2. After the core change, the same test must load the legacy provider and fetch
-   RC4 without modifying the process environment.
+   RC4 without modifying the process environment. The test also asserts that
+   `OPENSSL_MODULES` remains absent or empty.
 3. Before editing, a focused AppVeyor contract check must fail because the
    current scripts use `openssl-modules` and allow the provider to be absent.
 4. Both AppVeyor PowerShell scripts are syntax-checked, and the contract check
@@ -91,6 +114,10 @@ No database changes or configuration-file migration are required.
 5. The next AppVeyor run must publish the exact layout above. An extracted ZIP
    smoke test starts each daemon directly with `OPENSSL_MODULES` absent and
    confirms the legacy provider loads.
+
+The Windows failure diagnostic names the release-relative `ossl-modules`
+remedy and says an explicit `OPENSSL_MODULES` must point to the directory that
+contains `legacy.dll`; it no longer assumes `C:\OpenSSL-Win64\bin`.
 
 ## Scope
 
