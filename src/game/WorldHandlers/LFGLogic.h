@@ -78,6 +78,11 @@ namespace LFGLogic
     std::set<std::uint32_t> RequeueDungeons(
         std::set<std::uint32_t> const& requestedDungeons,
         std::uint32_t activeDungeonId);
+    std::uint32_t RequeueRandomDungeon(bool hasActiveProvenance,
+        std::uint32_t activeRandomDungeonId,
+        std::uint32_t requestedRandomDungeonId);
+    bool ShouldReturnFromCompletedDungeon(bool finished,
+        std::int32_t currentMapId, std::int32_t previousDungeonMapId);
     bool IsQueueOwnerPublished(bool queued, bool proposing);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);

@@ -175,6 +175,7 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             roleItr != roleCheck.currentRoles.end(); ++roleItr)
         {
             m_playerQueueOwners.erase(roleItr->first);
+            m_playerStatusMap.erase(roleItr->first);
         }
         m_playerData.erase(groupGuid);
     }
@@ -475,7 +476,7 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
 }
 
 void LFGMgr::UnwindProposal(uint32 proposalId,
-    std::set<ObjectGuid> const& failedPlayers)
+    std::set<ObjectGuid> const& failedPlayers, ObjectGuid playerPacketGuid)
 {
     proposalMap::iterator proposalItr = m_proposalMap.find(proposalId);
     if (proposalItr == m_proposalMap.end())
@@ -542,7 +543,7 @@ void LFGMgr::UnwindProposal(uint32 proposalId,
             if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType))
             {
                 SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
-                    source.isGroup);
+                    source.isGroup && roleItr->first != playerPacketGuid);
             }
             m_playerStatusMap.erase(roleItr->first);
         }
@@ -713,10 +714,39 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         return false;
     }
 
+    std::map<ObjectGuid, std::pair<Group*, uint32> > capturedGroups;
     for (playerGroupMap::const_iterator itr = proposal->groups.begin();
         itr != proposal->groups.end(); ++itr)
     {
-        if (!sPlayerRegistry.Find(itr->first))
+        Player* player = sPlayerRegistry.Find(itr->first);
+        if (!player)
+        {
+            return false;
+        }
+        Group* currentGroup = player->GetGroup();
+        ObjectGuid const currentGroupGuid = currentGroup ?
+            currentGroup->GetObjectGuid() : ObjectGuid();
+        if (currentGroupGuid != itr->second)
+        {
+            return false;
+        }
+        if (currentGroup)
+        {
+            std::pair<Group*, uint32>& capturedGroup =
+                capturedGroups[currentGroupGuid];
+            if (capturedGroup.first && capturedGroup.first != currentGroup)
+            {
+                return false;
+            }
+            capturedGroup.first = currentGroup;
+            ++capturedGroup.second;
+        }
+    }
+    for (std::map<ObjectGuid, std::pair<Group*, uint32> >::const_iterator itr =
+        capturedGroups.begin(); itr != capturedGroups.end(); ++itr)
+    {
+        if (!itr->second.first ||
+            itr->second.first->GetMembersCount() != itr->second.second)
         {
             return false;
         }
@@ -731,6 +761,7 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
 
     Group* pGroup = NULL;
     bool createdGroup = false;
+    std::set<ObjectGuid> returnedFromCompletedDungeon;
     if (proposal->groupRawGuid)
     {
         pGroup = leader->GetGroup();
@@ -738,6 +769,31 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
             proposal->groupRawGuid)
         {
             return false;
+        }
+
+        LFGGroupStatus* previousStatus = GetGroupStatus(pGroup->GetObjectGuid());
+        LfgDungeonsEntry const* previousDungeon = previousStatus ?
+            sLfgDungeonsStore.LookupEntry(previousStatus->dungeonID) : NULL;
+        if (previousStatus && previousDungeon)
+        {
+            for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL;
+                itr = itr->next())
+            {
+                Player* player = itr->getSource();
+                if (!player || previousStatus->playerRoles.find(
+                    player->GetObjectGuid()) == previousStatus->playerRoles.end() ||
+                    !LFGLogic::ShouldReturnFromCompletedDungeon(
+                        previousStatus->state == LFG_STATE_FINISHED_DUNGEON,
+                        int32(player->GetMapId()), previousDungeon->MapID))
+                {
+                    continue;
+                }
+                if (!TeleportPlayer(player, true, true, true))
+                {
+                    return false;
+                }
+                returnedFromCompletedDungeon.insert(player->GetObjectGuid());
+            }
         }
     }
     else
@@ -803,7 +859,10 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     {
         if (Player* player = itr->getSource())
         {
-            TeleportPlayer(player, false, true);
+            bool const completedDungeonTransfer =
+                returnedFromCompletedDungeon.find(player->GetObjectGuid()) !=
+                returnedFromCompletedDungeon.end();
+            TeleportPlayer(player, false, true, completedDungeonTransfer);
         }
     }
 
@@ -811,11 +870,12 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
     return true;
 }
 
-void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
+bool LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic,
+    bool completedDungeonTransfer)
 {
     if (!pPlayer)
     {
-        return;
+        return false;
     }
 
     auto sendError = [pPlayer](LFGTeleportError error)
@@ -827,14 +887,14 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
     if (!pGroup)
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
 
     LFGGroupStatus* status = GetGroupStatus(pGroup->GetObjectGuid());
     if (!status)
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
 
     LfgDungeonsEntry const* dungeon =
@@ -857,56 +917,77 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
         uint32(pGroup->GetDungeonDifficulty())))
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
 
     uint32 const mapID = uint32(dungeon->MapID);
     if (out)
     {
-        if (pPlayer->GetMapId() != mapID || !pPlayer->TeleportToBGEntryPoint())
+        if (pPlayer->GetMapId() != mapID)
         {
             sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+            return false;
         }
-        return;
+        bool const teleported = completedDungeonTransfer ?
+            pPlayer->TeleportTo(pPlayer->GetBattleGroundEntryPoint()) :
+            pPlayer->TeleportToBGEntryPoint();
+        if (!teleported)
+        {
+            sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+            return false;
+        }
+        return true;
     }
 
-    if (pPlayer->GetMapId() == mapID)
+    bool const chainedExteriorTransfer = completedDungeonTransfer &&
+        pPlayer->IsBeingTeleportedFar();
+    if (pPlayer->GetMapId() == mapID && !chainedExteriorTransfer)
     {
-        return;
+        return true;
     }
     if (pPlayer->IsDead())
     {
         sendError(LFG_TELEPORTERROR_PLAYER_DEAD);
-        return;
+        return false;
     }
     if (pPlayer->IsFalling())
     {
         sendError(LFG_TELEPORTERROR_FALLING);
-        return;
+        return false;
     }
     if (pPlayer->GetVehicleInfo())
     {
         sendError(LFG_TELEPORTERROR_IN_VEHICLE);
-        return;
+        return false;
     }
     if (pPlayer->IsInCombat())
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
     dungeonForbidden const lockedDungeons = FindRandomDungeonsNotForPlayer(pPlayer);
     if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
 
-    Map* currentMap = pPlayer->GetMap();
-    if (!currentMap || currentMap->IsDungeon() || currentMap->IsRaid() ||
-        currentMap->IsBattleGroundOrArena())
+    bool validCurrentMap = false;
+    if (chainedExteriorTransfer)
+    {
+        WorldLocation const& exterior = pPlayer->GetTeleportDest();
+        MapEntry const* exteriorMap = sMapStore.LookupEntry(exterior.mapid);
+        validCurrentMap = exteriorMap && !exteriorMap->Instanceable();
+    }
+    else if (Map* currentMap = pPlayer->GetMap())
+    {
+        validCurrentMap = !currentMap->IsDungeon() && !currentMap->IsRaid() &&
+            !currentMap->IsBattleGroundOrArena();
+    }
+    if (!validCurrentMap)
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-        return;
+        return false;
     }
 
     float x = 0.0f;
@@ -948,7 +1029,7 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
         if (!entrance)
         {
             sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
-            return;
+            return false;
         }
         x = entrance->target_X;
         y = entrance->target_Y;
@@ -956,11 +1037,16 @@ void LFGMgr::TeleportPlayer(Player* pPlayer, bool out, bool automatic)
         o = entrance->target_Orientation;
     }
 
-    pPlayer->SetBattleGroundEntryPoint();
+    if (!chainedExteriorTransfer)
+    {
+        pPlayer->SetBattleGroundEntryPoint();
+    }
     if (!pPlayer->TeleportTo(mapID, x, y, z, o))
     {
         sendError(LFG_TELEPORTERROR_INVALID_LOCATION);
+        return false;
     }
+    return true;
 }
 
 LFGGroupStatus* LFGMgr::GetGroupStatus(ObjectGuid guid)

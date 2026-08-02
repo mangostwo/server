@@ -183,6 +183,24 @@ TEST(LFG_RequeuePreservesTheActiveDungeon)
         std::set<std::uint32_t>({10, 11}));
 }
 
+TEST(LFG_ReplacementQueuePreservesRandomDungeonProvenance)
+{
+    CHECK_EQ(LFGLogic::RequeueRandomDungeon(true, 258, 0),
+        std::uint32_t(258));
+    CHECK_EQ(LFGLogic::RequeueRandomDungeon(true, 0, 258),
+        std::uint32_t(0));
+    CHECK_EQ(LFGLogic::RequeueRandomDungeon(false, 0, 258),
+        std::uint32_t(258));
+}
+
+TEST(LFG_CompletedDungeonTransitionReturnsMembersFromThePreviousMap)
+{
+    CHECK(LFGLogic::ShouldReturnFromCompletedDungeon(true, 34, 34));
+    CHECK(!LFGLogic::ShouldReturnFromCompletedDungeon(false, 34, 34));
+    CHECK(!LFGLogic::ShouldReturnFromCompletedDungeon(true, 0, 34));
+    CHECK(!LFGLogic::ShouldReturnFromCompletedDungeon(true, 36, 34));
+}
+
 TEST(LFG_QueueOwnerCanBePublishedByAnImmediateProposal)
 {
     CHECK(LFGLogic::IsQueueOwnerPublished(true, false));

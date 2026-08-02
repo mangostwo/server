@@ -226,6 +226,21 @@ std::set<std::uint32_t> LFGLogic::RequeueDungeons(
         std::set<std::uint32_t>{activeDungeonId};
 }
 
+std::uint32_t LFGLogic::RequeueRandomDungeon(bool hasActiveProvenance,
+    std::uint32_t activeRandomDungeonId,
+    std::uint32_t requestedRandomDungeonId)
+{
+    return hasActiveProvenance ? activeRandomDungeonId :
+        requestedRandomDungeonId;
+}
+
+bool LFGLogic::ShouldReturnFromCompletedDungeon(bool finished,
+    std::int32_t currentMapId, std::int32_t previousDungeonMapId)
+{
+    return finished && previousDungeonMapId > 0 &&
+        currentMapId == previousDungeonMapId;
+}
+
 bool LFGLogic::IsQueueOwnerPublished(bool queued, bool proposing)
 {
     return queued || proposing;

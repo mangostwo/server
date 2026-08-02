@@ -602,7 +602,8 @@ public:
         LFGGroupUpdateData& data) const;
 
     /// Enter or leave the group's validated LFD dungeon.
-    void TeleportPlayer(Player* pPlayer, bool out, bool automatic);
+    bool TeleportPlayer(Player* pPlayer, bool out, bool automatic,
+        bool completedDungeonTransfer = false);
 
     /// Queue Functions Below
 
@@ -718,7 +719,9 @@ protected:
     bool BeginProposal(ObjectGuid ownerGuid);
 
     /// Remove one failed proposal and restore each still-valid source at most once.
-    void UnwindProposal(uint32 proposalId, std::set<ObjectGuid> const& failedPlayers);
+    void UnwindProposal(uint32 proposalId,
+        std::set<ObjectGuid> const& failedPlayers,
+        ObjectGuid playerPacketGuid = ObjectGuid());
 
     /// Revalidate and republish one immutable queue source.
     bool RestoreQueueSource(LFGQueueSource const& source);
@@ -748,10 +751,19 @@ protected:
     void RemoveOldBoots();
 
     /// Cancel one immutable queue source and restore unaffected merged sources.
-    void CancelQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType);
+    void CancelQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,
+        ObjectGuid playerPacketGuid = ObjectGuid());
+
+    /// Publish a terminal update and erase one source's player state.
+    void DiscardQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,
+        ObjectGuid playerPacketGuid = ObjectGuid());
+    void DiscardQueueSource(LFGQueueSource const& source,
+        LfgUpdateType updateType,
+        ObjectGuid playerPacketGuid = ObjectGuid());
 
     /// Abort and remove one pending party role check.
-    void CancelRoleCheck(ObjectGuid groupGuid, LfgUpdateType updateType);
+    void CancelRoleCheck(ObjectGuid groupGuid, LfgUpdateType updateType,
+        ObjectGuid playerPacketGuid = ObjectGuid());
 
     /// Keep an aggregate queue record and every member's client status in sync.
     bool TransitionQueueUnit(ObjectGuid ownerGuid, LFGState state, LfgUpdateType updateType);
