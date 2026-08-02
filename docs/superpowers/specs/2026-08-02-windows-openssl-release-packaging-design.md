@@ -10,12 +10,12 @@ extracted server can locate the provider. OpenSSL then falls back to its
 compiled installation directory or an administrator-provided
 `OPENSSL_MODULES`, neither of which is valid for a clean extracted release.
 
-## Outcome
+## Phase-one outcome
 
-An extracted Windows release is self-contained for the OpenSSL functionality
-MaNGOS requires. Starting `realmd.exe` or `mangosd.exe` directly must load the
-matching legacy provider without requiring OpenSSL to be installed globally or
-`OPENSSL_MODULES` to be configured.
+An extracted Windows release contains every OpenSSL artifact MaNGOS requires
+and supplies launchers that select the bundled provider without requiring
+OpenSSL to be installed globally or `OPENSSL_MODULES` to be configured by the
+user. This first phase changes only the external AppVeyor scripts.
 
 ## Design
 
@@ -31,6 +31,8 @@ server/
   libssl-3-x64.dll
   ossl-modules/
     legacy.dll
+  Start-Mangosd.cmd
+  Start-Realmd.cmd
 ```
 
 The files must come from the same OpenSSL installation used to link the
@@ -41,56 +43,55 @@ provider is required.
 
 ### Runtime discovery
 
-On Windows, before providers are loaded, MaNGOS will:
+Each launcher will:
 
 1. Preserve an explicitly configured, non-empty `OPENSSL_MODULES` value.
-2. Otherwise resolve the running executable's directory.
-3. If `ossl-modules/legacy.dll` exists beside that executable, set OpenSSL's
-   default provider search path to the `ossl-modules` directory for the default
-   library context.
-4. If the bundled provider is absent, retain OpenSSL's normal discovery and
-   report a diagnostic that names both supported remedies.
+2. Otherwise set `OPENSSL_MODULES` to the executable-relative `ossl-modules`
+   directory for the child process only.
+3. Start the corresponding daemon from the extracted server directory and
+   forward all command-line arguments and the daemon's exit code.
 
-This fallback is Windows-only. It does not change Linux provider discovery or
-override administrator configuration.
+The existing daemon binaries are unchanged. Launching an `.exe` directly, or
+starting it as a Windows service, still requires a suitable externally defined
+`OPENSSL_MODULES`. Executable-relative discovery for those entry points is a
+possible later core change, outside this AppVeyor-first phase.
 
 ### Build and release packaging
 
-The core CMake install rules will locate the runtime DLLs and `legacy.dll` from
-the OpenSSL installation selected by `find_package(OpenSSL)`, then install them
-to the layout above. This makes local `cmake --install` output and release
-packaging consistent.
+The external AppVeyor script will copy the runtime DLLs and `legacy.dll` from
+the same OpenSSL root supplied to CMake. It will use `ossl-modules`, create the
+two launchers, and verify all staged archive inputs before invoking 7-Zip. This
+prevents a stale or minimal AppVeyor OpenSSL cache from publishing a broken
+archive.
 
-The external AppVeyor script will retain a defensive packaging check. It will
-use `ossl-modules`, require exactly the needed legacy provider, and verify the
-staged archive inputs before invoking 7-Zip. This prevents a stale or minimal
-AppVeyor OpenSSL cache from publishing a broken archive.
+The AppVeyor install script will validate `legacy.dll` as well as the runtime
+and development libraries so a bad dependency cache fails before compilation.
 
 ## Failure handling
 
-- CMake configuration or installation fails on Windows dynamic builds if the
-  required OpenSSL runtime/provider artifacts cannot be located.
 - AppVeyor fails before archive creation if any required artifact is absent.
-- Runtime diagnostics report the bundled directory attempted and the explicit
-  `OPENSSL_MODULES` override when provider loading still fails.
+- The launchers do not overwrite an administrator-provided `OPENSSL_MODULES`.
+- Direct executable and Windows-service use retain the existing runtime
+  diagnostic when no provider path is configured.
 
 No database changes or configuration-file migration are required.
 
 ## Verification
 
-1. A focused provider test runs with `OPENSSL_MODULES` unset and a matching
-   `ossl-modules/legacy.dll` beside the test executable. RC4 acquisition must
-   succeed through the same provider manager used by both daemons.
-2. CMake install output is checked for both OpenSSL runtime DLLs and
-   `ossl-modules/legacy.dll`.
-3. The AppVeyor PowerShell script is syntax-checked and its staging assertions
-   are inspected against the required archive layout.
-4. The rebased branch receives the existing targeted tests, one phase-end full
-   build/CTest run, and an extracted-install provider smoke check with
-   `OPENSSL_MODULES` removed from the process environment.
+1. Before editing, a focused contract check must fail because the current
+   scripts use `openssl-modules`, allow the provider to be absent, and create no
+   launchers.
+2. Both AppVeyor PowerShell scripts are syntax-checked after editing.
+3. A focused contract check confirms the required runtime/provider files,
+   standard directory name, launcher behavior, and pre-archive assertions.
+4. The next AppVeyor run is the integration gate: it must complete staging and
+   publish a ZIP containing the exact layout above.
+5. An extracted-release smoke test should launch each daemon through its
+   launcher with `OPENSSL_MODULES` absent and confirm the legacy provider loads.
 
 ## Scope
 
-This repair changes Windows dependency packaging and provider discovery only.
-It does not change cryptographic algorithms, authentication protocol behavior,
-database schemas, or the completed LFD behavior.
+This phase changes only the external Windows AppVeyor dependency and packaging
+scripts. It does not modify MaNGOS source, cryptographic algorithms,
+authentication protocol behavior, database schemas, or the completed LFD
+behavior.
