@@ -132,10 +132,6 @@ if(WIN32)
     find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
         NAMES libcrypto-3-x64.dll libcrypto-3.dll libcrypto.dll
         HINTS ${MANGOS_SSL_HINTS})
-    find_file(MANGOS_TEST_OPENSSL_SSL_DLL
-        NAMES libssl-3-x64.dll libssl-3.dll libssl.dll
-        HINTS ${MANGOS_SSL_HINTS})
-
     if(MANGOS_TEST_OPENSSL_CRYPTO_DLL)
         add_custom_command(TARGET mangos_tests POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -144,16 +140,6 @@ if(WIN32)
     else()
         message(WARNING
             "OpenSSL runtime DLL not found; mangos_tests may need it on PATH to run.")
-    endif()
-
-    if(MANGOS_TEST_OPENSSL_SSL_DLL)
-        add_custom_command(TARGET mangos_tests POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${MANGOS_TEST_OPENSSL_SSL_DLL}"
-                "$<TARGET_FILE_DIR:mangos_tests>")
-    else()
-        message(WARNING
-            "OpenSSL SSL runtime DLL not found; mangos_tests may need it on PATH to run.")
     endif()
 
     get_filename_component(
