@@ -178,7 +178,7 @@ if(WIN32)
     find_file(MANGOS_TEST_OPENSSL_LEGACY_DLL
         NAMES legacy.dll
         HINTS ${MANGOS_SSL_HINTS}
-        PATH_SUFFIXES "" bin/ossl-modules ossl-modules lib/ossl-modules)
+        PATH_SUFFIXES bin/ossl-modules ossl-modules lib/ossl-modules "")
 
     if(MANGOS_TEST_OPENSSL_LEGACY_DLL)
         add_custom_command(TARGET mangos_tests POST_BUILD
