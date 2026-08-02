@@ -132,6 +132,9 @@ if(WIN32)
     find_file(MANGOS_TEST_OPENSSL_CRYPTO_DLL
         NAMES libcrypto-3-x64.dll libcrypto-3.dll libcrypto.dll
         HINTS ${MANGOS_SSL_HINTS})
+    find_file(MANGOS_TEST_OPENSSL_SSL_DLL
+        NAMES libssl-3-x64.dll libssl-3.dll libssl.dll
+        HINTS ${MANGOS_SSL_HINTS})
 
     if(MANGOS_TEST_OPENSSL_CRYPTO_DLL)
         add_custom_command(TARGET mangos_tests POST_BUILD
@@ -141,6 +144,16 @@ if(WIN32)
     else()
         message(WARNING
             "OpenSSL runtime DLL not found; mangos_tests may need it on PATH to run.")
+    endif()
+
+    if(MANGOS_TEST_OPENSSL_SSL_DLL)
+        add_custom_command(TARGET mangos_tests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${MANGOS_TEST_OPENSSL_SSL_DLL}"
+                "$<TARGET_FILE_DIR:mangos_tests>")
+    else()
+        message(WARNING
+            "OpenSSL SSL runtime DLL not found; mangos_tests may need it on PATH to run.")
     endif()
 
     get_filename_component(
@@ -160,21 +173,22 @@ endif()
 add_test(NAME mangos_tests COMMAND mangos_tests)
 
 if(WIN32)
-    # OPENSSL_ROOT_DIR is only a hint to FindOpenSSL, which locates OpenSSL by other means when it
-    # is unset -- so "${OPENSSL_ROOT_DIR}/bin" expanded to "/bin", OPENSSL_MODULES pointed nowhere,
-    # and the legacy provider was never loaded. RC4 lives in that provider, so this surfaced as a
-    # test failure rather than as a configure error. Locate legacy.dll with the same hints and take
-    # the directory from it, setting the variable only when it is actually known.
+    # Match the release layout and leave OPENSSL_MODULES empty: provider discovery
+    # must work from ossl-modules beside the executable, not from the build host.
     find_file(MANGOS_TEST_OPENSSL_LEGACY_DLL
         NAMES legacy.dll
         HINTS ${MANGOS_SSL_HINTS}
-        PATH_SUFFIXES ossl-modules lib/ossl-modules)
+        PATH_SUFFIXES "" bin/ossl-modules ossl-modules lib/ossl-modules)
 
     if(MANGOS_TEST_OPENSSL_LEGACY_DLL)
-        get_filename_component(MANGOS_TEST_OPENSSL_MODULES_DIR
-            "${MANGOS_TEST_OPENSSL_LEGACY_DLL}" DIRECTORY)
+        add_custom_command(TARGET mangos_tests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                "$<TARGET_FILE_DIR:mangos_tests>/ossl-modules"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${MANGOS_TEST_OPENSSL_LEGACY_DLL}"
+                "$<TARGET_FILE_DIR:mangos_tests>/ossl-modules/legacy.dll")
         set_tests_properties(mangos_tests PROPERTIES
-            ENVIRONMENT "OPENSSL_MODULES=${MANGOS_TEST_OPENSSL_MODULES_DIR}")
+            ENVIRONMENT "OPENSSL_MODULES=")
     else()
         message(WARNING
             "OpenSSL legacy provider (legacy.dll) not found; mangos_tests may fail its RC4 cases.")
