@@ -79,6 +79,8 @@ function Resolve-OpenSslArtifact {
 Use ordered candidates:
 
 ```powershell
+$headerPaths = @('include\openssl\ssl.h')
+$opensslExePaths = @('bin\openssl.exe', 'openssl.exe')
 $cryptoRuntimePaths = @('bin\libcrypto-3-x64.dll', 'libcrypto-3-x64.dll')
 $sslRuntimePaths = @('bin\libssl-3-x64.dll', 'libssl-3-x64.dll')
 $legacyProviderPaths = @(
@@ -99,8 +101,6 @@ $sslImportPaths = @(
 )
 ```
 
-Also resolve `openssl.exe` from `bin\openssl.exe` and then `openssl.exe`.
-
 In `install_script.txt`, resolve the header plus both import libraries, both
 runtime DLLs, `legacy.dll`, and `openssl.exe` inside the existing-installation
 branch. If any resolution throws, treat that root as unusable and perform the
@@ -112,12 +112,19 @@ In `build_script.txt`, iterate `$openSslRootCandidates` in order and call
 `Resolve-OpenSslArtifact` for all seven artifacts inside a `try` block. Select a
 root only after every call succeeds, retaining the resolved paths in an object
 used by `Copy-OpenSslRuntime`. If no candidate passes, throw with every checked
-root. This replaces the current header-plus-recursive-libcrypto root test and
+root. Store them as a `[pscustomobject]` with `Header`, `OpenSslExe`,
+`CryptoRuntime`, `SslRuntime`, `LegacyProvider`, `CryptoImport`, and `SslImport`
+properties. This replaces the current header-plus-recursive-libcrypto root test and
 recursive first-match selection for packaged files.
 
 - [ ] **Step 3: Stage only the required files**
 
-Change `Copy-OpenSslRuntime` in `build_script.txt` to copy the resolved crypto and SSL runtime DLLs to `$out`, create `$out\ossl-modules`, and copy only the resolved `legacy.dll` there. Delete the broad recursive provider search, `default.dll` handling, and warning-only branch.
+Change `Copy-OpenSslRuntime` in `build_script.txt` to accept
+`[pscustomobject]$Artifacts` and `[string]$DestinationDirectory`. Copy
+`$Artifacts.CryptoRuntime` and `$Artifacts.SslRuntime` to the destination, use
+`Join-Path $DestinationDirectory "ossl-modules"` for the provider directory,
+and copy only `$Artifacts.LegacyProvider` there. Delete the broad recursive
+provider search, `default.dll` handling, and warning-only branch.
 
 Before staging, prove the selected runtime supplies the default provider
 internally: create a unique directory under `$env:TEMP`, copy only the resolved
@@ -175,7 +182,12 @@ Report the two exact local paths and the required resulting ZIP layout to the us
 
 - [ ] **Step 1: Change CMake test staging before production code**
 
-Find both `libcrypto-3-x64.dll` and `libssl-3-x64.dll` from the existing `MANGOS_SSL_HINTS`. Copy both beside `mangos_tests`. Find `legacy.dll` using `PATH_SUFFIXES "" bin/ossl-modules ossl-modules lib/ossl-modules`, then add a post-build command that creates `$<TARGET_FILE_DIR:mangos_tests>/ossl-modules` and copies it there as `legacy.dll`. Replace the current test environment path with:
+Find `libcrypto` with the existing names and find `libssl` using `NAMES
+libssl-3-x64.dll libssl-3.dll libssl.dll`, both from `MANGOS_SSL_HINTS`. Copy
+both beside `mangos_tests`. Find `legacy.dll` using `PATH_SUFFIXES ""
+bin/ossl-modules ossl-modules lib/ossl-modules`, then add a post-build command
+that creates `$<TARGET_FILE_DIR:mangos_tests>/ossl-modules` and copies it there
+as `legacy.dll`. Replace the current test environment path with:
 
 ```cmake
 set_tests_properties(mangos_tests PROPERTIES ENVIRONMENT "OPENSSL_MODULES=")
@@ -196,7 +208,7 @@ OpenSSLProviderManager& manager =
     OpenSSLProviderManager::Instance();
 
 const char* modulesAfter = std::getenv("OPENSSL_MODULES");
-CHECK_EQ(std::string(modulesAfter ? modulesAfter : ""), modulesBefore);
+CHECK_STR(std::string(modulesAfter ? modulesAfter : ""), modulesBefore);
 ```
 
 This proves both the CTest premise and that manager initialization does not
@@ -243,9 +255,9 @@ OpenSSLProvider LoadLegacyProvider();
 Implementation requirements:
 
 - `ReadWindowsEnvironment` grows a `std::vector<wchar_t>` around `GetEnvironmentVariableW` and returns a copied value.
-- `GetExecutableDirectory` grows a `std::vector<wchar_t>` around `GetModuleFileNameW`; it never uses the current directory.
+- `GetExecutableDirectory` grows a `std::vector<wchar_t>` around `GetModuleFileNameW`; it never uses the current directory. Filesystem path construction and the provider-file probe use `std::error_code` overloads where available and catch `std::filesystem::filesystem_error`, logging and returning instead of escaping manager construction.
 - `ConvertWideToAnsi` produces an owned narrow string with `WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, ...)` and rejects `usedDefaultChar`; use it for both OpenSSL paths and Windows diagnostic text.
-- `ConvertForOpenSSL` passes `directory.native()` (the Windows `std::wstring`) to `ConvertWideToAnsi` and rejects a provider path whose appended `\legacy.dll` reaches `MAX_PATH`. On failure it retries with `GetShortPathNameW` and the same checks.
+- `ConvertForOpenSSL` passes `directory.native()` (the Windows `std::wstring`) to `ConvertWideToAnsi`, then checks the resulting narrow byte length including appended `\legacy.dll` against `MAX_PATH`. On conversion failure or narrow-length overflow it retries with `GetShortPathNameW`, converts that wide short path, and checks the final narrow byte length again.
 - `ConfigureBundledProviderSearchPath` returns immediately for a non-empty override and verifies `ossl-modules\legacy.dll` is a regular file. If `OSSL_PROVIDER_set_default_search_path(nullptr, converted.c_str()) != 1`, it logs the failure and returns without throwing; the following provider load then retains existing fail-closed behavior.
 - `LoadLegacyProvider` calls configuration first and returns `OpenSSLProvider("legacy")`.
 - Wrap Windows helper definitions and calls in `#ifdef WIN32`; the single cross-platform `LoadLegacyProvider` calls `ConfigureBundledProviderSearchPath()` only inside that guard and always returns `OpenSSLProvider("legacy")`.
@@ -334,11 +346,31 @@ revision metadata.
 Run:
 
 ```powershell
+$cacheLine = Get-Content E:\Mangos\WIP\Two\LFDSystemsRepair\build-msvc\CMakeCache.txt |
+    Where-Object { $_ -match '^OPENSSL_ROOT_DIR:' } | Select-Object -First 1
+$cacheMatch = [regex]::Match($cacheLine, '^[^=]+=(.+)$')
+if (-not $cacheMatch.Success) { throw 'OPENSSL_ROOT_DIR is missing from the MSVC CMake cache' }
+$localOpenSslRoot = $cacheMatch.Groups[1].Value -replace '/', '\'
+
+function Resolve-LocalOpenSslArtifact([string[]]$RelativePaths) {
+    foreach ($relativePath in $RelativePaths) {
+        $candidate = Join-Path $localOpenSslRoot $relativePath
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { return $candidate }
+    }
+    throw "OpenSSL artifact missing under ${localOpenSslRoot}: $($RelativePaths -join ', ')"
+}
+
+$localCrypto = Resolve-LocalOpenSslArtifact @('bin\libcrypto-3-x64.dll', 'libcrypto-3-x64.dll')
+$localSsl = Resolve-LocalOpenSslArtifact @('bin\libssl-3-x64.dll', 'libssl-3-x64.dll')
+$localLegacy = Resolve-LocalOpenSslArtifact @(
+    'bin\ossl-modules\legacy.dll', 'bin\legacy.dll',
+    'lib\ossl-modules\legacy.dll', 'ossl-modules\legacy.dll')
+
 cmake --install E:\Mangos\WIP\Two\LFDSystemsRepair\build-msvc --config RelWithDebInfo
 New-Item -ItemType Directory -Force E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\ossl-modules | Out-Null
-Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\libcrypto-3-x64.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
-Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\libssl-3-x64.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
-Copy-Item -LiteralPath C:\OpenSSL-Win64\bin\legacy.dll -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\ossl-modules -Force
+Copy-Item -LiteralPath $localCrypto -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
+Copy-Item -LiteralPath $localSsl -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc -Force
+Copy-Item -LiteralPath $localLegacy -Destination E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\ossl-modules\legacy.dll -Force
 Copy-Item -Path E:\Mangos\WIP\Two\LFDSystemsRepair\install-msvc\* -Destination E:\Mangos\WIP\Two\Testing\server_install -Recurse -Force
 ```
 
@@ -383,3 +415,52 @@ if ($LASTEXITCODE -ne 1) { throw "rg failed with exit code $LASTEXITCODE" }
 - [ ] **Step 5: Stop short of publishing**
 
 Report the branch HEAD, modified external AppVeyor files, verification evidence, AppVeyor upload instructions, and remaining user smoke test. Do not push, merge, or start either daemon.
+
+### Task 5: Audit and port the verified repair across MaNGOS Zero-Four
+
+**Files:**
+- Audit: `E:\Mangos\Repos\Zero\server`, `One\server`, `Three\server`, and the active Four server checkout
+- Modify as proven: `E:\Mangos\appveyor\Zero`, `One`, `Three`, and `Four`
+- Worktrees: one isolated `codex/openssl-release-repair` branch per affected core
+
+**Interfaces:**
+- Consumes: the reviewed Two implementation and each core's current live `origin/master`.
+- Produces: equivalent self-contained Windows release behavior only where the same OpenSSL 3 provider contract exists; no pushes.
+
+- [ ] **Step 1: Refresh and classify each core read-only**
+
+Fetch `origin/master` for Zero, One, Three, and the active Four repository.
+Compare `OpenSSLProvider.{h,cpp}`, provider tests/CMake, daemon startup, and
+AppVeyor scripts against the verified Two implementation. Record whether each
+is an exact port, a build-only packaging port, or a distinct design.
+
+- [ ] **Step 2: Port exact matches in isolated worktrees**
+
+Zero, One, and Three currently show the same eager
+`OpenSSLProviderManager`/hard-coded `OPENSSL_MODULES` pattern. Create clean
+worktrees from their refreshed `origin/master`, apply the smallest compatible
+provider fallback and realistic test staging available in each repository, run
+the narrowest existing provider/build check, and commit separately per core.
+Do not add a new test framework where a core lacks the Two harness.
+
+- [ ] **Step 3: Update matching AppVeyor scripts**
+
+Apply the verified fail-closed artifact resolver, default-provider probe,
+`ossl-modules` layout, and staged-file assertions to Zero, One, Three, and Four.
+Run the PowerShell parser and the focused packaging contract separately in each
+directory so per-core root/stage names remain intact.
+
+- [ ] **Step 4: Treat Four as a separate compatibility gate**
+
+Confirm which Four repository the AppVeyor project builds before editing core
+source. The local `mangosfour/server` checkout uses legacy `EVP_rc4()` and has no
+provider manager, while `NewMangosFour` has the eager provider-manager pattern;
+do not assume they are interchangeable. If AppVeyor targets the former, stop at
+the packaging update and write a focused Four-specific provider-loading design
+before changing its authentication code.
+
+- [ ] **Step 5: Review only cross-core ports and report**
+
+Give SWE one bounded diff-only review of the mechanical cross-core ports after
+their targeted checks. Report each branch/worktree HEAD, scripts changed,
+checks run, and any Four-specific blocker. Do not push or merge any repository.
