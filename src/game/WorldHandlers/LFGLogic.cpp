@@ -252,6 +252,12 @@ bool LFGLogic::IsQueueOwnerPublished(bool queued, bool proposing)
     return queued || proposing;
 }
 
+bool LFGLogic::ShouldReplacePendingQueueSource(bool requestValid,
+    bool hasPendingSource)
+{
+    return requestValid && hasPendingSource;
+}
+
 LFGLogic::GroupPacketValues LFGLogic::MakeGroupPacketValues(std::uint8_t role,
     bool finished, std::uint32_t dungeonEntry)
 {

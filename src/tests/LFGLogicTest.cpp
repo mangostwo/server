@@ -216,6 +216,13 @@ TEST(LFG_QueueOwnerCanBePublishedByAnImmediateProposal)
     CHECK(!LFGLogic::IsQueueOwnerPublished(false, false));
 }
 
+TEST(LFG_ExistingQueueSourceIsReplacedOnlyAfterValidation)
+{
+    CHECK(LFGLogic::ShouldReplacePendingQueueSource(true, true));
+    CHECK(!LFGLogic::ShouldReplacePendingQueueSource(false, true));
+    CHECK(!LFGLogic::ShouldReplacePendingQueueSource(true, false));
+}
+
 TEST(LFG_GroupPacketValuesPreserveRoleStateAndPackedEntry)
 {
     LFGLogic::GroupPacketValues const active =

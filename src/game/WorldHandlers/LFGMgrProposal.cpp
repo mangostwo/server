@@ -549,6 +549,16 @@ void LFGMgr::UnwindProposal(uint32 proposalId,
             continue;
         }
 
+        bool const restoreActiveStatus =
+            LFGLogic::ShouldRestoreActiveGroupStatus(true, false,
+                source.isGroup && GetGroupStatus(source.ownerGuid) != NULL);
+        if (restoreActiveStatus)
+        {
+            RestoreActiveGroupStatus(source.ownerGuid, ObjectGuid(),
+                source.ownerGuid != silentSourceOwner);
+            continue;
+        }
+
         LfgUpdateType const updateType = sourceDeclined ?
             LFG_UPDATE_PROPOSAL_DECLINED : LFG_UPDATE_PROPOSAL_FAILED;
         for (roleMap::const_iterator roleItr = source.selectedRoles.begin();

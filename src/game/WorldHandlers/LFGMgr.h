@@ -773,6 +773,9 @@ protected:
     /// Return true while a successful proposal is moving this source group.
     bool IsSuccessfulProposalMove(ObjectGuid groupGuid) const;
 
+    /// Return true while this immutable source owns a pending LFG lifecycle.
+    bool HasPendingQueueSource(ObjectGuid sourceOwner) const;
+
     /// Republish the active dungeon lifecycle after replacement cancellation.
     bool RestoreActiveGroupStatus(ObjectGuid groupGuid,
         ObjectGuid excludedGuid = ObjectGuid(), bool sendUpdate = true);

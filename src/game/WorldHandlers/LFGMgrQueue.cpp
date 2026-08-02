@@ -57,15 +57,6 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
     Group* pGroup = plr->GetGroup();
     ObjectGuid guid = (pGroup) ? pGroup->GetObjectGuid() : plr->GetObjectGuid();
 
-    LFGPlayers* currentInfo = GetPlayerOrPartyData(guid);
-    if (currentInfo)
-    {
-        if (currentInfo->currentState == LFG_STATE_QUEUED)
-        {
-            RemoveFromQueue(guid);
-        }
-    }
-
     LFGGroupStatus* activeGroupStatus = NULL;
     uint32 activeDungeonId = 0;
     if (pGroup && pGroup->isLFGGroup())
@@ -214,10 +205,25 @@ void LFGMgr::JoinLFG(uint32 roles, std::set<uint32> dungeons, std::string commen
         }
     }
 
+    bool const replacePendingSource =
+        LFGLogic::ShouldReplacePendingQueueSource(result == ERR_LFG_OK,
+            HasPendingQueueSource(guid));
     if (result != ERR_LFG_OK)
     {
         plr->GetSession()->SendLfgJoinResult(result, LFG_STATE_NONE, partyLockedDungeons);
         return;
+    }
+
+    if (replacePendingSource)
+    {
+        if (m_roleCheckMap.find(guid) != m_roleCheckMap.end())
+        {
+            CancelRoleCheck(guid, LFG_UPDATE_LEAVE, ObjectGuid(), false);
+        }
+        else
+        {
+            CancelQueueSource(guid, LFG_UPDATE_LEAVE, ObjectGuid(), false);
+        }
     }
 
     if (pGroup)
@@ -319,15 +325,21 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
         }
 
         ObjectGuid grpGuid = pGroup->GetObjectGuid();
+        bool const restoreActiveStatus = GetGroupStatus(grpGuid) != NULL;
         if (m_roleCheckMap.find(grpGuid) != m_roleCheckMap.end())
         {
-            CancelRoleCheck(grpGuid, LFG_UPDATE_LEAVE);
+            CancelRoleCheck(grpGuid, LFG_UPDATE_LEAVE, ObjectGuid(),
+                !restoreActiveStatus);
         }
         else
         {
-            CancelQueueSource(grpGuid, LFG_UPDATE_LEAVE);
+            CancelQueueSource(grpGuid, LFG_UPDATE_LEAVE, ObjectGuid(),
+                !restoreActiveStatus);
         }
-        RestoreActiveGroupStatus(grpGuid);
+        if (restoreActiveStatus)
+        {
+            RestoreActiveGroupStatus(grpGuid);
+        }
     }
     else
     {
@@ -521,6 +533,38 @@ bool LFGMgr::IsSuccessfulProposalMove(ObjectGuid groupGuid) const
         proposalItr->second.state == LFG_PROPOSAL_SUCCESS;
 }
 
+bool LFGMgr::HasPendingQueueSource(ObjectGuid sourceOwner) const
+{
+    if (m_roleCheckMap.find(sourceOwner) != m_roleCheckMap.end())
+    {
+        return true;
+    }
+
+    ownerProposalMap::const_iterator ownerItr =
+        m_ownerProposalIds.find(sourceOwner);
+    if (ownerItr != m_ownerProposalIds.end())
+    {
+        proposalMap::const_iterator proposalItr =
+            m_proposalMap.find(ownerItr->second);
+        if (proposalItr != m_proposalMap.end() &&
+            proposalItr->second.state == LFG_PROPOSAL_INITIATING)
+        {
+            return true;
+        }
+    }
+
+    for (playerData::const_iterator dataItr = m_playerData.begin();
+        dataItr != m_playerData.end(); ++dataItr)
+    {
+        if (dataItr->second.sourceUnits.find(sourceOwner) !=
+            dataItr->second.sourceUnits.end())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool LFGMgr::RestoreActiveGroupStatus(ObjectGuid groupGuid,
     ObjectGuid excludedGuid, bool sendUpdate)
 {
@@ -572,40 +616,17 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
     LFGGroupStatus* groupStatus = GetGroupStatus(groupGuid);
     if (groupStatus)
     {
-        bool pendingReplacement = m_roleCheckMap.find(groupGuid) !=
-            m_roleCheckMap.end();
-        ownerProposalMap::const_iterator ownerItr =
-            m_ownerProposalIds.find(groupGuid);
-        if (!pendingReplacement && ownerItr != m_ownerProposalIds.end())
-        {
-            proposalMap::const_iterator proposalItr =
-                m_proposalMap.find(ownerItr->second);
-            pendingReplacement = proposalItr != m_proposalMap.end() &&
-                proposalItr->second.state == LFG_PROPOSAL_INITIATING;
-        }
-        if (!pendingReplacement)
-        {
-            for (playerData::const_iterator dataItr = m_playerData.begin();
-                dataItr != m_playerData.end(); ++dataItr)
-            {
-                if (dataItr->second.sourceUnits.find(groupGuid) !=
-                    dataItr->second.sourceUnits.end())
-                {
-                    pendingReplacement = true;
-                    break;
-                }
-            }
-        }
-
-        if (pendingReplacement)
+        if (HasPendingQueueSource(groupGuid))
         {
             if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
             {
-                CancelRoleCheck(groupGuid, LFG_UPDATE_LEAVE, playerGuid);
+                CancelRoleCheck(groupGuid, LFG_UPDATE_LEAVE, playerGuid,
+                    false);
             }
             else
             {
-                CancelQueueSource(groupGuid, LFG_UPDATE_LEAVE, playerGuid);
+                CancelQueueSource(groupGuid, LFG_UPDATE_LEAVE, playerGuid,
+                    false);
             }
 
             RestoreActiveGroupStatus(groupGuid, playerGuid);
@@ -775,6 +796,20 @@ bool LFGMgr::OnPlayerLogout(Player* player)
                 status->state == LFG_STATE_BOOT ||
                 status->state == LFG_STATE_FINISHED_DUNGEON))
         {
+            if (HasPendingQueueSource(groupGuid))
+            {
+                if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+                {
+                    CancelRoleCheck(groupGuid,
+                        LFG_UPDATE_GROUP_MEMBER_OFFLINE, playerGuid, false);
+                }
+                else
+                {
+                    CancelQueueSource(groupGuid,
+                        LFG_UPDATE_GROUP_MEMBER_OFFLINE, playerGuid, false);
+                }
+                RestoreActiveGroupStatus(groupGuid);
+            }
             return true;
         }
 

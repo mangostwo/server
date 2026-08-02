@@ -86,6 +86,8 @@ namespace LFGLogic
     bool ShouldRestoreActiveGroupStatus(bool terminal, bool queued,
         bool hasActiveGroupStatus);
     bool IsQueueOwnerPublished(bool queued, bool proposing);
+    bool ShouldReplacePendingQueueSource(bool requestValid,
+        bool hasPendingSource);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);
     std::uint8_t GroupHeaderRole(bool lfd, bool battleground,
