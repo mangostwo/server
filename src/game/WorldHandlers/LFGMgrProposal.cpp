@@ -239,12 +239,8 @@ bool LFGMgr::BeginProposal(ObjectGuid ownerGuid)
 
     std::vector<LFGLogic::RoleAssignment> assignments;
     LFGLogic::RoleNeeds needs;
-    bool const testingSolo = m_testing && !aggregate.isGroup &&
-        requests.size() == 1 && !aggregate.dungeonList.empty() &&
-        LFGLogic::AllRolesAnswered(requests);
-    // TEMPORARY LFD SMOKE TEST: production still requires the full 1/1/3 party.
     if (!LFGLogic::ResolveRoles(requests, assignments, needs) ||
-        !LFGLogic::IsProposalReady(requests.size(), testingSolo, needs))
+        !LFGLogic::IsProposalReady(requests.size(), needs))
     {
         return false;
     }

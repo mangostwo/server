@@ -212,13 +212,8 @@ bool LFGLogic::ResolveRoles(std::vector<RoleRequest> const& requests,
     return true;
 }
 
-bool LFGLogic::IsProposalReady(std::size_t playerCount, bool testing,
-    RoleNeeds const& needs)
+bool LFGLogic::IsProposalReady(std::size_t playerCount, RoleNeeds const& needs)
 {
-    if (testing && playerCount == 1)
-    {
-        return true;
-    }
     return playerCount == 5 && needs.tanks == 0 && needs.healers == 0 &&
         needs.damage == 0;
 }
