@@ -165,16 +165,14 @@ TEST(LFG_ResolveRolesReportsPartialNeedsAndRejectsImpossibleGroups)
         assignments, needs));
 }
 
-TEST(LFG_ProposalReadinessKeepsTheSoloBypassNarrow)
+TEST(LFG_ProposalReadinessRequiresCompleteFivePlayerComposition)
 {
     LFGLogic::RoleNeeds const complete = {0, 0, 0};
-    LFGLogic::RoleNeeds const soloTank = {0, 1, 3};
+    LFGLogic::RoleNeeds const incomplete = {0, 1, 3};
 
-    CHECK(LFGLogic::IsProposalReady(5, false, complete));
-    CHECK(!LFGLogic::IsProposalReady(4, false, complete));
-    CHECK(!LFGLogic::IsProposalReady(1, false, soloTank));
-    CHECK(LFGLogic::IsProposalReady(1, true, soloTank));
-    CHECK(!LFGLogic::IsProposalReady(2, true, soloTank));
+    CHECK(LFGLogic::IsProposalReady(5, complete));
+    CHECK(!LFGLogic::IsProposalReady(4, complete));
+    CHECK(!LFGLogic::IsProposalReady(5, incomplete));
 }
 
 TEST(LFG_GroupPacketValuesPreserveRoleStateAndPackedEntry)

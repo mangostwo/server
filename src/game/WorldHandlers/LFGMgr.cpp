@@ -43,8 +43,6 @@
 LFGMgr::LFGMgr()
 {
     m_proposalId = 0;
-    // TEMPORARY LFD SMOKE TEST: remove after the one-player live test.
-    m_testing = false;
 }
 
 LFGMgr::~LFGMgr()
@@ -161,6 +159,7 @@ void LFGMgr::Update()
     FindQueueMatches();
     SendQueueStatus();
 }
+
 
 
 
@@ -457,7 +456,7 @@ void LFGMgr::AddToQueue(ObjectGuid guid)
     std::vector<LFGLogic::RoleAssignment> assignments;
     LFGLogic::RoleNeeds needs;
     if (LFGLogic::ResolveRoles(requests, assignments, needs) &&
-        LFGLogic::IsProposalReady(information->currentRoles.size(), false, needs))
+        LFGLogic::IsProposalReady(information->currentRoles.size(), needs))
     {
         BeginProposal(guid);
     }
@@ -558,14 +557,9 @@ void LFGMgr::FindSpecificQueueMatches(ObjectGuid guid)
     }
     std::vector<LFGLogic::RoleAssignment> currentAssignments;
     LFGLogic::RoleNeeds currentNeeds;
-    bool const testingSolo = m_testing && !queueInfo->isGroup &&
-        currentRequests.size() == 1 && !queueInfo->dungeonList.empty() &&
-        LFGLogic::AllRolesAnswered(currentRequests);
-    // TEMPORARY LFD SMOKE TEST: testingSolo is intentionally narrower than
-    // production readiness and still uses the normal proposal path.
     if (LFGLogic::ResolveRoles(currentRequests, currentAssignments,
         currentNeeds) && LFGLogic::IsProposalReady(currentRequests.size(),
-        testingSolo, currentNeeds))
+        currentNeeds))
     {
         BeginProposal(guid);
         return;
@@ -710,7 +704,7 @@ void LFGMgr::MergeGroups(ObjectGuid guidOne, ObjectGuid guidTwo,
     std::vector<LFGLogic::RoleAssignment> assignments;
     LFGLogic::RoleNeeds needs;
     if (LFGLogic::ResolveRoles(requests, assignments, needs) &&
-        LFGLogic::IsProposalReady(mainGroup->currentRoles.size(), false, needs))
+        LFGLogic::IsProposalReady(mainGroup->currentRoles.size(), needs))
     {
         BeginProposal(guidOne);
     }
@@ -830,8 +824,6 @@ bool LFGMgr::GetGroupUpdateData(ObjectGuid groupGuid, ObjectGuid playerGuid,
     data.dungeonEntry = values.dungeonEntry;
     return true;
 }
-
-
 
 
 
