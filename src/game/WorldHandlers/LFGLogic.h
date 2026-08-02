@@ -83,6 +83,8 @@ namespace LFGLogic
         std::uint32_t requestedRandomDungeonId);
     bool ShouldReturnFromCompletedDungeon(bool finished,
         std::int32_t currentMapId, std::int32_t previousDungeonMapId);
+    bool ShouldRestoreActiveGroupStatus(bool terminal, bool queued,
+        bool hasActiveGroupStatus);
     bool IsQueueOwnerPublished(bool queued, bool proposing);
     GroupPacketValues MakeGroupPacketValues(std::uint8_t role,
         bool finished, std::uint32_t dungeonEntry);

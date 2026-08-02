@@ -241,6 +241,12 @@ bool LFGLogic::ShouldReturnFromCompletedDungeon(bool finished,
         currentMapId == previousDungeonMapId;
 }
 
+bool LFGLogic::ShouldRestoreActiveGroupStatus(bool terminal, bool queued,
+    bool hasActiveGroupStatus)
+{
+    return terminal && !queued && hasActiveGroupStatus;
+}
+
 bool LFGLogic::IsQueueOwnerPublished(bool queued, bool proposing)
 {
     return queued || proposing;

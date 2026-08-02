@@ -721,7 +721,8 @@ protected:
     /// Remove one failed proposal and restore each still-valid source at most once.
     void UnwindProposal(uint32 proposalId,
         std::set<ObjectGuid> const& failedPlayers,
-        ObjectGuid playerPacketGuid = ObjectGuid());
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        ObjectGuid silentSourceOwner = ObjectGuid());
 
     /// Revalidate and republish one immutable queue source.
     bool RestoreQueueSource(LFGQueueSource const& source);
@@ -752,18 +753,29 @@ protected:
 
     /// Cancel one immutable queue source and restore unaffected merged sources.
     void CancelQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,
-        ObjectGuid playerPacketGuid = ObjectGuid());
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        bool publishTerminalUpdate = true);
 
     /// Publish a terminal update and erase one source's player state.
     void DiscardQueueSource(ObjectGuid sourceOwner, LfgUpdateType updateType,
-        ObjectGuid playerPacketGuid = ObjectGuid());
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        bool publishTerminalUpdate = true);
     void DiscardQueueSource(LFGQueueSource const& source,
         LfgUpdateType updateType,
-        ObjectGuid playerPacketGuid = ObjectGuid());
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        bool publishTerminalUpdate = true);
 
     /// Abort and remove one pending party role check.
     void CancelRoleCheck(ObjectGuid groupGuid, LfgUpdateType updateType,
-        ObjectGuid playerPacketGuid = ObjectGuid());
+        ObjectGuid playerPacketGuid = ObjectGuid(),
+        bool publishTerminalUpdate = true);
+
+    /// Return true while a successful proposal is moving this source group.
+    bool IsSuccessfulProposalMove(ObjectGuid groupGuid) const;
+
+    /// Republish the active dungeon lifecycle after replacement cancellation.
+    bool RestoreActiveGroupStatus(ObjectGuid groupGuid,
+        ObjectGuid excludedGuid = ObjectGuid(), bool sendUpdate = true);
 
     /// Keep an aggregate queue record and every member's client status in sync.
     bool TransitionQueueUnit(ObjectGuid ownerGuid, LFGState state, LfgUpdateType updateType);

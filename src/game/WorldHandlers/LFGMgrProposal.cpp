@@ -139,6 +139,9 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             LFG_UPDATE_ROLECHECK_ABORTED : LFG_UPDATE_ROLECHECK_FAILED;
         TransitionQueueUnit(groupGuid, LFG_STATE_NONE, updateType);
     }
+    bool const restoreActiveStatus =
+        LFGLogic::ShouldRestoreActiveGroupStatus(terminal, queued,
+            GetGroupStatus(groupGuid) != NULL);
 
     partyForbidden nullForbidden;
     for (roleMap::const_iterator itr = roleCheck.currentRoles.begin();
@@ -161,7 +164,10 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             SendLfgJoinResult(guidBuff, ERR_LFG_ROLE_CHECK_FAILED,
                 LFG_STATE_ROLECHECK, nullForbidden);
         }
-        SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
+        if (!restoreActiveStatus)
+        {
+            SendLfgUpdate(guidBuff, GetPlayerStatus(guidBuff), true);
+        }
     }
 
     if (!terminal)
@@ -175,7 +181,14 @@ void LFGMgr::PerformRoleCheck(Player* pPlayer, Group* pGroup, uint8 roles)
             roleItr != roleCheck.currentRoles.end(); ++roleItr)
         {
             m_playerQueueOwners.erase(roleItr->first);
-            m_playerStatusMap.erase(roleItr->first);
+            if (!restoreActiveStatus)
+            {
+                m_playerStatusMap.erase(roleItr->first);
+            }
+        }
+        if (restoreActiveStatus)
+        {
+            RestoreActiveGroupStatus(groupGuid);
         }
         m_playerData.erase(groupGuid);
     }
@@ -476,7 +489,8 @@ bool LFGMgr::RestoreQueueSource(LFGQueueSource const& source)
 }
 
 void LFGMgr::UnwindProposal(uint32 proposalId,
-    std::set<ObjectGuid> const& failedPlayers, ObjectGuid playerPacketGuid)
+    std::set<ObjectGuid> const& failedPlayers, ObjectGuid playerPacketGuid,
+    ObjectGuid silentSourceOwner)
 {
     proposalMap::iterator proposalItr = m_proposalMap.find(proposalId);
     if (proposalItr == m_proposalMap.end())
@@ -540,7 +554,8 @@ void LFGMgr::UnwindProposal(uint32 proposalId,
         for (roleMap::const_iterator roleItr = source.selectedRoles.begin();
             roleItr != source.selectedRoles.end(); ++roleItr)
         {
-            if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType))
+            if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType) &&
+                sourceItr->first != silentSourceOwner)
             {
                 SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
                     source.isGroup && roleItr->first != playerPacketGuid);
@@ -727,6 +742,12 @@ bool LFGMgr::CreateDungeonGroup(LFGProposal* proposal)
         ObjectGuid const currentGroupGuid = currentGroup ?
             currentGroup->GetObjectGuid() : ObjectGuid();
         if (currentGroupGuid != itr->second)
+        {
+            return false;
+        }
+        dungeonForbidden const lockedDungeons =
+            FindRandomDungeonsNotForPlayer(player);
+        if (lockedDungeons.find(dungeon->Entry()) != lockedDungeons.end())
         {
             return false;
         }
@@ -1438,6 +1459,9 @@ void LFGMgr::RemoveOldRoleChecks()
         LFGRoleCheck& roleCheck = roleItr->second;
         roleCheck.state = LFG_ROLECHECK_NO_ROLE;
         TransitionQueueUnit(groupGuid, LFG_STATE_NONE, LFG_UPDATE_ROLECHECK_FAILED);
+        bool const restoreActiveStatus =
+            LFGLogic::ShouldRestoreActiveGroupStatus(true, false,
+                GetGroupStatus(groupGuid) != NULL);
         partyForbidden nullForbidden;
 
         for (roleMap::const_iterator roleMapItr = roleCheck.currentRoles.begin();
@@ -1451,8 +1475,16 @@ void LFGMgr::RemoveOldRoleChecks()
             }
 
             SendRoleCheckUpdate(plrGuid, roleCheck);
-            SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
+            if (!restoreActiveStatus)
+            {
+                SendLfgUpdate(plrGuid, GetPlayerStatus(plrGuid), true);
+                m_playerStatusMap.erase(plrGuid);
+            }
             m_playerQueueOwners.erase(plrGuid);
+        }
+        if (restoreActiveStatus)
+        {
+            RestoreActiveGroupStatus(groupGuid);
         }
 
         m_playerData.erase(groupGuid);

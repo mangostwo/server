@@ -201,6 +201,14 @@ TEST(LFG_CompletedDungeonTransitionReturnsMembersFromThePreviousMap)
     CHECK(!LFGLogic::ShouldReturnFromCompletedDungeon(true, 36, 34));
 }
 
+TEST(LFG_FailedReplacementRoleCheckRestoresTheActiveDungeonStatus)
+{
+    CHECK(LFGLogic::ShouldRestoreActiveGroupStatus(true, false, true));
+    CHECK(!LFGLogic::ShouldRestoreActiveGroupStatus(false, false, true));
+    CHECK(!LFGLogic::ShouldRestoreActiveGroupStatus(true, true, true));
+    CHECK(!LFGLogic::ShouldRestoreActiveGroupStatus(true, false, false));
+}
+
 TEST(LFG_QueueOwnerCanBePublishedByAnImmediateProposal)
 {
     CHECK(LFGLogic::IsQueueOwnerPublished(true, false));

@@ -319,37 +319,15 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
         }
 
         ObjectGuid grpGuid = pGroup->GetObjectGuid();
-        roleCheckMap::iterator roleCheckItr = m_roleCheckMap.find(grpGuid);
-        bool const abortedRoleCheck = roleCheckItr != m_roleCheckMap.end();
-        if (abortedRoleCheck)
+        if (m_roleCheckMap.find(grpGuid) != m_roleCheckMap.end())
         {
-            PerformRoleCheck(NULL, pGroup, 0);
+            CancelRoleCheck(grpGuid, LFG_UPDATE_LEAVE);
         }
         else
         {
-            TransitionQueueUnit(grpGuid, LFG_STATE_NONE, LFG_UPDATE_LEAVE);
+            CancelQueueSource(grpGuid, LFG_UPDATE_LEAVE);
         }
-
-        for (GroupReference* itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-        {
-            if (Player* pGroupPlr = itr->getSource())
-            {
-                ObjectGuid grpPlrGuid = pGroupPlr->GetObjectGuid();
-                LFGPlayerStatus grpPlrStatus = GetPlayerStatus(grpPlrGuid);
-                if (!abortedRoleCheck && (grpPlrStatus.state == LFG_STATE_NONE ||
-                    grpPlrStatus.state == LFG_STATE_QUEUED ||
-                    grpPlrStatus.state == LFG_STATE_PROPOSAL))
-                {
-                    SendLfgUpdate(grpPlrGuid, grpPlrStatus, true);
-                }
-                m_playerQueueOwners.erase(grpPlrGuid);
-                m_playerStatusMap.erase(grpPlrGuid);
-            }
-        }
-
-        RemoveFromQueue(grpGuid);
-        m_roleCheckMap.erase(grpGuid);
-        m_playerData.erase(grpGuid);
+        RestoreActiveGroupStatus(grpGuid);
     }
     else
     {
@@ -359,7 +337,8 @@ void LFGMgr::LeaveLFG(Player* plr, bool isGroup)
 }
 
 void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
-    LfgUpdateType updateType, ObjectGuid playerPacketGuid)
+    LfgUpdateType updateType, ObjectGuid playerPacketGuid,
+    bool publishTerminalUpdate)
 {
     ownerProposalMap::iterator proposalOwnerItr =
         m_ownerProposalIds.find(sourceOwner);
@@ -378,7 +357,8 @@ void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
             if (sourceItr == proposalItr->second.sourceUnits.end())
             {
                 m_ownerProposalIds.erase(proposalOwnerItr);
-                DiscardQueueSource(sourceOwner, updateType, playerPacketGuid);
+                DiscardQueueSource(sourceOwner, updateType, playerPacketGuid,
+                    publishTerminalUpdate);
                 return;
             }
             std::set<ObjectGuid> failedPlayers;
@@ -389,7 +369,8 @@ void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
                 failedPlayers.insert(roleItr->first);
             }
             UnwindProposal(proposalItr->first, failedPlayers,
-                playerPacketGuid);
+                playerPacketGuid, publishTerminalUpdate ? ObjectGuid() :
+                    sourceOwner);
             return;
         }
         else
@@ -415,7 +396,8 @@ void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
     }
     if (!aggregateOwner)
     {
-        DiscardQueueSource(sourceOwner, updateType, playerPacketGuid);
+        DiscardQueueSource(sourceOwner, updateType, playerPacketGuid,
+            publishTerminalUpdate);
         return;
     }
 
@@ -440,12 +422,14 @@ void LFGMgr::CancelQueueSource(ObjectGuid sourceOwner,
             }
             continue;
         }
-        DiscardQueueSource(source, updateType, playerPacketGuid);
+        DiscardQueueSource(source, updateType, playerPacketGuid,
+            publishTerminalUpdate);
     }
 }
 
 void LFGMgr::DiscardQueueSource(ObjectGuid sourceOwner,
-    LfgUpdateType updateType, ObjectGuid playerPacketGuid)
+    LfgUpdateType updateType, ObjectGuid playerPacketGuid,
+    bool publishTerminalUpdate)
 {
     roleMap players;
     for (playerGroupMap::const_iterator ownerItr = m_playerQueueOwners.begin();
@@ -464,16 +448,19 @@ void LFGMgr::DiscardQueueSource(ObjectGuid sourceOwner,
     std::set<uint32> dungeons;
     LFGQueueSource source(sourceOwner, dungeons, randomDungeons, players,
         "", TEAM_NEUTRAL, sourceOwner.IsGroup(), 0);
-    DiscardQueueSource(source, updateType, playerPacketGuid);
+    DiscardQueueSource(source, updateType, playerPacketGuid,
+        publishTerminalUpdate);
 }
 
 void LFGMgr::DiscardQueueSource(LFGQueueSource const& source,
-    LfgUpdateType updateType, ObjectGuid playerPacketGuid)
+    LfgUpdateType updateType, ObjectGuid playerPacketGuid,
+    bool publishTerminalUpdate)
 {
     for (roleMap::const_iterator roleItr = source.selectedRoles.begin();
         roleItr != source.selectedRoles.end(); ++roleItr)
     {
-        if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType))
+        if (TransitionPlayer(roleItr->first, LFG_STATE_NONE, updateType) &&
+            publishTerminalUpdate)
         {
             SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
                 source.isGroup && roleItr->first != playerPacketGuid);
@@ -484,7 +471,8 @@ void LFGMgr::DiscardQueueSource(LFGQueueSource const& source,
 }
 
 void LFGMgr::CancelRoleCheck(ObjectGuid groupGuid,
-    LfgUpdateType updateType, ObjectGuid playerPacketGuid)
+    LfgUpdateType updateType, ObjectGuid playerPacketGuid,
+    bool publishTerminalUpdate)
 {
     roleCheckMap::iterator roleCheckItr = m_roleCheckMap.find(groupGuid);
     if (roleCheckItr == m_roleCheckMap.end())
@@ -505,8 +493,11 @@ void LFGMgr::CancelRoleCheck(ObjectGuid groupGuid,
             SendLfgJoinResult(roleItr->first, ERR_LFG_ROLE_CHECK_FAILED,
                 LFG_STATE_ROLECHECK, noLockedDungeons);
         }
-        SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
-            roleItr->first != playerPacketGuid);
+        if (publishTerminalUpdate)
+        {
+            SendLfgUpdate(roleItr->first, GetPlayerStatus(roleItr->first),
+                roleItr->first != playerPacketGuid);
+        }
         m_playerQueueOwners.erase(roleItr->first);
         m_playerStatusMap.erase(roleItr->first);
     }
@@ -516,9 +507,63 @@ void LFGMgr::CancelRoleCheck(ObjectGuid groupGuid,
     m_roleCheckMap.erase(roleCheckItr);
 }
 
+bool LFGMgr::IsSuccessfulProposalMove(ObjectGuid groupGuid) const
+{
+    ownerProposalMap::const_iterator ownerItr =
+        m_ownerProposalIds.find(groupGuid);
+    if (ownerItr == m_ownerProposalIds.end())
+    {
+        return false;
+    }
+    proposalMap::const_iterator proposalItr =
+        m_proposalMap.find(ownerItr->second);
+    return proposalItr != m_proposalMap.end() &&
+        proposalItr->second.state == LFG_PROPOSAL_SUCCESS;
+}
+
+bool LFGMgr::RestoreActiveGroupStatus(ObjectGuid groupGuid,
+    ObjectGuid excludedGuid, bool sendUpdate)
+{
+    LFGGroupStatus* groupStatus = GetGroupStatus(groupGuid);
+    if (!groupStatus)
+    {
+        return false;
+    }
+
+    for (roleMap::const_iterator roleItr = groupStatus->playerRoles.begin();
+        roleItr != groupStatus->playerRoles.end(); ++roleItr)
+    {
+        if (roleItr->first == excludedGuid)
+        {
+            continue;
+        }
+        uint32 displayDungeonId = groupStatus->dungeonID;
+        playerDungeonMap::const_iterator randomItr =
+            groupStatus->randomDungeonByPlayer.find(roleItr->first);
+        if (randomItr != groupStatus->randomDungeonByPlayer.end() &&
+            randomItr->second != 0)
+        {
+            displayDungeonId = randomItr->second;
+        }
+        LFGPlayerStatus restoredStatus(groupStatus->state,
+            LFG_UPDATE_STATUS, std::set<uint32>{displayDungeonId}, "");
+        m_playerStatusMap[roleItr->first] = restoredStatus;
+        if (sendUpdate)
+        {
+            SendLfgUpdate(roleItr->first, restoredStatus, true);
+        }
+    }
+    return true;
+}
+
 void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
     ObjectGuid playerGuid)
 {
+    if (IsSuccessfulProposalMove(groupGuid))
+    {
+        return;
+    }
+
     if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
     {
         FinishBootVote(groupGuid, false);
@@ -563,26 +608,7 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
                 CancelQueueSource(groupGuid, LFG_UPDATE_LEAVE, playerGuid);
             }
 
-            for (roleMap::const_iterator roleItr = groupStatus->playerRoles.begin();
-                roleItr != groupStatus->playerRoles.end(); ++roleItr)
-            {
-                if (roleItr->first == playerGuid)
-                {
-                    continue;
-                }
-                uint32 displayDungeonId = groupStatus->dungeonID;
-                playerDungeonMap::const_iterator randomItr =
-                    groupStatus->randomDungeonByPlayer.find(roleItr->first);
-                if (randomItr != groupStatus->randomDungeonByPlayer.end() &&
-                    randomItr->second != 0)
-                {
-                    displayDungeonId = randomItr->second;
-                }
-                LFGPlayerStatus restoredStatus(groupStatus->state,
-                    LFG_UPDATE_STATUS, std::set<uint32>{displayDungeonId}, "");
-                m_playerStatusMap[roleItr->first] = restoredStatus;
-                SendLfgUpdate(roleItr->first, restoredStatus, true);
-            }
+            RestoreActiveGroupStatus(groupGuid, playerGuid);
         }
         else if (TransitionPlayer(playerGuid, LFG_STATE_NONE,
             LFG_UPDATE_LEAVE))
@@ -611,6 +637,13 @@ void LFGMgr::OnGroupMemberRemoved(ObjectGuid groupGuid,
 
 void LFGMgr::OnGroupDisband(ObjectGuid groupGuid)
 {
+    if (IsSuccessfulProposalMove(groupGuid))
+    {
+        m_groupStatusMap.erase(groupGuid);
+        m_groupSet.erase(groupGuid);
+        return;
+    }
+
     if (m_bootStatusMap.find(groupGuid) != m_bootStatusMap.end())
     {
         FinishBootVote(groupGuid, false);
@@ -619,6 +652,20 @@ void LFGMgr::OnGroupDisband(ObjectGuid groupGuid)
     groupStatusMap::iterator statusItr = m_groupStatusMap.find(groupGuid);
     if (statusItr != m_groupStatusMap.end())
     {
+        if (m_roleCheckMap.find(groupGuid) != m_roleCheckMap.end())
+        {
+            CancelRoleCheck(groupGuid, LFG_UPDATE_GROUP_DISBAND,
+                ObjectGuid(), false);
+        }
+        else
+        {
+            CancelQueueSource(groupGuid, LFG_UPDATE_GROUP_DISBAND,
+                ObjectGuid(), false);
+        }
+        // Recreate statuses without publishing them so the terminal disband
+        // update can still be sent after cancellation erased queue state.
+        RestoreActiveGroupStatus(groupGuid, ObjectGuid(), false);
+
         LFGGroupStatus const status = statusItr->second;
         for (roleMap::const_iterator roleItr = status.playerRoles.begin();
             roleItr != status.playerRoles.end(); ++roleItr)
