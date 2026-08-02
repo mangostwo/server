@@ -64,12 +64,17 @@ path configuration therefore occurs before either call to
 initialization has already completed.
 
 Executable-path resolution uses `GetModuleFileNameW` with a dynamically grown
-buffer up to the Windows extended-path limit. It constructs
+buffer. It constructs
 `<executable-directory>\ossl-modules` as a wide filesystem path, checks
 `legacy.dll` without consulting the current working directory, and converts the
-directory to UTF-8 for `OSSL_PROVIDER_set_default_search_path`. A non-empty
-override is detected through the Windows environment API and copied only for
-diagnostics; no borrowed environment pointer survives initialization.
+directory to the active Windows ANSI code page for OpenSSL's `LoadLibraryA`
+provider loader. Conversion rejects best-fit substitutions. If the path cannot
+be represented or exceeds the narrow loader's practical path limit, MaNGOS
+tries the directory's existing 8.3 short path; if neither form is usable it
+retains fail-closed provider loading and logs the unsupported path. A non-empty
+override is detected through the Windows environment API and copied for all
+diagnostics, including version mismatch; no borrowed environment pointer
+survives initialization.
 
 ### Build and release packaging
 
@@ -80,10 +85,12 @@ minimal AppVeyor OpenSSL cache from publishing a broken archive.
 
 Artifact lookup uses an ordered list of supported paths beneath that selected
 x64 OpenSSL root: `bin` for runtime DLLs, followed by the root for distributions
-that place them there; and `bin`, `lib\ossl-modules`, then `ossl-modules` for
-`legacy.dll`. It does not recursively select an arbitrary first match. The
-dependency check also requires both crypto and SSL import libraries before a
-root is considered usable.
+that place them there; and `bin\ossl-modules`, `bin`,
+`lib\ossl-modules`, then `ossl-modules` for `legacy.dll`. It does not
+recursively select an arbitrary first match. The dependency check also requires
+both crypto and SSL import libraries before a root is considered usable. Only
+`legacy.dll` is staged; `default.dll` and unrelated provider modules are not
+packaged.
 
 The AppVeyor install script will validate `legacy.dll` as well as the runtime
 and development libraries so a bad dependency cache fails before compilation.
@@ -118,6 +125,11 @@ No database changes or configuration-file migration are required.
 The Windows failure diagnostic names the release-relative `ossl-modules`
 remedy and says an explicit `OPENSSL_MODULES` must point to the directory that
 contains `legacy.dll`; it no longer assumes `C:\OpenSSL-Win64\bin`.
+
+The Windows test CMake rules copy the selected `legacy.dll` into
+`$<TARGET_FILE_DIR:mangos_tests>/ossl-modules`, co-locate both matching OpenSSL
+runtime DLLs, and run `mangos_tests` with `OPENSSL_MODULES` empty. They no longer
+make the test pass by setting `OPENSSL_MODULES` to the machine installation.
 
 ## Scope
 
