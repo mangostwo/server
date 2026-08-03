@@ -61,6 +61,8 @@ namespace proto
         }
     }
 
+    std::atomic<uint32> ClientConnection::s_openConnections{0};
+
     ClientConnection::ClientConnection(IWorldGateway& gateway)
         : m_gateway(gateway),
           m_codec(),
@@ -68,10 +70,12 @@ namespace proto
           m_session(INVALID_SESSION_ID),
           m_closed(false)
     {
+        s_openConnections.fetch_add(1, std::memory_order_relaxed);
     }
 
     ClientConnection::~ClientConnection()
     {
+        s_openConnections.fetch_sub(1, std::memory_order_relaxed);
     }
 
     std::vector<uint8_t> ClientConnection::onConnect()

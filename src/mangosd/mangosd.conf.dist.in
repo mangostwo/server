@@ -802,8 +802,8 @@ SD3ErrorLogFile              = "scriptdev3-errors.log"
 #        Default: 0 (false)
 #                 1 (true)
 #
-#    BeepAtStart
-#        Beep at mangosd start finished (mostly work only at Unix/Linux systems)
+#    Console.BeepAtStart
+#        Beep once mangosd has finished starting and the console is ready.
 #        Default: 1 (true)
 #                 0 (false)
 #
@@ -920,7 +920,7 @@ OffhandCheckAtTalentsReset                = 0
 PetUnsummonAtMount                        = 1
 ClientCacheVersion                        = 0
 Event.Announce                            = 0
-BeepAtStart                               = 1
+Console.BeepAtStart                       = 1
 ShowProgressBars                          = 1
 Console.Style                             = "auto"
 WaitAtStartupError                        = 10

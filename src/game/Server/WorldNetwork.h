@@ -63,6 +63,9 @@ class WorldNetwork : public MaNGOS::Singleton<WorldNetwork>
         /// Stop accepting and tear down every live connection.
         void Stop();
 
+        /// Sockets currently open, for the mangosd console/window title.
+        uint32 GetOpenConnectionCount() const;
+
     private:
 
         WorldNetwork();

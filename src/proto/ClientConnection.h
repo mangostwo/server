@@ -105,6 +105,12 @@ namespace proto
 
             bool IsClosed() const override { return closed(); }
 
+            /// Sockets currently open, for the mangosd console/window title.
+            static uint32 GetOpenConnectionCount()
+            {
+                return s_openConnections.load(std::memory_order_relaxed);
+            }
+
         private:
 
             /// Dispatch one fully decoded packet. Returns false to drop the peer.
@@ -135,6 +141,8 @@ namespace proto
 
             net::Sender m_sender;
             net::Closer m_closer;
+
+            static std::atomic<uint32> s_openConnections;
     };
 }
 
