@@ -23,8 +23,6 @@ jobs:
 
     env:
       BUILD_DIR: ${{ github.workspace }}\..\build-msvc
-      CCACHE_DIR: ${{ github.workspace }}\..\ccache
-      SCCACHE_DIR: ${{ github.workspace }}\..\sccache
 
     steps:
       - name: Checkout repository
@@ -89,6 +87,9 @@ jobs:
             echo "OPENSSL_INCLUDE_DIR=$root/include" >> "$GITHUB_ENV"
             echo "OPENSSL_CRYPTO_LIBRARY=$root/lib/VC/libcrypto64MT.lib" >> "$GITHUB_ENV"
             echo "OPENSSL_SSL_LIBRARY=$root/lib/VC/libssl64MT.lib" >> "$GITHUB_ENV"
+            # SlProWeb installs provider DLLs beside openssl.exe, while its
+            # compiled MODULESDIR still names the default installation path.
+            echo "OPENSSL_MODULES=$root/bin" >> "$GITHUB_ENV"
             echo "$root/bin" >> "$GITHUB_PATH"
           else
             echo "::error::OpenSSL developer libraries not found"
@@ -109,6 +110,8 @@ jobs:
           key: windows-msvc
           max-size: 500M
 
+      # Never the socket tests: they bind real listeners and dominate the
+      # suite's wall-clock. A human asks for them, CI does not.
       - name: Configure
         shell: bash
         run: >
@@ -122,8 +125,6 @@ jobs:
           -DBUILD_MANGOSD=1
           -DBUILD_REALMD=1
           -DWITH_TESTS=1
-          # Never the socket tests: they bind real listeners and dominate the
-          # suite's wall-clock. A human asks for them, CI does not.
           -DWITH_NET_TESTS=0
           -DSOAP=1
           -DSCRIPT_LIB_ELUNA=1
