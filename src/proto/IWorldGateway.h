@@ -177,6 +177,16 @@ namespace proto
                                      const std::shared_ptr<AuthContext>& context) = 0;
 
             /**
+             * @brief Record one packet in the packet dump, in either direction.
+             *
+             * `session` is INVALID_SESSION_ID for the pre-auth handshake only.
+             * Without it a dump cannot say which of several connected clients a
+             * packet belongs to, which is most of what a packet dump is for.
+             */
+            virtual void TracePacket(SessionId session, const WorldPacket& packet,
+                                     bool incoming) = 0;
+
+            /**
              * @brief Hand a decoded packet to an attached session.
              *
              * The protocol layer has already framed and decrypted it and knows

@@ -68,6 +68,7 @@ namespace proto
           m_codec(),
           m_seed(MakeAuthSeed()),
           m_session(INVALID_SESSION_ID),
+          m_traceSession(INVALID_SESSION_ID),
           m_closed(false)
     {
         s_openConnections.fetch_add(1, std::memory_order_relaxed);
@@ -96,6 +97,7 @@ namespace proto
 
         // The crypt is not armed yet, so this goes out in clear text -- which is
         // exactly right: the client cannot key its cipher until it has this packet.
+        m_gateway.TracePacket(INVALID_SESSION_ID, packet, false);
         return PacketCodec::Encode(packet, PacketCodec::HeaderEncryptor());
     }
 
@@ -118,6 +120,9 @@ namespace proto
         {
             for (size_t i = 0; i < packets.size(); ++i)
             {
+                // Before the move, which empties it.
+                m_gateway.TracePacket(m_traceSession.load(std::memory_order_relaxed),
+                                      packets[i], true);
                 if (!HandlePacket(std::move(packets[i])))
                 {
                     Close();
@@ -259,6 +264,7 @@ namespace proto
         }
 
         m_session = session;
+        m_traceSession.store(session, std::memory_order_relaxed);
 
         DEBUG_LOG("proto: account '%s' authenticated from %s",
                   request.account.c_str(), m_address.c_str());
@@ -278,6 +284,8 @@ namespace proto
         {
             return;
         }
+
+        m_gateway.TracePacket(m_traceSession.load(std::memory_order_relaxed), packet, false);
 
         std::vector<uint8_t> wire;
         {
@@ -315,5 +323,6 @@ namespace proto
             m_gateway.Detach(m_session);
             m_session = INVALID_SESSION_ID;
         }
+        m_traceSession.store(INVALID_SESSION_ID, std::memory_order_relaxed);
     }
 }

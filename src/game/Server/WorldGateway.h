@@ -62,6 +62,9 @@ class WorldGateway : public proto::IWorldGateway
                                 const std::shared_ptr<proto::IClientLink>& link,
                                 const std::shared_ptr<proto::AuthContext>& context) override;
 
+        void TracePacket(proto::SessionId session, const WorldPacket& packet,
+                         bool incoming) override;
+
         void Deliver(proto::SessionId session, WorldPacket&& packet) override;
 
         void Detach(proto::SessionId session) override;
