@@ -308,11 +308,13 @@ class Group
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
         bool IsFull() const
         {
-            return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE);
+            return isRaidGroup() ? (m_memberSlots.size() >= MAX_RAID_SIZE) : (m_memberSlots.size() >= MAX_GROUP_SIZE);
         }
+        /// m_groupType is a flag set, so test the bit; an equality check misses
+        /// GROUPTYPE_BGRAID and any future flag OR-ed alongside it.
         bool isRaidGroup() const
         {
-            return m_groupType == GROUPTYPE_RAID;
+            return (m_groupType & GROUPTYPE_RAID) != 0;
         }
         bool isBGGroup()   const
         {
