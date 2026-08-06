@@ -1225,7 +1225,7 @@ void Log::outErrorScriptLib(const char* err, ...)
     }
 }
 
-void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming)
+void Log::outWorldPacketDump(uint32 session, uint32 opcode, char const* opcodeName, ByteBuffer const* packet, bool incoming)
 {
     if (!worldLogfile)
     {
@@ -1242,13 +1242,14 @@ void Log::outWorldPacketDump(uint32 socket, uint32 opcode, char const* opcodeNam
     std::string out;
     out.reserve(packet->size() * 3 + packet->size() / 16 + 128);
 
-    // header[512] is ample for the fixed text plus a (short, compile-time)
-    // opcode-name constant; snprintf is bounded, so output stays byte-identical
-    // to the previous fprintf for every real opcode name.
+    // SESSION, not SOCKET: the incoming side keyed this on the proto SessionId and the
+    // outgoing side on the account id, two numbering schemes in one field that named
+    // neither. header[512] is ample for the fixed text plus a (short, compile-time)
+    // opcode-name constant, and snprintf is bounded.
     char header[512];
-    snprintf(header, sizeof(header), "\n%s:\nSOCKET: %u\nLENGTH: %zu\nOPCODE: %s (0x%.4X)\nDATA:\n",
+    snprintf(header, sizeof(header), "\n%s:\nSESSION: %u\nLENGTH: %zu\nOPCODE: %s (0x%.4X)\nDATA:\n",
         incoming ? "CLIENT" : "SERVER",
-        socket, packet->size(), opcodeName, opcode);
+        session, packet->size(), opcodeName, opcode);
     out += header;
 
     char hexbuf[4];

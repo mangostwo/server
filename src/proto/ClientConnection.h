@@ -137,6 +137,12 @@ namespace proto
 
             SessionId m_session;
 
+            /// The same id, readable off the network thread. SendPacket runs on the
+            /// world thread while m_session is written here on the network thread, so
+            /// the trace needs a copy it can read without a race. Tracing only --
+            /// m_session stays the authority.
+            std::atomic<SessionId> m_traceSession;
+
             std::atomic<bool> m_closed;
 
             net::Sender m_sender;

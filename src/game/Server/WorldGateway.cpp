@@ -311,6 +311,19 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     return id;
 }
 
+void WorldGateway::TracePacket(proto::SessionId session, const WorldPacket& packet,
+                               bool incoming)
+{
+    // Both directions, from the one place that sees every packet on the wire. It used to
+    // be two: this side keyed on the SessionId, WorldSession::SendPacket on the account
+    // id, so one field carried two numbering schemes and named neither.
+    if (sLog.IsPacketLoggingEnabled())
+    {
+        sLog.outWorldPacketDump(session, packet.GetOpcode(),
+                                LookupOpcodeName(packet.GetOpcode()), &packet, incoming);
+    }
+}
+
 void WorldGateway::Deliver(proto::SessionId session, WorldPacket&& packet)
 {
     std::shared_ptr<SessionMailbox> mailbox;
@@ -322,16 +335,6 @@ void WorldGateway::Deliver(proto::SessionId session, WorldPacket&& packet)
             return;
         }
         mailbox = route->second;
-    }
-
-    // Dump incoming packet (opt-in via PacketLoggingEnabled; off by default).
-    // WorldSocket.cpp did this with the ACE socket fd as the "SOCKET:" field;
-    // the proto SessionId is the modern equivalent -- a slot assigned once at
-    // Attach() and released at Detach(), same lifetime shape as a fd.
-    if (sLog.IsPacketLoggingEnabled())
-    {
-        sLog.outWorldPacketDump(session, packet.GetOpcode(),
-                                LookupOpcodeName(packet.GetOpcode()), &packet, true);
     }
 
     mailbox->Enqueue(std::make_unique<WorldPacket>(std::move(packet)));
