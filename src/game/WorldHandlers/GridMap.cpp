@@ -179,17 +179,24 @@ bool TerrainInfo::Load(const uint32 x, const uint32 y)
         firstReference = (++m_GridRef[x][y] == 1);
     }
 
-    // Pins the cell's tile against the cache sweep for as long as a grid stands on it.
+    // Pins the cell's tile against the cache sweep for as long as a grid stands on it,
+    // and BY THE FIRST REFERENT ONLY, for the same reason the navmesh load below is:
+    // Unload releases on the last reference, so pinning per reference left the tile
+    // pinned N-1 times after N owners had all let go. The five-minute sweep then never
+    // evicts it, and resident terrain grows for the life of the process as instances
+    // are made and torn down. Pin and unpin must be counted the same way or neither
+    // count means anything.
+    //
     // The tile data itself still loads lazily, on the first query that reaches it.
-    m_terrain.PinCell(int(x), int(y));
-
-    // The navmesh tile is loaded by the FIRST referent only -- the refcount above is what
-    // makes several owners of one grid legal, and Unload already releases on the last.
-    // Loading unconditionally made every second owner ask for a tile the first had already
-    // brought in, which the mmap manager rejects and logs. Common now that a vessel is an
-    // active object holding grids a player then walks into.
     if (firstReference)
     {
+        m_terrain.PinCell(int(x), int(y));
+
+        // The navmesh tile is loaded by the FIRST referent only -- the refcount above is
+        // what makes several owners of one grid legal, and Unload already releases on the
+        // last. Loading unconditionally made every second owner ask for a tile the first
+        // had already brought in, which the mmap manager rejects and logs. Common now
+        // that a vessel is an active object holding grids a player then walks into.
         MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
     }
     return true;

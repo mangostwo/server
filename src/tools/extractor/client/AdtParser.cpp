@@ -1,5 +1,8 @@
 #include "AdtParser.hpp"
 
+#include <algorithm>
+#include <array>
+
 namespace world::terrain
 {
     namespace
@@ -19,6 +22,7 @@ namespace world::terrain
         constexpr size_t MCNK_OFS_MCLQ = 0x60;
         constexpr size_t MCNK_SIZE_MCLQ = 0x64;
         constexpr size_t MCNK_POS_Z = 0x70;
+        constexpr uint32_t MCNK_HEADER = 128;
 
         constexpr uint32_t MCNK_FLAG_RIVER = 1u << 2;
         constexpr uint32_t MCNK_FLAG_OCEAN = 1u << 3;
@@ -41,15 +45,25 @@ namespace world::terrain
             out.liquidNoLight.assign(size_t(ADT_GRID) * ADT_GRID, 0);
         }
 
-        void ReadMcnk(const uint8_t* mcnk, uint32_t mcnkSize, AdtData& out)
+        /// @return the linear chunk this filled, or -1 when it is not usable.
+        int ReadMcnk(const uint8_t* mcnk, uint32_t mcnkSize, AdtData& out)
         {
+            // The header fields read below reach 0x74. Without this a chunk whose SIZE
+            // says less than a header walks off the end of the file -- and the chunk
+            // that does it is the last one in the buffer, where there is nothing after
+            // it to absorb the read.
+            if (mcnkSize < MCNK_HEADER)
+            {
+                return -1;
+            }
+
             const uint8_t* h = mcnk + 8;
             const uint32_t flags = RdU32(h + MCNK_FLAGS);
             const uint32_t ix = RdU32(h + MCNK_INDEX_X);
             const uint32_t iy = RdU32(h + MCNK_INDEX_Y);
             if (ix > 15 || iy > 15)
             {
-                return;
+                return -1;
             }
 
             const uint32_t offsMcvt = RdU32(h + MCNK_OFS_MCVT);
@@ -61,7 +75,16 @@ namespace world::terrain
             out.holes[iy * ADT_CHUNKS + ix] = static_cast<uint16_t>(RdU32(h + MCNK_HOLES) & 0xFFFF);
             out.areaIds[iy * ADT_CHUNKS + ix] = static_cast<uint16_t>(RdU32(h + MCNK_AREA_ID) & 0xFFFF);
 
-            if (offsMcvt && offsMcvt + 8 + 145 * 4 <= span)
+            // No MCVT, or one that does not fit, means this chunk contributes NO heights.
+            // Reporting it as filled anyway is worse than reporting nothing: v9/v8 were
+            // zeroed for the whole tile before the walk, so the chunk's 8x8 cells come
+            // back as flat ground at 0.0 -- and the count that decides whether the tile
+            // is written would have said the map square was read.
+            if (!offsMcvt || offsMcvt + 8 + 145 * 4 > span)
+            {
+                return -1;
+            }
+
             {
                 // MCVT is 145 floats: 9 V9 corners then 8 V8 centres, per row.
                 const uint8_t* hm = mcnk + offsMcvt + 8;
@@ -91,7 +114,7 @@ namespace world::terrain
             constexpr uint32_t MCLQ_BYTES = 8 + 81 * 8 + 64;
             if (!offsMclq || sizeMclq <= 8 || offsMclq + 8 + MCLQ_BYTES > span)
             {
-                return;
+                return int(iy) * ADT_CHUNKS + int(ix);   // heights are in; no MCLQ here
             }
 
             const uint8_t* lq = mcnk + offsMclq + 8;
@@ -147,6 +170,8 @@ namespace world::terrain
                     out.liquidDark[idx] = (cellFlags & MCLQ_DARK) ? 1 : 0;
                 }
             }
+
+            return int(iy) * ADT_CHUNKS + int(ix);
         }
 
         // MH2O: 256 SMLiquidChunk headers, one per MCNK in IndexY-major order, followed
@@ -275,6 +300,9 @@ namespace world::terrain
         uint32_t mh2oSize = 0;
 
         bool sawMcnk = false;
+        bool truncated = false;
+        std::array<bool, size_t(ADT_CHUNKS) * ADT_CHUNKS> filled{};
+
         size_t pos = 0;
         while (pos + 8 <= size)
         {
@@ -283,6 +311,7 @@ namespace world::terrain
             const uint8_t* body = data + pos + 8;
             if (pos + 8 + csize > size)
             {
+                truncated = true;
                 break;
             }
 
@@ -296,7 +325,11 @@ namespace world::terrain
                     out.areaIds.fill(0);
                     sawMcnk = true;
                 }
-                ReadMcnk(tag, csize, out);
+                const int chunk = ReadMcnk(tag, csize, out);
+                if (chunk >= 0)
+                {
+                    filled[size_t(chunk)] = true;
+                }
             }
             else if (TagIs(tag, "MH2O"))
             {
@@ -354,6 +387,21 @@ namespace world::terrain
             out.m2Names = ResolveNames(mmdx, mmdxSize, mmid, mmidSize);
         }
 
+        // A chunk that runs past the end of the buffer is a broken file, and what it
+        // leaves behind is worse than nothing: v9/v8 are allocated whole and zeroed by
+        // the first MCNK, so every cell the parse never reached reads back as ground at
+        // sea level -- authoritative, under a mountain, with nothing reporting a problem.
+        if (truncated)
+        {
+            out = AdtData{};
+            return false;
+        }
+
+        // A real 3.3.5a ADT carries all 256 MCNKs. Reported rather than enforced here,
+        // because this parser is also handed deliberately minimal ADTs (see
+        // ClientParserTest) and a chunk count is not the parser's business to police.
+        // The baker is what must refuse a hole-ridden tile -- see MpqTileSource.
+        out.chunksFilled = uint32_t(std::count(filled.begin(), filled.end(), true));
         out.hasTerrain = sawMcnk;
         return true;
     }

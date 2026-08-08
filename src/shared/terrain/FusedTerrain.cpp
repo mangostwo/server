@@ -68,20 +68,25 @@ namespace world::terrain
     {
     }
 
+    // READ, not stat. This answers the start-up question "does this map have terrain",
+    // and a file that opens is not an answer: a truncated tile, one from another build,
+    // or one whose grids are the wrong shape passes an existence check and then fails
+    // inside ReadTile, after which every height, liquid and collision query silently
+    // answers nothing at all. The whole point of asking at start-up is to fail loudly
+    // instead. It is asked once per checked grid, never on a query path, so parsing the
+    // file is affordable -- the first query would have parsed it anyway.
     bool FusedTerrain::HasTile(uint32_t mapId, int tx, int ty)
     {
         if (g_tileDir.empty())
         {
             return false;
         }
-        if (std::ifstream(g_tileDir + "/" + TileFileName(mapId, tx, ty),
-                          std::ios::binary).good())
+        if (ReadTile(g_tileDir + "/" + TileFileName(mapId, tx, ty)))
         {
             return true;
         }
         // A map built from one global WMO carries no ADT grid tiles at all.
-        return std::ifstream(g_tileDir + "/" + GlobalWmoFileName(mapId),
-                             std::ios::binary).good();
+        return ReadTile(g_tileDir + "/" + GlobalWmoFileName(mapId)) != nullptr;
     }
 
     FusedTerrain::TilePtr FusedTerrain::LoadCell(int tx, int ty) const
@@ -210,8 +215,16 @@ namespace world::terrain
         {
             return;
         }
+        // SATURATING, not wrapping. m_cellRef is an int16_t, so 32767 pins on one cell
+        // is not an unreachable number for a leaked pin; signed overflow is undefined,
+        // and the observable outcome of wrapping is worse than the leak it replaces --
+        // the count goes NEGATIVE, the cell reads as unpinned, and the sweep evicts a
+        // tile that is still in use.
         std::lock_guard<std::mutex> lock(m_cellRefMutex);
-        ++m_cellRef[tx][ty];
+        if (m_cellRef[tx][ty] < std::numeric_limits<int16_t>::max())
+        {
+            ++m_cellRef[tx][ty];
+        }
     }
 
     void FusedTerrain::UnpinCell(int tx, int ty)
@@ -361,12 +374,13 @@ namespace world::terrain
                                                std::vector<const StaticInstance*>& out,
                                                std::vector<TilePtr>& keepAlive) const
     {
+        out.clear();
+        keepAlive.clear();
+
         const float minx = std::min(a.x, b.x), maxx = std::max(a.x, b.x);
         const float miny = std::min(a.y, b.y), maxy = std::max(a.y, b.y);
 
         const float dx = b.x - a.x, dy = b.y - a.y;
-        const float lengthXY = std::sqrt(dx * dx + dy * dy);
-        const int samples = std::max(2, int(lengthXY / (TILE_SIZE * 0.5f)) + 2);
 
         auto gather = [&](const TilePtr& tile)
         {
@@ -386,23 +400,122 @@ namespace world::terrain
             }
         };
 
-        int lastTx = 0, lastTy = 0;
-        bool seen = false;
-        for (int i = 0; i < samples; ++i)
+        // SUPERCOVER walk of the tiles the XY segment touches (Amanatides-Woo).
+        //
+        // This used to sample the segment every half tile and take the tile under each
+        // sample. A sample step can only guarantee the tiles it lands in, and a segment
+        // that clips the CORNER of a tile -- entering and leaving between two samples --
+        // is missed entirely. The tile is then never gathered, so a wall standing in it
+        // occludes nothing: the sight line reads clear straight through solid geometry,
+        // and only from the angles that clip that corner. Halving the step does not fix
+        // it, it only moves the angle at which it happens.
+        //
+        // A walk cannot miss a tile the segment enters, because it advances to the next
+        // BOUNDARY rather than to the next sample.
+        auto visit = [&](int tx, int ty)
         {
-            const float f = float(i) / float(samples - 1);
-            const float px = a.x + dx * f, py = a.y + dy * f;
-            const int tx = TileIndex(px), ty = TileIndex(py);
-            if (seen && tx == lastTx && ty == lastTy)
+            if (tx < 0 || tx >= GRID_COUNT || ty < 0 || ty >= GRID_COUNT)
             {
-                continue;
+                return;
             }
-            seen = true;
-            lastTx = tx;
-            lastTy = ty;
-            if (tx >= 0 && tx < GRID_COUNT && ty >= 0 && ty < GRID_COUNT)
+            // The centre of that tile, which is what TileAt() takes. Tile tx spans world
+            // x in ((MAP_CENTER - tx - 1) * TILE_SIZE, (MAP_CENTER - tx) * TILE_SIZE].
+            const float px = (float(MAP_CENTER) - (float(tx) + 0.5f)) * TILE_SIZE;
+            const float py = (float(MAP_CENTER) - (float(ty) + 0.5f)) * TILE_SIZE;
+            gather(TileAt(px, py));
+        };
+
+        const int startTx = TileIndex(a.x), startTy = TileIndex(a.y);
+        const int endTx = TileIndex(b.x), endTy = TileIndex(b.y);
+
+        if (startTx == endTx && startTy == endTy)
+        {
+            visit(startTx, startTy);
+        }
+        else
+        {
+            // A tile index DECREASES as the world coordinate grows, so travelling
+            // towards +x steps towards a smaller tx.
+            const int stepX = (dx > 0.0f) ? -1 : (dx < 0.0f ? 1 : 0);
+            const int stepY = (dy > 0.0f) ? -1 : (dy < 0.0f ? 1 : 0);
+
+            const float absDx = std::fabs(dx), absDy = std::fabs(dy);
+            constexpr float NEVER = 1e30f;
+
+            // How much of the segment one whole tile costs on each axis, and how much of
+            // it is left before the first boundary. Both in the parameter t of [0, 1].
+            const float tDeltaX = (absDx < 1e-6f) ? NEVER : (TILE_SIZE / absDx);
+            const float tDeltaY = (absDy < 1e-6f) ? NEVER : (TILE_SIZE / absDy);
+
+            float tMaxX = NEVER;
+            float tMaxY = NEVER;
+            if (stepX != 0)
             {
-                gather(TileAt(px, py));
+                // Towards +x (stepX < 0) the next boundary is the tile's high edge.
+                const float nextX = (float(MAP_CENTER) -
+                                     float(stepX < 0 ? startTx : startTx + 1)) * TILE_SIZE;
+                tMaxX = std::max(0.0f, (nextX - a.x) / dx);
+            }
+            if (stepY != 0)
+            {
+                const float nextY = (float(MAP_CENTER) -
+                                     float(stepY < 0 ? startTy : startTy + 1)) * TILE_SIZE;
+                tMaxY = std::max(0.0f, (nextY - a.y) / dy);
+            }
+
+            int tx = startTx, ty = startTy;
+            visit(tx, ty);
+
+            // A continent's diagonal is 64 tiles, so a sight line between two points on
+            // the map needs at most 129 steps. The cap is a backstop for a segment whose
+            // endpoints are off the map entirely, never a limit a real one reaches.
+            for (int guard = 0; guard < 4 * GRID_COUNT; ++guard)
+            {
+                if (tx == endTx && ty == endTy)
+                {
+                    break;
+                }
+                if (tMaxX < tMaxY)
+                {
+                    if (tMaxX > 1.0f)
+                    {
+                        break;
+                    }
+                    tx += stepX;
+                    tMaxX += tDeltaX;
+                }
+                else if (tMaxY < tMaxX)
+                {
+                    if (tMaxY > 1.0f)
+                    {
+                        break;
+                    }
+                    ty += stepY;
+                    tMaxY += tDeltaY;
+                }
+                else
+                {
+                    // Exactly through a grid corner. Stepping straight to the diagonal
+                    // would skip the two edge-adjacent tiles the segment still clips --
+                    // the very case this walk exists for -- so both are visited first.
+                    if (tMaxX > 1.0f)
+                    {
+                        break;
+                    }
+                    if (stepX != 0)
+                    {
+                        visit(tx + stepX, ty);
+                    }
+                    if (stepY != 0)
+                    {
+                        visit(tx, ty + stepY);
+                    }
+                    tx += stepX;
+                    ty += stepY;
+                    tMaxX += tDeltaX;
+                    tMaxY += tDeltaY;
+                }
+                visit(tx, ty);
             }
         }
 

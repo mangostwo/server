@@ -400,7 +400,10 @@ TEST(TileReaderRejectsCountsLargerThanTheFile)
     std::FILE* f = std::fopen(file.path.c_str(), "wb");
     REQUIRE(f != nullptr);
     const uint32_t magic = 0x32474E4D;  // "MNG2"
-    const uint32_t version = 1;
+    // Must track TileSerializer's VERSION. Leave it behind and the reader rejects this
+    // file on the version alone, the absurd count below is never reached, and the case
+    // goes green while testing nothing at all.
+    const uint32_t version = 2;
     const int32_t tx = 0, ty = 0;
     const uint8_t flags[2] = {1, 0};
     const uint32_t absurd = 0xFFFFFFFFu;

@@ -37,6 +37,71 @@ namespace world::terrain
     static_assert(std::is_trivially_copyable<Bvh::Node>::value,
                   "Bvh::Node must stay trivially copyable (it is written raw to the tile)");
 
+    bool TriSoup::IndicesValid() const
+    {
+        const uint32_t count = uint32_t(verts.size());
+        for (const std::array<uint32_t, 3>& tri : tris)
+        {
+            if (tri[0] >= count || tri[1] >= count || tri[2] >= count)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool Bvh::Adopt(std::vector<Node> nodes, size_t triangleCount)
+    {
+        m_nodes.clear();
+        m_maxDepth = 0;
+        if (nodes.empty())
+        {
+            return true;
+        }
+
+        // One forward sweep. BuildNode appends the parent before either child, so a
+        // child index is always greater than its parent's; requiring that makes a cycle
+        // unrepresentable, and reaching a node before its parent impossible -- which is
+        // what lets the depth be known by the time the node itself is examined.
+        const int64_t size = int64_t(nodes.size());
+        std::vector<int> depth(nodes.size(), -1);
+        depth[0] = 0;
+
+        for (size_t i = 0; i < nodes.size(); ++i)
+        {
+            const Node& node = nodes[i];
+            if (depth[i] < 0 || depth[i] > MAX_DEPTH)
+            {
+                return false;                       // unreachable, or too deep to walk
+            }
+
+            if (node.left < 0)
+            {
+                // A leaf's run must lie inside the soup: Raycast reads it unchecked.
+                if (uint64_t(node.first) + node.count > triangleCount)
+                {
+                    return false;
+                }
+                continue;
+            }
+
+            const int64_t left = node.left;
+            const int64_t right = node.right;
+            if (left <= int64_t(i) || right <= int64_t(i) || left >= size || right >= size ||
+                left == right || depth[size_t(left)] >= 0 || depth[size_t(right)] >= 0)
+            {
+                return false;
+            }
+
+            depth[size_t(left)] = depth[i] + 1;
+            depth[size_t(right)] = depth[i] + 1;
+            m_maxDepth = std::max(m_maxDepth, depth[i] + 1);
+        }
+
+        m_nodes = std::move(nodes);
+        return true;
+    }
+
     void Bvh::Build(TriSoup& soup, std::vector<uint16_t>* parallel, int leafSize)
     {
         m_nodes.clear();
@@ -89,7 +154,13 @@ namespace world::terrain
         }
         m_nodes[self].box = box;
 
-        if (count <= uint32_t(leafSize) || depth > MAX_DEPTH)
+        // Cut off AT MAX_DEPTH, not past it. The comment on MAX_DEPTH says it is the
+        // deepest node Build will create and that Raycast's stack is sized from it; a
+        // strict compare made the deepest node MAX_DEPTH + 1, so the two were out of
+        // step in the one direction that matters. Adopt now rejects anything deeper on
+        // load, and a soup of coincident centroids -- which is what drives the split
+        // this deep -- would otherwise bake a tree that fails to reload.
+        if (count <= uint32_t(leafSize) || depth >= MAX_DEPTH)
         {
             m_nodes[self].left = -1;
             m_nodes[self].first = first;
