@@ -560,28 +560,40 @@ namespace
 
     // One map's tiles. A map is either an ADT grid or a single global WMO; both end up
     // as the same payload, so the runtime has nothing to reconcile.
-    void BakeMap(MpqTileSource& source, uint32_t mapId, const std::string& name,
-                 const std::string& dest)
+    //
+    // @return how many tiles this map FAILED to bake. A failure that only reaches the
+    // log is a failure nobody acts on: the install script deletes the previous data
+    // before running this, and then reads the exit status as "the extraction is
+    // complete". A map missing half its tiles must not exit 0.
+    int BakeMap(MpqTileSource& source, uint32_t mapId, const std::string& name,
+                const std::string& dest)
     {
         const WdtData* wdt = source.Wdt(mapId);
         if (!wdt)
         {
-            return;
+            // Map.dbc lists identities that ship no WDT at all; that is not a failure.
+            return 0;
         }
 
         if (!wdt->HasAnyAdt())
         {
-            auto tile = source.Load(mapId, 0, 0);
-            if (tile && tile->isGlobalWmo)
+            // Asked of the WDT, not of the tile that just failed to load: "the load
+            // returned nothing" and "this map declares no global WMO" are the same
+            // value, and inferring one from the other hides exactly the failure this
+            // count exists to report.
+            if (!wdt->hasGlobalWmo)
             {
-                const bool ok =
-                    WriteTile(*tile, dest + "/" + GlobalWmoFileName(mapId));
-                char msg[256];
-                std::snprintf(msg, sizeof(msg), "  map %4u %-24s global WMO %s", mapId,
-                              name.c_str(), ok ? "ok" : "FAILED");
-                if (ok) { g_console.Detail(msg); } else { g_console.Error(msg); }
+                return 0;
             }
-            return;
+
+            auto tile = source.Load(mapId, 0, 0);
+            const bool ok = tile && tile->isGlobalWmo &&
+                            WriteTile(*tile, dest + "/" + GlobalWmoFileName(mapId));
+            char msg[256];
+            std::snprintf(msg, sizeof(msg), "  map %4u %-24s global WMO %s", mapId,
+                          name.c_str(), ok ? "ok" : "FAILED");
+            if (ok) { g_console.Detail(msg); } else { g_console.Error(msg); }
+            return ok ? 0 : 1;
         }
 
         size_t expected = 0;
@@ -624,6 +636,7 @@ namespace
         std::snprintf(msg, sizeof(msg), "  map %4u %-24s %5d tiles%s", mapId,
                       name.c_str(), written, failed ? " (SOME FAILED)" : "");
         if (failed) { g_console.Warn(msg); } else { g_console.Detail(msg); }
+        return failed;
     }
 }
 
@@ -891,17 +904,33 @@ int main(int argc, char** argv)
     MpqTileSource source(mpq, &maps, &liquids);
     g_console.Log("tiles -> " + tileDir);
 
+    int tileFailures = 0;
     for (const auto& entry : maps.All())
     {
         if (opt.mapFilter >= 0 && uint32_t(opt.mapFilter) != entry.first)
         {
             continue;
         }
-        BakeMap(source, entry.first, entry.second, tileDir);
+        tileFailures += BakeMap(source, entry.first, entry.second, tileDir);
     }
 
     if (!BakeNav(opt, tileDir))
     {
+        g_console.Stop();
+        return 1;
+    }
+
+    // The nav bake enumerates the tiles that WERE written, so it succeeds over a partial
+    // set and cannot report this on its own. Say so here, and exit non-zero: the install
+    // script removes the previous data before this runs and treats 0 as a complete
+    // extraction, so a silent partial bake leaves a server with holes in its world.
+    if (tileFailures > 0)
+    {
+        char msg[128];
+        std::snprintf(msg, sizeof(msg),
+                      "bake INCOMPLETE: %d tile(s) failed; the data set has holes",
+                      tileFailures);
+        g_console.Error(msg);
         g_console.Stop();
         return 1;
     }

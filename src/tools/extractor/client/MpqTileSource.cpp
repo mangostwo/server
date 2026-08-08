@@ -31,27 +31,29 @@ namespace world::terrain
             return out;
         }
 
+        // Every placement goes through the THREE-ARGUMENT constructor, which is the only
+        // thing that screens the scale. MDDF stores it as a uint16 over 1024 and can say
+        // zero; assigning the field instead bakes that zero into the tile for good, and
+        // the runtime then divides by it in worldToLocal and misses every ray against
+        // the model -- silently, because a NaN compares false against everything.
+        //
         // Placement into the same world frame the terrain uses. The 180 degrees added to
         // the Z euler is the diag(-1,-1,1) axis flip, which is exactly a half-turn.
         Transform PlacementTransform(const Placement& p)
         {
-            Transform xf;
-            xf.pos = {MID - p.pos.z, MID - p.pos.x, p.pos.y};
-            xf.rot = Mat3::fromEuler(p.rotDeg.z * DEG2RAD, p.rotDeg.x * DEG2RAD,
-                                     (p.rotDeg.y + 180.0f) * DEG2RAD);
-            xf.scale = p.scale;
-            return xf;
+            return Transform({MID - p.pos.z, MID - p.pos.x, p.pos.y},
+                             Mat3::fromEuler(p.rotDeg.z * DEG2RAD, p.rotDeg.x * DEG2RAD,
+                                             (p.rotDeg.y + 180.0f) * DEG2RAD),
+                             p.scale);
         }
 
         // A WDT global WMO's MODF is already in world coordinates, so no re-centring.
         Transform GlobalWmoTransform(const Placement& p)
         {
-            Transform xf;
-            xf.pos = {p.pos.z, p.pos.x, p.pos.y};
-            xf.rot = Mat3::fromEuler(p.rotDeg.z * DEG2RAD, p.rotDeg.x * DEG2RAD,
-                                     (p.rotDeg.y + 180.0f) * DEG2RAD);
-            xf.scale = p.scale;
-            return xf;
+            return Transform({p.pos.z, p.pos.x, p.pos.y},
+                             Mat3::fromEuler(p.rotDeg.z * DEG2RAD, p.rotDeg.x * DEG2RAD,
+                                             (p.rotDeg.y + 180.0f) * DEG2RAD),
+                             p.scale);
         }
 
         // MODD's quaternion is authored against the M2's RAW model space, but M2Parser
@@ -66,11 +68,8 @@ namespace world::terrain
             r.m[4] = -r.m[4];
             r.m[7] = -r.m[7];
 
-            Transform xf;
-            xf.pos = wmoXf.localToWorld(d.pos);
-            xf.rot = Mat3::mulm(wmoXf.rot, r);
-            xf.scale = wmoXf.scale * d.scale;
-            return xf;
+            return Transform(wmoXf.localToWorld(d.pos), Mat3::mulm(wmoXf.rot, r),
+                             wmoXf.scale * d.scale);
         }
     }
 
@@ -178,6 +177,16 @@ namespace world::terrain
 
         AdtData adt;
         if (!ParseAdt(bytes, adt) || !adt.hasTerrain)
+        {
+            return nullptr;
+        }
+
+        // Every one of the 256 MCNKs, or no tile at all. A cell no chunk reached is not
+        // missing in the bake -- v9/v8 are allocated whole and zeroed, so it comes out
+        // as ground at sea level, which the server then serves as authoritative terrain
+        // under whatever mountain was supposed to be there. Refusing the tile leaves a
+        // hole the loader reports; accepting it leaves a lie nothing reports.
+        if (adt.chunksFilled != uint32_t(ADT_CHUNKS) * ADT_CHUNKS)
         {
             return nullptr;
         }

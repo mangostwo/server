@@ -20,6 +20,9 @@ namespace world::terrain
         const uint8_t* modf = nullptr;
         uint32_t modfSize = 0;
 
+        bool truncated = false;
+        bool haveMphd = false;
+
         size_t pos = 0;
         while (pos + 8 <= size)
         {
@@ -28,6 +31,7 @@ namespace world::terrain
             const uint8_t* body = data + pos + 8;
             if (pos + 8 + csize > size)
             {
+                truncated = true;
                 break;
             }
 
@@ -37,6 +41,7 @@ namespace world::terrain
                 {
                     out.mphdFlags = RdU32(body);
                     out.hasGlobalWmo = (out.mphdFlags & 0x0001) != 0;
+                    haveMphd = true;
                 }
             }
             else if (TagIs(tag, "MAIN"))
@@ -78,6 +83,20 @@ namespace world::terrain
         if (out.hasGlobalWmo && modf && modfSize >= 64)
         {
             out.globalWmoPlacement = ReadModf(modf);
+        }
+
+        // FAIL CLOSED. A WDT that lost its MAIN reads back as a map with no ADT grid at
+        // all, which the baker cannot tell from a map that legitimately has none: it
+        // writes nothing and reports success, and the map is simply absent from the bake
+        // with no error to find. Every 3.3.5a WDT carries MPHD and MAIN, and one that
+        // claims a global WMO carries the MODF that places it.
+        if (truncated || !haveMphd || !out.hasMainChunk)
+        {
+            return false;
+        }
+        if (out.hasGlobalWmo && (out.globalWmoName.empty() || !out.globalWmoPlacement))
+        {
+            return false;
         }
 
         return true;
