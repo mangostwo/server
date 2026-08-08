@@ -150,6 +150,11 @@ target_compile_definitions(mangos-extractor
 target_link_libraries(mangos-extractor
     PRIVATE
         extractor_mpq
+        # The manifest the server verifies at start-up is written HERE, by the same code
+        # that reads it -- a second implementation of the format would be a second thing
+        # to keep in step. `dataintegrity` carries OpenSSL and nothing else, so this does
+        # not pull `shared` (and MySQL with it) into the baker.
+        dataintegrity
         # The baker threads its per-tile work; relying on another target's link line to
         # drag in the thread library is an accident, not a dependency.
         Threads::Threads

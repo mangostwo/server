@@ -238,6 +238,8 @@ enum eConfigUInt32Values
     CONFIG_UINT32_CINEMATIC_FLYOVER_UPDATE_INTERVAL_MS,
     CONFIG_UINT32_CINEMATIC_FLYOVER_TIMEOUT_SEC,
     CONFIG_UINT32_CINEMATIC_FLYOVER_BODY_ENTRY,
+    /// 0 off, 1 report, 2 refuse to start. See World::VerifyDataIntegrity.
+    CONFIG_UINT32_DATA_INTEGRITY_CHECK,
     CONFIG_UINT32_VALUE_COUNT
 };
 
@@ -597,6 +599,10 @@ class World
 
         void SetInitialWorldSettings();
         void LoadConfigSettings(bool reload = false);
+
+        /// Re-hashes the baked data set against the manifest the extractor wrote.
+        /// Governed by DataIntegrityCheck; exits when that says 2 and the check fails.
+        void VerifyDataIntegrity();
 
         void SendWorldText(int32 string_id, ...);
         void SendGlobalMessage(WorldPacket* packet, AccountTypes minSec = SEC_PLAYER);

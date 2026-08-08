@@ -59,10 +59,26 @@ ConfVersion=@MANGOS_WORLD_VER@
 #        on different IP addresses using default ports.
 #        DO NOT CHANGE THIS UNLESS YOU _REALLY_ KNOW WHAT YOU'RE DOING
 #
+#    DataIntegrityCheck
+#        Re-hash the baked data set under DataDir against data.manifest, the SHA-256
+#        listing mangos-extractor writes at the end of a successful bake.
+#        A tile carries a format version, so an old bake is refused on sight. This
+#        catches what a version cannot: a file truncated by a full disk or an
+#        interrupted copy, a map whose tiles came half from one bake and half from
+#        another, a stale file an older run left behind, a sector that rotted. Each of
+#        those loads as a valid tile and answers wrongly in one corner of one map.
+#        Costs a few seconds at start-up, once, spread over every core. A data set with
+#        no manifest is reported and accepted, never refused.
+#        Checkable by hand:  cd <DataDir> && sha256sum -c data.manifest
+#        0 - off
+#        1 - report a mismatch and start anyway (default)
+#        2 - refuse to start
+#
 ################################################################################
 
 RealmID                      = 1
 DataDir                      = "@CONF_INSTALL_DIR@"
+DataIntegrityCheck           = 1
 LogsDir                      = ""
 LoginDatabaseInfo            = "127.0.0.1;3306;root;mangos;realmd"
 WorldDatabaseInfo            = "127.0.0.1;3306;root;mangos;mangos2"

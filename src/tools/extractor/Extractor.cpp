@@ -39,6 +39,7 @@
 #include "stores/GameObjectDisplayInfoStore.hpp"
 #include "stores/MapDbcStore.hpp"
 #include "terrain/TileSerializer.hpp"
+#include "DataIntegrity/DataManifest.h"
 
 #include <algorithm>
 #include <chrono>
@@ -558,6 +559,40 @@ namespace
         return true;
     }
 
+    // Every file the server will read, hashed, so it can tell at start-up whether it is
+    // reading what was written here. Called on each path that FINISHES: a manifest over
+    // a bake that failed would certify the holes, which is the one thing worse than not
+    // having one.
+    //
+    // The whole data directory is walked every time, not just the part this run touched.
+    // A tiles-only run therefore re-lists the game-object models and the DBCs beside
+    // them -- if they are stale, that is what the set contains, and the manifest
+    // describes the set rather than the run.
+    bool WriteDataManifest(const std::string& dest)
+    {
+        namespace di = MaNGOS::DataIntegrity;
+
+        g_console.SetStage("manifest");
+        const bool ok = di::WriteManifest(
+            dest, {"dbc", "gomodels", "tiles", "mmaps"},
+            [](size_t done, size_t total, const std::string&)
+            {
+                g_console.SetCounts(done, total);
+                Tick();
+            });
+
+        if (ok)
+        {
+            g_console.Detail("manifest: " + dest + "/" + di::MANIFEST_FILE_NAME);
+        }
+        else
+        {
+            g_console.Error("manifest: FAILED to write " + dest + "/" +
+                            di::MANIFEST_FILE_NAME);
+        }
+        return ok;
+    }
+
     // One map's tiles. A map is either an ADT grid or a single global WMO; both end up
     // as the same payload, so the runtime has nothing to reconcile.
     //
@@ -793,7 +828,7 @@ int main(int argc, char** argv)
     if (!opt.dbc && !opt.tiles && !opt.goModels)
     {
         BakeVessels();
-        const bool ok = BakeNav(opt, tileDir);
+        const bool ok = BakeNav(opt, tileDir) && WriteDataManifest(opt.dest);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
@@ -854,7 +889,7 @@ int main(int argc, char** argv)
     if (!opt.tiles && !opt.goModels)
     {
         BakeVessels();
-        const bool ok = BakeNav(opt, tileDir);
+        const bool ok = BakeNav(opt, tileDir) && WriteDataManifest(opt.dest);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
@@ -893,7 +928,7 @@ int main(int argc, char** argv)
 
     if (!opt.tiles)
     {
-        const bool ok = BakeNav(opt, tileDir);
+        const bool ok = BakeNav(opt, tileDir) && WriteDataManifest(opt.dest);
         g_console.SetStage("done");
         g_console.Progress(-1);
         g_console.Stop();
@@ -931,6 +966,12 @@ int main(int argc, char** argv)
                       "bake INCOMPLETE: %d tile(s) failed; the data set has holes",
                       tileFailures);
         g_console.Error(msg);
+        g_console.Stop();
+        return 1;
+    }
+
+    if (!WriteDataManifest(opt.dest))
+    {
         g_console.Stop();
         return 1;
     }
