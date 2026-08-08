@@ -498,6 +498,26 @@ bool IsVMAPDisabledFor(uint32 entry, uint8 flags)
 }
 
 /**
+ * @brief Every collision disable bit set for one map, or 0 when the map has none.
+ *
+ * Reads only. IsDisabledFor reaches m_DisableMap through operator[], which inserts a
+ * default-constructed entry when the type has no rows -- harmless from one thread and a
+ * data race from several, which is what a per-query call from every map-update thread
+ * would be. This walks the same container with find().
+ */
+uint8 GetCollisionDisablesFor(uint32 mapId)
+{
+    const DisableMap::const_iterator type = m_DisableMap.find(DISABLE_TYPE_VMAP);
+    if (type == m_DisableMap.end())
+    {
+        return 0;
+    }
+
+    const DisableTypeMap::const_iterator itr = type->second.find(mapId);
+    return itr == type->second.end() ? 0 : itr->second.flags;
+}
+
+/**
  * @brief Checks whether mmap pathfinding is enabled for a map.
  *
  * @param mapId The map identifier.

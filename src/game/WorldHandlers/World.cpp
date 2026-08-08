@@ -488,6 +488,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Disables...");                  // must be before loading quests and items
     DisableMgr::LoadDisables();
+    // Order-independent rather than order-dependent: a terrain reads its collision row
+    // when it is built, and nothing here promises no map was touched before this line.
+    sTerrainMgr.RefreshCollisionDisables();
 
     sLog.outString("Loading Item Templates...");            // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr.LoadItemPrototypes();
