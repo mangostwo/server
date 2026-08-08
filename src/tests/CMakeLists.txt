@@ -50,6 +50,7 @@ set(SRC_GRP_TESTS
     DynamicCollisionTest.cpp
     PlacementTest.cpp
     GeometryMathTest.cpp
+    DataIntegrityTest.cpp
     LFGLogicTest.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These two know nothing of it.
@@ -83,6 +84,7 @@ target_link_libraries(mangos_tests
     PRIVATE
         proto
         shared
+        dataintegrity
         extractor_client
         extractor_data
         Threads::Threads
