@@ -79,6 +79,7 @@
 #include "LootMgr.h"
 #include "ItemEnchantmentMgr.h"
 #include "MapManager.h"
+#include "DataIntegrity/DataManifest.h"
 #include "ScriptMgr.h"
 #include "CreatureAIRegistry.h"
 #include "ProgressBar.h"
@@ -339,6 +340,83 @@ World::AddSession_(WorldSession* s)
 
 
 
+/**
+ * @brief Re-hashes the baked data set against the manifest the extractor wrote.
+ *
+ * A tile carries a format version, so a bake from an older extractor is refused on
+ * sight. Everything else that can be wrong with a data set looks perfectly valid: a file
+ * truncated by a full disk or an interrupted copy, a map whose tiles came half from one
+ * bake and half from another, a stale file an older run left behind, a sector that
+ * rotted. Each of those loads, answers wrongly in one corner of one map, and is
+ * indistinguishable from a bug in the server.
+ *
+ * DataIntegrityCheck: 0 skips this, 1 reports, 2 refuses to start. Reporting is the
+ * default because the cost is a few seconds of hashing at start-up, once, spread over
+ * every core -- and because the alternative to knowing is not knowing.
+ *
+ * A data set with no manifest is NOT an error. It was baked before this existed, or by
+ * hand; saying so once is honest, refusing to start over it would not be.
+ */
+void World::VerifyDataIntegrity()
+{
+    namespace di = MaNGOS::DataIntegrity;
+
+    const uint32 mode = getConfig(CONFIG_UINT32_DATA_INTEGRITY_CHECK);
+    if (mode == 0)
+    {
+        return;
+    }
+
+    sLog.outString("Verifying baked data against %s...", di::MANIFEST_FILE_NAME);
+
+    const uint32 started = getMSTime();
+    const di::VerifyResult result = di::VerifyManifest(m_dataPath);
+    const uint32 tookMs = getMSTimeDiff(started, getMSTime());
+
+    if (!result.manifestFound)
+    {
+        sLog.outString(">> No %s in '%s'; the data set is unverified. Re-run "
+                       "mangos-extractor to create one.",
+                       di::MANIFEST_FILE_NAME, m_dataPath.c_str());
+        return;
+    }
+
+    if (!result.manifestReadable)
+    {
+        sLog.outError("%s in '%s' could not be parsed. Re-run mangos-extractor.",
+                      di::MANIFEST_FILE_NAME, m_dataPath.c_str());
+        if (mode >= 2)
+        {
+            Log::WaitBeforeContinueIfNeed();
+            exit(1);
+        }
+        return;
+    }
+
+    if (result.Ok())
+    {
+        sLog.outString(">> %zu file(s) verified in %u ms", result.verified, tookMs);
+        return;
+    }
+
+    sLog.outError("BAKED DATA DOES NOT MATCH %s: %zu changed, %zu missing, %zu unreadable "
+                  "of %zu listed (%u ms).",
+                  di::MANIFEST_FILE_NAME, result.changed, result.missing,
+                  result.unreadable, result.listed, tookMs);
+    for (const std::string& example : result.examples)
+    {
+        sLog.outError("  %s", example.c_str());
+    }
+    sLog.outError("Re-run mangos-extractor against the client. A file that is present "
+                  "but does not match is read as valid and answers wrongly.");
+
+    if (mode >= 2)
+    {
+        Log::WaitBeforeContinueIfNeed();
+        exit(1);
+    }
+}
+
 /// Initialize the World
 void World::SetInitialWorldSettings()
 {
@@ -378,6 +456,10 @@ void World::SetInitialWorldSettings()
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
+
+    ///- The tiles exist. Whether they are the ones the extractor wrote is a different
+    ///  question, and the one that produces the bug reports nobody can reproduce.
+    VerifyDataIntegrity();
 
     ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
     sLog.outString("Loading MaNGOS strings...");
@@ -488,6 +570,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Disables...");                  // must be before loading quests and items
     DisableMgr::LoadDisables();
+    // Order-independent rather than order-dependent: a terrain reads its collision row
+    // when it is built, and nothing here promises no map was touched before this line.
+    sTerrainMgr.RefreshCollisionDisables();
 
     sLog.outString("Loading Item Templates...");            // must be after LoadRandomEnchantmentsTable and LoadPageTexts
     sObjectMgr.LoadItemPrototypes();

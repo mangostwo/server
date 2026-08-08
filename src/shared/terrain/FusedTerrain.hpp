@@ -46,6 +46,19 @@ namespace world::terrain
         static const std::string& TileDir();
         static bool HasTile(uint32_t mapId, int tx, int ty);
 
+        // Which kinds of surface a gather is allowed to report. Whole categories, never
+        // individual objects, and the engine attaches no meaning to WHY one is excluded:
+        // the server has a table that turns baked collision off per map, and translating
+        // a row of it into these bits is the caller's business, not this side's.
+        enum SurfaceSources : uint32_t
+        {
+            SOURCE_TERRAIN       = 0x1,  ///< the ADT heightmap and its own liquid
+            SOURCE_STATIC        = 0x2,  ///< baked WMO and M2 floors
+            SOURCE_STATIC_LIQUID = 0x4,  ///< liquid authored inside a WMO
+            SOURCE_LIVE          = 0x8,  ///< whatever `live` poses at runtime
+            SOURCE_ALL           = 0xF
+        };
+
         // THE height query. Every surface crossing the window [zBottom, zTop] over (x,y):
         // the ADT heightmap, each baked static, the liquid surface, and -- when `live` is
         // given -- the bodies the game poses at runtime. `filter` reaches that provider
@@ -56,7 +69,8 @@ namespace world::terrain
         // ask a question the entry point had not anticipated, and four layers each kept
         // their own idea of which surface "the ground" meant. Select on the Column.
         Column ColumnAt(float x, float y, float zTop, float zBottom,
-                        const ILiveGeometry* live = nullptr, uint32_t filter = 0) const;
+                        const ILiveGeometry* live = nullptr, uint32_t filter = 0,
+                        uint32_t sources = SOURCE_ALL) const;
 
         // Nearest static hit along a->b as a fraction of the segment; > 1 when nothing
         // blocks. A fraction rather than a point on purpose: the static and dynamic

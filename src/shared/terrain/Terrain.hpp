@@ -22,7 +22,13 @@ namespace world::terrain
     constexpr int FusedTerrainGridCount = 64;
 
     inline float GridCoord(float c) { return GRID_PER_TILE * (MAP_CENTER - c / TILE_SIZE); }
-    inline int TileIndex(float c) { return static_cast<int>(GridCoord(c)) >> 7; }
+
+    /// FLOOR, not truncate. The shift already floors for a negative grid coordinate,
+    /// but the conversion to int in front of it truncates toward zero: a grid
+    /// coordinate in (-1, 0) -- the 4.16-yard strip at the far corner of the map --
+    /// became 0 >> 7 = tile 0 instead of tile -1, so a point off one edge was answered
+    /// with the tile off the opposite one.
+    inline int TileIndex(float c) { return static_cast<int>(std::floor(GridCoord(c))) >> 7; }
 
     enum class LiquidKind : uint8_t
     {

@@ -76,6 +76,21 @@ namespace DisableMgr
     };
 
     bool IsVMAPDisabledFor(uint32 entry, uint8 flags);
+
+    /**
+     * @brief Every collision disable bit set for one map, or 0 for none.
+     *
+     * Asked ONCE per map, by TerrainInfo, and cached there -- the alternative is a map
+     * lookup inside every height, liquid and line-of-sight query, on every map-update
+     * thread. IsDisabledFor cannot serve that: it reaches the outer container through
+     * operator[], which INSERTS when the type is absent, so a lookup from a map thread
+     * is a write, and `.reload disables` clears the same container from the world
+     * thread. This one only reads.
+     *
+     * A reload therefore has to tell the caches: see TerrainManager::RefreshCollisionDisables.
+     */
+    uint8 GetCollisionDisablesFor(uint32 mapId);
+
     bool IsPathfindingEnabled(uint32 mapId);
 }
 

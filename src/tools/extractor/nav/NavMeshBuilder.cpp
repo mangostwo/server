@@ -885,14 +885,24 @@ namespace world::nav
             }
 
             // Every walkable poly must carry a flag or the query filter rejects all of
-            // them; the area id is what the server's filter then reads.
+            // them -- but the flag has to be the TERRAIN BIT, not a bare 1.
+            //
+            // Detour tests dtQueryFilter against polyFlags, never against the area id,
+            // and PathFinder builds its include mask out of the same NAV_* bits that are
+            // stored here as areas (NAV_GROUND 0x1, NAV_MAGMA 0x2, NAV_SLIME 0x4,
+            // NAV_WATER 0x8). Writing 1 for every non-empty poly told the filter that
+            // every polygon in the world is ground: a swimmer whose mask is
+            // WATER|MAGMA|SLIME then matches nothing at all and cannot path across its
+            // own lake, while a walker that includes GROUND is cleared to walk over
+            // magma. The area survives for whatever reads areas; the flag now says the
+            // same thing.
             for (int i = 0; i < merged->npolys; ++i)
             {
                 if (merged->areas[i] == RC_WALKABLE_AREA)
                 {
                     merged->areas[i] = NAV_GROUND;
                 }
-                merged->flags[i] = merged->areas[i] ? 1 : 0;
+                merged->flags[i] = merged->areas[i];
             }
 
             const std::vector<OffMeshLink> links =

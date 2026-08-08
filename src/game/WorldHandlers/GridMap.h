@@ -231,6 +231,12 @@ class TerrainInfo : public Referencable<AtomicLong>
         // Ages the tile cache and reclaims what no active grid holds.
         void CleanUpGrids(const uint32 diff);
 
+        /// Re-reads this map's row from `disables`. Called once when the terrain is
+        /// created and again after `.reload disables`, because the answer is cached:
+        /// asking DisableMgr inside every height and sight query would put a container
+        /// lookup on the hottest path in the server, from every map-update thread.
+        void RefreshCollisionDisables();
+
     protected:
         friend class Map;
         bool Load(const uint32 x, const uint32 y);
@@ -239,6 +245,16 @@ class TerrainInfo : public Referencable<AtomicLong>
     private:
         TerrainInfo(const TerrainInfo&);
         TerrainInfo& operator=(const TerrainInfo&);
+
+        /// Which of this map's collision answers the `disables` table has switched off.
+        /// Atomic because a reload writes it from the world thread while map-update
+        /// threads read it; a stale read for one tick is the whole cost of not locking,
+        /// and the value is one byte that is never half-written.
+        std::atomic<uint8> m_collisionDisables;
+
+        /// The engine-side source mask this map's queries gather with, derived from
+        /// m_collisionDisables. The terrain engine knows nothing about `disables`.
+        uint32 SurfaceSources() const;
 
         const uint32 m_mapId;
 
@@ -265,6 +281,11 @@ class TerrainManager : public MaNGOS::Singleton<TerrainManager>
 
         void Update(const uint32 diff);
         void UnloadAll();
+
+        /// Pushes the `disables` table into every terrain already built. The rows are
+        /// read once per map and cached there, so a reload that does not do this leaves
+        /// the old answer in place for the life of the process.
+        void RefreshCollisionDisables();
 
         uint16 GetAreaFlag(uint32 mapid, float x, float y, float z) const
         {
