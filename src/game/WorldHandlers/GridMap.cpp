@@ -56,6 +56,7 @@
 #include "DBCEnums.h"
 #include "DBCStores.h"
 #include "GridMap.h"
+#include "DisableMgr.h"
 #include "terrain/TileSerializer.hpp"
 #include "MoveMap.h"
 #include "World.h"
@@ -137,8 +138,11 @@ namespace
     }
 }
 
-TerrainInfo::TerrainInfo(uint32 mapid) : m_mapId(mapid), m_terrain(mapid), m_refMutex()
+TerrainInfo::TerrainInfo(uint32 mapid)
+    : m_collisionDisables(0), m_mapId(mapid), m_terrain(mapid), m_refMutex()
 {
+    RefreshCollisionDisables();
+
     for (int k = 0; k < MAX_NUMBER_OF_GRIDS; ++k)
     {
         for (int i = 0; i < MAX_NUMBER_OF_GRIDS; ++i)
@@ -149,6 +153,45 @@ TerrainInfo::TerrainInfo(uint32 mapid) : m_mapId(mapid), m_terrain(mapid), m_ref
 
     i_timer.SetInterval(60 * 1000);
     i_timer.SetCurrent(urand(20, 40) * 1000);
+}
+
+void TerrainInfo::RefreshCollisionDisables()
+{
+    m_collisionDisables.store(DisableMgr::GetCollisionDisablesFor(m_mapId),
+                              std::memory_order_relaxed);
+}
+
+/**
+ * @brief The engine-side source mask for this map's gathers.
+ *
+ * The `disables` table names what to switch OFF and the terrain engine takes what to
+ * gather, so the translation happens here -- the engine never learns that a database
+ * table exists, and this class never learns what a WMO is.
+ *
+ * The two collision flags mean what they did when this was a vmap: HEIGHT drops the
+ * baked model floors and leaves the ADT heightmap standing, LIQUIDSTATUS drops liquid
+ * authored inside a WMO and leaves the ADT's own. Runtime game-object geometry is not
+ * baked collision and is never dropped by either.
+ */
+uint32 TerrainInfo::SurfaceSources() const
+{
+    using namespace world::terrain;
+    const uint8 disabled = m_collisionDisables.load(std::memory_order_relaxed);
+    if (!disabled)
+    {
+        return FusedTerrain::SOURCE_ALL;
+    }
+
+    uint32 sources = FusedTerrain::SOURCE_ALL;
+    if (disabled & DisableMgr::COLLISION_DISABLE_HEIGHT)
+    {
+        sources &= ~uint32(FusedTerrain::SOURCE_STATIC);
+    }
+    if (disabled & DisableMgr::COLLISION_DISABLE_LIQUIDSTATUS)
+    {
+        sources &= ~uint32(FusedTerrain::SOURCE_STATIC_LIQUID);
+    }
+    return sources;
 }
 
 TerrainInfo::~TerrainInfo()
@@ -251,7 +294,7 @@ world::terrain::Column TerrainInfo::ColumnAt(float x, float y, float zTop, float
                                              const world::terrain::ILiveGeometry* live,
                                              uint32 phasemask) const
 {
-    return m_terrain.ColumnAt(x, y, zTop, zBottom, live, phasemask);
+    return m_terrain.ColumnAt(x, y, zTop, zBottom, live, phasemask, SurfaceSources());
 }
 
 std::optional<float> TerrainInfo::StaticFloor(float x, float y, float z) const
@@ -263,6 +306,14 @@ std::optional<float> TerrainInfo::StaticFloor(float x, float y, float z) const
 bool TerrainInfo::GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId,
                               int32& rootId, int32& groupId) const
 {
+    // No answer rather than a wrong one: the caller reads false as "no WMO here", which
+    // is what a map with its baked area lookup switched off is asserting.
+    if (m_collisionDisables.load(std::memory_order_relaxed) &
+        DisableMgr::COLLISION_DISABLE_AREAFLAG)
+    {
+        return false;
+    }
+
     float groundZ = 0.0f;
     return m_terrain.GetAreaInfo(x, y, z, flags, adtId, rootId, groupId, groundZ);
 }
@@ -511,12 +562,32 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
 bool TerrainInfo::IsInLineOfSight(float x1, float y1, float z1, float x2, float y2,
                                   float z2) const
 {
+    // BAKED collision only. A map with line of sight switched off still has doors and
+    // lifts, and Map::IsInLineOfSight asks the dynamic tree separately -- that is the
+    // same split the vmap flag always meant, and the reason it is answered here rather
+    // than at the Map.
+    if (m_collisionDisables.load(std::memory_order_relaxed) &
+        DisableMgr::COLLISION_DISABLE_LOS)
+    {
+        return true;
+    }
+
     return m_terrain.IsInLineOfSight(x1, y1, z1, x2, y2, z2);
 }
 
 float TerrainInfo::NearestHitFraction(float x1, float y1, float z1, float x2, float y2,
                                       float z2) const
 {
+    // The same answer as IsInLineOfSight above, in the units Map uses to race the static
+    // and dynamic worlds against each other: nothing baked blocks, so the static side
+    // never wins. Leaving this one out would have made a disabled map report clear sight
+    // and still stop a spell at the wall it just said was not there.
+    if (m_collisionDisables.load(std::memory_order_relaxed) &
+        DisableMgr::COLLISION_DISABLE_LOS)
+    {
+        return 2.0f;
+    }
+
     return m_terrain.NearestHitFraction(x1, y1, z1, x2, y2, z2);
 }
 
@@ -529,6 +600,24 @@ TerrainManager::~TerrainManager()
     for (TerrainDataMap::iterator it = i_TerrainMap.begin(); it != i_TerrainMap.end(); ++it)
     {
         delete it->second;
+    }
+}
+
+/**
+ * @brief Re-reads `disables` into every terrain already built.
+ *
+ * A terrain reads its row once, when it is created, because the answer sits on the
+ * hottest query path in the server. That makes a reload of the table a no-op for every
+ * map already in memory unless it is pushed -- which is the failure this exists to
+ * prevent, and the reason it is called by the reload command and not only at start-up.
+ */
+void TerrainManager::RefreshCollisionDisables()
+{
+    std::lock_guard<LOCK_TYPE> _guard(m_mutex);
+
+    for (TerrainDataMap::const_iterator it = i_TerrainMap.begin(); it != i_TerrainMap.end(); ++it)
+    {
+        it->second->RefreshCollisionDisables();
     }
 }
 

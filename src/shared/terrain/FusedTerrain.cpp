@@ -255,9 +255,19 @@ namespace world::terrain
     }
 
     Column FusedTerrain::ColumnAt(float x, float y, float zTop, float zBottom,
-                                  const ILiveGeometry* live, uint32_t filter) const
+                                  const ILiveGeometry* live, uint32_t filter,
+                                  uint32_t sources) const
     {
         Column column;
+
+        // Each source is asked for separately below. Excluding one is not the same as
+        // finding nothing in it: the column simply never hears about that kind of
+        // surface, and every selection over it -- floor, ceiling, water level -- answers
+        // from what is left, which is exactly what turning baked collision off means.
+        const bool wantTerrain = (sources & SOURCE_TERRAIN) != 0;
+        const bool wantStatic = (sources & SOURCE_STATIC) != 0;
+        const bool wantStaticLiquid = (sources & SOURCE_STATIC_LIQUID) != 0;
+        const bool wantLive = (sources & SOURCE_LIVE) != 0;
 
         TilePtr tile = TileAt(x, y);
         TilePtr global = GlobalWmo();
@@ -270,7 +280,7 @@ namespace world::terrain
         // tile already holds, so there is nothing to gain by hiding it, and a caller
         // probing from far above (MAX_HEIGHT) would otherwise get an empty column on a
         // map whose only surface is terrain.
-        if (tile)
+        if (tile && wantTerrain)
         {
             if (auto h = tile->TerrainHeight(x, y))
             {
@@ -311,11 +321,19 @@ namespace world::terrain
 
                 // localToWorld(o + t*d) == originWorld + t*downWorld, so t is already a
                 // world distance whatever the instance scale.
-                hits.clear();
-                inst.model->RaycastAll(originLocal, dirLocal, span, hits);
-                for (const float t : hits)
+                if (wantStatic)
                 {
-                    column.AddSolid(zTop - t, SurfaceKind::Static);
+                    hits.clear();
+                    inst.model->RaycastAll(originLocal, dirLocal, span, hits);
+                    for (const float t : hits)
+                    {
+                        column.AddSolid(zTop - t, SurfaceKind::Static);
+                    }
+                }
+
+                if (!wantStaticLiquid)
+                {
+                    continue;
                 }
 
                 // The ray origin doubles as the liquid probe: MLIQ is indexed by local X
@@ -345,16 +363,19 @@ namespace world::terrain
             }
         };
 
-        if (tile)
+        if (wantStatic || wantStaticLiquid)
         {
-            probe(tile->instances);
-        }
-        if (global && global != tile)
-        {
-            probe(global->instances);
+            if (tile)
+            {
+                probe(tile->instances);
+            }
+            if (global && global != tile)
+            {
+                probe(global->instances);
+            }
         }
 
-        if (tile)
+        if (tile && wantTerrain)
         {
             if (auto adt = tile->LiquidAt(x, y))
             {
@@ -362,7 +383,7 @@ namespace world::terrain
             }
         }
 
-        if (live)
+        if (live && wantLive)
         {
             live->AddSurfaces(x, y, zTop, zBottom, filter, column);
         }

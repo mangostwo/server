@@ -191,3 +191,29 @@ TEST(ModelMap_WithoutASourceADisplayIdNamesNoTerrainAtAll)
 
     FusedTerrain::SetTileDir(saved);
 }
+
+// The `disables` table can switch a map's baked collision off per category. The engine
+// is told WHICH categories to gather, never why, and the translation from a database row
+// lives in TerrainInfo -- so what is pinned here is that excluding a source removes only
+// that source's surfaces and leaves the rest of the gather intact.
+TEST(ModelMap_ExcludingBakedStaticsEmptiesAModelBackedMap)
+{
+    FusedTerrain hull(SHIP_TRANSPORTSHIP, HullSource());
+
+    const uint32_t noStatic =
+        FusedTerrain::SOURCE_ALL & ~uint32_t(FusedTerrain::SOURCE_STATIC);
+
+    // A model-backed map has nothing BUT baked statics, so dropping them leaves nothing
+    // at all -- which is exactly what a map with collision height disabled is asserting.
+    CHECK(!hull.ColumnAt(5.f, 5.f, 8.f, -10.f).Empty());
+    CHECK(hull.ColumnAt(5.f, 5.f, 8.f, -10.f, nullptr, 0, noStatic).Empty());
+
+    // Dropping WMO liquid instead leaves the floor standing: the two are separate
+    // categories, and the flags in `disables` are separate bits for the same reason.
+    const uint32_t noStaticLiquid =
+        FusedTerrain::SOURCE_ALL & ~uint32_t(FusedTerrain::SOURCE_STATIC_LIQUID);
+    auto z = hull.ColumnAt(5.f, 5.f, 8.f, -10.f, nullptr, 0, noStaticLiquid)
+                 .HighestSolidAtOrBelow(6.f);
+    REQUIRE(z.has_value());
+    CHECK(Approx(*z, 5.f));
+}
