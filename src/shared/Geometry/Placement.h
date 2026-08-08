@@ -97,14 +97,20 @@ namespace Geometry
                            : Unreachable();
             }
 
+            /// A bare point carries no frame, so the only thing that can disqualify the
+            /// comparison is this placement having none either -- and then it fails
+            /// closed like every other cross-frame answer. An item in a bag must not
+            /// measure its distance from the origin of a map it is not on.
             float DistanceTo(const Vector3& point, bool is3D = true) const
             {
-                return Gap(std::sqrt(SeparationSq(point, is3D)), m_extent);
+                return IsPlaced() ? Gap(std::sqrt(SeparationSq(point, is3D)), m_extent)
+                                  : Unreachable();
             }
 
             float DistanceTo(const Vector2& point) const
             {
-                return Gap(std::sqrt(SeparationSq2D(point)), m_extent);
+                return IsPlaced() ? Gap(std::sqrt(SeparationSq2D(point)), m_extent)
+                                  : Unreachable();
             }
 
             float HeightGapTo(const Placement& other) const
@@ -122,12 +128,12 @@ namespace Geometry
 
             bool WithinDist(const Vector3& point, float dist, bool is3D = true) const
             {
-                return Closer(SeparationSq(point, is3D), dist, m_extent);
+                return IsPlaced() && Closer(SeparationSq(point, is3D), dist, m_extent);
             }
 
             bool WithinDist(const Vector2& point, float dist) const
             {
-                return Closer(SeparationSq2D(point), dist, m_extent);
+                return IsPlaced() && Closer(SeparationSq2D(point), dist, m_extent);
             }
 
             bool WithinRange(const Placement& other, float minRange, float maxRange, bool is3D = true) const
@@ -138,18 +144,22 @@ namespace Geometry
 
             bool WithinRange(const Vector3& point, float minRange, float maxRange, bool is3D = true) const
             {
-                return InBand(SeparationSq(point, is3D), minRange, maxRange, m_extent);
+                return IsPlaced() && InBand(SeparationSq(point, is3D), minRange, maxRange, m_extent);
             }
 
             bool WithinRange(const Vector2& point, float minRange, float maxRange) const
             {
-                return InBand(SeparationSq2D(point), minRange, maxRange, m_extent);
+                return IsPlaced() && InBand(SeparationSq2D(point), minRange, maxRange, m_extent);
             }
 
             /// A zero tolerance skips that axis; all-zero matches nothing, as the database's
             /// integer waypoint tolerances have always meant.
             bool WithinBox(const Vector3& point, const Vector3& tolerance) const
             {
+                if (!IsPlaced())
+                {
+                    return false;
+                }
                 if (tolerance.x <= 0.0f && tolerance.y <= 0.0f && tolerance.z <= 0.0f)
                 {
                     return false;
@@ -209,13 +219,25 @@ namespace Geometry
                 return SignedOrientation(BearingTo(point) - m_facing);
             }
 
+            /// @p arc is the FULL width of the cone, centred on the facing.
+            ///
+            /// It must not go through NormalizeOrientation. That wraps into the
+            /// half-open [0, 2*PI), so a full circle -- the natural way to spell "in any
+            /// direction", and what IsInBack() below computes for an arc of zero -- came
+            /// back as zero, halved to zero, and matched only a target dead ahead. An
+            /// angle that names a direction and an angle that names a width are
+            /// different things wearing the same type.
             bool HasInArc(const Placement& other, float arc) const
             {
-                if (!ShareFrame(other))
+                if (!ShareFrame(other) || !(arc > 0.0f))
                 {
                     return false;
                 }
-                const float half = NormalizeOrientation(arc) / 2.0f;
+                if (arc >= TwoPi())
+                {
+                    return true;
+                }
+                const float half = arc / 2.0f;
                 const float bearing = RelativeBearingTo(other);
                 return bearing >= -half && bearing <= half;
             }
@@ -276,10 +298,15 @@ namespace Geometry
                 return dx * dx + dy * dy;
             }
 
+            /// CLOSED. Exactly at the limit counts as within, which is what makes
+            /// WithinDist(other, DistanceTo(other)) true. With a strict compare the two
+            /// disagreed by construction: DistanceTo returns the separation minus the
+            /// extents, and feeding that straight back asked whether a number is less
+            /// than itself.
             static bool Closer(float separationSq, float dist, float extentSum)
             {
                 const float reach = dist + extentSum;
-                return separationSq < reach * reach;
+                return separationSq <= reach * reach;
             }
 
             static bool InBand(float separationSq, float minRange, float maxRange, float extentSum)
@@ -293,7 +320,7 @@ namespace Geometry
                     }
                 }
                 const float far_ = maxRange + extentSum;
-                return separationSq < far_ * far_;
+                return separationSq <= far_ * far_;
             }
 
             Frame m_frame;
