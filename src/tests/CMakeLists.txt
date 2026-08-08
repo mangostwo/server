@@ -49,6 +49,7 @@ set(SRC_GRP_TESTS
     NavBinningTest.cpp
     DynamicCollisionTest.cpp
     PlacementTest.cpp
+    GeometryMathTest.cpp
     LFGLogicTest.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These two know nothing of it.

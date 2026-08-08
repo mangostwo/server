@@ -72,9 +72,18 @@ namespace Geometry
             float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
             float length() const { return magnitude(); }
 
+            /// The zero vector has no direction, and 1/sqrt(0) is infinity: the result
+            /// would be all NaN, isFinite() would say so, and every comparison against
+            /// it would quietly be false -- a ray that misses instead of a call that
+            /// fails. Zero in, zero out; the same for a non-finite magnitude.
             Vector3 direction() const
             {
-                const float invSqrt = 1.0f / std::sqrt(squaredMagnitude());
+                const float lengthSq = squaredMagnitude();
+                if (!(lengthSq > 0.0f) || !Geometry::isFinite(lengthSq))
+                {
+                    return zero();
+                }
+                const float invSqrt = rsq(lengthSq);
                 return Vector3(x * invSqrt, y * invSqrt, z * invSqrt);
             }
             Vector3 unit() const { return direction(); }
