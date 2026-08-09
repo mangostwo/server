@@ -11,7 +11,9 @@
 #include "Geometry/GeometryMath.h"
 #include "Geometry/Vector3.h"
 
+#include <cstddef>
 #include <cstdint>
+#include <type_traits>
 
 #include <cmath>
 
@@ -65,7 +67,20 @@ namespace Geometry
             }
 
             /// Make unit length in place.
-            void unitize() { *this *= rsq(dot(*this)); }
+            ///
+            /// A zero quaternion has no direction to normalise towards; it becomes the
+            /// identity rather than four NaNs that every later comparison reads as
+            /// "not equal, not unit, not finite" without anything reporting an error.
+            void unitize()
+            {
+                const float lengthSq = dot(*this);
+                if (!(lengthSq > 0.0f) || !Geometry::isFinite(lengthSq))
+                {
+                    *this = Quat();
+                    return;
+                }
+                *this *= rsq(lengthSq);
+            }
 
             float magnitude() const { return std::sqrt(dot(*this)); }
 
@@ -73,6 +88,18 @@ namespace Geometry
     };
 
     inline Quat operator*(float s, const Quat& q) { return q * s; }
+
+    // The layout note at the top of this file is a requirement, not a description:
+    // imag() reinterpret_casts x,y,z onto a Vector3. Add a member, a base or a virtual
+    // and that cast still compiles, still links, and reads the wrong three floats.
+    static_assert(sizeof(Quat) == 4 * sizeof(float),
+                  "Quat::imag aliases x,y,z as a Vector3: it must be four bare floats");
+    static_assert(std::is_standard_layout<Quat>::value,
+                  "Quat::imag aliases x,y,z as a Vector3: it must be standard layout");
+    static_assert(offsetof(Quat, x) == 0 && offsetof(Quat, y) == sizeof(float) &&
+                  offsetof(Quat, z) == 2 * sizeof(float) &&
+                  offsetof(Quat, w) == 3 * sizeof(float),
+                  "Quat members must stay in x,y,z,w order with no padding");
 
     /// The yaw a rotation carries, in [0, 2*PI) -- the only component a server-side
     /// facing has, since everything the core places stands upright.

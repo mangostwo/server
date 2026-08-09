@@ -6,6 +6,7 @@
 #include "terrain/WmoModel.hpp"
 
 #include <array>
+#include <cmath>
 #include <cstdio>
 #include <unordered_map>
 
@@ -14,10 +15,23 @@ namespace world::terrain
     namespace
     {
         constexpr uint32_t MAGIC = 0x32474E4D;  // "MNG2" in file order
-        constexpr uint32_t VERSION = 1;
+        // Version 2 is the same byte LAYOUT as 1 and a different set of accepted files.
+        // The reader now requires each present grid to match its fixed dimensions, a WMO
+        // group's liquid to match its own tile counts, a BVH node array to be a tree over
+        // the triangles it indexes, and an instance to carry a finite pose -- all of which
+        // a version 1 bake was free to violate. A tile that does is now REJECTED, and a
+        // rejected tile is silence: no height, no liquid, no collision, no diagnostic
+        // beyond the miss. The version is what turns "this map answers nothing" into
+        // "this bake is stale, run the extractor".
+        constexpr uint32_t VERSION = 2;
 
         constexpr uint32_t MAX_MODELS = 1u << 20;
         constexpr uint32_t MAX_INSTANCES = 1u << 22;
+        // A WMO's group count is a uint32 in the file and a few hundred in reality. The
+        // model ceiling is far too loose for it: it lets a corrupt header size a vector
+        // of a million groups -- each one a Group with two vectors inside -- before any
+        // per-group read measures anything against the file.
+        constexpr uint32_t MAX_GROUPS = 4096;
 
         // A count is only believable if the file still holds that many elements. A fixed
         // ceiling is not enough: it still lets a corrupt header reserve hundreds of
@@ -92,6 +106,65 @@ namespace world::terrain
             return std::fread(a.data(), sizeof(T), N, f) == N;
         }
 
+        // MLIQ is a (tilesX+1) x (tilesY+1) grid of corner heights over a tilesX x tilesY
+        // grid of flags. WmoModel::LiquidLocal interpolates the four corners around a
+        // point with no bounds test, so a pair of counts that does not match the vectors
+        // is an out-of-bounds read at query time -- long after the file was accepted.
+        bool LiquidSizesOk(uint32_t tilesX, uint32_t tilesY,
+                           const std::vector<float>& heights,
+                           const std::vector<uint8_t>& flags)
+        {
+            if (tilesX == 0 || tilesY == 0)
+            {
+                return false;
+            }
+            const size_t wantHeights = size_t(tilesX + 1) * size_t(tilesY + 1);
+            const size_t wantFlags = size_t(tilesX) * size_t(tilesY);
+            return heights.size() == wantHeights && flags.size() == wantFlags;
+        }
+
+        // The height and liquid grids are indexed by fixed arithmetic over the tile's
+        // constant dimensions -- TerrainHeight and LiquidAt never look at .size(). A
+        // short vector read off disk is therefore not a wrong height, it is a read past
+        // the end of the allocation.
+        bool TerrainGridSizesOk(const TerrainTile& tile)
+        {
+            constexpr size_t V9 = size_t(V9_SIDE) * size_t(V9_SIDE);
+            constexpr size_t V8 = size_t(GRID_PER_TILE) * size_t(GRID_PER_TILE);
+
+            if (tile.hasTerrain && (tile.v9.size() != V9 || tile.v8.size() != V8))
+            {
+                return false;
+            }
+            if (tile.hasLiquid &&
+                (tile.liquidHeight.size() != V9 || tile.liquidShow.size() != V8 ||
+                 tile.liquidKind.size() != V8 || tile.liquidEntry.size() != V8 ||
+                 tile.liquidDeep.size() != V8))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        // The bake writes proper rotation matrices, so |det| is 1. Anything else is a
+        // corrupt placement, and a non-finite one poisons every ray transformed by it.
+        bool RotationOk(const Mat3& rot)
+        {
+            for (const float c : rot.m)
+            {
+                if (!std::isfinite(c))
+                {
+                    return false;
+                }
+            }
+            const auto& m = rot.m;
+            const float det = m[0] * (m[4] * m[8] - m[5] * m[7]) -
+                              m[1] * (m[3] * m[8] - m[5] * m[6]) +
+                              m[2] * (m[3] * m[7] - m[4] * m[6]);
+            constexpr float eps = 1e-3f;
+            return std::fabs(det - 1.0f) < eps || std::fabs(det + 1.0f) < eps;
+        }
+
         bool WriteGroup(std::FILE* f, const WmoModel::Group& g)
         {
             bool ok = WPod(f, g.mogpFlags) && WPod(f, g.groupWmoId);
@@ -99,6 +172,8 @@ namespace world::terrain
             ok = ok && WPod(f, hasLiquid);
             if (g.hasLiquid)
             {
+                ok = ok && LiquidSizesOk(g.liquid.tilesX, g.liquid.tilesY,
+                                         g.liquid.heights, g.liquid.flags);
                 ok = ok && WPod(f, g.liquid.tilesX) && WPod(f, g.liquid.tilesY) &&
                      WPod(f, g.liquid.corner) && WPod(f, g.liquid.entry) &&
                      WPod(f, g.liquid.kind) && WVec(f, g.liquid.heights) &&
@@ -119,6 +194,8 @@ namespace world::terrain
                      RPod(f, g.liquid.corner) && RPod(f, g.liquid.entry) &&
                      RPod(f, g.liquid.kind) && RVec(f, g.liquid.heights) &&
                      RVec(f, g.liquid.flags);
+                ok = ok && LiquidSizesOk(g.liquid.tilesX, g.liquid.tilesY,
+                                         g.liquid.heights, g.liquid.flags);
             }
             return ok;
         }
@@ -157,7 +234,8 @@ namespace world::terrain
         const uint8_t globalWmo = tile.isGlobalWmo ? 1 : 0;
         const uint8_t hasLiquid = tile.hasLiquid ? 1 : 0;
 
-        bool ok = WPod(f, MAGIC) && WPod(f, VERSION) && WPod(f, tile.tx) &&
+        bool ok = TerrainGridSizesOk(tile);
+        ok = ok && WPod(f, MAGIC) && WPod(f, VERSION) && WPod(f, tile.tx) &&
                   WPod(f, tile.ty) && WPod(f, hasTerrain) && WPod(f, globalWmo) &&
                   WVec(f, tile.v9) && WVec(f, tile.v8) && WArray(f, tile.holes) &&
                   WArray(f, tile.areaIds) && WPod(f, hasLiquid) &&
@@ -217,7 +295,10 @@ namespace world::terrain
                  WPod(f, inst.worldBounds.hi) && WPod(f, idx) && WPod(f, inst.adtId);
         }
 
-        std::fclose(f);
+        // fclose is what flushes: a write that failed only in the buffer -- a full disk
+        // is the ordinary way -- reports success here and leaves a truncated tile that
+        // looks complete to every later reader.
+        ok = (std::fclose(f) == 0) && ok;
         if (!ok)
         {
             std::remove(path.c_str());
@@ -253,6 +334,7 @@ namespace world::terrain
         tile->hasTerrain = hasTerrain != 0;
         tile->isGlobalWmo = globalWmo != 0;
         tile->hasLiquid = hasLiquid != 0;
+        ok = ok && TerrainGridSizesOk(*tile);
 
         uint32_t nModels = 0;
         ok = ok && RPod(f, nModels) && nModels <= MAX_MODELS;
@@ -278,7 +360,7 @@ namespace world::terrain
             if (kind == uint8_t(ModelKind::Wmo))
             {
                 uint32_t rootId = 0, nGroups = 0;
-                ok = RPod(f, rootId) && RPod(f, nGroups) && nGroups <= MAX_MODELS;
+                ok = RPod(f, rootId) && RPod(f, nGroups) && nGroups <= MAX_GROUPS;
                 std::vector<WmoModel::Group> groups(ok ? nGroups : 0);
                 for (uint32_t g = 0; ok && g < nGroups; ++g)
                 {
@@ -288,11 +370,12 @@ namespace world::terrain
                 std::vector<uint16_t> triGroup;
                 ok = ok && RVec(f, soup.verts) && RVec(f, soup.tris) &&
                      RVec(f, triGroup) && RVec(f, nodes) &&
-                     triGroup.size() == soup.tris.size();
+                     triGroup.size() == soup.tris.size() && soup.IndicesValid();
+
+                Bvh bvh;
+                ok = ok && bvh.Adopt(std::move(nodes), soup.tris.size());
                 if (ok)
                 {
-                    Bvh bvh;
-                    bvh.Adopt(std::move(nodes));
                     models[i] = std::make_shared<WmoModel>(std::move(soup),
                                                            std::move(triGroup),
                                                            std::move(groups), rootId,
@@ -301,11 +384,13 @@ namespace world::terrain
             }
             else if (kind == uint8_t(ModelKind::Mesh))
             {
-                ok = RVec(f, soup.verts) && RVec(f, soup.tris) && RVec(f, nodes);
+                ok = RVec(f, soup.verts) && RVec(f, soup.tris) && RVec(f, nodes) &&
+                     soup.IndicesValid();
+
+                Bvh bvh;
+                ok = ok && bvh.Adopt(std::move(nodes), soup.tris.size());
                 if (ok)
                 {
-                    Bvh bvh;
-                    bvh.Adopt(std::move(nodes));
                     models[i] = std::make_shared<CollisionModel>(std::move(soup),
                                                                  std::move(bvh));
                 }
@@ -322,11 +407,21 @@ namespace world::terrain
         {
             StaticInstance inst;
             uint32_t idx = 0;
+            float scale = 1.0f;
             ok = RPod(f, inst.xf.pos) && RArray(f, inst.xf.rot.m) &&
-                 RPod(f, inst.xf.scale) && RPod(f, inst.worldBounds.lo) &&
-                 RPod(f, inst.worldBounds.hi) && RPod(f, idx) && RPod(f, inst.adtId);
+                 RPod(f, scale) && RPod(f, inst.worldBounds.lo) &&
+                 RPod(f, inst.worldBounds.hi) && RPod(f, idx) && RPod(f, inst.adtId) &&
+                 inst.xf.pos.isFinite() && inst.worldBounds.lo.isFinite() &&
+                 inst.worldBounds.hi.isFinite() && RotationOk(inst.xf.rot);
             if (ok)
             {
+                // Through the CLAMPING constructor, never by assigning the field. The
+                // comment on that constructor says a non-positive or non-finite scale
+                // is screened once, where a model is placed -- and this is the one place
+                // a scale enters the server without passing through it. A zero read off
+                // disk divides to infinity in worldToLocal, and every ray then misses
+                // the model instead of failing.
+                inst.xf = Transform(inst.xf.pos, inst.xf.rot, scale);
                 if (idx < models.size())
                 {
                     inst.model = models[idx];

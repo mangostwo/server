@@ -336,3 +336,103 @@ TEST(WmoAreaInfoNamesTheGroupTheRayHit)
     REQUIRE(below.has_value());
     CHECK_EQ(below->groupId, uint32_t(111));
 }
+
+// A tile file is not a message from a peer, but it is still bytes from outside the
+// process, and the query path trusts them completely: Raycast pushes both children of
+// every node onto a stack sized from MAX_DEPTH, indexes the array with whatever it
+// popped, and reads a leaf's triangle run without a bounds test. All three are safe only
+// because Build cannot emit a node array that breaks them. A file can.
+TEST(BvhAdoptRejectsANodeArrayThatIsNotATree)
+{
+    std::mt19937 rng(0xBADF00D);
+    TriSoup soup = RandomSoup(rng, 200, 40.f);
+
+    Bvh built;
+    built.Build(soup);
+    const std::vector<Bvh::Node> good = built.Nodes();
+    REQUIRE(good.size() > 2);
+    REQUIRE(good[0].left >= 0);           // the root of this soup is not a leaf
+
+    {
+        Bvh bvh;
+        CHECK(bvh.Adopt(good, soup.tris.size()));
+        CHECK_EQ(bvh.NodeCount(), good.size());
+    }
+    {
+        // Empty is a legal tile: a model with no geometry.
+        Bvh bvh;
+        CHECK(bvh.Adopt({}, 0));
+        CHECK(bvh.Empty());
+    }
+    {
+        // A child that points at or behind its parent is a cycle, and the walk would
+        // never come back.
+        std::vector<Bvh::Node> nodes = good;
+        nodes[0].left = 0;
+        Bvh bvh;
+        CHECK(!bvh.Adopt(nodes, soup.tris.size()));
+        CHECK(bvh.Empty());
+    }
+    {
+        std::vector<Bvh::Node> nodes = good;
+        nodes[0].right = int32_t(nodes.size()) + 7;
+        Bvh bvh;
+        CHECK(!bvh.Adopt(nodes, soup.tris.size()));
+    }
+    {
+        // Both children the same node: not a tree, and the second visit is a second
+        // walk of the same subtree.
+        std::vector<Bvh::Node> nodes = good;
+        nodes[0].right = nodes[0].left;
+        Bvh bvh;
+        CHECK(!bvh.Adopt(nodes, soup.tris.size()));
+    }
+    {
+        // A leaf whose run reaches past the soup: an out-of-bounds read per ray.
+        std::vector<Bvh::Node> nodes = good;
+        for (Bvh::Node& n : nodes)
+        {
+            if (n.left < 0)
+            {
+                n.count = uint32_t(soup.tris.size()) + 4;
+                break;
+            }
+        }
+        Bvh bvh;
+        CHECK(!bvh.Adopt(nodes, soup.tris.size()));
+    }
+    {
+        // A node nothing points at is not part of the tree, and its depth is unknowable.
+        std::vector<Bvh::Node> nodes = good;
+        nodes.push_back(Bvh::Node{});
+        Bvh bvh;
+        CHECK(!bvh.Adopt(nodes, soup.tris.size()));
+    }
+}
+
+TEST(TriSoupRejectsATriangleThatNamesAVertexItDoesNotHave)
+{
+    TriSoup soup;
+    soup.verts = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}};
+    soup.tris = {{0, 1, 2}};
+    CHECK(soup.IndicesValid());
+
+    soup.tris.push_back({0, 1, 3});
+    CHECK(!soup.IndicesValid());
+
+    TriSoup empty;
+    CHECK(empty.IndicesValid());
+}
+
+TEST(TileIndexFloorsInsteadOfTruncating)
+{
+    // The map spans 64 tiles centred on 32, so world x = 0 is tile 32.
+    CHECK_EQ(TileIndex(0.f), 32);
+    CHECK_EQ(TileIndex(-1.f), 32);
+
+    // The 4.16-yard strip past the far corner, where the grid coordinate lands in
+    // (-1, 0). Truncating toward zero called it tile 0 -- the tile at the OPPOSITE
+    // edge of the map -- instead of the tile -1 that is off the map.
+    CHECK_EQ(TileIndex(17066.f), 0);
+    CHECK_EQ(TileIndex(17068.f), -1);
+}

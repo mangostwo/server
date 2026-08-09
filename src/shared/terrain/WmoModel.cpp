@@ -81,13 +81,31 @@ namespace world::terrain
                 continue;
             }
 
-            const float txf = (p.x - lq.corner.x) / LIQUID_TILE_SIZE;
-            const float tyf = (p.y - lq.corner.y) / LIQUID_TILE_SIZE;
-            const int tx = int(txf), ty = int(tyf);
-            if (txf < 0.f || tyf < 0.f || tx >= int(lq.tilesX) || ty >= int(lq.tilesY))
+            // H() below indexes the corner grid unchecked, up to (tx+1, ty+1). That is
+            // only in bounds if the heights really are (tilesX+1) x (tilesY+1) -- so a
+            // group whose counts disagree with its vector is dropped rather than
+            // sampled off the end. The serializer screens this on load too; here is
+            // where the read would happen.
+            if (lq.heights.size() != size_t(lq.tilesX + 1) * size_t(lq.tilesY + 1))
             {
                 continue;
             }
+
+            const float txf = (p.x - lq.corner.x) / LIQUID_TILE_SIZE;
+            const float tyf = (p.y - lq.corner.y) / LIQUID_TILE_SIZE;
+            // Stated POSITIVELY so a NaN falls out here rather than through: every
+            // comparison against a NaN is false, so "not outside" would have let one
+            // reach the conversion below.
+            if (!(txf >= 0.f && txf < float(lq.tilesX)) ||
+                !(tyf >= 0.f && tyf < float(lq.tilesY)))
+            {
+                continue;
+            }
+            // Ranged in FLOAT before the conversion, not after: int(txf) for a point far
+            // outside the group -- which is most of the model, most of the time -- is a
+            // conversion that does not fit, and that is undefined, not a big number.
+            // Non-negative and in range here, so the truncation floors.
+            const int tx = int(txf), ty = int(tyf);
 
             const size_t fi = size_t(tx) + size_t(ty) * lq.tilesX;
             if (fi < lq.flags.size() && (lq.flags[fi] & 0x0F) == 0x0F)

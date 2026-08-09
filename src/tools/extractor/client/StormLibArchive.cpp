@@ -119,9 +119,13 @@ namespace world::terrain
                 continue;
             }
 
+            // The high dword is not ignorable: resize() would take the low half and the
+            // caller would parse a silently TRUNCATED file as though it were whole.
+            // Nothing in a 3.3.5a client is 4 GiB, so this only fires when the tool is
+            // pointed at something that is not one.
             DWORD high = 0;
             const DWORD size = SFileGetFileSize(hFile, &high);
-            if (size == SFILE_INVALID_SIZE)
+            if (size == SFILE_INVALID_SIZE || high != 0)
             {
                 SFileCloseFile(hFile);
                 continue;

@@ -59,14 +59,27 @@ namespace Geometry
     }
 
     /// Wraps t into the half-open interval [lo, hi).
+    ///
+    /// Non-finite input and a non-positive interval fail closed to lo, and the
+    /// quotient is floored in double rather than through iFloor. This is reachable
+    /// from a client packet: MoveSpline normalizes the orientation the client
+    /// reports, so a NaN or a value beyond 2^31 intervals from lo used to convert a
+    /// double to int out of range -- undefined behaviour, not a wrong angle. Inside
+    /// the range every caller actually uses, the value is unchanged.
     inline float wrap(float t, float lo, float hi)
     {
+        const float interval = hi - lo;
+        if (!(interval > 0.0f) || !isFinite(t))
+        {
+            return lo;
+        }
+
         if ((t >= lo) && (t < hi))
         {
             return t;
         }
 
-        const float interval = hi - lo;
-        return t - interval * iFloor((t - lo) / interval);
+        const double turns = std::floor((double(t) - double(lo)) / double(interval));
+        return float(double(t) - double(interval) * turns);
     }
 }

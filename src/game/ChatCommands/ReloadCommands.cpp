@@ -41,6 +41,7 @@
 #include "DisableMgr.h"
 #include "World.h"
 #include "MapManager.h"
+#include "GridMap.h"                                        // sTerrainMgr
 #include "CreatureEventAIMgr.h"
 #include "BattleGroundMgr.h"
 #include "SkillExtraItems.h"
@@ -1572,6 +1573,9 @@ bool ChatHandler::HandleReloadDisablesCommand(char* /*args*/)
     sLog.outString("Re-loading Disables...");
     DisableMgr::LoadDisables();
     DisableMgr::CheckQuestDisables();
+    // The collision rows are cached per map when its terrain is built, so a reload that
+    // stopped here would change the table and nothing else for every map in memory.
+    sTerrainMgr.RefreshCollisionDisables();
     SendGlobalSysMessage("DB table `disables` reloaded.", SEC_MODERATOR);
     return true;
 }

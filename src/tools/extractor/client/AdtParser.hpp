@@ -25,6 +25,11 @@ namespace world::terrain
     struct AdtData
     {
         bool hasTerrain = false;
+        /// How many of the 256 MCNKs were read. A real 3.3.5a ADT has all of them, and
+        /// a cell no chunk reached keeps the zero the allocation gave it -- ground at
+        /// sea level, indistinguishable from real terrain once it is baked. The parser
+        /// reports; the baker refuses.
+        uint32_t chunksFilled = 0;
         std::vector<float> v9;
         std::vector<float> v8;
         std::array<uint16_t, ADT_CHUNKS * ADT_CHUNKS> holes{};

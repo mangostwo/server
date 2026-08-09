@@ -33,7 +33,13 @@
 
 #define MMAP_MAGIC 0x4d4d4150   // 'MMAP'
 // Version 6 adds orthogonal terrain/liquid border cells during fused navmesh baking.
-#define MMAP_VERSION 6
+// Version 7 stores the TERRAIN BIT in each polygon's flags instead of a bare 1. Detour
+// filters on flags, never on the area id, so a version 6 tile tells every query that
+// every polygon is ground: a swimmer's WATER|MAGMA|SLIME mask matches nothing and a
+// walker is cleared to cross magma. The two are indistinguishable at load time -- both
+// are "a poly with flags set" -- so the version is what makes a stale bake say so
+// instead of pathing wrongly for as long as it stays on disk.
+#define MMAP_VERSION 7
 
 struct MmapTileHeader
 {

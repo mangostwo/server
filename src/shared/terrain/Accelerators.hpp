@@ -42,6 +42,12 @@ namespace world::terrain
         }
 
         size_t Size() const { return tris.size(); }
+
+        /// At() indexes verts blindly, because the query path cannot afford a bounds
+        /// test per triangle. That is only sound if the soup was screened ONCE, when it
+        /// came off disk: a bit-flip in a .tile otherwise becomes an out-of-bounds read
+        /// inside a raycast, which is the one place nothing is watching.
+        bool IndicesValid() const;
     };
 
     class Bvh
@@ -85,7 +91,25 @@ namespace world::terrain
                         std::vector<Crossing>& out) const;
 
         const std::vector<Node>& Nodes() const { return m_nodes; }
-        void Adopt(std::vector<Node> nodes) { m_nodes = std::move(nodes); }
+
+        /**
+         * @brief Take a node array read from disk, after checking it really is a tree.
+         *
+         * Nothing downstream re-checks. Raycast pushes both children unconditionally
+         * onto a stack sized from MAX_DEPTH, indexes m_nodes with whatever it popped,
+         * and reads a leaf's triangle run without a bounds test. All three are safe
+         * only because Build cannot emit a node array that violates them -- a FILE can,
+         * whether corrupt or hostile, and the tile format has no checksum.
+         *
+         * The check requires each child's index to exceed its parent's. That is the
+         * layout Build emits (the parent is appended before either child) and it is
+         * therefore part of the tile format, not an implementation detail: it makes a
+         * cycle unrepresentable, which is what lets the depth pass be one forward sweep.
+         *
+         * @return false when the array is not a depth-first tree over @p triangleCount
+         *         triangles; the tree is left empty and the caller must reject the tile.
+         */
+        bool Adopt(std::vector<Node> nodes, size_t triangleCount);
 
         size_t NodeCount() const { return m_nodes.size(); }
         int MaxDepth() const { return m_maxDepth; }

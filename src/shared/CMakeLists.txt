@@ -237,6 +237,39 @@ configure_file(SystemConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/SystemConfig.h)
 
 TEST_BIG_ENDIAN(ENDIAN_VALUE)
 
+# =============================================================================
+# dataintegrity -- the SHA-256 manifest, as a library of its own.
+#
+# Not part of `shared`, on purpose. The baker has to WRITE the manifest the server
+# READS, and `shared` exports MySQL as a PUBLIC dependency; linking it into the
+# extractor to reach two files would drag a database client into a tool that has never
+# needed one. This target carries OpenSSL and nothing else -- and OpenSSL is already
+# mandatory for the whole project, so it adds no requirement to either side.
+#
+# One implementation, both consumers: the format cannot drift from itself.
+# =============================================================================
+add_library(dataintegrity STATIC
+    DataIntegrity/DataManifest.cpp
+    DataIntegrity/DataManifest.h
+    DataIntegrity/Sha256.cpp
+    DataIntegrity/Sha256.h
+)
+
+target_include_directories(dataintegrity
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_link_libraries(dataintegrity
+    PUBLIC
+        Threads::Threads
+    PRIVATE
+        mangos_openssl
+        mangos_openssl_strict
+)
+
+set_target_properties(dataintegrity PROPERTIES FOLDER "shared")
+
 add_library(shared STATIC
     ${SRC_GRP_AUTH}
     ${SRC_GRP_COMMON}
@@ -287,6 +320,7 @@ target_link_libraries(shared
         Threads::Threads
         utf8
         MySQL::MySQL
+        dataintegrity
         ${CMAKE_DL_LIBS}
         mangos_openssl
         $<$<BOOL:${WIN32}>:dbghelp>

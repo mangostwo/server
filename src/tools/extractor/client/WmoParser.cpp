@@ -273,7 +273,13 @@ namespace world::terrain
             const uint64_t vbytes = uint64_t(xverts) * yverts * 8;
             const uint64_t fbytes = uint64_t(xtiles) * ytiles;
 
-            if (xverts && yverts && xtiles && ytiles && 30 + vbytes + fbytes <= mliqSize)
+            // The corner grid must be exactly one wider than the tile grid on each axis.
+            // Everything downstream -- the serializer's screen, WmoModel::LiquidLocal's
+            // four-corner interpolation -- assumes that relation and indexes on it, so a
+            // MLIQ that does not hold it is dropped here rather than baked into a tile
+            // that reads off the end of its own height vector.
+            if (xverts && yverts && xtiles && ytiles && xverts == xtiles + 1 &&
+                yverts == ytiles + 1 && 30 + vbytes + fbytes <= mliqSize)
             {
                 const uint8_t* verts = mliq + 30;
                 const uint8_t* tileFlags = verts + vbytes;

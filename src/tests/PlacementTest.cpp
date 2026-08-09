@@ -126,6 +126,22 @@ TEST(Placement_NeitherEmissaryHasTheOtherBehindIt)
     CHECK(!ArathorEmissary().IsInBack(ArathorEmissaryPair(), 5.0f, kPi));
 }
 
+TEST(Placement_AFullCircleArcSeesEveryDirection)
+{
+    // The arc is a WIDTH, not a direction, so it must not be wrapped into [0, 2*PI):
+    // a full circle wrapped to zero, halved, and matched only a target dead ahead.
+    // The emissary is 1.5 degrees off dead ahead, so the difference does not show
+    // there -- it shows at the two ends of the range.
+    CHECK(ArathorEmissary().HasInArc(ArathorEmissaryPair(), 2.0f * kPi));
+    CHECK(ArathorEmissary().HasInArc(ArathorEmissaryPair(), 4.0f * kPi));
+    CHECK(!ArathorEmissary().HasInArc(ArathorEmissaryPair(), 0.0f));
+    CHECK(!ArathorEmissary().HasInArc(ArathorEmissaryPair(), -1.0f));
+
+    // IsInBack asks for the complement, so an arc of zero means "nothing is in front
+    // of me", and the emissary standing in plain sight was reported as behind.
+    CHECK(!ArathorEmissary().IsInBack(ArathorEmissaryPair(), 5.0f, 0.0f));
+}
+
 TEST(Placement_StormwindResidentsAreOutOfInteractionRange)
 {
     // Turner to Gallina is 16.07 centre to centre: past INTERACTION_DISTANCE (5 yards),
@@ -161,6 +177,36 @@ TEST(Placement_TheSameStormwindSpotOnKalimdorIsUnreachable)
     CHECK(std::isinf(inStormwind.DistanceTo(inKalimdor)));
     CHECK(!inStormwind.WithinDist(inKalimdor, 1000.0f));
     CHECK(!inStormwind.HasInArc(inKalimdor, 2.0f * kPi - 0.001f));
+}
+
+TEST(Placement_AnItemInABagIsNowhereAtAll)
+{
+    // A default Placement is what an Item has: no frame. Measured against a bare
+    // coordinate it used to answer as though it stood at the origin of a map it is
+    // not on -- 8843 yards from Stormwind rather than nowhere.
+    const Geometry::Placement carried;
+    const Geometry::Vector3 stormwind(-8840.63f, 652.959f, 97.1184f);
+
+    CHECK(!carried.IsPlaced());
+    CHECK(std::isinf(carried.DistanceTo(stormwind)));
+    CHECK(std::isinf(carried.DistanceTo(Geometry::Vector2(-8840.63f, 652.959f))));
+    CHECK(!carried.WithinDist(stormwind, 100000.0f));
+    CHECK(!carried.WithinRange(stormwind, 0.0f, 100000.0f));
+    CHECK(!carried.WithinBox(stormwind, Geometry::Vector3(100000.0f, 100000.0f, 100000.0f)));
+}
+
+TEST(Placement_ReachIsClosedAtItsOwnLimit)
+{
+    // Stormwind coordinates chosen so the separation is EXACTLY four yards in float:
+    // the point of the case is the comparison at the limit, and a real spawn pair
+    // whose distance is only approximately known cannot pin it.
+    const Geometry::Placement a = Spawn(-8840.0f, 650.0f, 97.0f, 0.0f, 0.0f);
+    const Geometry::Placement b = Spawn(-8836.0f, 650.0f, 97.0f, 0.0f, 0.0f);
+
+    CHECK(Approx(a.DistanceTo(b), 4.0f));
+    CHECK(a.WithinDist(b, 4.0f));            // exactly at reach counts as within
+    CHECK(!a.WithinDist(b, 3.999f));
+    CHECK(a.WithinRange(b, 0.0f, 4.0f));
 }
 
 TEST(Placement_TwoNaxxramasCopiesNeverSeeEachOther)

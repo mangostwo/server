@@ -483,9 +483,44 @@ TEST(AdtStopsOnTruncatedChunk)
     adt.U32(0x7FFFFFFF);
     adt.Pad(16);
 
+    // REJECTED, not merely stopped. A chunk whose size runs past the end of the buffer
+    // is a structurally broken file, which is the one thing ParseAdt's contract says it
+    // returns false for; this case used to be accepted as an empty tile. It matters
+    // where the truncation lands AFTER some MCNKs: v9/v8 are allocated whole and zeroed
+    // by the first one, so every cell the parse never reached comes back as ground at
+    // sea level -- and hasTerrain is true, so nothing downstream doubts it.
+    AdtData d;
+    CHECK(!ParseAdt(adt.b, d));
+    CHECK(!d.hasTerrain);
+    CHECK_EQ(d.chunksFilled, uint32_t(0));
+}
+
+TEST(AdtCountsTheChunksItFilled)
+{
+    // The baker requires all 256; a real 3.3.5a ADT has them. The parser only counts,
+    // because it is also handed the deliberately minimal ADTs above.
+    float mcvt[145];
+    FillRamp(mcvt, 0.f);
+
+    Blob adt;
+    PutChunk(adt, "MCNK", MakeMcnk(1, 2, 0.f, 0, 0, mcvt));
+    PutChunk(adt, "MCNK", MakeMcnk(3, 4, 0.f, 0, 0, mcvt));
+
     AdtData d;
     REQUIRE(ParseAdt(adt.b, d));
-    CHECK(!d.hasTerrain);
+    CHECK(d.hasTerrain);
+    CHECK_EQ(d.chunksFilled, uint32_t(2));
+
+    // A chunk header shorter than the 128 bytes the fields reach into is not read at
+    // all: the last chunk in a buffer is the one that would walk off the end.
+    Blob stunted;
+    Blob tiny;
+    tiny.Pad(64);
+    PutChunk(stunted, "MCNK", tiny);
+
+    AdtData s;
+    REQUIRE(ParseAdt(stunted.b, s));
+    CHECK_EQ(s.chunksFilled, uint32_t(0));
 }
 
 TEST(WdtGridAndGlobalWmo)

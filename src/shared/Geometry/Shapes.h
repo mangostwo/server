@@ -48,12 +48,23 @@ namespace Geometry
             hi.y = std::max(hi.y, p.y);
             hi.z = std::max(hi.z, p.z);
         }
+        // An empty box is lo = +max, hi = -max. Expanding by one would poison this
+        // accumulator into a full-span range -- lo = -max and hi = +max, whose extent
+        // overflows to infinity -- and the SAH cost of every split then compares equal.
+        // The BVH still builds, still loads, and stops separating anything.
         void expand(const Aabb& b)
         {
+            if (!b.valid())
+            {
+                return;
+            }
             expand(b.lo);
             expand(b.hi);
         }
-        bool valid() const { return lo.x <= hi.x; }
+        // All three axes: an accumulator that has seen one point is valid on every axis,
+        // and one that has seen none is valid on none. Testing x alone calls a box whose
+        // y or z never got a value valid, and Surface() then reads garbage extents.
+        bool valid() const { return lo.x <= hi.x && lo.y <= hi.y && lo.z <= hi.z; }
 
         // Does the vertical line at (px,py) pass through this box's XY footprint?
         bool coversColumn(float px, float py) const
@@ -87,8 +98,32 @@ namespace Geometry
             float t0 = 0.f, t1 = tMax;
             for (int a = 0; a < 3; ++a)
             {
-                const float oa = (&o.x)[a], id = (&invDir.x)[a];
-                const float loa = (&lo.x)[a] - kSlabEps, hia = (&hi.x)[a] + kSlabEps;
+                const float oa = o[a], id = invDir[a];
+                const float loa = lo[a] - kSlabEps, hia = hi[a] + kSlabEps;
+
+                // A non-finite reciprocal makes every comparison below unreliable, and
+                // the failure is one-sided: std::max(t0, NaN) returns t0 and
+                // std::min(t1, NaN) returns t1, so the axis is silently DROPPED and the
+                // box is accepted. An infinite reciprocal (a zero direction component)
+                // still rejects correctly through the infinities, except when the origin
+                // sits exactly on a slab face and the product becomes 0 * inf; a NaN
+                // reciprocal -- what a direction of zero length normalises to, and what
+                // 1/NaN gives -- drops the axis for EVERY origin, so a degenerate ray
+                // matches every node it is offered.
+                //
+                // On such an axis the ray neither enters nor leaves the slab, so the only
+                // question left is whether it started inside one. Measured against the
+                // PADDED bounds, so this stays exactly as permissive as the slab test
+                // above and never tightens it below rayTri's tolerance.
+                if (!std::isfinite(id))
+                {
+                    if (oa < loa || oa > hia)
+                    {
+                        return false;
+                    }
+                    continue;
+                }
+
                 float ta = (loa - oa) * id, tb = (hia - oa) * id;
                 if (ta > tb)
                 {
