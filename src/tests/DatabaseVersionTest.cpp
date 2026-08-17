@@ -38,7 +38,7 @@ TEST(CoreDatabaseVersion_requires_dormant_warden_schema)
         "Remove_Legacy_Warden");
 
     CHECK_STR(GitRevision::GetWorldDBVersion(), "22");
-    CHECK_STR(GitRevision::GetWorldDBStructure(), "7");
-    CHECK_STR(GitRevision::GetWorldDBContent(), "2");
+    CHECK_STR(GitRevision::GetWorldDBStructure(), "8");
+    CHECK_STR(GitRevision::GetWorldDBContent(), "1");
     CHECK_STR(GitRevision::GetWorldDBUpdateDescription(), "Warden_Checks");
 }
