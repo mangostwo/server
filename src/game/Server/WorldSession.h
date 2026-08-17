@@ -58,7 +58,6 @@ class Item;
 class Object;
 class Player;
 class Unit;
-class Warden;
 class WorldPacket;
 class SessionMailbox;
 namespace proto
@@ -309,7 +308,7 @@ class WorldSession
          * @param locale Locale
          * @param sessionKey The account's session key. Passed in rather than read
          *             back out of the transport: the world already fetched it to
-         *             verify the login, and Warden needs it here.
+         *             verify the login, and redirect authentication needs it here.
          */
         WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
                      std::shared_ptr<SessionMailbox> mailbox,
@@ -406,9 +405,6 @@ class WorldSession
             _player = plr;
         }
         uint8 Expansion() const { return m_expansion; }
-
-        // Warden
-        void InitWarden(uint16 build, BigNumber* k, std::string const& os);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state)
@@ -1090,7 +1086,7 @@ class WorldSession
         std::shared_ptr<proto::IClientLink> m_link;
         std::shared_ptr<SessionMailbox> m_mailbox;
 
-        /// The account's session key, for Warden's HMAC. Owned here because it is
+        /// The account's session key, for redirect HMAC. Owned here because it is
         /// account data, not transport state.
         BigNumber m_sessionKey;
         std::string m_Address;
@@ -1099,8 +1095,6 @@ class WorldSession
         uint32 _accountId;
         uint8 m_expansion;
 
-        // Warden
-        Warden* _warden;                                    // Remains NULL if Warden system is not enabled by config
         uint16 _build;                                      // connected client build
 
         time_t _logoutTime;

@@ -88,7 +88,6 @@
 #include "ElunaConfig.h"
 #include "ElunaLoader.h"
 #endif /* ENABLE_ELUNA */
-#include "WardenCheckMgr.h"
 #include <iostream>
 #include <sstream>
 
