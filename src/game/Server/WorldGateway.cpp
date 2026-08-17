@@ -64,7 +64,6 @@ namespace
         uint8          expansion = 0;
         time_t         muteTime  = 0;
         LocaleConstant locale    = LOCALE_enUS;
-        std::string    os;
         BigNumber      sessionKey;
     };
 
@@ -129,8 +128,7 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
                              "`locked`, "      // 4
                              "`expansion`, "   // 5
                              "`mutetime`, "    // 6
-                             "`locale`, "      // 7
-                             "`os` "           // 8
+                             "`locale` "       // 7
                              "FROM `account` WHERE `username` = '%s'",
                              safeAccount.c_str());
 
@@ -167,8 +165,6 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     const uint8 rawLocale = fields[7].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
 
-    row->os = fields[8].GetString();
-
     delete queryResult;
 
     // ---- IP lock ---------------------------------------------------------
@@ -204,18 +200,6 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     if (allowed > SEC_PLAYER && row->security < allowed)
     {
         result.status = proto::AuthStatus::Unavailable;
-        return result;
-    }
-
-    // ---- Warden's client OS rule -----------------------------------------
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-
-    if (wardenActive && row->os != "Win" && row->os != "OSX")
-    {
-        sLog.outError("WorldGateway: client %s reported invalid OS '%s'",
-                      request.peerAddress.c_str(), row->os.c_str());
-        result.status = proto::AuthStatus::Reject;
         return result;
     }
 
@@ -263,13 +247,6 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         addonPacket.append(request.addonData.data(), request.addonData.size());
     }
     session->ReadAddonsInfo(addonPacket);
-
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-    if (wardenActive)
-    {
-        session->InitWarden(uint16(request.build), &row->sessionKey, row->os);
-    }
 
     if (link->IsClosed())
     {
