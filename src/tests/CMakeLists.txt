@@ -40,6 +40,7 @@ set(SRC_GRP_TESTS
     ByteBufferTest.cpp
     SessionMailboxTest.cpp
     SessionProtocolPolicyTest.cpp
+    DatabaseVersionTest.cpp
     DatabaseConcurrencyTest.cpp
     OpenSSLProviderTest.cpp
     ClientParserTest.cpp
