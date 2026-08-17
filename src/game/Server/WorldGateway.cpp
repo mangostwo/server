@@ -40,6 +40,7 @@
 #include "SessionMailbox.h"
 #include "World.h"
 #include "WorldSession.h"
+#include "WorldGatewayAuth.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -128,7 +129,8 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
                              "`locked`, "      // 4
                              "`expansion`, "   // 5
                              "`mutetime`, "    // 6
-                             "`locale` "       // 7
+                             "`locale`, "      // 7
+                             "`os` "           // 8
                              "FROM `account` WHERE `username` = '%s'",
                              safeAccount.c_str());
 
@@ -164,6 +166,7 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
 
     const uint8 rawLocale = fields[7].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
+    const std::string clientOS = fields[8].GetString();
 
     delete queryResult;
 
@@ -200,6 +203,15 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     if (allowed > SEC_PLAYER && row->security < allowed)
     {
         result.status = proto::AuthStatus::Unavailable;
+        return result;
+    }
+
+    // ---- Client platform -------------------------------------------------
+    if (!IsSupportedAccountClientOS(clientOS))
+    {
+        sLog.outError("WorldGateway: client %s reported invalid OS '%s'",
+                      request.peerAddress.c_str(), clientOS.c_str());
+        result.status = proto::AuthStatus::Reject;
         return result;
     }
 

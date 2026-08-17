@@ -40,6 +40,7 @@ set(SRC_GRP_TESTS
     ByteBufferTest.cpp
     SessionMailboxTest.cpp
     SessionProtocolPolicyTest.cpp
+    WorldGatewayAuthTest.cpp
     DatabaseVersionTest.cpp
     DatabaseConcurrencyTest.cpp
     OpenSSLProviderTest.cpp
@@ -59,6 +60,7 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Server/WorldGatewayAuth.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
