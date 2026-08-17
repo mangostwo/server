@@ -166,7 +166,7 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
 
     const uint8 rawLocale = fields[7].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
-    const std::string clientOS = fields[8].GetString();
+    const std::string clientOS = fields[8].GetCppString();
 
     delete queryResult;
 
