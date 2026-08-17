@@ -90,7 +90,7 @@ namespace proto
      *
      * The protocol layer never looks inside this; it only holds it across the
      * proof step and hands it back. That is what keeps the account row -- security
-     * level, expansion, mute time, locale, client OS -- from having to be fetched
+     * level, expansion, mute time, and locale -- from having to be fetched
      * twice, without any of those fields appearing in an interface that has no
      * business knowing they exist.
      *
@@ -144,8 +144,8 @@ namespace proto
             /**
              * @brief Resolve an account and decide whether it may log in at all.
              *
-             * This is where the account row, bans, IP lock, allowed build, security
-             * level and client OS are checked -- all of it world and database
+             * This is where the account row, bans, IP lock, allowed build, and
+             * security level are checked -- all of it world and database
              * business. Returning anything other than AuthStatus::Ok makes the
              * protocol layer send that code and drop the connection.
              *
