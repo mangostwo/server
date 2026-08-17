@@ -1008,9 +1008,6 @@ class WorldSession
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
 
-        // for Warden
-        uint16 GetClientBuild() const { return _build; }
-
         // Guild Bank
         void HandleGuildPermissions(WorldPacket& recv_data);
         void HandleGuildBankMoneyWithdrawn(WorldPacket& recv_data);
@@ -1094,8 +1091,6 @@ class WorldSession
         AccountTypes _security;
         uint32 _accountId;
         uint8 m_expansion;
-
-        uint16 _build;                                      // connected client build
 
         time_t _logoutTime;
         bool m_inQueue;                                     // session wait in auth.queue
