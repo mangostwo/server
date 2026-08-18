@@ -38,9 +38,9 @@ class SessionMailbox;
  * @brief The world's side of the protocol seam.
  *
  * Everything the old WorldSocket used to reach for -- the login database, ban and
- * IP-lock checks, the allowed client build, the security floor, Warden's client-OS
- * rule, the scripting hook, and the WorldSession object itself -- lives here, on
- * the far side of an interface the protocol library knows nothing about.
+ * IP-lock checks, the allowed client build, the security floor, the scripting hook,
+ * and the WorldSession object itself -- lives here, on the far side of an interface
+ * the protocol library knows nothing about.
  *
  * The protocol layer refers to a session only by an opaque SessionId. That
  * indirection is not ceremony: it means a connection can never be handed a

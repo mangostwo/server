@@ -207,7 +207,7 @@ namespace proto
         }
 
         // Policy and persistence: account row, bans, IP lock, allowed build,
-        // security level, client OS. None of it belongs on this side of the seam.
+        // security level. None of it belongs on this side of the seam.
         const AuthLookup lookup = m_gateway.LookupAccount(request);
 
         if (lookup.status != AuthStatus::Ok)

@@ -40,6 +40,7 @@
 #include "SessionMailbox.h"
 #include "World.h"
 #include "WorldSession.h"
+#include "WorldGatewayAuth.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -64,7 +65,6 @@ namespace
         uint8          expansion = 0;
         time_t         muteTime  = 0;
         LocaleConstant locale    = LOCALE_enUS;
-        std::string    os;
         BigNumber      sessionKey;
     };
 
@@ -166,8 +166,7 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
 
     const uint8 rawLocale = fields[7].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
-
-    row->os = fields[8].GetString();
+    const std::string clientOS = fields[8].GetCppString();
 
     delete queryResult;
 
@@ -207,14 +206,11 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
         return result;
     }
 
-    // ---- Warden's client OS rule -----------------------------------------
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-
-    if (wardenActive && row->os != "Win" && row->os != "OSX")
+    // ---- Client platform -------------------------------------------------
+    if (!IsSupportedAccountClientOS(clientOS))
     {
         sLog.outError("WorldGateway: client %s reported invalid OS '%s'",
-                      request.peerAddress.c_str(), row->os.c_str());
+                      request.peerAddress.c_str(), clientOS.c_str());
         result.status = proto::AuthStatus::Reject;
         return result;
     }
@@ -263,13 +259,6 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         addonPacket.append(request.addonData.data(), request.addonData.size());
     }
     session->ReadAddonsInfo(addonPacket);
-
-    const bool wardenActive = sWorld.getConfig(CONFIG_BOOL_WARDEN_WIN_ENABLED)
-                           || sWorld.getConfig(CONFIG_BOOL_WARDEN_OSX_ENABLED);
-    if (wardenActive)
-    {
-        session->InitWarden(uint16(request.build), &row->sessionKey, row->os);
-    }
 
     if (link->IsClosed())
     {
