@@ -161,29 +161,13 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
     if (!LoginDatabase.CommitTransactionChecked())
         return failed;
 
-    std::optional<WardenIncidentWindowState> const after = Load(
-        context.accountId, configuration.incidentWindowSeconds,
-        configuration.aggressiveThreshold);
-    std::unique_ptr<QueryResult> permanentBan(LoginDatabase.PQuery(
-        "SELECT EXISTS("
-        "SELECT 1 FROM `account_banned` "
-        "WHERE `id` = %u AND `active` = 1 "
-        "AND `bandate` = `unbandate` "
-        "AND `bannedby` = 'MaNGOS Warden'"
-        ") AS `permanent_ban_active`",
-        context.accountId));
-    if (!after || !permanentBan)
-    {
-        WardenIncidentWriteResult unknown;
-        unknown.status =
-            WardenIncidentWriteStatus::CommittedStateUnavailable;
-        return unknown;
-    }
-
+    // The world thread must not synchronously reload account history after
+    // the checked commit. Threshold escalation and any permanent ban were
+    // already applied atomically above; the gateway worker will load their
+    // authoritative state on the next admission.
     WardenIncidentWriteResult committed;
-    committed.status = WardenIncidentWriteStatus::Committed;
-    committed.recentCount = after->recentCount;
-    committed.permanentBanActive = permanentBan->Fetch()[0].GetBool();
+    committed.status =
+        WardenIncidentWriteStatus::CommittedStateUnavailable;
     return committed;
 }
 }

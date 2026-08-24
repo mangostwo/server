@@ -73,7 +73,7 @@ enum class WardenIncidentWriteStatus : uint8
     CommittedStateUnavailable
 };
 
-/** Result returned after the transaction and optional summary reload. */
+/** Result returned after the transaction without a world-thread reload. */
 struct WardenIncidentWriteResult
 {
     WardenIncidentWriteStatus status = WardenIncidentWriteStatus::Failed;

@@ -222,6 +222,17 @@ if(WORLD_CPP MATCHES "WardenIncidentStore::Instance\\(\\)\\.Load\\(" OR
         "World update files may not query Warden incident history")
 endif()
 
+read_code("src/game/Server/WardenIncidentStore.cpp" INCIDENT_STORE_CODE)
+slice_between("${INCIDENT_STORE_CODE}"
+    "WardenIncidentWriteResult WardenIncidentStore::Record("
+    "}\n}" INCIDENT_RECORD_CODE)
+if(INCIDENT_RECORD_CODE MATCHES
+        "(^|[^A-Za-z0-9_])Load[ \\t\\r\\n]*\\(" OR
+    INCIDENT_RECORD_CODE MATCHES "\\.PQuery[ \\t\\r\\n]*\\(")
+    message(FATAL_ERROR
+        "Warden incident commit may not synchronously reload history on the world thread")
+endif()
+
 file(GLOB PURE_WARDEN_SOURCES
     "${SOURCE_ROOT}/src/game/Warden/*.h"
     "${SOURCE_ROOT}/src/game/Warden/*.cpp")
