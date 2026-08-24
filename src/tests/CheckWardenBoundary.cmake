@@ -472,6 +472,12 @@ require_count("${DESTRUCTOR_CODE}"
 slice_between("${SESSION_CODE}"
     "void WorldSession::HandleWardenLifecycle("
     "void WorldSession::HandleWardenEvidenceBatch(" LIFECYCLE_CODE)
+require_ordered("${LIFECYCLE_CODE}" "closed-link send failure disposition"
+    "event.failure == warden::WardenFailure::SendFailure"
+    "!m_link || m_link->IsClosed()"
+    "RequestWardenDisengagement()"
+    "return"
+    "PersistWardenOperationalAudit(event.failure)")
 require_ordered("${LIFECYCLE_CODE}" "operational failure disposition"
     "PersistWardenOperationalAudit(event.failure)"
     "DrainWardenPendingConfirmations()"

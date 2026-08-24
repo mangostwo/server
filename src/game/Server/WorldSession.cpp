@@ -461,6 +461,16 @@ void WorldSession::HandleWardenLifecycle(
     if (event.state != warden::WardenState::Failed)
         return;
 
+    // The session send adapter reports failure only when the client link has
+    // closed. A disconnect racing the final send is transport teardown, not a
+    // Warden protocol incident, so do not create an operational audit row.
+    if (event.failure == warden::WardenFailure::SendFailure &&
+        (!m_link || m_link->IsClosed()))
+    {
+        RequestWardenDisengagement();
+        return;
+    }
+
     sLog.outError("Warden protocol failed for account %u (build %u): %s.",
         GetAccountId(), m_wardenBuild, warden::ToString(event.failure));
     PersistWardenOperationalAudit(event.failure);
