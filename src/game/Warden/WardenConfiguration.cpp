@@ -120,6 +120,14 @@ bool IsWardenAdmissionAggressive(WardenAdmissionHistory const& history,
         history.aggressiveUntilServer > nowServer;
 }
 
+bool ShouldUseAggressiveWardenAdmission(
+    WardenAdmissionHistory const& history,
+    WardenConfiguration const& configuration, uint64 nowServer)
+{
+    return configuration.enforcementMode != WardenEnforcementMode::Observe &&
+        IsWardenAdmissionAggressive(history, configuration, nowServer);
+}
+
 bool HasWardenConfigurationCorrection(
     WardenConfigurationCorrection corrections,
     WardenConfigurationCorrection correction)

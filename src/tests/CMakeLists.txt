@@ -65,6 +65,7 @@ set(SRC_GRP_TESTS
     WardenEnforcementPolicyTest.cpp
     WardenAuditStoreTest.cpp
     WardenIncidentStoreTest.cpp
+    WardenAdmissionTest.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleCatalog.cpp
@@ -227,3 +228,8 @@ add_test(NAME spatial_boundary
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckSpatialBoundary.cmake)
+
+add_test(NAME warden_boundary
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckWardenBoundary.cmake)

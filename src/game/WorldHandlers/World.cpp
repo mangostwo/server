@@ -315,6 +315,8 @@ World::AddSession_(WorldSession* s)
 
     s->SendTutorialsData();
 
+    s->OnAuthenticatedAdmission();
+
     UpdateMaxSessionCounters();
 
     // Updates the population

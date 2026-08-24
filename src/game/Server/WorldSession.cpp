@@ -69,6 +69,10 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "SessionMailbox.h"
+#include "GameTime.h"
+#include "WardenManager.h"
+#include "WardenProtocol.h"
+#include "WardenServer.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "Group.h"
@@ -113,6 +117,24 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
 
     // in Map::Update() we do not process packets where player is not in world!
     return plr->IsInWorld();
+}
+
+namespace
+{
+std::string SafeWardenLogToken(std::string const& value)
+{
+    if (value.empty())
+        return "<unavailable>";
+    for (unsigned char byte : value)
+    {
+        bool const alphaNumeric = (byte >= '0' && byte <= '9') ||
+            (byte >= 'A' && byte <= 'Z') ||
+            (byte >= 'a' && byte <= 'z');
+        if (!alphaNumeric)
+            return "<invalid>";
+    }
+    return value;
+}
 }
 
 
@@ -162,9 +184,25 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
                            std::shared_ptr<SessionMailbox> mailbox,
                            AccountTypes sec, uint8 expansion, time_t mute_time,
-                           LocaleConstant locale, const BigNumber& sessionKey) :
+                           LocaleConstant locale, const BigNumber& sessionKey)
+    : WorldSession(id, std::move(link), std::move(mailbox), sec, expansion,
+          mute_time, locale, sessionKey, warden::AdmissionData(),
+          warden::WardenAdmissionHistory())
+{
+}
+
+WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           std::shared_ptr<SessionMailbox> mailbox,
+                           AccountTypes sec, uint8 expansion, time_t mute_time,
+                           LocaleConstant locale, const BigNumber& sessionKey,
+                           warden::AdmissionData&& admission,
+                           warden::WardenAdmissionHistory admissionHistory) :
     m_muteTime(mute_time), _player(nullptr), m_link(std::move(link)),
     m_mailbox(mailbox ? std::move(mailbox) : std::make_shared<SessionMailbox>()),
+    m_pendingWardenAdmission(admission.available
+        ? std::make_unique<warden::AdmissionData>(std::move(admission))
+        : nullptr),
+    m_wardenAdmissionHistory(admissionHistory),
     m_sessionKey(sessionKey),
     _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
@@ -180,6 +218,12 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
+    m_warden.reset();
+    if (m_pendingWardenAdmission)
+    {
+        m_pendingWardenAdmission->Clear();
+        m_pendingWardenAdmission.reset();
+    }
     m_mailbox->Close();
 
     ///- unload player if not unloaded
@@ -197,6 +241,105 @@ WorldSession::~WorldSession()
         m_link.reset();
     }
 
+}
+
+void WorldSession::OnAuthenticatedAdmission()
+{
+    if (m_wardenAdmissionHandled)
+        return;
+    m_wardenAdmissionHandled = true;
+
+    // Queue residence is unbounded, so only this current coherent snapshot is
+    // authoritative for the admitted session.
+    std::shared_ptr<warden::WardenConfiguration const> const configuration =
+        warden::WardenManager::Instance().GetConfigurationSnapshot();
+    m_wardenConfiguration = configuration ? *configuration :
+        warden::WardenConfiguration();
+
+    if (!m_pendingWardenAdmission ||
+        !m_pendingWardenAdmission->available || !m_link || m_link->IsClosed())
+    {
+        if (m_pendingWardenAdmission)
+            m_pendingWardenAdmission->Clear();
+        m_pendingWardenAdmission.reset();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        return;
+    }
+
+    warden::AdmissionData admission(std::move(*m_pendingWardenAdmission));
+    m_pendingWardenAdmission.reset();
+    m_wardenBuild = admission.build;
+    m_clientPlatform = std::move(admission.platform);
+    m_clientLocale = std::move(admission.clientLocale);
+
+    std::string const logPlatform = SafeWardenLogToken(m_clientPlatform);
+    std::string const logLocale = SafeWardenLogToken(m_clientLocale);
+    bool const exactProfile = warden::IsWardenEnforcementProfile(
+        m_wardenBuild, m_clientPlatform, m_clientLocale);
+    warden::WardenProfileDisposition const disposition =
+        warden::ClassifyWardenProfile(m_wardenConfiguration.enforcementMode,
+            m_wardenConfiguration.requireExactProfile, exactProfile);
+
+    if (disposition == warden::WardenProfileDisposition::Reject)
+    {
+        sLog.outError("Warden rejected an unprofiled client for account %u "
+            "(build %u; platform %s; locale %s): strict exact-profile "
+            "admission is enabled.", GetAccountId(), m_wardenBuild,
+            logPlatform.c_str(), logLocale.c_str());
+        admission.Clear();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        KickPlayer();
+        return;
+    }
+
+    if (!exactProfile)
+    {
+        sLog.outString("Warden profile unavailable for account %u (build %u; "
+            "platform %s; locale %s); admitting without Warden.",
+            GetAccountId(), m_wardenBuild, logPlatform.c_str(),
+            logLocale.c_str());
+        admission.Clear();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        return;
+    }
+
+    warden::WardenCreationOptions options;
+    options.configuration = m_wardenConfiguration;
+    options.initialAggressive = warden::ShouldUseAggressiveWardenAdmission(
+        m_wardenAdmissionHistory, m_wardenConfiguration,
+        static_cast<uint64>(GameTime::GetGameTime()));
+    m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+
+    std::unique_ptr<warden::WardenServer> server =
+        warden::WardenManager::Instance().Create(m_wardenBuild,
+            m_clientPlatform, m_clientLocale, admission.sessionKey,
+            [this](warden::Bytes const& payload)
+            {
+                if (!m_link || m_link->IsClosed())
+                    return false;
+                WorldPacket packet(SMSG_WARDEN_DATA, payload.size());
+                if (!payload.empty())
+                    packet.append(payload.data(), payload.size());
+                SendPacket(&packet);
+                return m_link && !m_link->IsClosed();
+            }, options);
+    admission.Clear();
+
+    if (!server)
+    {
+        sLog.outError("Warden could not construct an exact-profile session for "
+            "account %u (build %u; platform %s; locale %s).",
+            GetAccountId(), m_wardenBuild, logPlatform.c_str(),
+            logLocale.c_str());
+        if (m_wardenConfiguration.enforcementMode !=
+            warden::WardenEnforcementMode::Observe)
+            KickPlayer();
+        return;
+    }
+
+    // Construction is inert; Task 11 starts bootstrap only after the existing
+    // character-enumeration response or its player-login safety net.
+    m_warden = std::move(server);
 }
 
 /**

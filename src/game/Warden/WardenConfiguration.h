@@ -77,6 +77,11 @@ struct WardenAdmissionHistory
 bool IsWardenAdmissionAggressive(WardenAdmissionHistory const& history,
     WardenConfiguration const& configuration, uint64 nowServer);
 
+/** Observe and missing/expired history always select normal admission cadence. */
+bool ShouldUseAggressiveWardenAdmission(
+    WardenAdmissionHistory const& history,
+    WardenConfiguration const& configuration, uint64 nowServer);
+
 /** Invalid groups are reported separately so the loader can explain repairs. */
 enum class WardenConfigurationCorrection : uint32
 {

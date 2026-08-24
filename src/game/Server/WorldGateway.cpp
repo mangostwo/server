@@ -27,6 +27,7 @@
 #include <utility>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include "Common/Locales.h"
 #include <algorithm>
 #include "Common/ServerDefines.h"
@@ -34,6 +35,7 @@
 
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
+#include "GameTime.h"
 #include "Log/Log.h"
 #include "OpcodeTable.h"
 #include "SharedDefines.h"
@@ -41,6 +43,8 @@
 #include "World.h"
 #include "WorldSession.h"
 #include "WorldGatewayAuth.h"
+#include "WardenIncidentStore.h"
+#include "WardenManager.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -66,6 +70,8 @@ namespace
         time_t         muteTime  = 0;
         LocaleConstant locale    = LOCALE_enUS;
         BigNumber      sessionKey;
+        std::string    platform;
+        std::string    clientLocale;
     };
 
     /**
@@ -130,7 +136,8 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
                              "`expansion`, "   // 5
                              "`mutetime`, "    // 6
                              "`locale`, "      // 7
-                             "`os` "           // 8
+                             "`os`, "          // 8
+                             "`client_locale` " // 9
                              "FROM `account` WHERE `username` = '%s'",
                              safeAccount.c_str());
 
@@ -144,29 +151,42 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
 
     std::shared_ptr<AccountRow> row = std::make_shared<AccountRow>();
 
-    row->id = fields[0].GetUInt32();
+    row->id = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Id)].GetUInt32();
 
     // Clamp rather than trust: a bad gmlevel in the database must not hand out
     // more authority than the server has levels for.
-    uint32 security = fields[1].GetUInt16();
+    uint32 security = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Security)].GetUInt16();
     if (security > SEC_ADMINISTRATOR)
     {
         security = SEC_ADMINISTRATOR;
     }
     row->security = AccountTypes(security);
 
-    row->sessionKey.SetHexStr(fields[2].GetString());
+    row->sessionKey.SetHexStr(fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::SessionKey)].GetString());
 
-    const std::string lastIp = fields[3].GetString();
-    const bool        locked = fields[4].GetUInt8() == 1;
+    const std::string lastIp = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::LastIp)].GetCppString();
+    const bool locked = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::Locked)].GetUInt8() == 1;
 
     row->expansion = uint8(std::min<uint32>(sWorld.getConfig(CONFIG_UINT32_EXPANSION),
-                                            fields[5].GetUInt8()));
-    row->muteTime  = time_t(fields[6].GetUInt64());
+        fields[WorldGatewayAccountFieldIndex(
+            WorldGatewayAccountField::Expansion)].GetUInt8()));
+    row->muteTime = time_t(fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::MuteTime)].GetUInt64());
 
-    const uint8 rawLocale = fields[7].GetUInt8();
+    const uint8 rawLocale = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::DbcLocale)].GetUInt8();
     row->locale = rawLocale >= MAX_LOCALE ? LOCALE_enUS : LocaleConstant(rawLocale);
-    const std::string clientOS = fields[8].GetCppString();
+    row->platform = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::ClientOS)].GetCppString();
+    std::string const rawClientLocale = fields[WorldGatewayAccountFieldIndex(
+        WorldGatewayAccountField::ClientLocale)].GetCppString();
+    if (char const* exactLocale = GetExactLocaleName(rawClientLocale))
+        row->clientLocale = exactLocale;
 
     delete queryResult;
 
@@ -207,10 +227,10 @@ proto::AuthLookup WorldGateway::LookupAccount(const proto::AuthRequest& request)
     }
 
     // ---- Client platform -------------------------------------------------
-    if (!IsSupportedAccountClientOS(clientOS))
+    if (!IsSupportedAccountClientOS(row->platform))
     {
         sLog.outError("WorldGateway: client %s reported invalid OS '%s'",
-                      request.peerAddress.c_str(), clientOS.c_str());
+                      request.peerAddress.c_str(), row->platform.c_str());
         result.status = proto::AuthStatus::Reject;
         return result;
     }
@@ -243,10 +263,49 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
 
     std::shared_ptr<SessionMailbox> mailbox =
         std::make_shared<SessionMailbox>();
+
+    // Load history only when the Attach-time mode needs it. This database work
+    // stays on the already registered gateway worker, never the world heartbeat.
+    warden::WardenAdmissionHistory admissionHistory;
+    std::shared_ptr<warden::WardenConfiguration const> attachConfiguration =
+        warden::WardenManager::Instance().GetConfigurationSnapshot();
+    if (attachConfiguration && attachConfiguration->enforcementMode !=
+        warden::WardenEnforcementMode::Observe)
+    {
+        std::optional<warden::WardenIncidentWindowState> const history =
+            warden::WardenIncidentStore::Instance().Load(row->id,
+                attachConfiguration->incidentWindowSeconds,
+                attachConfiguration->aggressiveThreshold);
+        if (history)
+        {
+            admissionHistory.recentIncidentCount = history->recentCount;
+            admissionHistory.aggressiveUntilServer =
+                warden::RebaseIncidentDeadline(history->aggressiveUntil,
+                    history->databaseNow,
+                    static_cast<uint64>(GameTime::GetGameTime()));
+            admissionHistory.incidentHistoryLoaded = true;
+        }
+        else
+        {
+            sLog.outError("Warden incident history could not be loaded for "
+                "account %u; admission will use normal cadence.", row->id);
+        }
+    }
+
+    warden::AdmissionData admission = BuildWardenAdmissionData(request.build,
+        row->platform, row->clientLocale, row->sessionKey);
+    if (!admission.available)
+    {
+        sLog.outError("Warden admission key extraction failed for account %u.",
+            row->id);
+        link->Close();
+        return proto::INVALID_SESSION_ID;
+    }
     std::unique_ptr<WorldSession> session =
         std::make_unique<WorldSession>(
             row->id, link, mailbox, row->security, row->expansion,
-            row->muteTime, row->locale, row->sessionKey);
+            row->muteTime, row->locale, row->sessionKey,
+            std::move(admission), admissionHistory);
 
     session->LoadGlobalAccountData();
     session->LoadTutorialsData();

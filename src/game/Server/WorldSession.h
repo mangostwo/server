@@ -45,6 +45,7 @@
 #include "Item.h"
 #include "LFGMgr.h"
 #include "SessionProtocolPolicy.h"
+#include "WardenConfiguration.h"
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -63,6 +64,11 @@ class SessionMailbox;
 namespace proto
 {
     class IClientLink;
+}
+namespace warden
+{
+    struct AdmissionData;
+    class WardenServer;
 }
 class QueryResult;
 class LoginQueryHolder;
@@ -314,6 +320,12 @@ class WorldSession
                      std::shared_ptr<SessionMailbox> mailbox,
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKey);
+        WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     std::shared_ptr<SessionMailbox> mailbox,
+                     AccountTypes sec, uint8 expansion, time_t mute_time,
+                     LocaleConstant locale, const BigNumber& sessionKey,
+                     warden::AdmissionData&& admission,
+                     warden::WardenAdmissionHistory admissionHistory);
 
         /**
          * @brief Destructor
@@ -375,6 +387,8 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseShift);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
+        /** Applies the current policy after either native auth send sequence. */
+        void OnAuthenticatedAdmission();
         void SendPlayerNotFoundFailureResponse();
         void SendGmResurrectFailureResponse();
         void SendGmResurrectSuccessResponse();
@@ -1082,6 +1096,15 @@ class WorldSession
         /// call on it is safe after teardown, so callers need only null-check.
         std::shared_ptr<proto::IClientLink> m_link;
         std::shared_ptr<SessionMailbox> m_mailbox;
+
+        std::unique_ptr<warden::AdmissionData> m_pendingWardenAdmission;
+        warden::WardenAdmissionHistory m_wardenAdmissionHistory;
+        std::unique_ptr<warden::WardenServer> m_warden;
+        warden::WardenConfiguration m_wardenConfiguration;
+        uint32 m_wardenBuild = 0;
+        std::string m_clientPlatform;
+        std::string m_clientLocale;
+        bool m_wardenAdmissionHandled = false;
 
         /// The account's session key, for redirect HMAC. Owned here because it is
         /// account data, not transport state.
