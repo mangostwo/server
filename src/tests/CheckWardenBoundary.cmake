@@ -551,6 +551,18 @@ require_count("${UPDATE_WARDEN_CODE}"
 
 read_code("src/game/Warden/WardenServer.cpp" WARDEN_SERVER_CODE)
 read_code("src/game/Warden/WardenServer.h" WARDEN_SERVER_HEADER_CODE)
+slice_between("${WARDEN_SERVER_CODE}"
+    "void WardenServer::HandleCheckResult("
+    "if (m_evidenceObserver)" HANDLE_CHECK_RESULT_CODE)
+string(FIND "${HANDLE_CHECK_RESULT_CODE}" "batch.evidence.push_back(evidence)"
+    LAST_EVIDENCE_AT REVERSE)
+string(FIND "${HANDLE_CHECK_RESULT_CODE}" "m_crypto = std::move(crypto)"
+    CRYPTO_COMMIT_AT)
+if(LAST_EVIDENCE_AT EQUAL -1 OR CRYPTO_COMMIT_AT EQUAL -1 OR
+    CRYPTO_COMMIT_AT LESS LAST_EVIDENCE_AT)
+    message(FATAL_ERROR
+        "Warden receive crypto may commit only after evidence classification succeeds")
+endif()
 if(WARDEN_SERVER_CODE MATCHES "m_transitionedSinceUpdate" OR
     WARDEN_SERVER_HEADER_CODE MATCHES "m_transitionedSinceUpdate")
     message(FATAL_ERROR

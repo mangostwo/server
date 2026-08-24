@@ -484,10 +484,6 @@ void WardenServer::HandleCheckResult(Bytes& plain,
             return;
         }
 
-        // Structural decoding succeeded. Commit the receive stream before
-        // classifying its private result values into secret-free evidence.
-        m_crypto = std::move(crypto);
-
         batch.evidence.reserve(result.checks.size());
         for (size_t index = 0; index < result.checks.size(); ++index)
         {
@@ -590,6 +586,10 @@ void WardenServer::HandleCheckResult(Bytes& plain,
         }
     }
 
+    // Commit the receive stream only after every private result has been
+    // classified successfully. Any failing branch above leaves both protocol
+    // state and observer-visible evidence uncommitted.
+    m_crypto = std::move(crypto);
     m_pendingPlan.reset();
     m_state = WardenState::ModuleReady;
     m_remainingMs = 0;
