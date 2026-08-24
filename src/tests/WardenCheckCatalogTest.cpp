@@ -22,11 +22,14 @@
 
 #include "TestHarness.h"
 
+#include "WardenCheckCatalogLoader.h"
 #include "WardenCheckCatalog.h"
 #include "WardenCheckFixtures.h"
 
 #include <algorithm>
 #include <array>
+#include <limits>
+#include <memory>
 #include <string>
 #include <variant>
 #include <vector>
@@ -70,6 +73,32 @@ std::vector<warden::WardenCheckRowInput> FirstProfileRows()
         warden::test::InitialWardenRows();
     rows.resize(4);
     return rows;
+}
+
+warden::WardenCheckCatalogLoadFailure StageSnapshot(
+    warden::WardenCheckCatalogLoadTransaction& transaction,
+    std::vector<warden::WardenCheckRowInput> const& rows,
+    uint64 sourceCount, warden::WardenCheckDiagnostic& diagnostic)
+{
+    warden::WardenCheckCatalogLoadFailure failure =
+        transaction.Begin(sourceCount);
+    if (failure != warden::WardenCheckCatalogLoadFailure::None)
+        return failure;
+    for (warden::WardenCheckRowInput const& row : rows)
+    {
+        failure = transaction.ObserveSourceCount(sourceCount);
+        if (failure != warden::WardenCheckCatalogLoadFailure::None)
+            return failure;
+        failure = transaction.Add(row, diagnostic);
+        if (failure != warden::WardenCheckCatalogLoadFailure::None)
+            return failure;
+    }
+    return warden::WardenCheckCatalogLoadFailure::None;
+}
+
+warden::WardenCatalogPreflight AcceptPreflight()
+{
+    return [](warden::WardenCheckProfile const&) { return true; };
 }
 }
 
@@ -627,6 +656,173 @@ TEST(WardenCheckCatalog_enforces_complete_profiles_and_atomic_build)
         warden::CheckCatalogValidation::DuplicateId);
     CHECK_EQ(unchanged.TotalRows(), uint32(28));
     CHECK(unchanged.Find(12340, "Win", "ruRU") != nullptr);
+}
+
+TEST(WardenCheckCatalogLoader_rejects_invalid_snapshot_counts_before_rows)
+{
+    warden::WardenCheckCatalogLoadTransaction transaction;
+    CHECK(transaction.Begin(0) ==
+        warden::WardenCheckCatalogLoadFailure::EmptyCatalogue);
+
+    warden::WardenCheckCatalogLoadTransaction overflow;
+    CHECK(overflow.Begin(uint64(std::numeric_limits<uint32>::max()) + 1) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountOverflow);
+
+    std::vector<warden::WardenCheckRowInput> const rows =
+        warden::test::InitialWardenRows();
+    warden::WardenCheckDiagnostic diagnostic;
+    warden::WardenCheckCatalogLoadTransaction unobserved;
+    REQUIRE(unobserved.Begin(1) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(unobserved.Add(rows[0], diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::CatalogueQueryFailed);
+
+    warden::WardenCheckCatalogLoadTransaction inconsistent;
+    REQUIRE(inconsistent.Begin(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    REQUIRE(inconsistent.ObserveSourceCount(rows.size()) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    REQUIRE(inconsistent.Add(rows[0], diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(inconsistent.ObserveSourceCount(rows.size() - 1) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountInconsistent);
+}
+
+TEST(WardenCheckCatalogLoader_rejects_consumed_row_count_mismatch)
+{
+    std::vector<warden::WardenCheckRowInput> const rows =
+        warden::test::InitialWardenRows();
+    warden::WardenCheckDiagnostic diagnostic;
+    warden::WardenCheckCatalogLoadTransaction transaction;
+    REQUIRE(StageSnapshot(transaction, rows, rows.size() + 1, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+
+    uint32 publicationCalls = 0;
+    warden::WardenCatalogPublisher publisher =
+        [&publicationCalls](
+            std::shared_ptr<warden::WardenCheckCatalog const> const&)
+        {
+            ++publicationCalls;
+            return true;
+        };
+    CHECK(transaction.Finish(warden::WardenModuleCatalog{},
+        AcceptPreflight(), publisher, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::SourceCountMismatch);
+    CHECK_EQ(publicationCalls, uint32(0));
+}
+
+TEST(WardenCheckCatalogLoader_requires_bidirectional_exact_profile_coverage)
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::InitialWardenRows();
+    rows.resize(rows.size() - 4);
+    warden::WardenCheckDiagnostic diagnostic;
+    warden::WardenCheckCatalogLoadTransaction missingProfile;
+    REQUIRE(StageSnapshot(missingProfile, rows, rows.size(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    uint32 publicationCalls = 0;
+    warden::WardenCatalogPublisher publisher =
+        [&publicationCalls](
+            std::shared_ptr<warden::WardenCheckCatalog const> const&)
+        {
+            ++publicationCalls;
+            return true;
+        };
+    CHECK(missingProfile.Finish(warden::WardenModuleCatalog{},
+        AcceptPreflight(), publisher, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::ModuleWithoutProfile);
+    CHECK_EQ(publicationCalls, uint32(0));
+
+    rows = warden::test::InitialWardenRows();
+    std::vector<warden::WardenCheckRowInput> extra = FirstProfileRows();
+    for (warden::WardenCheckRowInput& row : extra)
+        row.localeHex = "69744954";
+    rows.insert(rows.end(), extra.begin(), extra.end());
+    warden::WardenCheckCatalogLoadTransaction unexpectedProfile;
+    REQUIRE(StageSnapshot(unexpectedProfile, rows, rows.size(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    CHECK(unexpectedProfile.Finish(warden::WardenModuleCatalog{},
+        AcceptPreflight(), publisher, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::ProfileWithoutModule);
+    CHECK_EQ(publicationCalls, uint32(0));
+}
+
+TEST(WardenCheckCatalogLoader_validates_disabled_rows_before_publication)
+{
+    std::vector<warden::WardenCheckRowInput> rows =
+        warden::test::InitialWardenRows();
+    warden::WardenCheckRowInput unsupported = rows[3];
+    unsupported.checkId = 9000;
+    unsupported.sortOrder = 41;
+    unsupported.type = 0x71;
+    unsupported.enabled = 0;
+    rows.push_back(unsupported);
+
+    warden::WardenCheckDiagnostic diagnostic;
+    warden::WardenCheckCatalogLoadTransaction transaction;
+    CHECK(StageSnapshot(transaction, rows, rows.size(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::InvalidRow);
+    CHECK(diagnostic.validation ==
+        warden::CheckCatalogValidation::InvalidType);
+    uint32 publicationCalls = 0;
+    warden::WardenCatalogPublisher publisher =
+        [&publicationCalls](
+            std::shared_ptr<warden::WardenCheckCatalog const> const&)
+        {
+            ++publicationCalls;
+            return true;
+        };
+    CHECK(transaction.Finish(warden::WardenModuleCatalog{},
+        AcceptPreflight(), publisher, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::InvalidRow);
+    CHECK_EQ(publicationCalls, uint32(0));
+}
+
+TEST(WardenCheckCatalogLoader_publishes_only_after_complete_preflight)
+{
+    std::vector<warden::WardenCheckRowInput> const rows =
+        warden::test::InitialWardenRows();
+    warden::WardenCheckDiagnostic diagnostic;
+    warden::WardenCheckCatalogLoadTransaction rejected;
+    REQUIRE(StageSnapshot(rejected, rows, rows.size(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    uint32 publicationCalls = 0;
+    warden::WardenCatalogPublisher publisher =
+        [&publicationCalls](
+            std::shared_ptr<warden::WardenCheckCatalog const> const&)
+        {
+            ++publicationCalls;
+            return true;
+        };
+    CHECK(rejected.Finish(warden::WardenModuleCatalog{},
+        [](warden::WardenCheckProfile const&) { return false; }, publisher,
+        diagnostic) == warden::WardenCheckCatalogLoadFailure::InvalidPlan);
+    CHECK_EQ(publicationCalls, uint32(0));
+
+    warden::WardenCheckCatalogLoadTransaction accepted;
+    REQUIRE(StageSnapshot(accepted, rows, rows.size(), diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    uint32 preflightCalls = 0;
+    warden::WardenCatalogPreflight preflight =
+        [&preflightCalls](warden::WardenCheckProfile const&)
+        {
+            ++preflightCalls;
+            return true;
+        };
+    warden::WardenCatalogPublisher verifyingPublisher =
+        [&publicationCalls](
+            std::shared_ptr<warden::WardenCheckCatalog const> const& snapshot)
+        {
+            ++publicationCalls;
+            CHECK_EQ(snapshot->TotalRows(), uint32(28));
+            CHECK_EQ(snapshot->Profiles().size(), size_t(7));
+            return true;
+        };
+    CHECK(accepted.Finish(warden::WardenModuleCatalog{}, preflight,
+        verifyingPublisher, diagnostic) ==
+        warden::WardenCheckCatalogLoadFailure::None);
+    CHECK_EQ(preflightCalls, uint32(7));
+    CHECK_EQ(publicationCalls, uint32(1));
 }
 
 TEST(WardenCheckCatalog_exposes_stable_validation_names)

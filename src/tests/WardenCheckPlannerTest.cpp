@@ -25,6 +25,7 @@
 #include "WardenCheckFixtures.h"
 #include "WardenCheckPlanner.h"
 #include "WardenEvidence.h"
+#include "WardenPacketCodec.h"
 
 #include <algorithm>
 #include <deque>
@@ -380,4 +381,48 @@ TEST(WardenCheckPlanner_preflight_is_linear_and_uses_exact_purposes)
     large.totalRows = static_cast<uint32>(large.checks.size());
     plans = warden::BuildWardenPreflightPlans(large);
     CHECK_EQ(plans.size(), size_t(1001));
+}
+
+TEST(WardenCheckPlanner_preflight_accepts_exact_profiles_and_rejects_overflow)
+{
+    warden::WardenCheckCatalog const catalog =
+        warden::test::BuildInitialWardenCatalog();
+    for (warden::WardenCheckProfile const& profile : catalog.Profiles())
+    {
+        std::vector<warden::CheckPlan> const plans =
+            warden::BuildWardenPreflightPlans(profile);
+        REQUIRE(!plans.empty());
+        for (warden::CheckPlan const& plan : plans)
+        {
+            warden::WardenCheckPlanBudget budget;
+            CHECK(warden::InspectCheckPlan(plan, budget) ==
+                warden::CheckPlanValidation::Valid);
+        }
+    }
+
+    warden::WardenCheckProfile oversized;
+    oversized.key = {12340, "Win", "enUS"};
+    warden::WardenCheckProfile const* exact =
+        catalog.Find(12340, "Win", "enUS");
+    REQUIRE(exact != nullptr);
+    oversized.checks.push_back(exact->checks[0]);
+    warden::WardenCheckDefinition definition = exact->checks[3];
+    warden::MemCheckProfile mem =
+        std::get<warden::MemCheckProfile>(definition.payload);
+    mem.expectedBytes.assign(255, 0x90);
+    for (uint32 index = 0; index < 41; ++index)
+    {
+        definition.sortOrder = static_cast<uint16>(20 + index);
+        mem.checkId = 200000 + index;
+        mem.addressOrRva = 0x01000000 + index * 0x100;
+        definition.payload = mem;
+        oversized.checks.push_back(definition);
+    }
+    oversized.totalRows = static_cast<uint32>(oversized.checks.size());
+    std::vector<warden::CheckPlan> const plans =
+        warden::BuildWardenPreflightPlans(oversized);
+    REQUIRE(!plans.empty());
+    warden::WardenCheckPlanBudget budget;
+    CHECK(warden::InspectCheckPlan(plans.front(), budget) ==
+        warden::CheckPlanValidation::TransportResultBodyTooLarge);
 }
