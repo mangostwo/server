@@ -233,6 +233,13 @@ if(INCIDENT_RECORD_CODE MATCHES
         "Warden incident commit may not synchronously reload history on the world thread")
 endif()
 
+read_code("src/game/Warden/WardenManager.cpp" WARDEN_MANAGER_CODE)
+require_ordered("${WARDEN_MANAGER_CODE}" "Warden crypto initialization guard"
+    "WardenCryptoContext crypto"
+    "if (!crypto.Initialize(sessionKey))"
+    "return nullptr"
+    "WardenCheckProfile const* selected")
+
 file(GLOB PURE_WARDEN_SOURCES
     "${SOURCE_ROOT}/src/game/Warden/*.h"
     "${SOURCE_ROOT}/src/game/Warden/*.cpp")

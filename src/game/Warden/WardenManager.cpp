@@ -112,7 +112,8 @@ std::unique_ptr<WardenServer> WardenManager::Create(uint32 build,
     // Initialization derives private stream state; WardenServer does not retain
     // the authenticated raw-40 key and Create emits no packet.
     WardenCryptoContext crypto;
-    crypto.Initialize(sessionKey);
+    if (!crypto.Initialize(sessionKey))
+        return nullptr;
 
     WardenCheckProfile const* selected =
         FindCheckProfile(build, platform, locale);
