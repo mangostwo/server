@@ -149,7 +149,12 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
             "'Repeated confirmed Warden violations',1 "
             "FROM `warden_incident` "
             "WHERE `incident_id` = LAST_INSERT_ID() "
-            "AND `ban_triggered` = 1");
+            "AND `ban_triggered` = 1 "
+            "ON DUPLICATE KEY UPDATE "
+            "`unbandate` = VALUES(`unbandate`),"
+            "`bannedby` = VALUES(`bannedby`),"
+            "`banreason` = VALUES(`banreason`),"
+            "`active` = VALUES(`active`)");
     }
 
     if (!queued)

@@ -232,6 +232,11 @@ if(INCIDENT_RECORD_CODE MATCHES
     message(FATAL_ERROR
         "Warden incident commit may not synchronously reload history on the world thread")
 endif()
+require_ordered("${INCIDENT_RECORD_CODE}" "same-second Warden ban promotion"
+    "INSERT INTO `account_banned`"
+    "ON DUPLICATE KEY UPDATE"
+    "`unbandate` = VALUES(`unbandate`)"
+    "`active` = VALUES(`active`)")
 
 read_code("src/game/Warden/WardenManager.cpp" WARDEN_MANAGER_CODE)
 require_ordered("${WARDEN_MANAGER_CODE}" "Warden crypto initialization guard"
