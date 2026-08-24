@@ -848,9 +848,50 @@ void WorldSession::PersistWardenIncidentAndKick(
     context.checkType = decision.checkType;
     context.evidenceClass = decision.evidenceClass;
     context.outcome = *outcome;
+
+    uint32 const incidentAccountId = GetAccountId();
+    uint32 const incidentCheckId = decision.checkId;
+    warden::WardenCheckType const incidentCheckType = decision.checkType;
+    uint32 const aggressiveThreshold =
+        m_wardenConfiguration.aggressiveThreshold;
+    warden::WardenIncidentSummaryObserver const summaryObserver =
+        [incidentAccountId, incidentCheckId, incidentCheckType,
+            aggressiveThreshold](
+                warden::WardenIncidentWriteResult const& summary)
+        {
+            warden::WardenIncidentApplication const application =
+                warden::ClassifyIncidentWriteResult(summary);
+            if (!application.summaryKnown)
+            {
+                sLog.outError("Warden incident summary unavailable for "
+                    "account %u (check %u; type %s); warden_incident and "
+                    "account_banned remain authoritative.",
+                    incidentAccountId, incidentCheckId,
+                    warden::ToString(incidentCheckType));
+                return;
+            }
+
+            sLog.outError("Warden incident summary for account %u (check %u; "
+                "type %s; recent count %u).", incidentAccountId,
+                incidentCheckId, warden::ToString(incidentCheckType),
+                application.recentCount);
+            if (application.recentCount == aggressiveThreshold)
+            {
+                sLog.outError("Warden confirmed incidents reached %u for "
+                    "account %u; aggressive interrogation will be enabled "
+                    "on reconnect.", aggressiveThreshold,
+                    incidentAccountId);
+            }
+            if (application.permanentBanActive)
+            {
+                sLog.outError("Warden permanent account ban is active for "
+                    "account %u after %u committed incidents.",
+                    incidentAccountId, application.recentCount);
+            }
+        };
     warden::WardenIncidentWriteResult const writeResult =
         warden::WardenIncidentStore::Instance().Record(context,
-            m_wardenConfiguration);
+            m_wardenConfiguration, summaryObserver);
     warden::WardenIncidentApplication const application =
         warden::ClassifyIncidentWriteResult(writeResult);
 
@@ -861,33 +902,13 @@ void WorldSession::PersistWardenIncidentAndKick(
             "kicking without a durable incident.", GetAccountId(),
             decision.checkId, warden::ToString(decision.checkType));
     }
-    else if (!application.summaryKnown)
-    {
-        sLog.outError("Warden incident committed for account %u (check %u; "
-            "type %s); its authoritative summary is deferred to the next "
-            "admission. Kicking without inventing a count.", GetAccountId(),
-            decision.checkId,
-            warden::ToString(decision.checkType));
-    }
     else
     {
         sLog.outError("Warden confirmed an actionable mismatch for account "
-            "%u (check %u; type %s; recent count %u); kicking.",
+            "%u (check %u; type %s); incident committed and client will be "
+            "kicked. Realm incident and ban records are authoritative.",
             GetAccountId(), decision.checkId,
-            warden::ToString(decision.checkType), application.recentCount);
-        if (application.recentCount ==
-            m_wardenConfiguration.aggressiveThreshold)
-        {
-            sLog.outError("Warden confirmed incidents reached %u for account "
-                "%u; aggressive interrogation will be enabled on reconnect.",
-                m_wardenConfiguration.aggressiveThreshold, GetAccountId());
-        }
-        if (application.permanentBanActive)
-        {
-            sLog.outError("Warden permanent account ban is active for account "
-                "%u after %u committed incidents.", GetAccountId(),
-                application.recentCount);
-        }
+            warden::ToString(decision.checkType));
     }
 
     // Persistence is attempted first. A failed write still closes this client,

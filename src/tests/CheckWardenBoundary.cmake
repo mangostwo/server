@@ -42,13 +42,18 @@ endfunction()
 
 function(slice_between CODE START_TOKEN END_TOKEN OUTPUT)
     string(FIND "${CODE}" "${START_TOKEN}" START_AT)
-    string(FIND "${CODE}" "${END_TOKEN}" END_AT)
-    if(START_AT EQUAL -1 OR END_AT EQUAL -1 OR END_AT LESS_EQUAL START_AT)
+    if(START_AT EQUAL -1)
         message(FATAL_ERROR
             "Unable to isolate '${START_TOKEN}' before '${END_TOKEN}'")
     endif()
-    math(EXPR LENGTH "${END_AT} - ${START_AT}")
-    string(SUBSTRING "${CODE}" ${START_AT} ${LENGTH} SLICE)
+
+    string(SUBSTRING "${CODE}" ${START_AT} -1 FROM_START)
+    string(FIND "${FROM_START}" "${END_TOKEN}" END_AT)
+    if(END_AT EQUAL -1)
+        message(FATAL_ERROR
+            "Unable to isolate '${START_TOKEN}' before '${END_TOKEN}'")
+    endif()
+    string(SUBSTRING "${FROM_START}" 0 ${END_AT} SLICE)
     set(${OUTPUT} "${SLICE}" PARENT_SCOPE)
 endfunction()
 
@@ -237,6 +242,10 @@ require_ordered("${INCIDENT_RECORD_CODE}" "same-second Warden ban promotion"
     "ON DUPLICATE KEY UPDATE"
     "`unbandate` = VALUES(`unbandate`)"
     "`active` = VALUES(`active`)")
+require_ordered("${INCIDENT_RECORD_CODE}" "asynchronous incident summary"
+    "CommitTransactionChecked()"
+    "LoginDatabase.AsyncPQuery"
+    "WardenIncidentWriteStatus::CommittedStateUnavailable")
 
 read_code("src/game/Warden/WardenManager.cpp" WARDEN_MANAGER_CODE)
 require_ordered("${WARDEN_MANAGER_CODE}" "Warden crypto initialization guard"

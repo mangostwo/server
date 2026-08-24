@@ -73,13 +73,17 @@ enum class WardenIncidentWriteStatus : uint8
     CommittedStateUnavailable
 };
 
-/** Result returned after the transaction without a world-thread reload. */
+/** Result returned after the transaction or its asynchronous summary read. */
 struct WardenIncidentWriteResult
 {
     WardenIncidentWriteStatus status = WardenIncidentWriteStatus::Failed;
     uint32 recentCount = 0;
     bool permanentBanActive = false;
 };
+
+/** Value-only callback safe to run after the originating session is gone. */
+using WardenIncidentSummaryObserver =
+    std::function<void(WardenIncidentWriteResult const&)>;
 
 /** Session action derived without exposing database implementation details. */
 struct WardenIncidentApplication
@@ -218,9 +222,10 @@ public:
         uint32 incidentWindowSeconds,
         uint32 aggressiveThreshold) const;
 
-    /** Persists before punishment and atomically applies the ban threshold. */
+    /** Persists before punishment and queues a non-blocking summary read. */
     WardenIncidentWriteResult Record(WardenIncidentContext const& context,
-        WardenConfiguration const& configuration) const;
+        WardenConfiguration const& configuration,
+        WardenIncidentSummaryObserver summaryObserver = {}) const;
 };
 }
 

@@ -29,6 +29,24 @@
 
 namespace warden
 {
+namespace
+{
+WardenIncidentWriteResult ReadIncidentSummary(QueryResult* rawResult)
+{
+    std::unique_ptr<QueryResult> result(rawResult);
+    WardenIncidentWriteResult summary;
+    summary.status = WardenIncidentWriteStatus::CommittedStateUnavailable;
+    if (!result)
+        return summary;
+
+    Field const* fields = result->Fetch();
+    summary.status = WardenIncidentWriteStatus::Committed;
+    summary.recentCount = fields[0].GetUInt32();
+    summary.permanentBanActive = fields[1].GetBool();
+    return summary;
+}
+}
+
 WardenIncidentStore& WardenIncidentStore::Instance()
 {
     static WardenIncidentStore instance;
@@ -87,7 +105,8 @@ std::optional<WardenIncidentWindowState> WardenIncidentStore::Load(
 
 WardenIncidentWriteResult WardenIncidentStore::Record(
     WardenIncidentContext const& context,
-    WardenConfiguration const& configuration) const
+    WardenConfiguration const& configuration,
+    WardenIncidentSummaryObserver summaryObserver) const
 {
     WardenIncidentWriteResult failed;
     if (configuration.enforcementMode == WardenEnforcementMode::Observe ||
@@ -141,6 +160,11 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
             ")",
             context.accountId, configuration.incidentWindowSeconds,
             configuration.banThreshold, context.accountId);
+
+        // account_banned is keyed by (id, bandate), so two rows for the same
+        // account and second cannot coexist. A collision is deliberately
+        // promoted to the permanent Warden ban, including its provenance;
+        // this preserves the incident transaction instead of rolling it back.
         queued = queued && LoginDatabase.PExecute(
             "INSERT INTO `account_banned` "
             "(`id`,`bandate`,`unbandate`,`bannedby`,`banreason`,`active`) "
@@ -166,10 +190,34 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
     if (!LoginDatabase.CommitTransactionChecked())
         return failed;
 
-    // The world thread must not synchronously reload account history after
-    // the checked commit. Threshold escalation and any permanent ban were
-    // already applied atomically above; the gateway worker will load their
-    // authoritative state on the next admission.
+    // Threshold escalation and any permanent ban were applied atomically
+    // above. Resolve their operator-facing summary on the database worker;
+    // the value-only observer never captures the originating WorldSession.
+    if (summaryObserver)
+    {
+        auto callback = [observer = std::move(summaryObserver)](
+            QueryResult* result) mutable
+        {
+            observer(ReadIncidentSummary(result));
+        };
+        if (!LoginDatabase.AsyncPQuery(callback,
+            "SELECT COUNT(*) AS `recent_count`,"
+            "EXISTS("
+            "SELECT 1 FROM `account_banned` "
+            "WHERE `id` = %u AND `active` = 1 "
+            "AND `bandate` = `unbandate` "
+            "AND `bannedby` = 'MaNGOS Warden'"
+            ") AS `permanent_ban_active` "
+            "FROM `warden_incident` "
+            "WHERE `account_id` = %u "
+            "AND `occurred_at` > UNIX_TIMESTAMP() - %u",
+            context.accountId, context.accountId,
+            configuration.incidentWindowSeconds))
+        {
+            callback(nullptr);
+        }
+    }
+
     WardenIncidentWriteResult committed;
     committed.status =
         WardenIncidentWriteStatus::CommittedStateUnavailable;
