@@ -864,8 +864,9 @@ void WorldSession::PersistWardenIncidentAndKick(
     else if (!application.summaryKnown)
     {
         sLog.outError("Warden incident committed for account %u (check %u; "
-            "type %s), but its summary could not be reloaded; kicking without "
-            "inventing a count.", GetAccountId(), decision.checkId,
+            "type %s); its authoritative summary is deferred to the next "
+            "admission. Kicking without inventing a count.", GetAccountId(),
+            decision.checkId,
             warden::ToString(decision.checkType));
     }
     else
