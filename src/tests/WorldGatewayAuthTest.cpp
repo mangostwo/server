@@ -24,7 +24,11 @@
  */
 
 #include "TestHarness.h"
+
+#include "Common/Locales.h"
 #include "WorldGatewayAuth.h"
+
+#include <array>
 
 TEST(WorldGatewayAuth_accepts_only_supported_account_operating_systems)
 {
@@ -33,4 +37,29 @@ TEST(WorldGatewayAuth_accepts_only_supported_account_operating_systems)
     CHECK(!IsSupportedAccountClientOS(""));
     CHECK(!IsSupportedAccountClientOS("win"));
     CHECK(!IsSupportedAccountClientOS("Linux"));
+}
+
+TEST(ExactLocaleName_recognizes_all_client_locale_tokens_without_aliasing)
+{
+    std::array<char const*, 10> const locales =
+    {{
+        "enUS", "enGB", "koKR", "frFR", "deDE",
+        "zhCN", "zhTW", "esES", "esMX", "ruRU"
+    }};
+    for (char const* locale : locales)
+    {
+        char const* exact = GetExactLocaleName(locale);
+        REQUIRE(exact != nullptr);
+        CHECK_STR(exact, locale);
+    }
+    CHECK_STR(GetExactLocaleName("enGB"), "enGB");
+    CHECK(GetLocaleByName("enGB") == LOCALE_enUS);
+}
+
+TEST(ExactLocaleName_rejects_missing_or_malformed_state_without_fallback)
+{
+    CHECK(GetExactLocaleName("") == nullptr);
+    CHECK(GetExactLocaleName("enus") == nullptr);
+    CHECK(GetExactLocaleName("enUS ") == nullptr);
+    CHECK(GetExactLocaleName("unknown") == nullptr);
 }
