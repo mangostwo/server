@@ -213,6 +213,7 @@ void WorldSession::HandleCharEnum(QueryResult* result)
     data.put<uint8>(0, num);
 
     SendPacket(&data);
+    StartWardenBootstrap();
 }
 
 /**
@@ -679,6 +680,9 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
         return;
     }
 
+    // Character enumeration normally starts Warden; this idempotent call also
+    // covers clients that reach player login through an unusual UI sequence.
+    StartWardenBootstrap();
     m_playerLoading = true;
 
     DEBUG_LOG("WORLD: Received opcode Player Logon Message");
@@ -1214,7 +1218,6 @@ void WorldSession::HandleShowingCloakOpcode(WorldPacket & /*recv_data*/)
     DEBUG_LOG("CMSG_SHOWING_CLOAK for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }
-
 
 
 

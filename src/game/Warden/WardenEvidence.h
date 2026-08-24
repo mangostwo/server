@@ -64,6 +64,9 @@ struct WardenEvidenceBatch
     std::vector<WardenEvidence> evidence;
 };
 
+/** True only when every result in one operator-facing batch is explicitly clean. */
+bool IsCompleteCleanOperatorBatch(WardenEvidenceBatch const& batch);
+
 /** Stable labels safe for logs; no raw result data is returned. */
 char const* ToString(WardenCheckType type);
 char const* ToString(WardenEvidenceClass evidenceClass);

@@ -1761,6 +1761,9 @@ void World::UpdateSessions(uint32 diff)
         WorldSession* pSession = itr->second;
         WorldSessionFilter updater(pSession);
 
+        // Charge the completed interval before any queued response can advance
+        // the protocol state and establish a fresh deadline.
+        pSession->UpdateWarden(diff);
         if (!pSession->Update(updater))
         {
             RemoveQueuedSession(pSession);

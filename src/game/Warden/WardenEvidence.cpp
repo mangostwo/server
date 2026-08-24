@@ -64,6 +64,33 @@ WardenConfirmedDisposition ClassifyConfirmedEvidence(
     return WardenConfirmedDisposition::Incident;
 }
 
+bool IsCompleteCleanOperatorBatch(WardenEvidenceBatch const& batch)
+{
+    if ((batch.purpose != CheckPlanPurpose::Initial &&
+            batch.purpose != CheckPlanPurpose::AggressiveImmediate) ||
+        batch.evidence.empty())
+        return false;
+
+    for (WardenEvidence const& evidence : batch.evidence)
+    {
+        if (!evidence.checkId ||
+            !IsLegalWardenEvidenceClass(evidence.checkType,
+                evidence.evidenceClass))
+            return false;
+        if (evidence.checkType == WardenCheckType::Timing)
+        {
+            if (evidence.outcome != WardenCheckOutcome::Stable)
+                return false;
+        }
+        else if (!IsNonHealthType(evidence.checkType) ||
+            evidence.outcome != WardenCheckOutcome::Match)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 char const* ToString(WardenCheckType type)
 {
     switch (type)

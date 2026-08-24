@@ -56,6 +56,8 @@ read_required("src/game/WorldHandlers/World.cpp" WORLD_CPP)
 read_required("src/game/WorldHandlers/WorldSessionMgr.cpp" SESSION_MGR_CPP)
 read_required("src/game/Server/WorldSession.cpp" SESSION_CPP)
 read_required("src/game/Server/WorldGateway.cpp" GATEWAY_CPP)
+read_required("src/game/WorldHandlers/CharacterHandler.cpp" CHARACTER_CPP)
+read_required("src/game/WorldHandlers/WardenHandler.cpp" WARDEN_HANDLER_CPP)
 
 slice_between("${WORLD_CPP}" "World::AddSession_(WorldSession* s)"
     "void World::VerifyDataIntegrity()" ADD_SESSION_CODE)
@@ -64,6 +66,11 @@ slice_between("${WORLD_CPP}" "void World::UpdateSessions(uint32 diff)"
 slice_between("${SESSION_CPP}"
     "void WorldSession::OnAuthenticatedAdmission()"
     "void WorldSession::SizeError" ADMISSION_CODE)
+slice_between("${CHARACTER_CPP}" "void WorldSession::HandleCharEnum("
+    "void WorldSession::HandleCharEnumOpcode" CHAR_ENUM_CODE)
+slice_between("${CHARACTER_CPP}"
+    "void WorldSession::HandlePlayerLoginOpcode"
+    "void WorldSession::HandlePlayerLogin(" PLAYER_LOGIN_CODE)
 
 require_ordered("${ADD_SESSION_CODE}" "immediate authenticated admission"
     "packet << uint8(AUTH_OK)"
@@ -88,6 +95,38 @@ require_ordered("${UPDATE_SESSIONS_CODE}" "queue release during session reap"
     "RemoveQueuedSession(pSession)"
     "m_sessions.erase(itr)")
 
+require_ordered("${CHAR_ENUM_CODE}" "character-list bootstrap"
+    "SendPacket(&data)"
+    "StartWardenBootstrap()")
+require_ordered("${PLAYER_LOGIN_CODE}" "player-login bootstrap safety net"
+    "if (PlayerLoading() || GetPlayer() != NULL)"
+    "return"
+    "StartWardenBootstrap()"
+    "m_playerLoading = true")
+require_ordered("${UPDATE_SESSIONS_CODE}" "Warden deadline ownership"
+    "pSession->UpdateWarden(diff)"
+    "pSession->Update(updater)")
+
+string(REGEX MATCHALL "HandleEncrypted\\(" HANDLES "${WARDEN_HANDLER_CPP}")
+list(LENGTH HANDLES HANDLE_COUNT)
+string(REGEX MATCHALL "rfinish\\(" FINISHES "${WARDEN_HANDLER_CPP}")
+list(LENGTH FINISHES FINISH_COUNT)
+if(NOT HANDLE_COUNT EQUAL 1 OR NOT FINISH_COUNT EQUAL 1)
+    message(FATAL_ERROR
+        "Grouped Warden handler must forward and finish exactly one body")
+endif()
+if(WARDEN_HANDLER_CPP MATCHES "switch[ \t\r\n]*\\(")
+    message(FATAL_ERROR "Grouped Warden handler may not decode inner commands")
+endif()
+require_ordered("${WARDEN_HANDLER_CPP}" "grouped Warden ingress"
+    "m_warden->HandleEncrypted(body)"
+    "recvData.rfinish()"
+    "FinalizeWardenDisengagement()")
+
+if(ADMISSION_CODE MATCHES "StartWardenBootstrap|m_warden->Start")
+    message(FATAL_ERROR "Authenticated admission must create Warden inertly")
+endif()
+
 if(ADMISSION_CODE MATCHES "m_sessions|AddSession_|RemoveSession")
     message(FATAL_ERROR "WorldSession admission hook may not mutate m_sessions")
 endif()
@@ -99,11 +138,13 @@ if(NOT LOAD_COUNT EQUAL 1)
     message(FATAL_ERROR
         "WorldGateway::Attach must contain exactly one Warden history load")
 endif()
-if(SESSION_CPP MATCHES "WardenIncidentStore|warden_incident")
+if(SESSION_CPP MATCHES
+    "WardenIncidentStore::Instance\\(\\)\\.Load\\(")
     message(FATAL_ERROR "WorldSession may not query Warden incident history")
 endif()
-if(WORLD_CPP MATCHES "WardenIncidentStore|warden_incident" OR
-    SESSION_MGR_CPP MATCHES "WardenIncidentStore|warden_incident")
+if(WORLD_CPP MATCHES "WardenIncidentStore::Instance\\(\\)\\.Load\\(" OR
+    SESSION_MGR_CPP MATCHES
+        "WardenIncidentStore::Instance\\(\\)\\.Load\\(")
     message(FATAL_ERROR
         "World update files may not query Warden incident history")
 endif()

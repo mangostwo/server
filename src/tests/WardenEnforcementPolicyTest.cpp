@@ -111,6 +111,49 @@ TEST(WardenEvidence_shared_confirmation_and_disposition_predicates)
         illegal) == WardenConfirmedDisposition::Invalid);
 }
 
+TEST(WardenEvidence_healthy_operator_batch_requires_every_explicit_clean_result)
+{
+    warden::WardenEvidence timing = Evidence(65536,
+        warden::WardenCheckType::Timing,
+        warden::WardenEvidenceClass::ProtocolHealth,
+        warden::WardenCheckOutcome::Stable);
+    warden::WardenEvidence mpq = Evidence(1,
+        warden::WardenCheckType::Mpq,
+        warden::WardenEvidenceClass::Corroboration,
+        warden::WardenCheckOutcome::Match);
+
+    CHECK(warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    CHECK(warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::AggressiveImmediate, {mpq})));
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Recurring, {timing, mpq})));
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {})));
+
+    timing.outcome = warden::WardenCheckOutcome::Unstable;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    timing.outcome = warden::WardenCheckOutcome::Stable;
+    mpq.outcome = warden::WardenCheckOutcome::Unavailable;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    mpq.outcome = warden::WardenCheckOutcome::Mismatch;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    mpq.outcome = warden::WardenCheckOutcome::Stable;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    mpq.outcome = warden::WardenCheckOutcome::Match;
+    mpq.checkId = 0;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+    mpq.checkId = 1;
+    mpq.evidenceClass = warden::WardenEvidenceClass::ProtocolHealth;
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
+        warden::CheckPlanPurpose::Initial, {timing, mpq})));
+}
+
 TEST(WardenEnforcementPolicy_first_anomaly_only_queues_confirmation)
 {
     warden::WardenEnforcementPolicy policy(
@@ -567,4 +610,45 @@ TEST(WardenEnforcementPolicy_lifecycle_failure_closes_only_enforcing_modes)
         CHECK(audits[0].action == warden::WardenPolicyAction::PersistAudit);
         CHECK_EQ(audits[0].checkId, uint32(3));
     }
+}
+
+TEST(WardenEnforcementPolicy_actionable_confirmation_preserves_other_pending_audits)
+{
+    warden::WardenEnforcementPolicy policy(
+        warden::WardenEnforcementMode::Kick);
+    warden::WardenEvidence mpq = Evidence(1,
+        warden::WardenCheckType::Mpq,
+        warden::WardenEvidenceClass::Corroboration,
+        warden::WardenCheckOutcome::Mismatch);
+    warden::WardenEvidence mem = Evidence(3,
+        warden::WardenCheckType::Mem,
+        warden::WardenEvidenceClass::IntegrityInvariant,
+        warden::WardenCheckOutcome::Mismatch);
+
+    auto queued = policy.EvaluateBatch(Batch(
+        warden::CheckPlanPurpose::Recurring, {mpq, mem}));
+    REQUIRE(queued.size() == 2u);
+    CHECK(queued[0].action ==
+        warden::WardenPolicyAction::QueueConfirmation);
+    CHECK(queued[1].action ==
+        warden::WardenPolicyAction::QueueConfirmation);
+
+    auto confirmed = policy.EvaluateBatch(Batch(
+        warden::CheckPlanPurpose::Confirmation, {mem}));
+    REQUIRE(confirmed.size() == 1u);
+    CHECK(confirmed[0].action ==
+        warden::WardenPolicyAction::PersistAndKick);
+    CHECK_EQ(confirmed[0].checkId, uint32(3));
+
+    auto abandoned = policy.AbortPendingConfirmations();
+    REQUIRE(abandoned.size() == 1u);
+    CHECK(abandoned[0].action ==
+        warden::WardenPolicyAction::PersistAudit);
+    CHECK_EQ(abandoned[0].checkId, uint32(1));
+    CHECK(abandoned[0].checkType == warden::WardenCheckType::Mpq);
+    CHECK(abandoned[0].evidenceClass ==
+        warden::WardenEvidenceClass::Corroboration);
+    CHECK(abandoned[0].outcome ==
+        warden::WardenCheckOutcome::Unavailable);
+    CHECK(policy.AbortPendingConfirmations().empty());
 }

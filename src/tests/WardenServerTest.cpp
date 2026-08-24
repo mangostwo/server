@@ -1407,10 +1407,12 @@ TEST(WardenServer_timing_timeout_malformed_unexpected_and_send_fail_are_terminal
 {
     Harness timeout;
     REQUIRE(StartTimingCheck(timeout));
-    timeout.server->Update(true, 29999);
+    // Loading blocks only new plan selection. An outstanding request keeps
+    // owning its cumulative deadline while the session is not eligible.
+    timeout.server->Update(false, 29999);
     CHECK(timeout.server->GetState() ==
         warden::WardenState::AwaitingCheckResult);
-    timeout.server->Update(true, 1);
+    timeout.server->Update(false, 1);
     CHECK(timeout.server->GetState() == warden::WardenState::Failed);
     CHECK(timeout.server->GetFailure() ==
         warden::WardenFailure::DeadlineExpired);
