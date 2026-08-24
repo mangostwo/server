@@ -66,9 +66,7 @@ WardenConfirmedDisposition ClassifyConfirmedEvidence(
 
 bool IsCompleteCleanOperatorBatch(WardenEvidenceBatch const& batch)
 {
-    if ((batch.purpose != CheckPlanPurpose::Initial &&
-            batch.purpose != CheckPlanPurpose::AggressiveImmediate) ||
-        batch.evidence.empty())
+    if (batch.purpose != CheckPlanPurpose::Initial || batch.evidence.empty())
         return false;
 
     for (WardenEvidence const& evidence : batch.evidence)

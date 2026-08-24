@@ -111,7 +111,7 @@ TEST(WardenEvidence_shared_confirmation_and_disposition_predicates)
         illegal) == WardenConfirmedDisposition::Invalid);
 }
 
-TEST(WardenEvidence_healthy_operator_batch_requires_every_explicit_clean_result)
+TEST(WardenEvidence_healthy_summary_requires_complete_clean_initial_batch)
 {
     warden::WardenEvidence timing = Evidence(65536,
         warden::WardenCheckType::Timing,
@@ -124,7 +124,7 @@ TEST(WardenEvidence_healthy_operator_batch_requires_every_explicit_clean_result)
 
     CHECK(warden::IsCompleteCleanOperatorBatch(Batch(
         warden::CheckPlanPurpose::Initial, {timing, mpq})));
-    CHECK(warden::IsCompleteCleanOperatorBatch(Batch(
+    CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
         warden::CheckPlanPurpose::AggressiveImmediate, {mpq})));
     CHECK(!warden::IsCompleteCleanOperatorBatch(Batch(
         warden::CheckPlanPurpose::Recurring, {timing, mpq})));
