@@ -66,6 +66,10 @@ source_group("Time" FILES ${SRC_GRP_TIME})
 file(GLOB SRC_GRP_TOOL Tools/*.cpp Tools/*.h)
 source_group("Tool" FILES ${SRC_GRP_TOOL})
 
+# Warden protocol, crypto, catalogue, planner, policy, and state machine.
+file(GLOB SRC_GRP_WARDEN Warden/*.cpp Warden/*.h)
+source_group("Warden" FILES ${SRC_GRP_WARDEN})
+
 #World and Handlers group
 file(GLOB SRC_GRP_WORLD_HANDLERS WorldHandlers/*.cpp WorldHandlers/*.h)
 source_group("World\\Handlers" FILES ${SRC_GRP_WORLD_HANDLERS})
@@ -114,6 +118,7 @@ add_library(game STATIC
     ${SRC_GRP_SERVER}
     ${SRC_GRP_TIME}
     ${SRC_GRP_TOOL}
+    ${SRC_GRP_WARDEN}
     ${SRC_GRP_WORLD_HANDLERS}
     $<$<BOOL:${SCRIPT_LIB_ELUNA}>:${SRC_GRP_ELUNA}>
 )
@@ -139,6 +144,7 @@ target_include_directories(game
         Server
         Time
         Tools
+        Warden
         WorldHandlers
         $<$<BOOL:${SCRIPT_LIB_ELUNA}>:
             ${CMAKE_SOURCE_DIR}/src/modules/Eluna
