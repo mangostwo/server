@@ -24,7 +24,7 @@
 
 #include "Common/GitRevision.h"
 
-TEST(CoreDatabaseVersion_requires_dormant_warden_schema)
+TEST(CoreDatabaseVersion_requires_coordinated_warden_schemas)
 {
     CHECK_STR(GitRevision::GetRealmDBVersion(), "22");
     CHECK_STR(GitRevision::GetRealmDBStructure(), "4");
@@ -38,7 +38,8 @@ TEST(CoreDatabaseVersion_requires_dormant_warden_schema)
         "Remove_Legacy_Warden");
 
     CHECK_STR(GitRevision::GetWorldDBVersion(), "22");
-    CHECK_STR(GitRevision::GetWorldDBStructure(), "8");
+    CHECK_STR(GitRevision::GetWorldDBStructure(), "9");
     CHECK_STR(GitRevision::GetWorldDBContent(), "1");
-    CHECK_STR(GitRevision::GetWorldDBUpdateDescription(), "Warden_Checks");
+    CHECK_STR(GitRevision::GetWorldDBUpdateDescription(),
+        "Warden_Check_Profiles");
 }
