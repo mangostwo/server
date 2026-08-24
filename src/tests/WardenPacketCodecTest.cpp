@@ -751,15 +751,7 @@ TEST(WardenPacket_rejects_malformed_check_results_without_partial_output)
             uint32(0xA5A5A5A5));
     }
 
-    // Checksums are independently derived so validation reaches each status.
-    warden::Bytes const invalidTimingStatus =
-    {
-        0x02, 0x06, 0x00, 0x53, 0x4D, 0x72, 0x53,
-        0x02, 0x04, 0x03, 0x02, 0x01, 0x01
-    };
-    CheckFailedDecodeLeavesOutput(View(invalidTimingStatus), plan,
-        warden::DecodeStatus::InvalidValue);
-
+    // Checksums are independently derived so validation reaches the status.
     warden::Bytes const invalidMpqStatus =
     {
         0x02, 0x06, 0x00, 0x8A, 0xFC, 0x74, 0xC1,
@@ -767,6 +759,24 @@ TEST(WardenPacket_rejects_malformed_check_results_without_partial_output)
     };
     CheckFailedDecodeLeavesOutput(View(invalidMpqStatus), plan,
         warden::DecodeStatus::InvalidValue);
+}
+
+TEST(WardenPacket_treats_any_nonzero_timing_status_as_stable)
+{
+    warden::Bytes const response =
+    {
+        0x02, 0x06, 0x00, 0x53, 0x4D, 0x72, 0x53,
+        0x02, 0x04, 0x03, 0x02, 0x01, 0x01
+    };
+    warden::CheckBatchResult result;
+    REQUIRE(warden::DecodeCheckResult(View(response), TimingMpqPlan(), result) ==
+        warden::DecodeStatus::Ok);
+    REQUIRE(result.checks.size() == 2u);
+    REQUIRE(std::holds_alternative<warden::TimingResult>(result.checks[0]));
+    warden::TimingResult const& timing =
+        std::get<warden::TimingResult>(result.checks[0]);
+    CHECK(timing.stable);
+    CHECK_EQ(timing.clientTick, uint32(0x01020304));
 }
 
 TEST(WardenPacket_encodes_cache_lengths_explicitly_little_endian)

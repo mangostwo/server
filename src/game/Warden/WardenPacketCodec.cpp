@@ -567,8 +567,6 @@ DecodeStatus DecodeCheckResult(ByteView body, CheckPlan const& plan,
             if (resultLength - offset < 5)
                 return DecodeStatus::WrongSize;
             uint8 const status = resultBody.data[offset];
-            if (status > 1)
-                return DecodeStatus::InvalidValue;
 
             decoded.checks.emplace_back(TimingResult
             {
