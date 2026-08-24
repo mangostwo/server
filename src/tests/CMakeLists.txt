@@ -61,6 +61,7 @@ set(SRC_GRP_TESTS
     WardenConfigurationTest.cpp
     WardenEvidenceTest.cpp
     WardenPacketCodecTest.cpp
+    WardenServerTest.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleCatalog.cpp
@@ -70,6 +71,8 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenConfiguration.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEvidence.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenPacketCodec.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenServer.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenManager.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
     # database globals that only mangosd defines. These sources know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
