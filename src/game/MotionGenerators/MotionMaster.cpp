@@ -231,13 +231,17 @@ void MotionMaster::DirectExpire(bool reset)
     MovementGenerator* curr = top();
     pop();
 
-    // Also drop stored under top() targeted motions
-    while (!empty() && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE || top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+    // Also drop stored under top() targeted motions -- except beneath a transient effect
+    // (a jump, a knockback), which resumes whatever it interrupted.
+    if (curr->GetMovementGeneratorType() != EFFECT_MOTION_TYPE)
     {
-        MovementGenerator* temp = top();
-        pop();
-        temp->Finalize(*m_owner);
-        delete temp;
+        while (!empty() && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE || top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+        {
+            MovementGenerator* temp = top();
+            pop();
+            temp->Finalize(*m_owner);
+            delete temp;
+        }
     }
 
     // Store current top MMGen, as Finalize might push a new MMGen
@@ -290,13 +294,17 @@ void MotionMaster::DelayedExpire(bool reset)
         m_expList = new ExpireList();
     }
 
-    // Also drop stored under top() targeted motions
-    while (!empty() && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE || top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+    // Also drop stored under top() targeted motions -- except beneath a transient effect
+    // (a jump, a knockback), which resumes whatever it interrupted.
+    if (curr->GetMovementGeneratorType() != EFFECT_MOTION_TYPE)
     {
-        MovementGenerator* temp = top();
-        pop();
-        temp ->Finalize(*m_owner);
-        m_expList->push_back(temp);
+        while (!empty() && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE || top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+        {
+            MovementGenerator* temp = top();
+            pop();
+            temp->Finalize(*m_owner);
+            m_expList->push_back(temp);
+        }
     }
 
     curr->Finalize(*m_owner);
@@ -618,6 +626,14 @@ void MotionMaster::Mutate(MovementGenerator* m)
             case DISTRACT_MOTION_TYPE:
             case EFFECT_MOTION_TYPE:
                 MovementExpired(false);
+                // The expiry keeps a chase or follow beneath an effect, for the effect that
+                // ends by itself. This one is being replaced: drop them, as before, or every
+                // knockback and re-chase would pile a chase on the last one.
+                while (size() > 1 && (top()->GetMovementGeneratorType() == CHASE_MOTION_TYPE ||
+                                      top()->GetMovementGeneratorType() == FOLLOW_MOTION_TYPE))
+                {
+                    MovementExpired(false);
+                }
             default:
                 break;
         }

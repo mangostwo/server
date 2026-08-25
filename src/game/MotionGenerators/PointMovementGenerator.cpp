@@ -199,7 +199,14 @@ void EffectMovementGenerator::Finalize(Unit& owner)
         return;
     }
 
-    // Expiring drops the chase beneath us, so re-lay it; anything else beneath resumes by itself.
+    // Whatever we interrupted resumes by itself -- a chase or follow included, which expiry
+    // now leaves beneath us. Only a victim with no chase left to resume gets a fresh one.
+    const MovementGeneratorType beneath = owner.GetMotionMaster()->GetCurrentMovementGeneratorType();
+    if (beneath == CHASE_MOTION_TYPE || beneath == FOLLOW_MOTION_TYPE)
+    {
+        return;
+    }
+
     if (Unit* victim = owner.getVictim())
     {
         owner.GetMotionMaster()->MoveChase(victim);
