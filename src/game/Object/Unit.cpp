@@ -5627,15 +5627,17 @@ void Unit::SendPetAIReaction()
 
 void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
-    if (IsStopped() && !forceSendStop)
-    {
-        return;
-    }
-
     clearUnitState(UNIT_STAT_MOVING);
 
     // not need send any packets if not in world
     if (!IsInWorld())
+    {
+        return;
+    }
+
+    // Gate on the spline, not on the *_MOVE states: home legs, effects and raw
+    // script splines set none, and skipping them left the spline running.
+    if (movespline->Finalized() && !forceSendStop)
     {
         return;
     }
