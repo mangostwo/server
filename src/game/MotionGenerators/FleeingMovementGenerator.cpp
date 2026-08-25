@@ -77,9 +77,10 @@ std::optional<Motion::Vector3> FleeingMovementGenerator::PickFleePoint(Unit& own
     }
     else if (distFromCaster > MAX_QUIET_DISTANCE)
     {
-        // Further than the panic band: drift back toward it.
+        // Further than the panic band: drift back toward it. Negating the bearing
+        // mirrored it across the x axis instead; toward the caster is bearing + pi.
         dist = frand(0.4f, 1.0f) * (MAX_QUIET_DISTANCE - MIN_QUIET_DISTANCE);
-        angle = -angleToCaster + frand(-M_PI_F / 4, M_PI_F / 4);
+        angle = angleToCaster + M_PI_F + frand(-M_PI_F / 4, M_PI_F / 4);
     }
     else
     {
