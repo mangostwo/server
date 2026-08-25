@@ -200,7 +200,7 @@ namespace Movement
     /**
      * @brief Stops any creature movement.
      */
-    void MoveSplineInit::Stop()
+    void MoveSplineInit::Stop(bool atCommittedPosition /*= false*/)
     {
         MoveSpline& move_spline = *unit.movespline;
 
@@ -231,7 +231,9 @@ namespace Movement
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        if (!move_spline.Finalized() && !transportInfo)
+        // ... unless the caller could not commit that position (a cell edge): then the
+        // stop is placed where the unit is known to stand, so the packet and the server agree.
+        if (!move_spline.Finalized() && !transportInfo && !atCommittedPosition)
         {
             real_position = move_spline.ComputePosition();
         }

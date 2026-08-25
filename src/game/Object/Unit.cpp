@@ -5627,11 +5627,6 @@ void Unit::SendPetAIReaction()
 
 void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
-    if (IsStopped() && !forceSendStop)
-    {
-        return;
-    }
-
     clearUnitState(UNIT_STAT_MOVING);
 
     // not need send any packets if not in world
@@ -5640,8 +5635,27 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
         return;
     }
 
+    // Gate on the spline, not on the *_MOVE states: home legs, effects and raw script
+    // splines set none, and skipping them left the spline running.
+    if (movespline->Finalized() && !forceSendStop)
+    {
+        return;
+    }
+
+    // A jump or a fall is ballistic: it cannot stop mid-air, so it is left to land and
+    // its effect ends there. Only an interrupt (forced) cuts it.
+    if (movespline->Airborne() && !forceSendStop)
+    {
+        return;
+    }
+
+    // Commit where the spline actually is before stopping there, so the server, the stop
+    // packet and every later create block agree. A commit refused at a cell edge leaves
+    // the last committed position, and the stop is placed there instead.
+    const bool committed = CommitSplinePosition();
+
     Movement::MoveSplineInit init(*this);
-    init.Stop();
+    init.Stop(!committed);
 }
 
 /**
@@ -5651,22 +5665,46 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
  */
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 {
-    bool isMoving = false;
+    // One stop path: commit the in-flight position and finalize through Stop(), which
+    // sends the stop packet and leaves a spline the driver reads as cut, not arrived.
+    StopMoving(forceSendStop || !movespline->Finalized());
+}
 
-    if (!movespline->Finalized())
+bool Unit::CommitSplinePosition()
+{
+    if (movespline->Finalized())
     {
-        Movement::Location loc = movespline->ComputePosition();
-        movespline->_Interrupt();
-        Place().MoveTo(loc.x, loc.y, loc.z, loc.orientation);
-
-        // The stop packet below, and every create block until the client speaks again, are
-        // written from the movement state -- so it follows the placement whenever the
-        // server is the one that moved the unit.
-        m_movementInfo.Report(loc.x, loc.y, loc.z, loc.orientation);
-        isMoving = true;
+        return false;
     }
 
-    StopMoving(forceSendStop || isMoving);
+    Movement::Location loc = movespline->ComputePosition();
+
+    if (IsBoarded())
+    {
+        // Boarded spline coordinates are seat-local: update the seat pose
+        Geometry::Placement deckPose;
+        deckPose.EnterFrame(GetTransportInfo()->Seat().CurrentFrame(),
+                            Geometry::Vector3(loc.x, loc.y, loc.z), loc.orientation);
+        GetTransportInfo()->SetSeatPose(deckPose);
+        return true;
+    }
+
+    // A bare placement write must not cross a cell: the grid would still list the unit
+    // in the old one. Keep the last committed position then, and let the next real
+    // relocation carry it over.
+    CellPair const curCell = MaNGOS::ComputeCellPair(Where().X(), Where().Y());
+    CellPair const newCell = MaNGOS::ComputeCellPair(loc.x, loc.y);
+    if (curCell != newCell)
+    {
+        return false;
+    }
+
+    Place().MoveTo(loc.x, loc.y, loc.z, loc.orientation);
+
+    // The movement state follows the placement whenever the server is the one that moved
+    // the unit, so the next create block agrees with where it was stopped.
+    m_movementInfo.Report(loc.x, loc.y, loc.z, loc.orientation);
+    return true;
 }
 
 
