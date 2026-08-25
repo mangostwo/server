@@ -212,13 +212,13 @@ TEST(WardenPacket_encodes_exact_12340_module_initialization)
         warden::EncodeStatus::Ok);
     REQUIRE(initialization.size() == 57u);
     CHECK_HEX(initialization.data(), initialization.size(),
-        "0314008648201401000100804f0200c01802003025020010290200"
+        "0314006e676f6101000200804f0200c01802003025020010290200"
         "030800f8ac4e0f040000409d410001"
         "030800b4e9d7ba01010020ae460001");
 
     CHECK_EQ(initialization[0], uint8(warden::ServerCommand::ModuleInitialize));
     CHECK_HEX(initialization.data() + 1, 2, "1400");
-    CHECK_HEX(initialization.data() + 3, 4, "86482014");
+    CHECK_HEX(initialization.data() + 3, 4, "6e676f61");
     CHECK_EQ(initialization[27], uint8(warden::ServerCommand::ModuleInitialize));
     CHECK_HEX(initialization.data() + 28, 2, "0800");
     CHECK_HEX(initialization.data() + 30, 4, "f8ac4e0f");

@@ -92,7 +92,7 @@ TEST(WardenCatalog_exact_12340_initialization_callbacks_are_custody_pinned)
 
     REQUIRE(profile != nullptr);
     CHECK_HEX(profile->initialization.archive.selectors.data(),
-        profile->initialization.archive.selectors.size(), "01000100");
+        profile->initialization.archive.selectors.size(), "01000200");
     CHECK_EQ(profile->initialization.archive.openRva, uint32(0x00024F80));
     CHECK_EQ(profile->initialization.archive.sizeRva, uint32(0x000218C0));
     CHECK_EQ(profile->initialization.archive.readRva, uint32(0x00022530));

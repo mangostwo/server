@@ -69,7 +69,10 @@ warden::ModuleProfile const ModuleWin12340 =
      0xBF, 0xB3, 0xF8, 0x56, 0x02, 0xBA, 0x80, 0x9B},
     {
         {
-            {0x01, 0x00, 0x01, 0x00},
+            // Record 1/0 installs archive family 2 with an empty module name.
+            // That family supplies the six arguments required by the exact
+            // build-12340 read wrapper at 0x00422530 (retn 0x18).
+            {0x01, 0x00, 0x02, 0x00},
             0x00024F80,
             0x000218C0,
             0x00022530,
