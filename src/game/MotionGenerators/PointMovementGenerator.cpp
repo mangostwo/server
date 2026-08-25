@@ -171,19 +171,15 @@ void EffectMovementGenerator::Finalize(Unit& owner)
         creature.AI()->MovementInform(EFFECT_MOTION_TYPE, m_id);
     }
 
-    // Restore the previous movement, since we have no proper state system for it.
     if (!owner.IsAlive() ||
         owner.hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_NO_COMBAT_MOVEMENT))
     {
         return;
     }
 
+    // Expiring drops the chase beneath us, so re-lay it; anything else beneath resumes by itself.
     if (Unit* victim = owner.getVictim())
     {
         owner.GetMotionMaster()->MoveChase(victim);
-    }
-    else
-    {
-        owner.GetMotionMaster()->Initialize();
     }
 }
