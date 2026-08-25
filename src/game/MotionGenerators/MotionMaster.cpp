@@ -730,12 +730,15 @@ bool MotionMaster::GetDestination(float& x, float& y, float& z)
 
 void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id)
 {
+    // Push first: Mutate interrupts the generator on top, and that interrupt
+    // finalizes the live spline - launching earlier let it kill the jump itself.
+    Mutate(new EffectMovementGenerator(id));
+
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(x, y, z);
     init.SetParabolic(max_height, 0);
     init.SetVelocity(horizontalSpeed);
     init.Launch();
-    Mutate(new EffectMovementGenerator(id));
 }
 
 void MotionMaster::MoveJump(Position& pos, float horizontalSpeed, float max_height, uint32 id)
@@ -765,9 +768,11 @@ void MotionMaster::MoveFall()
         return;
     }
 
+    // Push first, same reason as MoveJump.
+    Mutate(new EffectMovementGenerator(0));
+
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(m_owner->Where().X(), m_owner->Where().Y(), tz);
     init.SetFall();
     init.Launch();
-    Mutate(new EffectMovementGenerator(0));
 }
