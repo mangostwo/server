@@ -966,8 +966,9 @@ dtStatus PathFinder::findSmoothPath(const float* startPos, const float* endPos,
 
     *smoothPathSize = nsmoothPath;
 
-    // Return success if the smooth path size is within the maximum limit.
-    return nsmoothPath < MAX_POINT_PATH_LENGTH ? DT_SUCCESS : DT_FAILURE;
+    // A full buffer is a truncated route, not a failed one: the caller marks it
+    // INCOMPLETE and the mover re-paths from the far end of the corridor.
+    return (npolys && nsmoothPath >= maxSmoothPathSize) ? (DT_SUCCESS | DT_BUFFER_TOO_SMALL) : DT_SUCCESS;
 }
 
 /**
