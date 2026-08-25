@@ -122,6 +122,14 @@ Motion::MoveIntent PointMovementGenerator::Intent(Unit& owner,
         return Motion::MoveIntent::Done();
     }
 
+    // Stopped or interrupted from outside: the move is over. Tell the script anyway, so a
+    // sequence waiting on this point does not stall; the point is wherever we stand now.
+    if (status.cut)
+    {
+        m_done = true;
+        return Motion::MoveIntent::Done();
+    }
+
     owner.addUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
     // m_dest arrived from a script, an AI or a spell effect, and those speak WORLD
@@ -155,7 +163,16 @@ Motion::MoveIntent EffectMovementGenerator::Intent(Unit& /*owner*/,
     // Note this is `traveling`, not `arrived`: the spline was launched by the effect, not
     // by us, so if it was never running at all we must pop immediately rather than wait
     // for an arrival edge that will never come.
-    return status.traveling ? Motion::MoveIntent::Hold() : Motion::MoveIntent::Done();
+    if (status.traveling)
+    {
+        return Motion::MoveIntent::Hold();
+    }
+
+    // The spline is over -- run out, cut short, or never launched: report it. A script
+    // waiting on a jump must not stall; the landing is wherever the unit stands now.
+    // (Popped mid-flight by Clear or Mutate, nothing has ended and nothing is reported.)
+    m_done = true;
+    return Motion::MoveIntent::Done();
 }
 
 void EffectMovementGenerator::Finalize(Unit& owner)
@@ -167,7 +184,11 @@ void EffectMovementGenerator::Finalize(Unit& owner)
 
     Creature& creature = static_cast<Creature&>(owner);
 
-    if (creature.AI() && owner.movespline->Finalized())
+    // Ended on our own tick, or landed while we were not ticking at all (a stun): both
+    // are the effect having happened. A spline still flying, or one cut short by the
+    // generator that replaces us, is not.
+    const bool landed = owner.movespline->Finalized() && !owner.movespline->Cut();
+    if (creature.AI() && (m_done || landed))
     {
         creature.AI()->MovementInform(EFFECT_MOTION_TYPE, m_id);
     }

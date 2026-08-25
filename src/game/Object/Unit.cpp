@@ -6792,7 +6792,12 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
-    movespline->_Interrupt();
+
+    // A spline that ran out is finished, not cut; only a live one is interrupted here.
+    if (!movespline->Finalized())
+    {
+        movespline->_Interrupt();
+    }
 }
 
 void Unit::SendCollisionHeightUpdate(float height)

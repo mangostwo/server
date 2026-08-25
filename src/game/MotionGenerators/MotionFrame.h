@@ -122,6 +122,13 @@ namespace Motion
              */
             virtual bool Routed() const = 0;
 
+            /// The last route only got partway: its far end is a waypoint, not the goal.
+            virtual bool Partial() const = 0;
+
+            /// A partial route worth walking: it moves the mover. One that ends where
+            /// it starts would be laid again from the same spot every tick.
+            virtual bool Progresses() const = 0;
+
             /// False when the last route only got partway to the goal.
             virtual bool Reachable() const = 0;
     };

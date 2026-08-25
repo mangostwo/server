@@ -113,6 +113,7 @@ class TargetedMovementGenerator : public IntentMovementGenerator,
         Motion::Vector3 m_dest;       ///< The standing spot we are heading for.
         bool m_haveDest = false;      ///< False before the first spot has been derived.
         bool m_targetReached = false; ///< ReachTarget already fired for this approach.
+        bool m_relay = false;         ///< A cut or partial leg ended: derive a fresh spot on the next tick that moves.
 };
 
 /**

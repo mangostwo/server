@@ -222,6 +222,7 @@ namespace Movement
     void MoveSpline::Initialize(const MoveSplineInitArgs& args)
     {
         splineflags = args.flags;
+        m_cut = args.flags.done; // a stop spline is born finished: that is a cut, not an arrival
         facing = args.facing;
         m_Id = args.splineId;
         point_Idx_offset = args.path_Idx_offset;
