@@ -491,14 +491,23 @@ Motion::MoveIntent WaypointMovementGenerator::PrepareMove(Creature& creature)
 
         if (creature.AI() && m_pathOrigin == PATH_FROM_EXTERNAL && m_pathId > 0)
         {
+            const uint32 nodeBefore = m_currentNode;
             creature.AI()->MovementInform(
                 (reachedLast ? EXTERNAL_WAYPOINT_FINISHED_LAST : EXTERNAL_WAYPOINT_MOVE_START) + m_pathId,
                 currPoint->first);
 
-            // That hook may have despawned the creature or swapped its path.
-            if (creature.IsDead() || !creature.IsInWorld())
+            // That hook may have despawned the creature, swapped its path, or put another
+            // generator on top of this one.
+            if (creature.IsDead() || !creature.IsInWorld() || !IsActive(creature))
             {
                 return Motion::MoveIntent::Hold();
+            }
+
+            // A SetNextWaypoint from inside the hook re-targets the step; keep it.
+            if (m_currentNode != nodeBefore)
+            {
+                currPoint = m_path->find(m_currentNode);
+                MANGOS_ASSERT(currPoint != m_path->end());
             }
         }
 
