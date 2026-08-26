@@ -81,11 +81,11 @@ inline void AppendInitialProfile(std::vector<WardenCheckRowInput>& rows,
     rows.push_back(bootstrap);
 }
 
-/** Exact database rows intended for the seven evidenced Wrath locale profiles. */
+/** Exact database rows intended for all ten evidenced Wrath locale profiles. */
 inline std::vector<WardenCheckRowInput> InitialWardenRows()
 {
     std::vector<WardenCheckRowInput> rows;
-    rows.reserve(28);
+    rows.reserve(40);
     AppendInitialProfile(rows, 12340, "656E5553",
         "8C7CED99F8DDDD48296551EFE05A2CF27B26F818", "4F6B6179");
     AppendInitialProfile(rows, 12340, "656E4742",
@@ -100,6 +100,12 @@ inline std::vector<WardenCheckRowInput> InitialWardenRows()
         "E6F5A0C5C63056F63097420AE29B47ACA2E4D496", "4F4B");
     AppendInitialProfile(rows, 12340, "72755255",
         "329BF203079002D36E05EBF54BD5746AA37E47C8", "D09ED09A");
+    AppendInitialProfile(rows, 12340, "6B6F4B52",
+        "39BCDE7E67F7DA4A366D15007DBAF3D438338E00", "ED9995EC9DB8");
+    AppendInitialProfile(rows, 12340, "7A68434E",
+        "53538853E7026786EB30FCB247D7E8179A3CAAF8", "E7A1AEE5AE9A");
+    AppendInitialProfile(rows, 12340, "7A685457",
+        "ED14F2C71688B1DE9660F9CE04A62D63A9EB297A", "E7A2BAE5AE9A");
     return rows;
 }
 

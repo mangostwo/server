@@ -50,14 +50,15 @@ TEST(WardenCatalog_enumerates_one_validated_profile)
     CHECK(catalog.Validate(*profiles[0]) == warden::ModuleValidation::Valid);
 }
 
-TEST(WardenCatalog_requires_exactly_the_seven_evidenced_wrath_locales)
+TEST(WardenCatalog_requires_all_ten_evidenced_wrath_locales)
 {
     warden::WardenModuleCatalog catalog;
     warden::ModuleProfile const* profile = catalog.Find(12340, "Win");
     REQUIRE(profile != nullptr);
 
     std::vector<std::string> const expected =
-        {"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU"};
+        {"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU",
+            "koKR", "zhCN", "zhTW"};
     CHECK(profile->requiredCheckLocales == expected);
 }
 

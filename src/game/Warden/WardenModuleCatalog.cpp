@@ -89,7 +89,8 @@ warden::ModuleProfile const ModuleWin12340 =
             0x01
         }
     },
-    {"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU"}
+    {"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU",
+        "koKR", "zhCN", "zhTW"}
 };
 
 std::array<warden::ModuleProfile const*, 1> const ModuleProfiles =

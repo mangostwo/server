@@ -39,7 +39,7 @@ TEST(CoreDatabaseVersion_requires_coordinated_warden_schemas)
 
     CHECK_STR(GitRevision::GetWorldDBVersion(), "22");
     CHECK_STR(GitRevision::GetWorldDBStructure(), "9");
-    CHECK_STR(GitRevision::GetWorldDBContent(), "1");
+    CHECK_STR(GitRevision::GetWorldDBContent(), "2");
     CHECK_STR(GitRevision::GetWorldDBUpdateDescription(),
-        "Warden_Check_Profiles");
+        "Warden_Asian_Profiles");
 }

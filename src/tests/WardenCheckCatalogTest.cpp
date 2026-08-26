@@ -137,7 +137,7 @@ TEST(WardenCheckCatalog_type_evidence_class_contract_is_canonical)
         static_cast<WardenEvidenceClass>(0xFF)));
 }
 
-TEST(WardenCheckCatalog_decodes_and_selects_seven_exact_12340_profiles)
+TEST(WardenCheckCatalog_decodes_and_selects_ten_exact_12340_profiles)
 {
     warden::WardenCheckCatalogBuilder builder;
     warden::WardenCheckDiagnostic diagnostic;
@@ -151,9 +151,9 @@ TEST(WardenCheckCatalog_decodes_and_selects_seven_exact_12340_profiles)
     warden::WardenCheckCatalog catalog;
     REQUIRE(builder.Build(catalog, diagnostic) ==
         warden::CheckCatalogValidation::Valid);
-    CHECK_EQ(catalog.TotalRows(), uint32(28));
-    CHECK_EQ(catalog.EnabledRows(), uint32(28));
-    CHECK_EQ(catalog.Profiles().size(), size_t(7));
+    CHECK_EQ(catalog.TotalRows(), uint32(40));
+    CHECK_EQ(catalog.EnabledRows(), uint32(40));
+    CHECK_EQ(catalog.Profiles().size(), size_t(10));
 
     struct ExpectedProfile
     {
@@ -161,7 +161,7 @@ TEST(WardenCheckCatalog_decodes_and_selects_seven_exact_12340_profiles)
         char const* mpqSha1;
         char const* luaText;
     };
-    std::array<ExpectedProfile, 7> const expectedProfiles =
+    std::array<ExpectedProfile, 10> const expectedProfiles =
     {{
         {"enUS", "8c7ced99f8dddd48296551efe05a2cf27b26f818",
             "4f6b6179"},
@@ -176,7 +176,13 @@ TEST(WardenCheckCatalog_decodes_and_selects_seven_exact_12340_profiles)
         {"frFR", "e6f5a0c5c63056f63097420ae29b47aca2e4d496",
             "4f4b"},
         {"ruRU", "329bf203079002d36e05ebf54bd5746aa37e47c8",
-            "d09ed09a"}
+            "d09ed09a"},
+        {"koKR", "39bcde7e67f7da4a366d15007dbaf3d438338e00",
+            "ed9995ec9db8"},
+        {"zhCN", "53538853e7026786eb30fcb247d7e8179a3caaf8",
+            "e7a1aee5ae9a"},
+        {"zhTW", "ed14f2c71688b1de9660f9ce04a62d63a9eb297a",
+            "e7a2bae5ae9a"}
     }};
 
     for (ExpectedProfile const& expected : expectedProfiles)
@@ -227,9 +233,7 @@ TEST(WardenCheckCatalog_decodes_and_selects_seven_exact_12340_profiles)
     CHECK(!warden::IsActionableEvidenceClass(
         warden::WardenEvidenceClass::Corroboration));
 
-    CHECK(catalog.Find(12340, "Win", "koKR") == nullptr);
-    CHECK(catalog.Find(12340, "Win", "zhCN") == nullptr);
-    CHECK(catalog.Find(12340, "Win", "zhTW") == nullptr);
+    CHECK(catalog.Find(12340, "Win", "itIT") == nullptr);
     CHECK(catalog.Find(12340, "OSX", "enUS") == nullptr);
 }
 
@@ -649,12 +653,12 @@ TEST(WardenCheckCatalog_enforces_complete_profiles_and_atomic_build)
 
     warden::WardenCheckCatalog unchanged =
         warden::test::BuildInitialWardenCatalog();
-    REQUIRE(unchanged.TotalRows() == 28u);
+    REQUIRE(unchanged.TotalRows() == 40u);
     rows = FirstProfileRows();
     rows[2].checkId = rows[1].checkId;
     CHECK(BuildRows(rows, unchanged) ==
         warden::CheckCatalogValidation::DuplicateId);
-    CHECK_EQ(unchanged.TotalRows(), uint32(28));
+    CHECK_EQ(unchanged.TotalRows(), uint32(40));
     CHECK(unchanged.Find(12340, "Win", "ruRU") != nullptr);
 }
 
@@ -814,14 +818,14 @@ TEST(WardenCheckCatalogLoader_publishes_only_after_complete_preflight)
             std::shared_ptr<warden::WardenCheckCatalog const> const& snapshot)
         {
             ++publicationCalls;
-            CHECK_EQ(snapshot->TotalRows(), uint32(28));
-            CHECK_EQ(snapshot->Profiles().size(), size_t(7));
+            CHECK_EQ(snapshot->TotalRows(), uint32(40));
+            CHECK_EQ(snapshot->Profiles().size(), size_t(10));
             return true;
         };
     CHECK(accepted.Finish(warden::WardenModuleCatalog{}, preflight,
         verifyingPublisher, diagnostic) ==
         warden::WardenCheckCatalogLoadFailure::None);
-    CHECK_EQ(preflightCalls, uint32(7));
+    CHECK_EQ(preflightCalls, uint32(10));
     CHECK_EQ(publicationCalls, uint32(1));
 }
 

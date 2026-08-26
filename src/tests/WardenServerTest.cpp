@@ -883,20 +883,21 @@ TEST(WardenManager_selects_content_checks_only_for_the_exact_locale)
     warden::WardenCreationOptions observe;
     observe.configuration.enforcementMode =
         warden::WardenEnforcementMode::Observe;
-    Harness zhCN(ManagerLocale{"zhCN"}, true, observe);
-    REQUIRE(ReachModuleReady(zhCN));
-    zhCN.server->Update(true, 60000);
-    CHECK(zhCN.server->GetState() == warden::WardenState::ModuleReady);
-    CHECK_EQ(zhCN.sent.size(), size_t(3));
-    CHECK(zhCN.evidenceEvents.empty());
+    Harness unsupported(ManagerLocale{"itIT"}, true, observe);
+    REQUIRE(ReachModuleReady(unsupported));
+    unsupported.server->Update(true, 60000);
+    CHECK(unsupported.server->GetState() == warden::WardenState::ModuleReady);
+    CHECK_EQ(unsupported.sent.size(), size_t(3));
+    CHECK(unsupported.evidenceEvents.empty());
 }
 
 TEST(WardenManager_enforcing_modes_require_exact_check_profiles)
 {
     REQUIRE(EnsureTestCatalogPublished());
     auto send = [](warden::Bytes const&) { return true; };
-    std::array<char const*, 7> const locales =
-    {{"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU"}};
+    std::array<char const*, 10> const locales =
+    {{"enUS", "enGB", "deDE", "esES", "esMX", "frFR", "ruRU",
+        "koKR", "zhCN", "zhTW"}};
 
     for (warden::WardenEnforcementMode mode :
         {warden::WardenEnforcementMode::Kick,
@@ -911,7 +912,7 @@ TEST(WardenManager_enforcing_modes_require_exact_check_profiles)
                 options) != nullptr);
         }
         CHECK(warden::WardenManager::Instance().Create(12340,
-            "Win", "zhCN", TestSessionKey(), send, options) == nullptr);
+            "Win", "itIT", TestSessionKey(), send, options) == nullptr);
     }
 }
 
@@ -922,7 +923,7 @@ TEST(WardenManager_observe_mode_allows_missing_check_profile)
     options.configuration.enforcementMode =
         warden::WardenEnforcementMode::Observe;
 
-    CHECK(warden::WardenManager::Instance().Create(12340, "Win", "zhCN",
+    CHECK(warden::WardenManager::Instance().Create(12340, "Win", "itIT",
         TestSessionKey(), [](warden::Bytes const&) { return true; },
         options) != nullptr);
 }
@@ -931,12 +932,10 @@ TEST(WardenManager_identifies_only_exact_enforcement_profiles)
 {
     REQUIRE(EnsureTestCatalogPublished());
     for (char const* locale : {"enUS", "enGB", "deDE", "esES", "esMX",
-             "frFR", "ruRU"})
+             "frFR", "ruRU", "koKR", "zhCN", "zhTW"})
         CHECK(warden::IsWardenEnforcementProfile(12340, "Win", locale));
 
-    CHECK(!warden::IsWardenEnforcementProfile(12340, "Win", "koKR"));
-    CHECK(!warden::IsWardenEnforcementProfile(12340, "Win", "zhCN"));
-    CHECK(!warden::IsWardenEnforcementProfile(12340, "Win", "zhTW"));
+    CHECK(!warden::IsWardenEnforcementProfile(12340, "Win", "itIT"));
     CHECK(!warden::IsWardenEnforcementProfile(12340, "OSX", "enUS"));
     CHECK(!warden::IsWardenEnforcementProfile(9999, "Win", "enUS"));
     CHECK(!warden::IsWardenEnforcementProfile(12340, "Win", ""));
@@ -1196,7 +1195,7 @@ TEST(WardenServer_combined_lua_match_is_classified_without_text_evidence)
     CHECK_EQ(harness.evidenceEvents.size(), 3u);
 }
 
-TEST(WardenServer_all_seven_locale_content_vectors_report_ordered_matches)
+TEST(WardenServer_all_ten_locale_content_vectors_report_ordered_matches)
 {
     struct ProfileVector
     {
@@ -1211,7 +1210,10 @@ TEST(WardenServer_all_seven_locale_content_vectors_report_ordered_matches)
         {"esES", "022300156D84F001040302010020EC8371EC168B4723AF6DE3AFE81D46843726F4000741636570746172"},
         {"esMX", "022300389E7E800104030201000E39F4AF09E3CF08925D41E61FBAC8EE16478FC9000741636570746172"},
         {"frFR", "021E0046D423D8010403020100E6F5A0C5C63056F63097420AE29B47ACA2E4D49600024F4B"},
-        {"ruRU", "022000AD5EF5DF010403020100329BF203079002D36E05EBF54BD5746AA37E47C80004D09ED09A"}
+        {"ruRU", "022000AD5EF5DF010403020100329BF203079002D36E05EBF54BD5746AA37E47C80004D09ED09A"},
+        {"koKR", "02220066D34E5B01040302010039BCDE7E67F7DA4A366D15007DBAF3D438338E000006ED9995EC9DB8"},
+        {"zhCN", "02220054BF39DD01040302010053538853E7026786EB30FCB247D7E8179A3CAAF80006E7A1AEE5AE9A"},
+        {"zhTW", "0222002B576865010403020100ED14F2C71688B1DE9660F9CE04A62D63A9EB297A0006E7A2BAE5AE9A"}
     };
 
     for (ProfileVector const& vector : vectors)
