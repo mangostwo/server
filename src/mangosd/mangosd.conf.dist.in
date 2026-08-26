@@ -270,6 +270,8 @@ CleanCharacterDB                  = 1
 #    Warden.RequireExactProfile
 #        Admission policy for clients without a complete published
 #        (build,platform,locale) profile in `warden_checks`.
+#        The shipped module and profiles cover platform Win only. OSX clients
+#        require Warden.RequireExactProfile = 0 in enforcing modes.
 #        0 = explicitly opt in to unsupported unprofiled clients; exact
 #            evidenced profiles still run according to EnforcementMode
 #        1 = reject unprofiled clients after authentication as incompatible
