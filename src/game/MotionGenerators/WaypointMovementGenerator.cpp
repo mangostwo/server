@@ -236,6 +236,7 @@ void WaypointMovementGenerator::OnArrived(Creature& creature)
     }
 
     m_lastReachedWaypoint = m_currentNode;
+    m_deadNodes = 0;
 
     if (m_isArrivalDone)
     {
@@ -436,7 +437,7 @@ Motion::MoveIntent WaypointMovementGenerator::WalkPreparedLeg() const
 {
     // The pace rides on the intent: the driver resolves walk/run from MOVE_WALK alone, so
     // the unit-level SetWalk in PrepareMove is not enough to make a patrol walk.
-    uint32 flags = Motion::MOVE_REQUIRE_PATH;
+    uint32 flags = m_forceNextLeg ? Motion::MOVE_NONE : Motion::MOVE_REQUIRE_PATH;
     if (m_legWalk)
     {
         flags |= Motion::MOVE_WALK;
@@ -491,14 +492,23 @@ Motion::MoveIntent WaypointMovementGenerator::PrepareMove(Creature& creature)
 
         if (creature.AI() && m_pathOrigin == PATH_FROM_EXTERNAL && m_pathId > 0)
         {
+            const uint32 nodeBefore = m_currentNode;
             creature.AI()->MovementInform(
                 (reachedLast ? EXTERNAL_WAYPOINT_FINISHED_LAST : EXTERNAL_WAYPOINT_MOVE_START) + m_pathId,
                 currPoint->first);
 
-            // That hook may have despawned the creature or swapped its path.
-            if (creature.IsDead() || !creature.IsInWorld())
+            // That hook may have despawned the creature, swapped its path, or put another
+            // generator on top of this one.
+            if (creature.IsDead() || !creature.IsInWorld() || !IsActive(creature))
             {
                 return Motion::MoveIntent::Hold();
+            }
+
+            // A SetNextWaypoint from inside the hook re-targets the step; keep it.
+            if (m_currentNode != nodeBefore)
+            {
+                currPoint = m_path->find(m_currentNode);
+                MANGOS_ASSERT(currPoint != m_path->end());
             }
         }
 
@@ -559,7 +569,18 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
         ClearSegment();
         m_isArrivalDone = true;
         m_haveLeg = false;
+        m_forceNextLeg = false;
         Stop(SKIP_DEAD_NODE_DELAY);
+
+        // A whole lap of unreachable nodes means WE are off the mesh, not the nodes: walk
+        // the next leg unrouted so the straight line puts the creature back on it.
+        if (++m_deadNodes >= m_path->size())
+        {
+            m_deadNodes = 0;
+            m_forceNextLeg = true;
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s skipped every waypoint as unreachable, walking the next leg unrouted",
+                             creature.GetGuidStr().c_str());
+        }
     }
 
     if (Stopped(creature))

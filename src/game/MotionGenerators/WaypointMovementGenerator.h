@@ -197,6 +197,8 @@ class WaypointMovementGenerator final : public IntentMovementGenerator
         Motion::Facing m_legFacing;
         bool m_legWalk = true; ///< Pace of the leg; false only for a DB-flagged runner.
         bool m_haveLeg = false;
+        uint32 m_deadNodes = 0;      ///< Nodes skipped as unreachable in a row.
+        bool m_forceNextLeg = false; ///< Walk the next leg unrouted: a whole lap was unreachable.
 };
 
 /**

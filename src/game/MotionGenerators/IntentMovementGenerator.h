@@ -54,7 +54,16 @@ class IntentMovementGenerator : public MovementGenerator
         bool Update(Unit& owner, const uint32& diff) final
         {
             const Motion::MoveStatus status = m_driver.BeginTick(owner);
-            return m_driver.Apply(owner, Intent(owner, status, diff));
+            const Motion::MoveIntent intent = Intent(owner, status, diff);
+
+            // A hook fired from inside Intent (a waypoint inform, a script) may have pushed
+            // or popped generators: a leg laid now would belong to one no longer on top.
+            if (!IsActive(owner))
+            {
+                return true;
+            }
+
+            return m_driver.Apply(owner, intent);
         }
 
         void unitSpeedChanged() final { m_driver.OnSpeedChanged(); }
