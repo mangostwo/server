@@ -45,6 +45,24 @@ namespace Arbiter
             }
         }
 
+        /// The model-side twin of IsOneShot: kinds whose stack generator ends by itself.
+        bool IsOneShotKind(MoveKind kind)
+        {
+            switch (kind)
+            {
+                case MoveKind::Point:
+                case MoveKind::FlyLand:
+                case MoveKind::Home:
+                case MoveKind::AssistanceRun:
+                case MoveKind::Distract:
+                case MoveKind::AssistanceDistract:
+                case MoveKind::Effect:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         bool IsTargeted(MovementGeneratorType type)
         {
             return type == CHASE_MOTION_TYPE || type == FOLLOW_MOTION_TYPE;
@@ -104,14 +122,15 @@ namespace Arbiter
             return n;
         }
 
-        /// Number of command-layer entries the model holds (Scripted and above),
-        /// excluding the Idle-as-command singleton -- that one is a mask, not a one-shot.
-        size_t ModelCommandCount(ArbiterModel const& model)
+        /// Number of one-shot moves the model holds: the only entries a stack one-shot
+        /// can legitimately stand for. A standing behaviour masking others (an Idle
+        /// command, a fear, a taxi) is not one, and must not pad the count.
+        size_t ModelOneShotCount(ArbiterModel const& model)
         {
             size_t n = 0;
             for (Held const& h : model.Contents())
             {
-                if (LayerOf(h.kind) >= Layer::Scripted && h.kind != MoveKind::Idle)
+                if (IsOneShotKind(h.kind))
                 {
                     ++n;
                 }
@@ -130,15 +149,12 @@ namespace Arbiter
 
         const MovementGeneratorType top = stack.back();
         // Rules 3 and 4 compare positions inside the model, so they use the layer the selection is
-        // held on (an Idle command sits on Scripted although LayerOf(Idle) is Default). Rule 5 asks
-        // whether the selection is a standing behaviour, where that Idle command counts as one, so
-        // it keeps the kind's own layer.
+        // held on (an Idle command sits on Scripted although LayerOf(Idle) is Default).
         const Layer heldLayer = *model.SelectedLayer();
-        const Layer kindLayer = LayerOf(selected->kind);
 
         if (SameKind(top, selected->kind))
         {
-            if (CountIf(stack, IsOneShot) > ModelCommandCount(model))
+            if (CountIf(stack, IsOneShot) > ModelOneShotCount(model))
             {
                 return Divergence::SupersededOneShot;
             }
@@ -163,7 +179,7 @@ namespace Arbiter
             return Divergence::CombatCancelledEarly;
         }
 
-        if (IsOneShot(top) && !ModelHolds(model, top, NULL) && kindLayer <= Layer::Combat)
+        if (IsOneShot(top) && !ModelHolds(model, top, nullptr))
         {
             return Divergence::SupersededOneShot;
         }

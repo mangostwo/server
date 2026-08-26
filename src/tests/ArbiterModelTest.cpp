@@ -71,9 +71,13 @@ TEST(ArbiterContract_PolicyTable)
     CHECK_EQ(P(PolicyOf(MoveKind::Chase, false)), P(Policy::Supersede));    // D6: update
     CHECK_EQ(P(PolicyOf(MoveKind::Point, false)), P(Policy::Override));     // D2
     CHECK_EQ(P(PolicyOf(MoveKind::Point, true)), P(Policy::Suspend));       // resumeCombat
+    CHECK_EQ(P(PolicyOf(MoveKind::FlyLand, false)), P(Policy::Override));
     CHECK_EQ(P(PolicyOf(MoveKind::Home, false)), P(Policy::Override));
+    CHECK_EQ(P(PolicyOf(MoveKind::AssistanceRun, false)), P(Policy::Override));
     CHECK_EQ(P(PolicyOf(MoveKind::Distract, false)), P(Policy::Suspend));
+    CHECK_EQ(P(PolicyOf(MoveKind::AssistanceDistract, false)), P(Policy::Suspend));
     CHECK_EQ(P(PolicyOf(MoveKind::Fear, false)), P(Policy::Suspend));
+    CHECK_EQ(P(PolicyOf(MoveKind::Confused, false)), P(Policy::Suspend));
     CHECK_EQ(P(PolicyOf(MoveKind::Effect, false)), P(Policy::Suspend));
     CHECK_EQ(P(PolicyOf(MoveKind::Taxi, false)), P(Policy::Override));      // D8 split handled in the model
 }
@@ -81,10 +85,10 @@ TEST(ArbiterContract_PolicyTable)
 TEST(ArbiterContract_SelfExpiringMatchesMutate)
 {
     // MotionMaster::Mutate expires a HOME, DISTRACT or EFFECT top before pushing
-    // anything (MotionMaster.cpp:629-647); AssistanceDistract reports DISTRACT's family.
+    // anything; AssistanceDistract reports its own type, which is not in that switch.
     CHECK(SelfExpiring(MoveKind::Home));
     CHECK(SelfExpiring(MoveKind::Distract));
-    CHECK(SelfExpiring(MoveKind::AssistanceDistract));
+    CHECK(!SelfExpiring(MoveKind::AssistanceDistract));
     CHECK(SelfExpiring(MoveKind::Effect));
     CHECK(!SelfExpiring(MoveKind::Point));
     CHECK(!SelfExpiring(MoveKind::Chase));
@@ -260,7 +264,7 @@ TEST(ArbiterModel_EffectKeepsCombat_EffectSupersedesEffect)
 
 TEST(ArbiterModel_SelfExpiringCancelledByAnyRequest)
 {
-    // Mutate expires a HOME/DISTRACT/EFFECT top before pushing (MotionMaster.cpp:629-647).
+    // MotionMaster::Mutate expires a HOME/DISTRACT/EFFECT top before pushing.
     ArbiterModel m;
     m.InstallDefault(MoveKind::Random);
     m.Request(Req(MoveKind::Home));

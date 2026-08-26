@@ -82,7 +82,7 @@ namespace Arbiter
     bool SelfExpiring(MoveKind kind)
     {
         return kind == MoveKind::Home || kind == MoveKind::Distract ||
-               kind == MoveKind::AssistanceDistract || kind == MoveKind::Effect;
+               kind == MoveKind::Effect;
     }
 
     const char* KindName(MoveKind kind)
@@ -92,6 +92,8 @@ namespace Arbiter
             "Idle", "Random", "Waypoint", "FollowTarget", "Chase", "Point", "FlyLand", "Home",
             "AssistanceRun", "Distract", "AssistanceDistract", "Fear", "Confused", "Effect", "Taxi"
         };
+        static_assert(sizeof(names) / sizeof(names[0]) == static_cast<size_t>(MoveKind::Count),
+                      "KindName out of sync with MoveKind");
         return kind < MoveKind::Count ? names[static_cast<uint8>(kind)] : "?";
     }
 

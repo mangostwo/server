@@ -53,7 +53,7 @@ namespace Arbiter
         const Held held{request.kind, request.id, ++m_seq};
 
         // MotionMaster::Mutate expires a HOME, DISTRACT or EFFECT top before pushing
-        // anything else (MotionMaster.cpp:629-647). Same-layer requests supersede instead.
+        // anything else. Same-layer requests supersede instead.
         if (before && SelfExpiring(before->kind) && LayerOf(before->kind) != layer)
         {
             Finish(m_commands[static_cast<uint8>(LayerOf(before->kind))], FinishReason::Cancelled);
@@ -87,7 +87,7 @@ namespace Arbiter
     {
         if (request.kind == MoveKind::Idle && !Empty())
         {
-            // MoveIdle on a non-empty stack pushes the idle singleton on top (MotionMaster.cpp:321-328)
+            // MotionMaster::MoveIdle on a non-empty stack pushes the idle singleton on top
             // and is a no-op when the top already is that singleton. Here it is a Scripted-layer
             // command: it masks combat and the default, and it supersedes a scripted one-shot
             // beneath it on purpose -- a stale point never resumes (design §1); the shadow

@@ -57,7 +57,7 @@ namespace Arbiter
 
     struct MoveRequest
     {
-        MoveKind kind;
+        MoveKind kind;          ///< what to run
         uint32   id;            ///< MovementInform id, 0 when none
         bool     resumeCombat;  ///< Point only: Suspend instead of Override (D2)
     };
@@ -67,7 +67,7 @@ namespace Arbiter
     /// How a request treats what runs beneath it; resumeCombat turns a Point's Override into Suspend.
     Policy PolicyOf(MoveKind kind, bool resumeCombat);
     /// Kinds MotionMaster::Mutate expires on any new request (Home, Distract,
-    /// AssistanceDistract, Effect).
+    /// Effect; not AssistanceDistract, whose type is not in that switch).
     bool SelfExpiring(MoveKind kind);
     /// Human-readable kind name for traces and tests.
     const char* KindName(MoveKind kind);

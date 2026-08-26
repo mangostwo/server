@@ -88,7 +88,9 @@ namespace Arbiter
             std::optional<Held> const& Default() const { return m_default; }
             /// The Combat-layer entry, if any.
             std::optional<Held> const& Combat() const { return m_combat; }
-            /// The entry held on the given command layer, if any.
+            /// The entry held on the given command layer, if any. Scripted and above only;
+            /// the Default and Combat slots live in Default()/Combat() and this returns an
+            /// empty optional for them.
             std::optional<Held> const& Command(Layer layer) const { return m_commands[static_cast<uint8>(layer)]; }
             /// Every held entry, ascending layer order (Default, Combat, then commands).
             std::vector<Held> Contents() const;

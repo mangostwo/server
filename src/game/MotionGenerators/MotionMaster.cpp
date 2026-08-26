@@ -245,6 +245,8 @@ void MotionMaster::UpdateMotion(uint32 diff)
  */
 void MotionMaster::DirectClean(bool reset, bool all)
 {
+    // Mirrored even at depth one (DelayedClean returns before its mirror there): the model
+    // may hold masked entries the stack no longer has.
     ShadowClear(all);
 
     while (all ? !empty() : size() > 1)

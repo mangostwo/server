@@ -72,6 +72,30 @@ TEST(ShadowClassifier_StalePointBeneathIsSupersededOneShot)
     CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, POINT_MOTION_TYPE}, m)), D(Divergence::SupersededOneShot));   // stack: stale point resumed
 }
 
+TEST(ShadowClassifier_StalePointUnderFearIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Point, 1));
+    m.Request(Req(MoveKind::Point, 2));                                        // the model superseded the first
+    m.Request(Req(MoveKind::Fear));                                            // a mask, not a one-shot of its own
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, POINT_MOTION_TYPE, POINT_MOTION_TYPE, FLEEING_MOTION_TYPE}, m)),
+             D(Divergence::SupersededOneShot));
+}
+
+TEST(ShadowClassifier_StalePointResumedUnderFearIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Point, 1));
+    m.Request(Req(MoveKind::Point, 2));
+    m.Expire(MoveKind::Point);                                                 // the point on the stack expired
+    // The model holds [Idle, Fear]; the stack resumed the stale first point above the fear.
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, FLEEING_MOTION_TYPE, POINT_MOTION_TYPE}, m)),
+             D(Divergence::SupersededOneShot));
+}
+
 TEST(ShadowClassifier_TwoChasesIsTargetedMultiplicity)
 {
     ArbiterModel m;
