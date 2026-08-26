@@ -62,9 +62,9 @@ void PointMovementGenerator::Finalize(Unit& owner)
 {
     owner.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
 
-    // Only a leg that ran to completion counts as reaching the point; one cut short by an
-    // interrupt does not.
-    if (owner.movespline->Finalized())
+    // Only a leg that ended on its own counts as reaching the point. One cut short by an
+    // interrupt finalizes the spline too, so the spline state cannot tell them apart.
+    if (m_done)
     {
         MovementInform(owner);
     }
@@ -118,6 +118,7 @@ Motion::MoveIntent PointMovementGenerator::Intent(Unit& owner,
     // and the generator beneath it takes back over. Finalize fires the AI inform.
     if (status.arrived || status.blocked)
     {
+        m_done = true;
         return Motion::MoveIntent::Done();
     }
 

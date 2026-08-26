@@ -39,7 +39,7 @@ class PointMovementGenerator : public IntentMovementGenerator
 {
     public:
         PointMovementGenerator(uint32 id, float x, float y, float z, bool generatePath)
-            : m_id(id), m_dest(x, y, z), m_generatePath(generatePath) {}
+            : m_id(id), m_dest(x, y, z), m_generatePath(generatePath), m_done(false) {}
 
         void Initialize(Unit& owner) override;
         void Finalize(Unit& owner) override;
@@ -64,6 +64,7 @@ class PointMovementGenerator : public IntentMovementGenerator
         uint32 m_id;             ///< Echoed to the AI on arrival.
         Motion::Vector3 m_dest;  ///< Where we are going.
         bool m_generatePath;     ///< Route around geometry, or go straight there.
+        bool m_done;             ///< The leg ended on its own: arrived, or could not be laid.
 };
 
 /**
