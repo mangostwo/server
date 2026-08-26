@@ -197,6 +197,12 @@ BindIP                       = "0.0.0.0"
 #        Disable mmap pathfinding on the listed maps.
 #        List of map ids with delimiter ','
 #
+#    Movement.ArbiterShadow
+#        Run the movement arbiter model beside the generator stack and log where the two
+#        would select differently. Diagnostic only: it never changes movement.
+#        Default: 0 (off)
+#                 1 (on)
+#
 #    UpdateUptimeInterval
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0
 #        Default: 10 (minutes)
@@ -240,6 +246,7 @@ DetectPosCollision                = 1
 TargetPosRecalculateRange         = 1.5
 mmap.enabled                      = 1
 mmap.ignoreMapIds                 = ""
+Movement.ArbiterShadow            = 0
 UpdateUptimeInterval              = 10
 MaxCoreStuckTime                  = 0
 AddonChannel                      = 1

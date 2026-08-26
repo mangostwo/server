@@ -68,6 +68,11 @@ namespace Arbiter
             void Clear(bool all);
             /// MovementExpired / Update()==false on whatever is currently selected.
             void ExpireSelected();
+            /// Finish the highest-layer entry of this kind, as the stack expiring that generator
+            /// would: a command finishes Expired, combat TargetLost, a FollowTarget default
+            /// TargetLost with its fallback restored; any other default, or no entry of that
+            /// kind (a one-shot the model already superseded), is a no-op.
+            void Expire(MoveKind kind);
             /// Finish whatever is currently selected, for the given reason.
             void FinishSelected(FinishReason reason);
             /// Cancel the Control command if it still holds `kind` (D3: by identity).

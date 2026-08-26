@@ -777,6 +777,8 @@ void World::LoadConfigSettings(bool reload)
     MMAP::MMapFactory::preventPathfindingOnMaps(ignoreMapIds.c_str());
     sLog.outString("WORLD: MMap pathfinding %sabled", getConfig(CONFIG_BOOL_MMAP_ENABLED) ? "en" : "dis");
 
+    setConfig(CONFIG_BOOL_MOVEMENT_ARBITER_SHADOW, "Movement.ArbiterShadow", false);
+
 #ifdef ENABLE_ELUNA
     if (reload)
     {

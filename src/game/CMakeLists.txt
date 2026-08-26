@@ -38,6 +38,10 @@ source_group("Map Threading" FILES ${SRC_GRP_MAP_THREAD})
 file(GLOB SRC_GRP_MOTION_GEN MotionGenerators/*.cpp MotionGenerators/*.h)
 source_group("Motion generators" FILES ${SRC_GRP_MOTION_GEN})
 
+#Movement Arbiter group
+file(GLOB SRC_GRP_MOTION_ARBITER MotionGenerators/Arbiter/*.cpp MotionGenerators/Arbiter/*.h)
+source_group("Motion generators\\Arbiter" FILES ${SRC_GRP_MOTION_ARBITER})
+
 #Movement group
 file(GLOB SRC_GRP_MOVEMENT movement/*.cpp movement/*.h)
 source_group("Movement" FILES ${SRC_GRP_MOVEMENT})
@@ -111,6 +115,7 @@ add_library(game STATIC
     ${SRC_GRP_CHAT_COMMANDS}
     ${SRC_GRP_MAP_THREAD}
     ${SRC_GRP_MOTION_GEN}
+    ${SRC_GRP_MOTION_ARBITER}
     ${SRC_GRP_MOVEMENT}
     ${SRC_GRP_OBJECT}
     ${SRC_GRP_OUTDOOR_PVP}

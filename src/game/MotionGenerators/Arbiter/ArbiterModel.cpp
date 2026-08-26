@@ -192,6 +192,40 @@ namespace Arbiter
         }
     }
 
+    void ArbiterModel::Expire(MoveKind kind)
+    {
+        // The stack expires the generator on top, which is not always what the model
+        // selects: a point pushed over a fear expires the point, never the fear.
+        const std::optional<Held> before = Selected();
+
+        for (uint8 i = LAYER_COUNT; i-- > FIRST_COMMAND_LAYER;)
+        {
+            if (m_commands[i] && m_commands[i]->kind == kind)
+            {
+                Finish(m_commands[i], FinishReason::Expired);
+                Reselect(before);
+                return;
+            }
+        }
+
+        if (m_combat && m_combat->kind == kind)
+        {
+            Finish(m_combat, FinishReason::TargetLost);
+            Reselect(before);
+            return;
+        }
+
+        // A default only ends on its own when it is a Follow whose target is gone; any
+        // other default, and a kind the model no longer holds, is a no-op.
+        if (m_default && m_default->kind == kind && kind == MoveKind::FollowTarget)
+        {
+            Finish(m_default, FinishReason::TargetLost);
+            m_default = m_fallbackDefault;
+            m_fallbackDefault.reset();
+            Reselect(before);
+        }
+    }
+
     void ArbiterModel::FinishSelected(FinishReason reason)
     {
         const std::optional<Held> before = Selected();

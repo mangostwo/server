@@ -387,3 +387,47 @@ TEST(ArbiterModel_IdleTwiceIsNoOp)
     CHECK_EQ(static_cast<int>(m.Contents().size()), 2);
     CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));
 }
+
+TEST(ArbiterModel_ExpireKindFinishesMaskedEntryOnly)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Point, 4));                               // masked beneath the fear
+    m.DrainEvents();
+    m.Expire(MoveKind::Point);                                        // the stack's point expired
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Fear));                     // the fear is untouched
+    CHECK(!m.Command(Layer::Scripted));
+    CHECK_EQ(CountEvents(m.DrainEvents(), MovementEvent::Kind::Finished, MoveKind::Point), 1);
+}
+
+TEST(ArbiterModel_ExpireKindNotHeldIsNoOp)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Chase));
+    m.DrainEvents();
+    m.Expire(MoveKind::Point);                                        // a stale point the model never held
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Chase));
+    CHECK_EQ(static_cast<int>(m.DrainEvents().size()), 0);
+}
+
+TEST(ArbiterModel_ExpireKindPrefersIdleCommandOverDefault)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Idle));                                   // MoveIdle on a non-empty stack
+    m.Expire(MoveKind::Idle);
+    CHECK(!m.Command(Layer::Scripted));
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));                     // the default remains
+}
+
+TEST(ArbiterModel_ExpireKindFollowRestoresFallback)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Clear(false);
+    m.Request(Req(MoveKind::FollowTarget));
+    m.Expire(MoveKind::FollowTarget);
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Random));
+}
