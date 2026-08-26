@@ -57,11 +57,16 @@ Motion::IPathQuery* MotionDriver::Query(Unit const& owner)
     Motion::IMotionFrame const& frame = Motion::FrameFor(owner);
 
     // A leg never spans two frames: if the mover changed frame since the last leg, the
-    // old router speaks the wrong coordinate system.
-    if (!m_query || m_queryFrame != frame.Kind())
+    // old router speaks the wrong coordinate system. Nor two maps: the router binds the
+    // map's mesh and the instance's query at construction, and a generator outlives a
+    // teleport.
+    if (!m_query || m_queryFrame != frame.Kind() ||
+        m_queryMapId != owner.GetMapId() || m_queryInstanceId != owner.GetInstanceId())
     {
         m_query = frame.CreatePathQuery(owner);
         m_queryFrame = frame.Kind();
+        m_queryMapId = owner.GetMapId();
+        m_queryInstanceId = owner.GetInstanceId();
     }
 
     return m_query.get();

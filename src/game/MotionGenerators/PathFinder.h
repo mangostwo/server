@@ -170,6 +170,7 @@ class PathFinder
         Vector3        m_actualEndPosition;// {x, y, z} of the closest possible point to the given destination
 
         const Unit* const       m_sourceUnit;       // The unit that is moving
+        uint32                  m_mapId;            // The map routed on; the mesh is bound per route
         const dtNavMesh*        m_navMesh;          // The navigation mesh
         const dtNavMeshQuery*   m_navMeshQuery;     // The navigation mesh query used to find the path
 
@@ -287,6 +288,8 @@ class PathFinder
          * @brief Create the query filter.
          */
         void createFilter();
+        /// Take the map's mesh and the instance's query from the manager; NULL when there is none.
+        void BindMesh();
 
         /**
          * @brief Update the query filter.

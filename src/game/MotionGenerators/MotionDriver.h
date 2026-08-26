@@ -87,6 +87,8 @@ class MotionDriver
 
         std::unique_ptr<Motion::IPathQuery> m_query;
         Motion::FrameKind m_queryFrame = Motion::FrameKind::World;
+        uint32 m_queryMapId = 0;      ///< The map the router was built for.
+        uint32 m_queryInstanceId = 0; ///< And the instance: the mesh query is per instance.
 
         /// The goal of the leg we last laid, so the drift test can tell when a tracked
         /// destination has moved far enough to be worth re-routing.
