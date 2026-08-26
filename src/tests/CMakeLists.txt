@@ -51,6 +51,8 @@ set(SRC_GRP_TESTS
     NavBinningTest.cpp
     DynamicCollisionTest.cpp
     PlacementTest.cpp
+    ArbiterModelTest.cpp
+    ShadowClassifierTest.cpp
     GeometryMathTest.cpp
     DataIntegrityTest.cpp
     LFGLogicTest.cpp
@@ -85,6 +87,10 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/WorldGatewayAuth.cpp
+    # The movement arbiter's pure core: no Unit, no driver, no map.
+    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/MoveContract.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ArbiterModel.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators/Arbiter/ShadowClassifier.cpp
     ByteBufferStressTest.cpp
     CodecStressTest.cpp
     CryptoStressTest.cpp
@@ -106,7 +112,8 @@ target_include_directories(mangos_tests
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src/game/Warden
         ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
-        ${CMAKE_SOURCE_DIR}/src/game/Server)
+        ${CMAKE_SOURCE_DIR}/src/game/Server
+        ${CMAKE_SOURCE_DIR}/src/game/MotionGenerators)
 
 target_link_libraries(mangos_tests
     PRIVATE
