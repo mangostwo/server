@@ -448,6 +448,32 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
     ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, GetHealth() < GetMaxHealth() * 0.35f);
     ModifyAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, GetHealth() > GetMaxHealth() * 0.75f);
+    // A stop took the spline's position: write it now, where a cell switch is safe --
+    // unless something else moved the unit since.
+    if (m_hasPendingCommit)
+    {
+        m_hasPendingCommit = false;
+        if (Where().X() == m_pendingCommitFrom.x && Where().Y() == m_pendingCommitFrom.y &&
+            Where().Z() == m_pendingCommitFrom.z && Where().Facing() == m_pendingCommitFrom.o)
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)this)->SetPosition(m_pendingCommit.x, m_pendingCommit.y,
+                                             m_pendingCommit.z, m_pendingCommit.o);
+            }
+            else
+            {
+                GetMap()->CreatureRelocation((Creature*)this, m_pendingCommit.x, m_pendingCommit.y,
+                                             m_pendingCommit.z, m_pendingCommit.o);
+            }
+
+            // The movement state follows the placement whenever the server is the one that
+            // moved the unit, so the next create block agrees with where it was stopped.
+            m_movementInfo.Report(m_pendingCommit.x, m_pendingCommit.y,
+                                  m_pendingCommit.z, m_pendingCommit.o);
+        }
+    }
+
     UpdateSplineMovement(p_time);
     i_motionMaster.UpdateMotion(p_time);
 }
@@ -5649,13 +5675,12 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
         return;
     }
 
-    // Commit where the spline actually is before stopping there, so the server, the stop
-    // packet and every later create block agree. A commit refused at a cell edge leaves
-    // the last committed position, and the stop is placed there instead.
-    const bool committed = CommitSplinePosition();
+    // Take where the spline actually is before stopping there, so the stop packet and
+    // the placement agree. The placement itself is written on the next Update.
+    CommitSplinePosition();
 
     Movement::MoveSplineInit init(*this);
-    init.Stop(!committed);
+    init.Stop();
 }
 
 /**
@@ -5689,21 +5714,13 @@ bool Unit::CommitSplinePosition()
         return true;
     }
 
-    // A bare placement write must not cross a cell: the grid would still list the unit
-    // in the old one. Keep the last committed position then, and let the next real
-    // relocation carry it over.
-    CellPair const curCell = MaNGOS::ComputeCellPair(Where().X(), Where().Y());
-    CellPair const newCell = MaNGOS::ComputeCellPair(loc.x, loc.y);
-    if (curCell != newCell)
-    {
-        return false;
-    }
-
-    Place().MoveTo(loc.x, loc.y, loc.z, loc.orientation);
-
-    // The movement state follows the placement whenever the server is the one that moved
-    // the unit, so the next create block agrees with where it was stopped.
-    m_movementInfo.Report(loc.x, loc.y, loc.z, loc.orientation);
+    // The placement is written on the next Update. A stop can come from inside a grid
+    // visit (an AI reacting to what just walked into view), where a cell switch would
+    // break the list being walked; Update is the one place it is safe. Where the unit
+    // stands now is kept, so a relocation by anything else in between is not undone.
+    m_pendingCommit = Position(loc.x, loc.y, loc.z, loc.orientation);
+    m_pendingCommitFrom = Position(Where().X(), Where().Y(), Where().Z(), Where().Facing());
+    m_hasPendingCommit = true;
     return true;
 }
 

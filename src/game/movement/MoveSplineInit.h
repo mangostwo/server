@@ -63,7 +63,7 @@ namespace Movement
             /**
              * @brief Stops any creature movement.
              */
-            void Stop(bool atCommittedPosition = false);
+            void Stop();
 
             /* Adds movement by parabolic trajectory
              * @param amplitude  - the maximum height of parabola, value could be negative and positive

@@ -133,6 +133,15 @@ namespace Movement
         {
             real_position = move_spline.ComputePosition();
         }
+        else if (!transportInfo)
+        {
+            // A stop just took the spline's position and the placement has not caught up
+            // (it is written on the unit's next Update): start from where the stop was sent.
+            if (Position const* pending = unit.PendingSplineCommit())
+            {
+                real_position = Location(pending->x, pending->y, pending->z, pending->o);
+            }
+        }
 
         if (args.path.empty())
         {
@@ -200,7 +209,7 @@ namespace Movement
     /**
      * @brief Stops any creature movement.
      */
-    void MoveSplineInit::Stop(bool atCommittedPosition /*= false*/)
+    void MoveSplineInit::Stop()
     {
         MoveSpline& move_spline = *unit.movespline;
 
@@ -231,9 +240,7 @@ namespace Movement
 
         // there is a big chance that current position is unknown if current state is not finalized, need compute it
         // this also allows calculate spline position and update map position in much greater intervals
-        // ... unless the caller could not commit that position (a cell edge): then the
-        // stop is placed where the unit is known to stand, so the packet and the server agree.
-        if (!move_spline.Finalized() && !transportInfo && !atCommittedPosition)
+        if (!move_spline.Finalized() && !transportInfo)
         {
             real_position = move_spline.ComputePosition();
         }
