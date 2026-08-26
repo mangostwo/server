@@ -178,6 +178,21 @@ void RandomMovementGenerator::Finalize(Unit& owner)
     static_cast<Creature&>(owner).SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+uint32 RandomMovementGenerator::RetryDelay()
+{
+    // Every failed attempt doubles the wait, up to the shortest normal rest. A spot that
+    // never routes -- an island, a platform without a mesh, a floor no random point
+    // finds -- is then retried a few times a minute, not twenty times a second for as
+    // long as the creature lives. A hop that gets laid resets the count.
+    const uint32 delay = std::min<uint32>(RETRY_DELAY << m_retries, REST_AFTER_HOP_MIN);
+    if (delay < REST_AFTER_HOP_MIN)
+    {
+        ++m_retries;
+    }
+
+    return delay;
+}
+
 Motion::MoveIntent RandomMovementGenerator::Intent(Unit& owner,
                                                    Motion::MoveStatus const& status,
                                                    uint32 diff)
@@ -203,11 +218,17 @@ Motion::MoveIntent RandomMovementGenerator::Intent(Unit& owner,
     if (status.blocked)
     {
         m_haveHop = false;
-        m_restTime.Reset(RETRY_DELAY);
+        m_restTime.Reset(RetryDelay());
     }
 
     // Mid-hop: re-state the same goal, which the driver recognises as the leg it is
     // already walking and leaves alone.
+    // A hop that got laid -- seen traveling, or already run out -- ends the failure streak.
+    if (status.arrived || (status.traveling && m_haveHop))
+    {
+        m_retries = 0;
+    }
+
     if (status.traveling && m_haveHop)
     {
         return Motion::MoveIntent::Move(m_hop, hopFlags);
@@ -231,7 +252,7 @@ Motion::MoveIntent RandomMovementGenerator::Intent(Unit& owner,
         const auto hop = Motion::FrameFor(owner).RandomPoint(owner, m_centre, m_radius);
         if (!hop)
         {
-            m_restTime.Reset(RETRY_DELAY);
+            m_restTime.Reset(RetryDelay());
             return Motion::MoveIntent::Hold();
         }
 

@@ -54,9 +54,13 @@ class ConfusedMovementGenerator final : public IntentMovementGenerator
     private:
         Motion::Vector3 m_anchor;     ///< Where the unit stood when it was confused.
 
+        /// The wait before the next attempt after one that failed; doubles per failure.
+        uint32 RetryDelay();
+
         TimeTracker m_staggerTime{0}; ///< Time left before the next lurch.
         Motion::Vector3 m_lurch;      ///< Where the current lurch is heading.
         bool m_haveLurch = false;     ///< False before the first point has been picked.
+        uint32 m_retries = 0;         ///< Failed attempts in a row; the retry wait doubles with each.
 };
 
 #endif // MANGOS_CONFUSEDMOVEMENTGENERATOR_H
