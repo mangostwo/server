@@ -24,3 +24,141 @@
  */
 
 #include "TestHarness.h"
+
+#include "Arbiter/ShadowClassifier.h"
+
+using namespace Arbiter;
+
+namespace
+{
+    MoveRequest Req(MoveKind kind, uint32 id = 0)
+    {
+        MoveRequest r;
+        r.kind = kind;
+        r.id = id;
+        r.resumeCombat = false;
+        return r;
+    }
+
+    int D(Divergence d) { return static_cast<int>(d); }
+}
+
+TEST(ShadowClassifier_AgreeingStackIsNone)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Chase));
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, CHASE_MOTION_TYPE}, m)), D(Divergence::None));
+    m.Request(Req(MoveKind::Effect, 1));
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, CHASE_MOTION_TYPE, EFFECT_MOTION_TYPE}, m)), D(Divergence::None));
+}
+
+TEST(ShadowClassifier_FlyOrLandReportsPoint)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::FlyLand, 2));
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, POINT_MOTION_TYPE}, m)), D(Divergence::None));
+}
+
+TEST(ShadowClassifier_StalePointBeneathIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Point, 1));
+    m.Request(Req(MoveKind::Point, 2));
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, POINT_MOTION_TYPE, POINT_MOTION_TYPE}, m)), D(Divergence::SupersededOneShot));
+    m.ExpireSelected();                                                        // model: back to Idle
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, POINT_MOTION_TYPE}, m)), D(Divergence::SupersededOneShot));   // stack: stale point resumed
+}
+
+TEST(ShadowClassifier_TwoChasesIsTargetedMultiplicity)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Chase));
+    m.Request(Req(MoveKind::Chase));
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, CHASE_MOTION_TYPE, CHASE_MOTION_TYPE}, m)), D(Divergence::TargetedMultiplicity));
+}
+
+TEST(ShadowClassifier_PointUnderFearIsLayerOrder)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Point, 3));
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, FLEEING_MOTION_TYPE, POINT_MOTION_TYPE}, m)), D(Divergence::LayerOrder));
+}
+
+TEST(ShadowClassifier_ChaseDroppedBeneathFearIsCombatCancelledEarly)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Chase));
+    m.Request(Req(MoveKind::Fear));
+    m.ExpireSelected();                                                        // fear ends: model resumes the chase
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE}, m)), D(Divergence::CombatCancelledEarly));   // stack deleted it (DirectExpire)
+}
+
+TEST(ShadowClassifier_FollowDroppedBeneathChaseIsCombatCancelledEarly)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Clear(false);
+    m.Request(Req(MoveKind::FollowTarget));
+    m.Request(Req(MoveKind::Chase));
+    m.ExpireSelected();                                                        // chase target gone: model → Follow
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE}, m)), D(Divergence::CombatCancelledEarly));
+}
+
+TEST(ShadowClassifier_EmptyModelIsUnexpected)
+{
+    ArbiterModel m;
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE}, m)), D(Divergence::Unexpected));
+}
+
+TEST(ShadowClassifier_UnrelatedTopIsUnexpected)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Point, 1));
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, CONFUSED_MOTION_TYPE}, m)), D(Divergence::Unexpected));
+}
+
+TEST(ShadowClassifier_Describe)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Chase));
+    m.Request(Req(MoveKind::Point, 7));
+    CHECK_STR(DescribeStack({RANDOM_MOTION_TYPE, CHASE_MOTION_TYPE, POINT_MOTION_TYPE}), "[Random,Chase,Point]");
+    CHECK_STR(DescribeModel(m), "[Random|Point#7]");
+    CHECK_STR(DivergenceName(Divergence::LayerOrder), "LayerOrder");
+}
+
+TEST(ShadowClassifier_ChaseOverIdleCommandIsLayerOrder)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Idle));                                            // MoveIdle on a non-empty stack
+    m.Request(Req(MoveKind::Chase));                                           // aggro: the stack runs the chase
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, IDLE_MOTION_TYPE, CHASE_MOTION_TYPE}, m)), D(Divergence::LayerOrder));
+}
+
+TEST(ShadowClassifier_IdleOverStalePointIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Point, 1));
+    m.Request(Req(MoveKind::Idle));                                            // the model superseded the point
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, POINT_MOTION_TYPE, IDLE_MOTION_TYPE}, m)), D(Divergence::SupersededOneShot));
+}
+
+TEST(ShadowClassifier_IdleCommandUnderFearIsLayerOrder)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);                                          // a default Idle beneath an Idle command
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Idle));                                            // MoveIdle while feared: the stack runs the idle
+    CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, FLEEING_MOTION_TYPE, IDLE_MOTION_TYPE}, m)), D(Divergence::LayerOrder));
+}
