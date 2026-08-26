@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <memory>
+#include <unordered_set>
 #include "Auth/BigNumber.h"
 #include "SharedDefines.h"
 #include "ObjectGuid.h"
@@ -45,6 +46,7 @@
 #include "Item.h"
 #include "LFGMgr.h"
 #include "SessionProtocolPolicy.h"
+#include "WardenConfiguration.h"
 
 struct ItemPrototype;
 struct AuctionEntry;
@@ -63,6 +65,16 @@ class SessionMailbox;
 namespace proto
 {
     class IClientLink;
+}
+namespace warden
+{
+    enum class WardenFailure : uint8;
+    struct AdmissionData;
+    struct WardenEvidenceBatch;
+    class WardenEnforcementPolicy;
+    struct WardenLifecycleEvent;
+    struct WardenPolicyDecision;
+    class WardenServer;
 }
 class QueryResult;
 class LoginQueryHolder;
@@ -314,6 +326,12 @@ class WorldSession
                      std::shared_ptr<SessionMailbox> mailbox,
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKey);
+        WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                     std::shared_ptr<SessionMailbox> mailbox,
+                     AccountTypes sec, uint8 expansion, time_t mute_time,
+                     LocaleConstant locale, const BigNumber& sessionKey,
+                     warden::AdmissionData&& admission,
+                     warden::WardenAdmissionContext admissionContext);
 
         /**
          * @brief Destructor
@@ -375,6 +393,12 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseShift);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
+        /** Applies the coherent Attach-time policy after the native auth send. */
+        void OnAuthenticatedAdmission();
+        /** Starts the inert admission object after the character-list boundary. */
+        void StartWardenBootstrap();
+        /** Charges Warden before this world tick dispatches queued packets. */
+        void UpdateWarden(uint32 diffMs);
         void SendPlayerNotFoundFailureResponse();
         void SendGmResurrectFailureResponse();
         void SendGmResurrectSuccessResponse();
@@ -1064,6 +1088,26 @@ class WorldSession
         void HandleLfgBootVote(WorldPacket& recv_data);
 
     private:
+        // Pure Warden callbacks enter the account, persistence, logging, and
+        // connection policy adapter only through these typed methods.
+        void HandleWardenLifecycle(
+            warden::WardenLifecycleEvent const& event);
+        void HandleWardenEvidenceBatch(
+            warden::WardenEvidenceBatch const& batch);
+        void ApplyWardenPolicyDecisions(
+            std::vector<warden::WardenPolicyDecision> const& decisions);
+        /** Persists abandoned confirmations as non-actionable audits. */
+        void DrainWardenPendingConfirmations();
+        // Observers request teardown; the outer entry point performs it only
+        // after WardenServer returns, preventing callback self-destruction.
+        void RequestWardenDisengagement();
+        void FinalizeWardenDisengagement();
+        void PersistWardenAudit(
+            warden::WardenPolicyDecision const& decision);
+        void PersistWardenOperationalAudit(warden::WardenFailure failure);
+        void PersistWardenIncidentAndKick(
+            warden::WardenPolicyDecision const& decision);
+
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
         bool VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const;
@@ -1082,6 +1126,22 @@ class WorldSession
         /// call on it is safe after teardown, so callers need only null-check.
         std::shared_ptr<proto::IClientLink> m_link;
         std::shared_ptr<SessionMailbox> m_mailbox;
+
+        std::unique_ptr<warden::AdmissionData> m_pendingWardenAdmission;
+        /** Incident history loaded under the paired Attach-time policy. */
+        warden::WardenAdmissionHistory m_wardenAdmissionHistory;
+        std::unique_ptr<warden::WardenServer> m_warden;
+        std::unique_ptr<warden::WardenEnforcementPolicy> m_wardenPolicy;
+        /** Attach-time policy retained as this session's sole Warden policy. */
+        warden::WardenConfiguration m_wardenConfiguration;
+        uint32 m_wardenBuild = 0;
+        std::string m_clientPlatform;
+        std::string m_clientLocale;
+        uint64 m_wardenAggressiveUntil = 0;
+        bool m_wardenAggressive = false;
+        std::unordered_set<uint64> m_wardenLoggedAnomalies;
+        bool m_wardenDisengagementRequested = false;
+        bool m_wardenAdmissionHandled = false;
 
         /// The account's session key, for redirect HMAC. Owned here because it is
         /// account data, not transport state.

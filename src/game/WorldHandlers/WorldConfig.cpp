@@ -68,6 +68,8 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "TemporarySummon.h"
+#include "WardenConfiguration.h"
+#include "WardenManager.h"
 #include "MoveMap.h"
 #include "GameEventMgr.h"
 #include "PoolManager.h"
@@ -215,6 +217,93 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_ADDON_CHANNEL, "AddonChannel", true);
     setConfig(CONFIG_BOOL_CLEAN_CHARACTER_DB, "CleanCharacterDB", true);
     setConfig(CONFIG_BOOL_GRID_UNLOAD, "GridUnload", true);
+
+    // Normalize one complete policy before publishing it. Sessions copy this
+    // immutable manager snapshot only when authenticated admission completes.
+    setConfig(CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE,
+        "Warden.EnforcementMode", 2);
+    setConfig(CONFIG_BOOL_WARDEN_REQUIRE_EXACT_PROFILE,
+        "Warden.RequireExactProfile", true);
+    setConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MIN,
+        "Warden.CheckIntervalMin", 30);
+    setConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MAX,
+        "Warden.CheckIntervalMax", 60);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MIN,
+        "Warden.AggressiveIntervalMin", 10);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MAX,
+        "Warden.AggressiveIntervalMax", 20);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_THRESHOLD,
+        "Warden.AggressiveThreshold", 5);
+    setConfig(CONFIG_UINT32_WARDEN_BAN_THRESHOLD,
+        "Warden.BanThreshold", 10);
+    setConfig(CONFIG_UINT32_WARDEN_INCIDENT_WINDOW,
+        "Warden.IncidentWindow", 900);
+
+    warden::WardenRawConfiguration wardenRaw;
+    wardenRaw.enforcementMode =
+        getConfig(CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE);
+    wardenRaw.requireExactProfile =
+        getConfig(CONFIG_BOOL_WARDEN_REQUIRE_EXACT_PROFILE);
+    wardenRaw.normalMinSeconds =
+        getConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MIN);
+    wardenRaw.normalMaxSeconds =
+        getConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MAX);
+    wardenRaw.aggressiveMinSeconds =
+        getConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MIN);
+    wardenRaw.aggressiveMaxSeconds =
+        getConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MAX);
+    wardenRaw.aggressiveThreshold =
+        getConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_THRESHOLD);
+    wardenRaw.banThreshold = getConfig(CONFIG_UINT32_WARDEN_BAN_THRESHOLD);
+    wardenRaw.incidentWindowSeconds =
+        getConfig(CONFIG_UINT32_WARDEN_INCIDENT_WINDOW);
+
+    warden::WardenConfigurationNormalization const wardenConfig =
+        warden::NormalizeWardenConfiguration(wardenRaw);
+    setConfig(CONFIG_UINT32_WARDEN_ENFORCEMENT_MODE,
+        static_cast<uint32>(wardenConfig.value.enforcementMode));
+    setConfig(CONFIG_BOOL_WARDEN_REQUIRE_EXACT_PROFILE,
+        wardenConfig.value.requireExactProfile);
+    setConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MIN,
+        wardenConfig.value.normalMinSeconds);
+    setConfig(CONFIG_UINT32_WARDEN_CHECK_INTERVAL_MAX,
+        wardenConfig.value.normalMaxSeconds);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MIN,
+        wardenConfig.value.aggressiveMinSeconds);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_INTERVAL_MAX,
+        wardenConfig.value.aggressiveMaxSeconds);
+    setConfig(CONFIG_UINT32_WARDEN_AGGRESSIVE_THRESHOLD,
+        wardenConfig.value.aggressiveThreshold);
+    setConfig(CONFIG_UINT32_WARDEN_BAN_THRESHOLD,
+        wardenConfig.value.banThreshold);
+    setConfig(CONFIG_UINT32_WARDEN_INCIDENT_WINDOW,
+        wardenConfig.value.incidentWindowSeconds);
+
+    if (warden::HasWardenConfigurationCorrection(wardenConfig.corrections,
+        warden::WardenConfigurationCorrection::EnforcementMode))
+        sLog.outError("Warden.EnforcementMode is invalid; using 2.");
+    if (warden::HasWardenConfigurationCorrection(wardenConfig.corrections,
+        warden::WardenConfigurationCorrection::NormalInterval))
+        sLog.outError("Warden normal interval is invalid; using 30-60 seconds.");
+    if (warden::HasWardenConfigurationCorrection(wardenConfig.corrections,
+        warden::WardenConfigurationCorrection::AggressiveInterval))
+    {
+        sLog.outError("Warden aggressive interval is invalid; using 10-20 "
+            "seconds.");
+    }
+    if (warden::HasWardenConfigurationCorrection(wardenConfig.corrections,
+        warden::WardenConfigurationCorrection::Thresholds))
+    {
+        sLog.outError("Warden thresholds are invalid; using 5 aggressive and "
+            "10 ban events.");
+    }
+    if (warden::HasWardenConfigurationCorrection(wardenConfig.corrections,
+        warden::WardenConfigurationCorrection::IncidentWindow))
+        sLog.outError("Warden incident window is invalid; using 900 seconds.");
+
+    // One atomic pointer publication prevents reload readers from observing a
+    // mixture of old and new policy fields.
+    warden::WardenManager::Instance().PublishConfiguration(wardenConfig.value);
 
     setConfig(CONFIG_UINT32_AUTOBROADCAST_INTERVAL, "AutoBroadcast", 600);
 

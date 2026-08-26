@@ -36,6 +36,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "MapManager.h"
+#include "Server/WardenCheckCatalogLoader.h"
 #include "Server/WorldNetwork.h"
 #include "SystemConfig.h"
 #include "Timer.h"
@@ -379,6 +380,12 @@ int Master::Run()
     }
 
     ClearOnlineAccounts();
+
+    if (!warden::WardenCheckCatalogLoader().LoadAndPublish())
+    {
+        StopDatabases();
+        return 1;
+    }
 
     sWorld.SetInitialWorldSettings();
 

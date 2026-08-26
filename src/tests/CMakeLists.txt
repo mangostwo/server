@@ -54,8 +54,32 @@ set(SRC_GRP_TESTS
     GeometryMathTest.cpp
     DataIntegrityTest.cpp
     LFGLogicTest.cpp
+    WardenCryptoContextTest.cpp
+    WardenModuleCatalogTest.cpp
+    WardenCheckCatalogTest.cpp
+    WardenCheckPlannerTest.cpp
+    WardenConfigurationTest.cpp
+    WardenEvidenceTest.cpp
+    WardenPacketCodecTest.cpp
+    WardenServerTest.cpp
+    WardenEnforcementPolicyTest.cpp
+    WardenAuditStoreTest.cpp
+    WardenIncidentStoreTest.cpp
+    WardenAdmissionTest.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenProtocol.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCryptoContext.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleCatalog.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenModuleWinData.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckCatalog.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenCheckPlanner.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenConfiguration.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEvidence.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenPacketCodec.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenServer.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenManager.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/Warden/WardenEnforcementPolicy.cpp
     # Compiled in, not linked from `game`: game.lib pulls the whole server, down to the
-    # database globals that only mangosd defines. These two know nothing of it.
+    # database globals that only mangosd defines. These sources know nothing of it.
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp
@@ -80,6 +104,7 @@ add_executable(mangos_tests ${SRC_GRP_TESTS})
 
 target_include_directories(mangos_tests
     PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/game/Warden
         ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers
         ${CMAKE_SOURCE_DIR}/src/game/Server)
 
@@ -203,3 +228,8 @@ add_test(NAME spatial_boundary
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckSpatialBoundary.cmake)
+
+add_test(NAME warden_boundary
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_ROOT=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/CheckWardenBoundary.cmake)

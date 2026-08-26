@@ -25,8 +25,26 @@
 
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "WardenServer.h"
+
+#include <cstddef>
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recvData)
 {
+    // One outer opcode carries one encrypted Warden body. Inner command
+    // dispatch belongs exclusively to the protocol state machine.
+    size_t const unread = recvData.wpos() - recvData.rpos();
+    if (m_warden)
+    {
+        warden::ByteView const body =
+        {
+            unread ? recvData.contents() + recvData.rpos() : nullptr,
+            unread
+        };
+        m_warden->HandleEncrypted(body);
+    }
+
+    // Finish exactly once even when the admitted identity has no Warden.
     recvData.rfinish();
+    FinalizeWardenDisengagement();
 }

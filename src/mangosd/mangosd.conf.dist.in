@@ -246,6 +246,73 @@ AddonChannel                      = 1
 CleanCharacterDB                  = 1
 
 ################################################################################
+# WARDEN
+#
+#    Catalogue loading is mandatory at startup in every enforcement mode.
+#        The World database must provide a complete, valid `warden_checks`
+#        catalogue even in Observe mode; malformed or empty data stops mangosd
+#        before sessions can run with an ambiguous protection state.
+#
+#    Operational failures append a non-incident `warden_audit` row with `check_id = 0`.
+#        Query that sentinel to measure Warden shed rate; the exact failure
+#        reason remains in the server log and never enters incident policy.
+#
+#    Warden.EnforcementMode
+#        Response to repeated, confirmed, actionable Warden check mismatches.
+#        Protocol/lifecycle failures close enforcing sessions without an incident;
+#        Observe mode only audits and disengages.
+#        0 = observe and audit only
+#        1 = kick confirmed actionable mismatches; never permanently ban
+#        2 = kick confirmed actionable mismatches and permanently ban at
+#            BanThreshold
+#        Default: 2
+#
+#    Warden.RequireExactProfile
+#        Admission policy for clients without a complete published
+#        (build,platform,locale) profile in `warden_checks`.
+#        The shipped module and profiles cover platform Win only. OSX clients
+#        require Warden.RequireExactProfile = 0 in enforcing modes.
+#        0 = explicitly opt in to unsupported unprofiled clients; exact
+#            evidenced profiles still run according to EnforcementMode
+#        1 = reject unprofiled clients after authentication as incompatible
+#            in enforcing modes; Observe still admits without enforcement
+#        Default: 1
+#
+#    Warden.CheckIntervalMin / Warden.CheckIntervalMax
+#        Inclusive random interval, in seconds, between normal check batches.
+#        Default: 30 / 60
+#
+#    Warden.AggressiveIntervalMin / Warden.AggressiveIntervalMax
+#        Inclusive random interval, in seconds, between aggressive batches.
+#        Default: 10 / 20
+#
+#    Warden.AggressiveThreshold
+#        Committed incidents in the rolling window that enable aggressive mode.
+#        Default: 5
+#
+#    Warden.BanThreshold
+#        Committed incidents in the rolling window required for a permanent
+#        account ban when EnforcementMode is 2.
+#        Default: 10
+#
+#    Warden.IncidentWindow
+#        Rolling incident window in seconds.
+#        Maximum: 31536000 (one year)
+#        Default: 900
+#
+################################################################################
+
+Warden.EnforcementMode       = 2
+Warden.RequireExactProfile   = 1
+Warden.CheckIntervalMin      = 30
+Warden.CheckIntervalMax      = 60
+Warden.AggressiveIntervalMin = 10
+Warden.AggressiveIntervalMax = 20
+Warden.AggressiveThreshold   = 5
+Warden.BanThreshold          = 10
+Warden.IncidentWindow        = 900
+
+################################################################################
 # SERVER LOGGING
 #
 #    LogSQL

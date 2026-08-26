@@ -25,7 +25,36 @@
 
 #include "WorldGatewayAuth.h"
 
+#include <openssl/crypto.h>
+
+#include <algorithm>
+#include <utility>
+
 bool IsSupportedAccountClientOS(const std::string& os)
 {
     return os == "Win" || os == "OSX";
+}
+
+warden::AdmissionData BuildWardenAdmissionData(uint32 build,
+    std::string platform, std::string clientLocale, BigNumber& sessionKey)
+{
+    warden::AdmissionData admission;
+    admission.build = build;
+    admission.platform = std::move(platform);
+    admission.clientLocale = std::move(clientLocale);
+
+    // BigNumber owns this buffer and will replace it on the next serialization.
+    // Transfer the bytes, cleanse in place, and neither retain nor free it.
+    uint8* const serialized = sessionKey.AsByteArray(
+        static_cast<int>(admission.sessionKey.size()));
+    if (!serialized)
+    {
+        admission.Clear();
+        return admission;
+    }
+    std::copy(serialized, serialized + admission.sessionKey.size(),
+        admission.sessionKey.begin());
+    OPENSSL_cleanse(serialized, admission.sessionKey.size());
+    admission.available = true;
+    return admission;
 }

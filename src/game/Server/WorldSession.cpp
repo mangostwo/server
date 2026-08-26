@@ -55,6 +55,8 @@
 #include <string>
 #include <set>
 #include <memory>
+#include <optional>
+#include <vector>
 #include "Database/DatabaseEnv.h"
 #include "IClientLink.h"
 
@@ -69,6 +71,15 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "SessionMailbox.h"
+#include "GameTime.h"
+#include "WardenAuditStore.h"
+#include "WardenConfiguration.h"
+#include "WardenEnforcementPolicy.h"
+#include "WardenEvidence.h"
+#include "WardenIncidentStore.h"
+#include "WardenManager.h"
+#include "WardenProtocol.h"
+#include "WardenServer.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "Group.h"
@@ -113,6 +124,24 @@ static bool MapSessionFilterHelper(WorldSession* session, OpcodeHandler const& o
 
     // in Map::Update() we do not process packets where player is not in world!
     return plr->IsInWorld();
+}
+
+namespace
+{
+std::string SafeWardenLogToken(std::string const& value)
+{
+    if (value.empty())
+        return "<unavailable>";
+    for (unsigned char byte : value)
+    {
+        bool const alphaNumeric = (byte >= '0' && byte <= '9') ||
+            (byte >= 'A' && byte <= 'Z') ||
+            (byte >= 'a' && byte <= 'z');
+        if (!alphaNumeric)
+            return "<invalid>";
+    }
+    return value;
+}
 }
 
 
@@ -162,9 +191,26 @@ bool WorldSessionFilter::Process(WorldPacket* packet)
 WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
                            std::shared_ptr<SessionMailbox> mailbox,
                            AccountTypes sec, uint8 expansion, time_t mute_time,
-                           LocaleConstant locale, const BigNumber& sessionKey) :
+                           LocaleConstant locale, const BigNumber& sessionKey)
+    : WorldSession(id, std::move(link), std::move(mailbox), sec, expansion,
+          mute_time, locale, sessionKey, warden::AdmissionData(),
+          warden::WardenAdmissionContext())
+{
+}
+
+WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
+                           std::shared_ptr<SessionMailbox> mailbox,
+                           AccountTypes sec, uint8 expansion, time_t mute_time,
+                           LocaleConstant locale, const BigNumber& sessionKey,
+                           warden::AdmissionData&& admission,
+                           warden::WardenAdmissionContext admissionContext) :
     m_muteTime(mute_time), _player(nullptr), m_link(std::move(link)),
     m_mailbox(mailbox ? std::move(mailbox) : std::make_shared<SessionMailbox>()),
+    m_pendingWardenAdmission(admission.available
+        ? std::make_unique<warden::AdmissionData>(std::move(admission))
+        : nullptr),
+    m_wardenAdmissionHistory(std::move(admissionContext.history)),
+    m_wardenConfiguration(std::move(admissionContext.configuration)),
     m_sessionKey(sessionKey),
     _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
@@ -180,6 +226,16 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
 /// WorldSession destructor
 WorldSession::~WorldSession()
 {
+    // Drain first so an ordinary disconnect cannot erase the exact identities
+    // of isolated confirmations still in flight.
+    DrainWardenPendingConfirmations();
+    m_warden.reset();
+    m_wardenPolicy.reset();
+    if (m_pendingWardenAdmission)
+    {
+        m_pendingWardenAdmission->Clear();
+        m_pendingWardenAdmission.reset();
+    }
     m_mailbox->Close();
 
     ///- unload player if not unloaded
@@ -197,6 +253,113 @@ WorldSession::~WorldSession()
         m_link.reset();
     }
 
+}
+
+void WorldSession::OnAuthenticatedAdmission()
+{
+    if (m_wardenAdmissionHandled)
+        return;
+    m_wardenAdmissionHandled = true;
+
+    if (!m_pendingWardenAdmission ||
+        !m_pendingWardenAdmission->available || !m_link || m_link->IsClosed())
+    {
+        if (m_pendingWardenAdmission)
+            m_pendingWardenAdmission->Clear();
+        m_pendingWardenAdmission.reset();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        return;
+    }
+
+    warden::AdmissionData admission(std::move(*m_pendingWardenAdmission));
+    m_pendingWardenAdmission.reset();
+    m_wardenBuild = admission.build;
+    m_clientPlatform = std::move(admission.platform);
+    m_clientLocale = std::move(admission.clientLocale);
+
+    std::string const logPlatform = SafeWardenLogToken(m_clientPlatform);
+    std::string const logLocale = SafeWardenLogToken(m_clientLocale);
+    bool const exactProfile = warden::IsWardenEnforcementProfile(
+        m_wardenBuild, m_clientPlatform, m_clientLocale);
+    warden::WardenProfileDisposition const disposition =
+        warden::ClassifyWardenProfile(m_wardenConfiguration.enforcementMode,
+            m_wardenConfiguration.requireExactProfile, exactProfile);
+
+    if (disposition == warden::WardenProfileDisposition::Reject)
+    {
+        sLog.outError("Warden rejected an unprofiled client for account %u "
+            "(build %u; platform %s; locale %s): strict exact-profile "
+            "admission is enabled.", GetAccountId(), m_wardenBuild,
+            logPlatform.c_str(), logLocale.c_str());
+        admission.Clear();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        KickPlayer();
+        return;
+    }
+
+    if (!exactProfile)
+    {
+        sLog.outString("Warden profile unavailable for account %u (build %u; "
+            "platform %s; locale %s); admitting without Warden.",
+            GetAccountId(), m_wardenBuild, logPlatform.c_str(),
+            logLocale.c_str());
+        admission.Clear();
+        m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+        return;
+    }
+
+    warden::WardenCreationOptions options;
+    options.configuration = m_wardenConfiguration;
+    options.initialAggressive = warden::ShouldUseAggressiveWardenAdmission(
+        m_wardenAdmissionHistory, m_wardenConfiguration,
+        static_cast<uint64>(GameTime::GetGameTime()));
+    m_wardenAggressive = options.initialAggressive;
+    m_wardenAggressiveUntil = options.initialAggressive ?
+        m_wardenAdmissionHistory.aggressiveUntilServer : 0;
+    m_wardenLoggedAnomalies.clear();
+    m_wardenDisengagementRequested = false;
+    m_wardenAdmissionHistory = warden::WardenAdmissionHistory();
+
+    std::unique_ptr<warden::WardenServer> server =
+        warden::WardenManager::Instance().Create(m_wardenBuild,
+            m_clientPlatform, m_clientLocale, admission.sessionKey,
+            [this](warden::Bytes const& payload)
+            {
+                if (!m_link || m_link->IsClosed())
+                    return false;
+                WorldPacket packet(SMSG_WARDEN_DATA, payload.size());
+                if (!payload.empty())
+                    packet.append(payload.data(), payload.size());
+                SendPacket(&packet);
+                return m_link && !m_link->IsClosed();
+            }, options,
+            [this](warden::WardenLifecycleEvent const& event)
+            {
+                HandleWardenLifecycle(event);
+            },
+            [this](warden::WardenEvidenceBatch const& batch)
+            {
+                HandleWardenEvidenceBatch(batch);
+            });
+    admission.Clear();
+
+    if (!server)
+    {
+        sLog.outError("Warden could not construct an exact-profile session for "
+            "account %u (build %u; platform %s; locale %s).",
+            GetAccountId(), m_wardenBuild, logPlatform.c_str(),
+            logLocale.c_str());
+        if (m_wardenConfiguration.enforcementMode !=
+            warden::WardenEnforcementMode::Observe)
+            KickPlayer();
+        return;
+    }
+
+    // Construction remains inert until the character-list boundary or the
+    // player-login safety net starts the state machine.
+    m_wardenPolicy = std::make_unique<warden::WardenEnforcementPolicy>(
+        m_wardenConfiguration.enforcementMode);
+    m_warden = std::move(server);
 }
 
 /**
@@ -276,6 +439,510 @@ void WorldSession::SendPacket(WorldPacket const* packet)
     // owns delivery. A send on a dead connection is discarded, not a failure the
     // caller has to unwind.
     m_link->SendPacket(*packet);
+}
+
+void WorldSession::HandleWardenLifecycle(
+    warden::WardenLifecycleEvent const& event)
+{
+    if (event.state == warden::WardenState::ModuleReady)
+    {
+        sLog.outString("Warden initialized for account %u (build %u; module "
+            "%s).", GetAccountId(), m_wardenBuild,
+            event.transferCount ? "transferred" : "cache hit");
+        return;
+    }
+
+    if (event.state != warden::WardenState::Failed)
+        return;
+
+    // The session send adapter reports failure only when the client link has
+    // closed. A disconnect racing the final send is transport teardown, not a
+    // Warden protocol incident, so do not create an operational audit row.
+    if (event.failure == warden::WardenFailure::SendFailure &&
+        (!m_link || m_link->IsClosed()))
+    {
+        RequestWardenDisengagement();
+        return;
+    }
+
+    sLog.outError("Warden protocol failed for account %u (build %u): %s.",
+        GetAccountId(), m_wardenBuild, warden::ToString(event.failure));
+    PersistWardenOperationalAudit(event.failure);
+
+    warden::WardenPolicyDecision lifecycle;
+    if (m_wardenPolicy)
+    {
+        DrainWardenPendingConfirmations();
+        lifecycle = m_wardenPolicy->EvaluateLifecycle(event);
+    }
+    else
+    {
+        sLog.outError("Warden lifecycle failed without a policy for account "
+            "%u; no enforcement action taken.", GetAccountId());
+    }
+
+    RequestWardenDisengagement();
+    if (lifecycle.action == warden::WardenPolicyAction::Kick)
+    {
+        sLog.outError("Warden lifecycle enforcement is closing the client "
+            "link for account %u without recording an incident.",
+            GetAccountId());
+        KickPlayer();
+    }
+}
+
+void WorldSession::HandleWardenEvidenceBatch(
+    warden::WardenEvidenceBatch const& batch)
+{
+    uint32 const accountId = GetAccountId();
+    bool const operatorPass =
+        batch.purpose == warden::CheckPlanPurpose::Initial ||
+        batch.purpose == warden::CheckPlanPurpose::AggressiveImmediate;
+    bool const completeCleanOperatorBatch =
+        warden::IsCompleteCleanOperatorBatch(batch);
+    bool const confirmation =
+        batch.purpose == warden::CheckPlanPurpose::Confirmation;
+    auto const firstAnomaly = [this](uint32 category, uint32 checkId,
+        uint32 outcome)
+    {
+        uint64 const key = (uint64(category) << 56u) |
+            (uint64(outcome) << 48u) | uint64(checkId);
+        return m_wardenLoggedAnomalies.insert(key).second;
+    };
+    auto const evidenceCategory = [](warden::WardenCheckType type)
+    {
+        switch (type)
+        {
+            case warden::WardenCheckType::Timing: return 1u;
+            case warden::WardenCheckType::Mpq: return 2u;
+            case warden::WardenCheckType::Lua: return 3u;
+            case warden::WardenCheckType::Mem: return 4u;
+        }
+        return 0u;
+    };
+
+    // Only fixed classifications and catalogue identities cross this boundary;
+    // returned/expected bytes, keys, ticks, paths, and script text never do.
+    for (warden::WardenEvidence const& evidence : batch.evidence)
+    {
+        if (evidence.checkType == warden::WardenCheckType::Timing)
+        {
+            if (evidence.outcome == warden::WardenCheckOutcome::Stable)
+            {
+                if (operatorPass)
+                {
+                    sLog.outString("Warden timing check passed for account %u "
+                        "(check %u).", accountId, evidence.checkId);
+                }
+                else
+                {
+                    DEBUG_LOG("Warden timing check passed for account %u.",
+                        accountId);
+                }
+                continue;
+            }
+
+            if (firstAnomaly(evidenceCategory(evidence.checkType),
+                evidence.checkId, uint32(evidence.outcome)))
+            {
+                sLog.outError("Warden timing check %s for account %u "
+                    "(observation only).",
+                    warden::ToString(evidence.outcome), accountId);
+            }
+            else
+            {
+                DEBUG_LOG("Warden timing check %s for account %u "
+                    "(repeat observation).",
+                    warden::ToString(evidence.outcome), accountId);
+            }
+            continue;
+        }
+
+        if (evidence.outcome == warden::WardenCheckOutcome::Match)
+        {
+            if (confirmation)
+            {
+                DEBUG_LOG("Warden %s confirmation matched for account %u "
+                    "(check %u).", warden::ToString(evidence.checkType),
+                    accountId, evidence.checkId);
+            }
+            else if (operatorPass)
+            {
+                sLog.outString("Warden %s check passed for account %u "
+                    "(check %u).", warden::ToString(evidence.checkType),
+                    accountId, evidence.checkId);
+            }
+            else
+            {
+                DEBUG_LOG("Warden %s check passed for account %u (check "
+                    "%u).", warden::ToString(evidence.checkType), accountId,
+                    evidence.checkId);
+            }
+            continue;
+        }
+
+        uint32 const category = evidenceCategory(evidence.checkType) +
+            (confirmation ? 4u : 0u);
+        if (firstAnomaly(category, evidence.checkId,
+            uint32(evidence.outcome)))
+        {
+            sLog.outError("Warden %s %s %s for account %u (check %u; class "
+                "%s).", warden::ToString(evidence.checkType),
+                confirmation ? "confirmation" : "check",
+                warden::ToString(evidence.outcome), accountId,
+                evidence.checkId,
+                warden::ToString(evidence.evidenceClass));
+        }
+        else
+        {
+            DEBUG_LOG("Warden %s %s %s for account %u (check %u; class "
+                "%s; repeat observation).",
+                warden::ToString(evidence.checkType),
+                confirmation ? "confirmation" : "check",
+                warden::ToString(evidence.outcome), accountId,
+                evidence.checkId,
+                warden::ToString(evidence.evidenceClass));
+        }
+    }
+
+    if (!m_wardenPolicy)
+    {
+        sLog.outError("Warden evidence arrived without a policy for account "
+            "%u; disengaging without punishment.", accountId);
+        RequestWardenDisengagement();
+        return;
+    }
+
+    // The health summary belongs to the complete batch, never merely to its
+    // Timing member. Any mismatch, Unavailable, malformed clean outcome, or
+    // missing policy suppresses it while retaining per-check classifications.
+    if (completeCleanOperatorBatch)
+    {
+        Player* const player = GetPlayer();
+        if (player && player->IsInWorld())
+        {
+            sLog.outString("Warden healthy for player %s (account %u).",
+                player->GetName(), accountId);
+        }
+        else
+        {
+            sLog.outString("Warden healthy for account %u.", accountId);
+        }
+    }
+
+    ApplyWardenPolicyDecisions(m_wardenPolicy->EvaluateBatch(batch));
+}
+
+void WorldSession::ApplyWardenPolicyDecisions(
+    std::vector<warden::WardenPolicyDecision> const& decisions)
+{
+    for (warden::WardenPolicyDecision const& decision : decisions)
+    {
+        switch (decision.action)
+        {
+            case warden::WardenPolicyAction::None:
+                break;
+            case warden::WardenPolicyAction::QueueConfirmation:
+            {
+                if (m_warden &&
+                    m_warden->QueueConfirmation(decision.checkId))
+                {
+                    DEBUG_LOG("Warden isolated confirmation queued for "
+                        "account %u (check %u; type %s; outcome %s).",
+                        GetAccountId(), decision.checkId,
+                        warden::ToString(decision.checkType),
+                        warden::ToString(decision.outcome));
+                    break;
+                }
+
+                sLog.outError("Warden could not queue confirmation for "
+                    "account %u (check %u; type %s); auditing pending "
+                    "metadata and disengaging.", GetAccountId(),
+                    decision.checkId, warden::ToString(decision.checkType));
+                DrainWardenPendingConfirmations();
+                RequestWardenDisengagement();
+                bool const enforcing =
+                    m_wardenConfiguration.enforcementMode !=
+                        warden::WardenEnforcementMode::Observe;
+                if (enforcing)
+                {
+                    sLog.outError("Warden confirmation scheduling failed; "
+                        "closing the enforcing client link for account %u "
+                        "without recording an incident.", GetAccountId());
+                    KickPlayer();
+                }
+                return;
+            }
+            case warden::WardenPolicyAction::ConfirmationCleared:
+                sLog.outString("Warden %s confirmation cleared for account %u "
+                    "(check %u).", warden::ToString(decision.checkType),
+                    GetAccountId(), decision.checkId);
+                break;
+            case warden::WardenPolicyAction::PersistAudit:
+                PersistWardenAudit(decision);
+                break;
+            case warden::WardenPolicyAction::PersistAndKick:
+                PersistWardenIncidentAndKick(decision);
+                return;
+            case warden::WardenPolicyAction::Disengage:
+                sLog.outError("Warden confirmation contract failed for "
+                    "account %u; disengaging without punishment.",
+                    GetAccountId());
+                RequestWardenDisengagement();
+                return;
+            case warden::WardenPolicyAction::Kick:
+                sLog.outError("Warden policy is closing the client link for "
+                    "account %u without recording an incident.",
+                    GetAccountId());
+                RequestWardenDisengagement();
+                KickPlayer();
+                return;
+        }
+    }
+}
+
+void WorldSession::DrainWardenPendingConfirmations()
+{
+    if (!m_wardenPolicy)
+        return;
+
+    // Abort yields only non-actionable Unavailable decisions. Persistence stays
+    // here so the pure policy never acquires database access.
+    for (warden::WardenPolicyDecision const& audit :
+        m_wardenPolicy->AbortPendingConfirmations())
+    {
+        PersistWardenAudit(audit);
+    }
+}
+
+void WorldSession::RequestWardenDisengagement()
+{
+    m_wardenDisengagementRequested = true;
+}
+
+void WorldSession::FinalizeWardenDisengagement()
+{
+    if (!m_wardenDisengagementRequested)
+        return;
+
+    // Called only after Start/HandleEncrypted/Update returns; an observer can
+    // therefore never destroy the Warden object whose method is on the stack.
+    DrainWardenPendingConfirmations();
+    m_warden.reset();
+    m_wardenPolicy.reset();
+    m_wardenDisengagementRequested = false;
+}
+
+void WorldSession::PersistWardenAudit(
+    warden::WardenPolicyDecision const& decision)
+{
+    std::optional<warden::WardenAuditOutcome> const outcome =
+        warden::ToAuditOutcome(decision.outcome);
+    if (!outcome)
+    {
+        sLog.outError("Warden rejected a non-auditable classification for "
+            "account %u (check %u; type %s; outcome %s).", GetAccountId(),
+            decision.checkId, warden::ToString(decision.checkType),
+            warden::ToString(decision.outcome));
+        return;
+    }
+
+    warden::WardenAuditContext context;
+    context.accountId = GetAccountId();
+    context.realmId = realmID;
+    context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientPlatform;
+    context.clientLocale = m_clientLocale;
+    context.checkId = decision.checkId;
+    context.checkType = decision.checkType;
+    context.evidenceClass = decision.evidenceClass;
+    context.outcome = *outcome;
+    if (warden::WardenAuditStore::Instance().Record(context))
+    {
+        sLog.outString("Warden audit queued for account %u (check %u; type "
+            "%s; class %s; outcome %s).", GetAccountId(), decision.checkId,
+            warden::ToString(decision.checkType),
+            warden::ToString(decision.evidenceClass),
+            warden::ToString(decision.outcome));
+    }
+    else
+    {
+        sLog.outError("Warden audit enqueue failed for account %u (check %u; "
+            "type %s; class %s; outcome %s); no enforcement action taken.",
+            GetAccountId(), decision.checkId,
+            warden::ToString(decision.checkType),
+            warden::ToString(decision.evidenceClass),
+            warden::ToString(decision.outcome));
+    }
+}
+
+void WorldSession::PersistWardenOperationalAudit(warden::WardenFailure failure)
+{
+    if (failure == warden::WardenFailure::None)
+    {
+        sLog.outError("Warden rejected an empty operational failure for "
+            "account %u; no audit written.", GetAccountId());
+        return;
+    }
+
+    // Check zero is the Realm schema's reserved session-level sentinel.
+    // ProtocolHealth/Unavailable can never enter incident enforcement.
+    warden::WardenAuditContext context;
+    context.accountId = GetAccountId();
+    context.realmId = realmID;
+    context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientPlatform;
+    context.clientLocale = m_clientLocale;
+    context.checkId = 0;
+    context.checkType = warden::WardenCheckType::Timing;
+    context.evidenceClass = warden::WardenEvidenceClass::ProtocolHealth;
+    context.outcome = warden::WardenAuditOutcome::Unavailable;
+    if (warden::WardenAuditStore::Instance().Record(context))
+    {
+        sLog.outString("Warden operational audit queued for account %u "
+            "(failure %s); no enforcement action taken.", GetAccountId(),
+            warden::ToString(failure));
+    }
+    else
+    {
+        sLog.outError("Warden operational audit enqueue failed for account "
+            "%u (failure %s); no enforcement action taken.", GetAccountId(),
+            warden::ToString(failure));
+    }
+}
+
+void WorldSession::PersistWardenIncidentAndKick(
+    warden::WardenPolicyDecision const& decision)
+{
+    // Preserve every other in-flight confirmation before terminal
+    // disengagement destroys the policy snapshot.
+    DrainWardenPendingConfirmations();
+
+    std::optional<warden::WardenIncidentOutcome> const outcome =
+        warden::ToIncidentOutcome(decision.outcome);
+    if (!outcome)
+    {
+        sLog.outError("Warden rejected a non-actionable incident for account "
+            "%u (check %u; type %s; class %s; outcome %s); disengaging "
+            "without punishment.", GetAccountId(), decision.checkId,
+            warden::ToString(decision.checkType),
+            warden::ToString(decision.evidenceClass),
+            warden::ToString(decision.outcome));
+        RequestWardenDisengagement();
+        return;
+    }
+
+    warden::WardenIncidentContext context;
+    context.accountId = GetAccountId();
+    context.realmId = realmID;
+    context.clientBuild = m_wardenBuild;
+    context.clientPlatform = m_clientPlatform;
+    context.clientLocale = m_clientLocale;
+    context.checkId = decision.checkId;
+    context.checkType = decision.checkType;
+    context.evidenceClass = decision.evidenceClass;
+    context.outcome = *outcome;
+
+    uint32 const incidentAccountId = GetAccountId();
+    uint32 const incidentCheckId = decision.checkId;
+    warden::WardenCheckType const incidentCheckType = decision.checkType;
+    uint32 const aggressiveThreshold =
+        m_wardenConfiguration.aggressiveThreshold;
+    warden::WardenIncidentSummaryObserver const summaryObserver =
+        [incidentAccountId, incidentCheckId, incidentCheckType,
+            aggressiveThreshold](
+                warden::WardenIncidentWriteResult const& summary)
+        {
+            warden::WardenIncidentApplication const application =
+                warden::ClassifyIncidentWriteResult(summary);
+            if (!application.summaryKnown)
+            {
+                sLog.outError("Warden incident summary unavailable for "
+                    "account %u (check %u; type %s); warden_incident and "
+                    "account_banned remain authoritative.",
+                    incidentAccountId, incidentCheckId,
+                    warden::ToString(incidentCheckType));
+                return;
+            }
+
+            sLog.outError("Warden incident summary for account %u (check %u; "
+                "type %s; recent count %u).", incidentAccountId,
+                incidentCheckId, warden::ToString(incidentCheckType),
+                application.recentCount);
+            if (application.recentCount == aggressiveThreshold)
+            {
+                sLog.outError("Warden confirmed incidents reached %u for "
+                    "account %u; aggressive interrogation will be enabled "
+                    "on reconnect.", aggressiveThreshold,
+                    incidentAccountId);
+            }
+            if (application.permanentBanActive)
+            {
+                sLog.outError("Warden permanent account ban is active for "
+                    "account %u after %u committed incidents.",
+                    incidentAccountId, application.recentCount);
+            }
+        };
+    warden::WardenIncidentWriteResult const writeResult =
+        warden::WardenIncidentStore::Instance().Record(context,
+            m_wardenConfiguration, summaryObserver);
+    warden::WardenIncidentApplication const application =
+        warden::ClassifyIncidentWriteResult(writeResult);
+
+    if (!application.durable)
+    {
+        sLog.outError("Warden confirmed an actionable mismatch for account "
+            "%u (check %u; type %s), but the incident transaction failed; "
+            "kicking without a durable incident.", GetAccountId(),
+            decision.checkId, warden::ToString(decision.checkType));
+    }
+    else
+    {
+        sLog.outError("Warden confirmed an actionable mismatch for account "
+            "%u (check %u; type %s); incident committed and client will be "
+            "kicked. Realm incident and ban records are authoritative.",
+            GetAccountId(), decision.checkId,
+            warden::ToString(decision.checkType));
+    }
+
+    // Persistence is attempted first. A failed write still closes this client,
+    // but contributes nothing to aggressive or permanent-ban thresholds.
+    RequestWardenDisengagement();
+    KickPlayer();
+}
+
+void WorldSession::StartWardenBootstrap()
+{
+    // Character enumeration completes asynchronously; a peer may have closed
+    // before its callback reaches the world thread. That is not a Warden fault.
+    if (!m_warden || !m_link || m_link->IsClosed())
+        return;
+
+    m_warden->Start();
+    FinalizeWardenDisengagement();
+}
+
+void WorldSession::UpdateWarden(uint32 diffMs)
+{
+    // UpdateSessions charges Warden before reaping closed links. Never turn an
+    // ordinary disconnect into a protocol failure or operational audit row.
+    if (!m_warden || !m_link || m_link->IsClosed())
+        return;
+
+    uint64 const now = static_cast<uint64>(GameTime::GetGameTime());
+    bool const aggressive = m_wardenAggressiveUntil > now;
+    if (aggressive != m_wardenAggressive)
+    {
+        m_wardenAggressive = aggressive;
+        m_warden->SetAggressive(aggressive);
+        DEBUG_LOG("Warden aggressive cadence %s for account %u.",
+            aggressive ? "enabled" : "expired", GetAccountId());
+    }
+
+    Player* const player = GetPlayer();
+    bool const eligible = player && player->IsInWorld() && !m_playerLoading;
+    m_warden->Update(eligible, diffMs);
+    FinalizeWardenDisengagement();
 }
 
 /// Add an incoming packet to the queue

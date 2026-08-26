@@ -26,8 +26,38 @@
 #ifndef MANGOS_WORLDGATEWAYAUTH_H
 #define MANGOS_WORLDGATEWAYAUTH_H
 
+#include "Auth/BigNumber.h"
+#include "WardenProtocol.h"
+
+#include <cstddef>
 #include <string>
 
+/** Append-only account projection used by WorldGateway::LookupAccount. */
+enum class WorldGatewayAccountField : std::size_t
+{
+    Id = 0,
+    Security = 1,
+    SessionKey = 2,
+    LastIp = 3,
+    Locked = 4,
+    Expansion = 5,
+    MuteTime = 6,
+    DbcLocale = 7,
+    ClientOS = 8,
+    ClientLocale = 9,
+    Count = 10
+};
+
+constexpr std::size_t WorldGatewayAccountFieldIndex(
+    WorldGatewayAccountField field)
+{
+    return static_cast<std::size_t>(field);
+}
+
 bool IsSupportedAccountClientOS(const std::string& os);
+
+/** Copies one fixed-width Warden key while retaining the BigNumber for HMAC. */
+warden::AdmissionData BuildWardenAdmissionData(uint32 build,
+    std::string platform, std::string clientLocale, BigNumber& sessionKey);
 
 #endif
