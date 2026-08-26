@@ -50,18 +50,28 @@ PathFinder::PathFinder(const Unit* owner) :
 PathFinder::PathFinder(const Unit* owner, uint32 mapId) :
     m_polyLength(0), m_type(PATHFIND_BLANK),
     m_useStraightPath(false), m_forceDestination(false), m_pointPathLimit(MAX_POINT_PATH_LENGTH),
-    m_sourceUnit(owner), m_navMesh(NULL), m_navMeshQuery(NULL)
+    m_sourceUnit(owner), m_mapId(mapId), m_navMesh(NULL), m_navMeshQuery(NULL)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::PathInfo for %u \n", m_sourceUnit->GetGUIDLow());
 
-    if (MMAP::MMapFactory::IsPathfindingEnabled(mapId))
+    BindMesh();
+    createFilter();
+}
+
+void PathFinder::BindMesh()
+{
+    // Looked up afresh before every route: a PathFinder can outlive its map (a generator
+    // survives a teleport), and an instance torn down and recreated under the same ids
+    // gets a new query while a pointer taken earlier would point at freed memory.
+    m_navMesh = NULL;
+    m_navMeshQuery = NULL;
+
+    if (MMAP::MMapFactory::IsPathfindingEnabled(m_mapId))
     {
         MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-        m_navMesh = mmap->GetNavMesh(mapId);
-        m_navMeshQuery = mmap->GetNavMeshQuery(mapId, m_sourceUnit->GetInstanceId());
+        m_navMesh = mmap->GetNavMesh(m_mapId);
+        m_navMeshQuery = mmap->GetNavMeshQuery(m_mapId, m_sourceUnit->GetInstanceId());
     }
-
-    createFilter();
 }
 
 /**
@@ -116,6 +126,8 @@ bool PathFinder::calculate(float startX, float startY, float startZ, float destX
     m_forceDestination = forceDest;
 
     DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ PathFinder::calculate() for %u \n", m_sourceUnit->GetGUIDLow());
+
+    BindMesh();
 
     // make sure navMesh works - we can run on map w/o mmap
     // check if the start and end point have a .mmtile loaded (can we pass via not loaded tile on the way?)
@@ -371,6 +383,9 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         }
     }
 
+    // No usable prefix: the first run, or we are no longer on the old path.
+    bool rebuild = !startPolyFound;
+
     if (startPolyFound && endPolyFound)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (startPolyFound && endPolyFound)\n");
@@ -406,50 +421,49 @@ void PathFinder::BuildPolyPath(const Vector3& startPos, const Vector3& endPos)
         // we need any point on our suffix start poly to generate poly-path, so we need last poly in prefix data
         float suffixEndPoint[VERTEX_SIZE];
         dtResult = m_navMeshQuery->closestPointOnPoly(suffixStartPoly, endPoint, suffixEndPoint, NULL);
-        if (dtStatusFailed(dtResult))
+        if (dtStatusFailed(dtResult) && prefixPolyLength > 1)
         {
             // we can hit offmesh connection as last poly - closestPointOnPoly() don't like that
             // try to recover by using prev polyref
             --prefixPolyLength;
             suffixStartPoly = m_pathPolyRefs[prefixPolyLength - 1];
             dtResult = m_navMeshQuery->closestPointOnPoly(suffixStartPoly, endPoint, suffixEndPoint, NULL);
-            if (dtStatusFailed(dtResult))
-            {
-                // suffixStartPoly is still invalid, error state
-                BuildShortcut();
-                m_type = PATHFIND_NOPATH;
-                return;
-            }
         }
 
         // generate suffix
         uint32 suffixPolyLength = 0;
-        dtResult = m_navMeshQuery->findPath(
-                       suffixStartPoly,    // start polygon
-                       endPoly,            // end polygon
-                       suffixEndPoint,     // start position
-                       endPoint,           // end position
-                       &m_filter,            // polygon search filter
-                       m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
-                       (int*)&suffixPolyLength,
-                       MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
+        if (dtStatusSucceed(dtResult))
+        {
+            dtResult = m_navMeshQuery->findPath(
+                           suffixStartPoly,    // start polygon
+                           endPoly,            // end polygon
+                           suffixEndPoint,     // start position
+                           endPoint,           // end position
+                           &m_filter,            // polygon search filter
+                           m_pathPolyRefs + prefixPolyLength - 1,    // [out] path
+                           (int*)&suffixPolyLength,
+                           MAX_PATH_LENGTH - prefixPolyLength); // max number of polygons in output path
+        }
 
         if (!suffixPolyLength || dtStatusFailed(dtResult))
         {
-            // this is probably an error state, but we'll leave it
-            // and hopefully recover on the next Update
-            // we still need to copy our preffix
-            sLog.outError("%u's Path Build failed: 0 length path", m_sourceUnit->GetGUIDLow());
+            // No poly to start the suffix from (an off-mesh link was the whole prefix), or
+            // no suffix at all: the prefix is worthless. Rebuild from scratch below rather
+            // than keep a path of length zero, which the type check would index at -1.
+            rebuild = true;
         }
+        else
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++  m_polyLength=%u prefixPolyLength=%u suffixPolyLength=%u \n", m_polyLength, prefixPolyLength, suffixPolyLength);
 
-        DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++  m_polyLength=%u prefixPolyLength=%u suffixPolyLength=%u \n", m_polyLength, prefixPolyLength, suffixPolyLength);
-
-        // new path = prefix + suffix - overlap
-        m_polyLength = prefixPolyLength + suffixPolyLength - 1;
+            // new path = prefix + suffix - overlap
+            m_polyLength = prefixPolyLength + suffixPolyLength - 1;
+        }
     }
-     else
+
+    if (rebuild)
     {
-        DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: (!startPolyFound && !endPolyFound)\n");
+        DEBUG_FILTER_LOG(LOG_FILTER_PATHFINDING, "++ BuildPolyPath :: rebuild\n");
 
         // either we have no path at all -> first run
         // or something went really wrong -> we aren't moving along the path to the target
