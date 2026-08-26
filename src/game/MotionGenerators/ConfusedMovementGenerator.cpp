@@ -28,6 +28,8 @@
 #include "Unit.h"
 #include "Utilities/Util.h"
 
+#include <algorithm>
+
 namespace
 {
     /// How far from the spot it was confused at a unit may stagger.
@@ -97,6 +99,20 @@ void ConfusedMovementGenerator::Finalize(Unit& owner)
     }
 }
 
+uint32 ConfusedMovementGenerator::RetryDelay()
+{
+    // Every failed attempt doubles the wait, up to the shortest normal stagger, so a
+    // spot that never routes is retried a few times a second, not twenty. A lurch
+    // that gets laid resets the count.
+    const uint32 delay = std::min<uint32>(RETRY_DELAY << m_retries, STAGGER_INTERVAL_MIN);
+    if (delay < STAGGER_INTERVAL_MIN)
+    {
+        ++m_retries;
+    }
+
+    return delay;
+}
+
 Motion::MoveIntent ConfusedMovementGenerator::Intent(Unit& owner,
                                                      Motion::MoveStatus const& status,
                                                      uint32 diff)
@@ -112,7 +128,13 @@ Motion::MoveIntent ConfusedMovementGenerator::Intent(Unit& owner,
     if (status.blocked)
     {
         m_haveLurch = false;
-        m_staggerTime.Reset(RETRY_DELAY);
+        m_staggerTime.Reset(RetryDelay());
+    }
+
+    // A lurch that got laid -- seen traveling, or already run out -- ends the failure streak.
+    if (status.arrived || (status.traveling && m_haveLurch))
+    {
+        m_retries = 0;
     }
 
     // The timer runs even mid-leg, which is the point: when it fires early the new
@@ -128,7 +150,7 @@ Motion::MoveIntent ConfusedMovementGenerator::Intent(Unit& owner,
     const auto lurch = Motion::FrameFor(owner).RandomPoint(owner, m_anchor, STAGGER_RADIUS);
     if (!lurch)
     {
-        m_staggerTime.Reset(RETRY_DELAY);
+        m_staggerTime.Reset(RetryDelay());
         return Motion::MoveIntent::Hold();
     }
 

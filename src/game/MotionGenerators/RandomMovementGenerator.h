@@ -83,9 +83,13 @@ class RandomMovementGenerator final : public IntentMovementGenerator
         float m_orbitAngle = 0.0f;
         float m_orbitTilt = 0.0f;
 
+        /// The wait before the next attempt after one that failed; doubles per failure.
+        uint32 RetryDelay();
+
         TimeTracker m_restTime{0};   ///< Time left standing before the next hop.
         Motion::Vector3 m_hop;       ///< Where the current hop is heading.
         bool m_haveHop = false;      ///< False before the first point has been picked.
+        uint32 m_retries = 0;        ///< Failed attempts in a row; the retry wait doubles with each.
 };
 
 #endif // MANGOS_RANDOMMOTIONGENERATOR_H
