@@ -457,7 +457,7 @@ void WorldSession::HandleGossipHelloOpcode(WorldPacket& recv_data)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    pCreature->StopMoving();
+    pCreature->HoldForPlayer();
 
     if (pCreature->IsSpiritGuide())
     {

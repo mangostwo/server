@@ -32,22 +32,14 @@ bool HasReachedWaypointEndpoint(int32 currentPathIdx, size_t endpointPathIndex)
 }
 
 /**
- * @brief Classifies an in-progress segment, giving a force-stop precedence over a finished spline.
+ * @brief Classifies an in-progress segment by whether its spline has completed.
  * @param splineFinalized Whether the spline has completed.
- * @param creatureStopped Whether the unit is stopped (sampled before arrival handling).
  * @return The resulting WaypointSegmentUpdateState.
  */
-WaypointSegmentUpdateState GetWaypointSegmentUpdateState(bool splineFinalized, bool creatureStopped)
+WaypointSegmentUpdateState GetWaypointSegmentUpdateState(bool splineFinalized)
 {
-    // A force-stop (talking to the NPC, root, etc.) clears UNIT_STAT_MOVING and also
-    // finalizes the spline, so the stopped state must win or the unit would relaunch
-    // instead of pausing. The caller samples it before arrival handling clears
-    // UNIT_STAT_ROAMING_MOVE, else a normally finishing spline would look stopped too.
-    if (creatureStopped)
-    {
-        return WaypointSegmentUpdateState::Stopped;
-    }
-
+    // A stop from outside is not read here any more: the driver reports it as a cut
+    // leg, and the waypoint generator pauses or resumes on its own terms.
     if (splineFinalized)
     {
         return WaypointSegmentUpdateState::Finalized;

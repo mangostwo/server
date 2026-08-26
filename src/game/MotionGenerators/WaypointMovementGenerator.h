@@ -107,6 +107,10 @@ class WaypointMovementGenerator final : public IntentMovementGenerator
         void Interrupt(Unit& owner) override;
         void Reset(Unit& owner) override;
 
+        /// Hold the patrol where it stands for a while (a player talking to it); the leg
+        /// is prepared afresh, toward the same node, when the time is up.
+        void Pause(Unit& owner, int32 ms);
+
         MovementGeneratorType GetMovementGeneratorType() const override { return WAYPOINT_MOTION_TYPE; }
 
         bool GetResetPosition(Unit& owner, float& x, float& y, float& z, float& o) const override;

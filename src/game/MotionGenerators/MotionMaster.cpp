@@ -552,6 +552,17 @@ void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PAT
     }
 }
 
+bool MotionMaster::PauseWaypoints(int32 ms)
+{
+    if (empty() || top()->GetMovementGeneratorType() != WAYPOINT_MOTION_TYPE)
+    {
+        return false;
+    }
+
+    static_cast<WaypointMovementGenerator*>(top())->Pause(*m_owner, ms);
+    return true;
+}
+
 /**
  * @brief Moves the unit along a taxi flight path.
  * @param path ID of the flight path.
