@@ -35,6 +35,15 @@ enum class WardenEnforcementMode : uint8
     KickAndBan = 2
 };
 
+/** Largest rolling incident window accepted from configuration (one year). */
+uint32 constexpr MaxWardenIncidentWindowSeconds = 31536000;
+
+/** Prevents unsafe or operationally unbounded database window arithmetic. */
+inline bool IsValidWardenIncidentWindow(uint32 seconds)
+{
+    return seconds > 0 && seconds <= MaxWardenIncidentWindowSeconds;
+}
+
 /** Untrusted values read directly from mangosd.conf. */
 struct WardenRawConfiguration
 {
@@ -71,6 +80,13 @@ struct WardenAdmissionHistory
     // Absolute server deadline so queue residence consumes eligibility.
     uint64 aggressiveUntilServer = 0;
     bool incidentHistoryLoaded = false;
+};
+
+/** One coherent Attach-time policy and the history classified under it. */
+struct WardenAdmissionContext
+{
+    WardenConfiguration configuration;
+    WardenAdmissionHistory history;
 };
 
 /** Applies the current admission policy to previously loaded history. */

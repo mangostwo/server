@@ -146,7 +146,7 @@ TEST(WardenAdmission_queue_time_consumes_aggressive_deadline)
         history, configuration, 1000));
 }
 
-TEST(WardenAdmission_current_policy_overrides_attach_time_mode)
+TEST(WardenAdmission_observe_or_missing_history_never_selects_aggressive)
 {
     warden::WardenAdmissionHistory skippedHistory;
     warden::WardenConfiguration currentEnforcement;
@@ -164,26 +164,31 @@ TEST(WardenAdmission_current_policy_overrides_attach_time_mode)
         carriedHistory, currentObserve, 1000));
 }
 
-TEST(WardenAdmission_reads_the_newest_manager_snapshot_at_admission)
+TEST(WardenAdmission_keeps_history_with_its_attach_time_configuration)
 {
     warden::WardenManager manager;
     std::shared_ptr<warden::WardenConfiguration const> attachSnapshot =
         manager.GetConfigurationSnapshot();
     REQUIRE(attachSnapshot != nullptr);
-    CHECK(attachSnapshot->enforcementMode ==
-        warden::WardenEnforcementMode::KickAndBan);
+
+    warden::WardenAdmissionContext context;
+    context.configuration = *attachSnapshot;
+    context.history.recentIncidentCount =
+        context.configuration.aggressiveThreshold;
+    context.history.aggressiveUntilServer = 2000;
+    context.history.incidentHistoryLoaded = true;
 
     warden::WardenConfiguration reloaded;
     reloaded.enforcementMode = warden::WardenEnforcementMode::Kick;
-    reloaded.normalMinSeconds = 41;
-    reloaded.normalMaxSeconds = 51;
+    reloaded.aggressiveThreshold = 8;
+    reloaded.banThreshold = 12;
     manager.PublishConfiguration(reloaded);
-    std::shared_ptr<warden::WardenConfiguration const> admissionSnapshot =
+    std::shared_ptr<warden::WardenConfiguration const> reloadedSnapshot =
         manager.GetConfigurationSnapshot();
-    REQUIRE(admissionSnapshot != nullptr);
-    CHECK(admissionSnapshot != attachSnapshot);
-    CHECK(admissionSnapshot->enforcementMode ==
-        warden::WardenEnforcementMode::Kick);
-    CHECK_EQ(admissionSnapshot->normalMinSeconds, uint32(41));
-    CHECK_EQ(admissionSnapshot->normalMaxSeconds, uint32(51));
+    REQUIRE(reloadedSnapshot != nullptr);
+
+    CHECK(warden::ShouldUseAggressiveWardenAdmission(context.history,
+        context.configuration, 1000));
+    CHECK(!warden::ShouldUseAggressiveWardenAdmission(context.history,
+        *reloadedSnapshot, 1000));
 }

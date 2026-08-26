@@ -297,6 +297,7 @@ CleanCharacterDB                  = 1
 #
 #    Warden.IncidentWindow
 #        Rolling incident window in seconds.
+#        Maximum: 31536000 (one year)
 #        Default: 900
 #
 ################################################################################

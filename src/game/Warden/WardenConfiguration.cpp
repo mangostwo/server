@@ -102,7 +102,7 @@ WardenConfigurationNormalization NormalizeWardenConfiguration(
             WardenConfigurationCorrection::Thresholds);
     }
 
-    if (raw.incidentWindowSeconds > 0)
+    if (IsValidWardenIncidentWindow(raw.incidentWindowSeconds))
         result.value.incidentWindowSeconds = raw.incidentWindowSeconds;
     else
         AddCorrection(result.corrections,

@@ -24,6 +24,7 @@
  */
 
 #include <cmath>
+#include <ctime>
 #include <utility>
 #include <memory>
 #include <mutex>
@@ -35,7 +36,6 @@
 
 #include "DBCStores.h"
 #include "Database/DatabaseEnv.h"
-#include "GameTime.h"
 #include "Log/Log.h"
 #include "OpcodeTable.h"
 #include "SharedDefines.h"
@@ -264,26 +264,31 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
     std::shared_ptr<SessionMailbox> mailbox =
         std::make_shared<SessionMailbox>();
 
-    // Load history only when the Attach-time mode needs it. This database work
-    // stays on the already registered gateway worker, never the world heartbeat.
-    warden::WardenAdmissionHistory admissionHistory;
-    std::shared_ptr<warden::WardenConfiguration const> attachConfiguration =
+    // Capture one policy for both the history query and eventual admission.
+    // Queue residence may span a reload, but must never mix two snapshots.
+    warden::WardenAdmissionContext admissionContext;
+    std::shared_ptr<warden::WardenConfiguration const> configurationSnapshot =
         warden::WardenManager::Instance().GetConfigurationSnapshot();
-    if (attachConfiguration && attachConfiguration->enforcementMode !=
+    if (configurationSnapshot)
+        admissionContext.configuration = *configurationSnapshot;
+
+    // Database work stays on the registered gateway worker. The wall-clock
+    // read is thread-safe and only rebases the database-derived duration.
+    if (admissionContext.configuration.enforcementMode !=
         warden::WardenEnforcementMode::Observe)
     {
         std::optional<warden::WardenIncidentWindowState> const history =
             warden::WardenIncidentStore::Instance().Load(row->id,
-                attachConfiguration->incidentWindowSeconds,
-                attachConfiguration->aggressiveThreshold);
+                admissionContext.configuration.incidentWindowSeconds,
+                admissionContext.configuration.aggressiveThreshold);
         if (history)
         {
-            admissionHistory.recentIncidentCount = history->recentCount;
-            admissionHistory.aggressiveUntilServer =
+            admissionContext.history.recentIncidentCount = history->recentCount;
+            admissionContext.history.aggressiveUntilServer =
                 warden::RebaseIncidentDeadline(history->aggressiveUntil,
                     history->databaseNow,
-                    static_cast<uint64>(GameTime::GetGameTime()));
-            admissionHistory.incidentHistoryLoaded = true;
+                    static_cast<uint64>(std::time(nullptr)));
+            admissionContext.history.incidentHistoryLoaded = true;
         }
         else
         {
@@ -305,7 +310,7 @@ proto::SessionId WorldGateway::Attach(const proto::AuthRequest& request,
         std::make_unique<WorldSession>(
             row->id, link, mailbox, row->security, row->expansion,
             row->muteTime, row->locale, row->sessionKey,
-            std::move(admission), admissionHistory);
+            std::move(admission), std::move(admissionContext));
 
     session->LoadGlobalAccountData();
     session->LoadTutorialsData();

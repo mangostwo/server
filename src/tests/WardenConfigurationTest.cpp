@@ -183,6 +183,24 @@ TEST(WardenConfiguration_zero_window_falls_back_without_changing_thresholds)
     CHECK(warden::HasWardenConfigurationCorrection(result.corrections,
         warden::WardenConfigurationCorrection::IncidentWindow));
 }
+
+TEST(WardenConfiguration_bounds_the_incident_window_before_database_use)
+{
+    auto raw = ValidCustomConfiguration();
+    raw.incidentWindowSeconds = 31536000;
+    auto accepted = warden::NormalizeWardenConfiguration(raw);
+    CHECK_EQ(accepted.value.incidentWindowSeconds, uint32(31536000));
+    CHECK(!warden::HasWardenConfigurationCorrection(accepted.corrections,
+        warden::WardenConfigurationCorrection::IncidentWindow));
+
+    raw.incidentWindowSeconds = 31536001;
+    auto const rejected = warden::NormalizeWardenConfiguration(raw);
+    CHECK_EQ(rejected.value.incidentWindowSeconds, uint32(900));
+    CHECK(warden::HasWardenConfigurationCorrection(rejected.corrections,
+        warden::WardenConfigurationCorrection::IncidentWindow));
+    CHECK(!warden::IsValidWardenIncidentWindow(31536001));
+}
+
 TEST(WardenConfiguration_combines_corrections_for_all_invalid_groups)
 {
     warden::WardenRawConfiguration raw;

@@ -194,7 +194,7 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
                            LocaleConstant locale, const BigNumber& sessionKey)
     : WorldSession(id, std::move(link), std::move(mailbox), sec, expansion,
           mute_time, locale, sessionKey, warden::AdmissionData(),
-          warden::WardenAdmissionHistory())
+          warden::WardenAdmissionContext())
 {
 }
 
@@ -203,13 +203,14 @@ WorldSession::WorldSession(uint32 id, std::shared_ptr<proto::IClientLink> link,
                            AccountTypes sec, uint8 expansion, time_t mute_time,
                            LocaleConstant locale, const BigNumber& sessionKey,
                            warden::AdmissionData&& admission,
-                           warden::WardenAdmissionHistory admissionHistory) :
+                           warden::WardenAdmissionContext admissionContext) :
     m_muteTime(mute_time), _player(nullptr), m_link(std::move(link)),
     m_mailbox(mailbox ? std::move(mailbox) : std::make_shared<SessionMailbox>()),
     m_pendingWardenAdmission(admission.available
         ? std::make_unique<warden::AdmissionData>(std::move(admission))
         : nullptr),
-    m_wardenAdmissionHistory(admissionHistory),
+    m_wardenAdmissionHistory(std::move(admissionContext.history)),
+    m_wardenConfiguration(std::move(admissionContext.configuration)),
     m_sessionKey(sessionKey),
     _security(sec), _accountId(id), m_expansion(expansion), _logoutTime(0),
     m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
@@ -259,13 +260,6 @@ void WorldSession::OnAuthenticatedAdmission()
     if (m_wardenAdmissionHandled)
         return;
     m_wardenAdmissionHandled = true;
-
-    // Queue residence is unbounded, so only this current coherent snapshot is
-    // authoritative for the admitted session.
-    std::shared_ptr<warden::WardenConfiguration const> const configuration =
-        warden::WardenManager::Instance().GetConfigurationSnapshot();
-    m_wardenConfiguration = configuration ? *configuration :
-        warden::WardenConfiguration();
 
     if (!m_pendingWardenAdmission ||
         !m_pendingWardenAdmission->available || !m_link || m_link->IsClosed())

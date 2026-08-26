@@ -331,7 +331,7 @@ class WorldSession
                      AccountTypes sec, uint8 expansion, time_t mute_time,
                      LocaleConstant locale, const BigNumber& sessionKey,
                      warden::AdmissionData&& admission,
-                     warden::WardenAdmissionHistory admissionHistory);
+                     warden::WardenAdmissionContext admissionContext);
 
         /**
          * @brief Destructor
@@ -393,7 +393,7 @@ class WorldSession
         void SendSetPhaseShift(uint32 phaseShift);
         void SendQueryTimeResponse();
         void SendRedirectClient(std::string& ip, uint16 port);
-        /** Applies the current policy after either native auth send sequence. */
+        /** Applies the coherent Attach-time policy after the native auth send. */
         void OnAuthenticatedAdmission();
         /** Starts the inert admission object after the character-list boundary. */
         void StartWardenBootstrap();
@@ -1128,9 +1128,11 @@ class WorldSession
         std::shared_ptr<SessionMailbox> m_mailbox;
 
         std::unique_ptr<warden::AdmissionData> m_pendingWardenAdmission;
+        /** Incident history loaded under the paired Attach-time policy. */
         warden::WardenAdmissionHistory m_wardenAdmissionHistory;
         std::unique_ptr<warden::WardenServer> m_warden;
         std::unique_ptr<warden::WardenEnforcementPolicy> m_wardenPolicy;
+        /** Attach-time policy retained as this session's sole Warden policy. */
         warden::WardenConfiguration m_wardenConfiguration;
         uint32 m_wardenBuild = 0;
         std::string m_clientPlatform;

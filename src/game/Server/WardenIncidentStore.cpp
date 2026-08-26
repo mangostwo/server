@@ -57,7 +57,8 @@ std::optional<WardenIncidentWindowState> WardenIncidentStore::Load(
     uint32 accountId, uint32 incidentWindowSeconds,
     uint32 aggressiveThreshold) const
 {
-    if (accountId == 0 || incidentWindowSeconds == 0 ||
+    if (accountId == 0 ||
+        !IsValidWardenIncidentWindow(incidentWindowSeconds) ||
         aggressiveThreshold == 0)
     {
         return std::nullopt;
@@ -110,6 +111,7 @@ WardenIncidentWriteResult WardenIncidentStore::Record(
 {
     WardenIncidentWriteResult failed;
     if (configuration.enforcementMode == WardenEnforcementMode::Observe ||
+        !IsValidWardenIncidentWindow(configuration.incidentWindowSeconds) ||
         !IsValidWardenIncidentContext(context))
         return failed;
 

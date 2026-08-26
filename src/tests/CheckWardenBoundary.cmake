@@ -141,7 +141,7 @@ slice_between("${WORLD_CPP}" "World::AddSession_(WorldSession* s)"
     "void World::VerifyDataIntegrity()" ADD_SESSION_CODE)
 slice_between("${WORLD_CPP}" "void World::UpdateSessions(uint32 diff)"
     "// This handles the issued and queued CLI/RA commands" UPDATE_SESSIONS_CODE)
-slice_between("${SESSION_CPP}"
+slice_between("${SESSION_CODE}"
     "void WorldSession::OnAuthenticatedAdmission()"
     "void WorldSession::SizeError" ADMISSION_CODE)
 slice_between("${CHARACTER_CPP}" "void WorldSession::HandleCharEnum("
@@ -438,6 +438,14 @@ require_ordered("${GATEWAY_CODE}" "WorldGateway account projection"
     "FROM `account`")
 require_count("${GATEWAY_CODE}" "`client_locale`" 1
     "gateway account query must append exact locale once")
+if(GATEWAY_CODE MATCHES "GameTime::GetGameTime")
+    message(FATAL_ERROR
+        "Gateway workers must not read the world-thread game-time cache")
+endif()
+if(ADMISSION_CODE MATCHES "GetConfigurationSnapshot")
+    message(FATAL_ERROR
+        "Queued Warden admission must retain its Attach-time policy snapshot")
+endif()
 
 # Pin the two intentionally asymmetric authenticated admission sequences.
 require_ordered("${WORLD_CODE}" "immediate authenticated admission sends"
