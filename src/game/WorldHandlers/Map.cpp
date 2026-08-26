@@ -3537,46 +3537,24 @@ bool Map::GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, 
     i_z = *reachable;
 
     // here we have a valid position but the point can have a big Z in some case
-    // next code will check angle from 2 points of view: x-axis and y-axis movement
+    // next code checks the slope of the hop: the rise (a) over the horizontal distance walked (b)
     //        c
     //       /|
     //      / |
     //    b/__|a
 
-    // project vector to get only positive value
-    float ac = fabs(z - i_z);
-    float delta = 0;
-
-    // slope represented by b angle (in radian)
-    float slope = 0;
+    // Testing each axis on its own overstates a diagonal hop by up to sqrt(2) and
+    // rejects it short of the limit; the slope of the hop is over the distance walked.
+    const float ac = fabs(z - i_z);
+    const float horizontal = sqrt((x - i_x) * (x - i_x) + (y - i_y) * (y - i_y));
     const float MAX_SLOPE_IN_RADIAN = 50.0f / 180.0f * M_PI_F;  // 50(degree) max seem best value for walkable slope
 
-    delta = fabs(x - i_x);  // check x-axis movement
-    if (delta > 0.0f)       // check to avoid divide by 0
+    if (horizontal > 0.0f && atan(ac / horizontal) < MAX_SLOPE_IN_RADIAN)
     {
-        // compute slope
-        float slope = atan(ac / delta);
-        if (slope < MAX_SLOPE_IN_RADIAN)
-        {
-            x = i_x;
-            y = i_y;
-            z = i_z;
-            return true;
-        }
-    }
-
-    delta = fabs(y - i_y);  // check y-axis movement
-    if (delta > 0.0f)       // check to avoid divide by 0
-    {
-        // compute slope
-        slope = atan(ac / delta);
-        if (slope < MAX_SLOPE_IN_RADIAN)
-        {
-            x = i_x;
-            y = i_y;
-            z = i_z;
-            return true;
-        }
+        x = i_x;
+        y = i_y;
+        z = i_z;
+        return true;
     }
 
     return false;
