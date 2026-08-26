@@ -435,3 +435,37 @@ TEST(ArbiterModel_ExpireKindFollowRestoresFallback)
     m.Expire(MoveKind::FollowTarget);
     CHECK_EQ(SelectedKind(m), K(MoveKind::Random));
 }
+
+TEST(ArbiterModel_PushedRandomClearedRevealsFactoryDefault)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Random));                                 // EventAI change-movement: pushed over the factory default
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Random));
+    m.Clear(false);                                                   // evade: the stack pops it, the factory default resumes
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));
+    CHECK_EQ(static_cast<int>(m.Contents().size()), 1);
+}
+
+TEST(ArbiterModel_FollowAfterPushedWaypointKeepsFactoryFallback)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Waypoint));
+    m.Clear(false);                                                   // MoveFollow clears first
+    m.Request(Req(MoveKind::FollowTarget));
+    CHECK_EQ(SelectedKind(m), K(MoveKind::FollowTarget));
+    m.Expire(MoveKind::FollowTarget);                                 // target gone
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));                     // the factory default, not the popped waypoint
+}
+
+TEST(ArbiterModel_ExpirePushedDefaultPromotesFallback)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Idle);
+    m.Request(Req(MoveKind::Random));
+    m.ExpireSelected();                                               // MovementExpired at depth two pops the pushed default
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));
+    m.ExpireSelected();                                               // and at depth one it is a no-op
+    CHECK_EQ(SelectedKind(m), K(MoveKind::Idle));
+}

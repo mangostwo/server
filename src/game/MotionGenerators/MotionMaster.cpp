@@ -245,10 +245,6 @@ void MotionMaster::UpdateMotion(uint32 diff)
  */
 void MotionMaster::DirectClean(bool reset, bool all)
 {
-    // Mirrored even at depth one (DelayedClean returns before its mirror there): the model
-    // may hold masked entries the stack no longer has.
-    ShadowClear(all);
-
     while (all ? !empty() : size() > 1)
     {
         MovementGenerator* curr = top();
@@ -260,6 +256,10 @@ void MotionMaster::DirectClean(bool reset, bool all)
             delete curr;
         }
     }
+
+    // Mirrored after the pops: a Finalize that re-enters the facade (AssistanceRun -> AssistanceDistract) is
+    // cleared with everything else. At depth one DirectClean still mirrors while DelayedClean returns first.
+    ShadowClear(all);
 
     if (!all && reset)
     {
@@ -289,8 +289,6 @@ void MotionMaster::DelayedClean(bool reset, bool all)
         return;
     }
 
-    ShadowClear(all);
-
     if (!m_expList)
     {
         m_expList = new ExpireList();
@@ -307,6 +305,8 @@ void MotionMaster::DelayedClean(bool reset, bool all)
             m_expList->push_back(curr);
         }
     }
+
+    ShadowClear(all);
 }
 
 /**

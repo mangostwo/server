@@ -102,16 +102,12 @@ namespace Arbiter
             return;
         }
 
-        if (request.kind == MoveKind::FollowTarget)
+        // A facade default (Random, Waypoint, Follow) is pushed over the factory one, which the
+        // stack reveals again when it pops: keep the first displaced default as the fallback, and
+        // leave it in place when a second facade default replaces the first.
+        if (m_default && !m_fallbackDefault)
         {
-            if (m_default && m_default->kind != MoveKind::FollowTarget)
-            {
-                m_fallbackDefault = m_default;
-            }
-        }
-        else
-        {
-            m_fallbackDefault.reset();
+            m_fallbackDefault = m_default;
         }
 
         if (m_default)
@@ -163,6 +159,11 @@ namespace Arbiter
             Finish(m_default, FinishReason::Cleared);
             m_fallbackDefault.reset();
         }
+        else if (m_fallbackDefault)
+        {
+            // Clear(false) leaves the bottom generator only: a pushed default goes with the rest.
+            PopDefault(FinishReason::Cleared);
+        }
         Reselect(before);
     }
 
@@ -176,13 +177,20 @@ namespace Arbiter
         switch (*layer)
         {
             case Layer::Default:
-                // MovementExpired at depth one is a no-op, except a Follow whose target is gone:
-                // its Update() returns false and the bottom default beneath it resumes.
-                if (m_default->kind == MoveKind::FollowTarget)
+            {
+                // MovementExpired at depth one is a no-op. A default with a fallback beneath it is a
+                // pushed one (a facade Random, Waypoint or Follow over the factory default): the stack
+                // pops it and the factory default resumes.
+                if (!m_fallbackDefault)
                 {
-                    FinishSelected(FinishReason::TargetLost);
+                    return;
                 }
+                const std::optional<Held> before = Selected();
+                PopDefault(m_default->kind == MoveKind::FollowTarget ? FinishReason::TargetLost
+                                                                    : FinishReason::Expired);
+                Reselect(before);
                 return;
+            }
             case Layer::Combat:
                 FinishSelected(FinishReason::TargetLost);
                 return;
@@ -215,13 +223,12 @@ namespace Arbiter
             return;
         }
 
-        // A default only ends on its own when it is a Follow whose target is gone; any
-        // other default, and a kind the model no longer holds, is a no-op.
-        if (m_default && m_default->kind == kind && kind == MoveKind::FollowTarget)
+        // Only a pushed default ends on its own: the stack pops it and the factory default
+        // beneath resumes. The bottom default, and a kind the model no longer holds, is a no-op.
+        if (m_default && m_default->kind == kind && m_fallbackDefault)
         {
-            Finish(m_default, FinishReason::TargetLost);
-            m_default = m_fallbackDefault;
-            m_fallbackDefault.reset();
+            PopDefault(kind == MoveKind::FollowTarget ? FinishReason::TargetLost
+                                                      : FinishReason::Expired);
             Reselect(before);
         }
     }
@@ -236,9 +243,7 @@ namespace Arbiter
         }
         if (*layer == Layer::Default)
         {
-            Finish(m_default, reason);
-            m_default = m_fallbackDefault;
-            m_fallbackDefault.reset();
+            PopDefault(reason);
         }
         else if (*layer == Layer::Combat)
         {
@@ -332,6 +337,13 @@ namespace Arbiter
         std::vector<MovementEvent> out;
         out.swap(m_events);
         return out;
+    }
+
+    void ArbiterModel::PopDefault(FinishReason reason)
+    {
+        Finish(m_default, reason);
+        m_default = m_fallbackDefault;
+        m_fallbackDefault.reset();
     }
 
     void ArbiterModel::Finish(std::optional<Held>& slot, FinishReason reason)

@@ -63,7 +63,8 @@ namespace Arbiter
             /// Generic request entry: derives layer and policy from the kind, applies
             /// self-expiry (Home/Distract/Effect) and the policy's cancellation effects.
             void Request(MoveRequest const& request);
-            /// §5 Clear(reset, all) projection: drop every command and combat, and the
+            /// §5 Clear(reset, all) projection: drop every command and combat, a pushed
+            /// default with them (the factory default beneath resumes), and that bottom
             /// default too when `all`.
             void Clear(bool all);
             /// MovementExpired / Update()==false on whatever is currently selected.
@@ -98,6 +99,8 @@ namespace Arbiter
             std::vector<MovementEvent> DrainEvents();
 
         private:
+            /// Finish the Default-layer entry and promote the factory default beneath it, if any.
+            void PopDefault(FinishReason reason);
             /// Finish the entry in `slot`, if any, logging Finished and clearing it.
             void Finish(std::optional<Held>& slot, FinishReason reason);
             /// Compare the selection before and after a mutation and log Suspended/Resumed.
@@ -108,7 +111,8 @@ namespace Arbiter
             void RequestCommand(MoveRequest const& request, Held const& held, Layer layer, Policy policy);
 
             std::optional<Held> m_default;         ///< the Default-layer entry
-            std::optional<Held> m_fallbackDefault;  ///< the default FollowTarget replaced
+            std::optional<Held> m_fallbackDefault;  ///< the factory default beneath a pushed one;
+                                                    ///< restored when the stack pops it
             std::optional<Held> m_combat;          ///< the Combat-layer entry
             std::optional<Held> m_commands[static_cast<uint8>(Layer::Count)];  ///< per-layer commands
             uint32 m_seq = 0;                      ///< monotonic arrival counter
