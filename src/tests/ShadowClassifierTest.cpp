@@ -146,7 +146,7 @@ TEST(ShadowClassifier_UnrelatedTopIsUnexpected)
     ArbiterModel m;
     m.InstallDefault(MoveKind::Random);
     m.Request(Req(MoveKind::Point, 1));
-    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, CONFUSED_MOTION_TYPE}, m)), D(Divergence::Unexpected));
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, FLIGHT_MOTION_TYPE}, m)), D(Divergence::Unexpected));
 }
 
 TEST(ShadowClassifier_Describe)
@@ -185,4 +185,24 @@ TEST(ShadowClassifier_IdleCommandUnderFearIsLayerOrder)
     m.Request(Req(MoveKind::Fear));
     m.Request(Req(MoveKind::Idle));                                            // MoveIdle while feared: the stack runs the idle
     CHECK_EQ(D(Classify({IDLE_MOTION_TYPE, FLEEING_MOTION_TYPE, IDLE_MOTION_TYPE}, m)), D(Divergence::LayerOrder));
+}
+
+TEST(ShadowClassifier_DoubleFearIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Fear));                                            // feared again: the stack keeps both
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, FLEEING_MOTION_TYPE, FLEEING_MOTION_TYPE}, m)),
+             D(Divergence::SupersededOneShot));
+}
+
+TEST(ShadowClassifier_StaleFearResumedIsSupersededOneShot)
+{
+    ArbiterModel m;
+    m.InstallDefault(MoveKind::Random);
+    m.Request(Req(MoveKind::Fear));
+    m.Request(Req(MoveKind::Fear));
+    m.Expire(MoveKind::Fear);                                                  // the second fear ended; the stack resumes the first
+    CHECK_EQ(D(Classify({RANDOM_MOTION_TYPE, FLEEING_MOTION_TYPE}, m)), D(Divergence::SupersededOneShot));
 }

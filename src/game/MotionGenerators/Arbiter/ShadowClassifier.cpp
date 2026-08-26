@@ -29,7 +29,10 @@ namespace Arbiter
 {
     namespace
     {
-        bool IsOneShot(MovementGeneratorType type)
+        /// A transient the stack keeps beneath and may resume, but the model supersedes: the
+        /// one-shot family (point, effect, home, distract, assistance) and the controls
+        /// (fear, confused).
+        bool IsTransient(MovementGeneratorType type)
         {
             switch (type)
             {
@@ -39,14 +42,19 @@ namespace Arbiter
                 case DISTRACT_MOTION_TYPE:
                 case ASSISTANCE_MOTION_TYPE:
                 case ASSISTANCE_DISTRACT_MOTION_TYPE:
+                case FLEEING_MOTION_TYPE:
+                case TIMED_FLEEING_MOTION_TYPE:
+                case CONFUSED_MOTION_TYPE:
                     return true;
                 default:
                     return false;
             }
         }
 
-        /// The model-side twin of IsOneShot: kinds whose stack generator ends by itself.
-        bool IsOneShotKind(MoveKind kind)
+        /// The model-side twin of IsTransient: kinds the stack keeps beneath and may resume,
+        /// but the model supersedes -- the one-shot family (point, effect, home, distract,
+        /// assistance) and the controls (fear, confused).
+        bool IsTransientKind(MoveKind kind)
         {
             switch (kind)
             {
@@ -57,6 +65,8 @@ namespace Arbiter
                 case MoveKind::Distract:
                 case MoveKind::AssistanceDistract:
                 case MoveKind::Effect:
+                case MoveKind::Fear:
+                case MoveKind::Confused:
                     return true;
                 default:
                     return false;
@@ -122,15 +132,15 @@ namespace Arbiter
             return n;
         }
 
-        /// Number of one-shot moves the model holds: the only entries a stack one-shot
-        /// can legitimately stand for. A standing behaviour masking others (an Idle
-        /// command, a fear, a taxi) is not one, and must not pad the count.
-        size_t ModelOneShotCount(ArbiterModel const& model)
+        /// Number of transients the model holds: the only entries a stack transient can
+        /// legitimately stand for. A standing behaviour masking others (an Idle command,
+        /// a taxi) is not one, and must not pad the count.
+        size_t ModelTransientCount(ArbiterModel const& model)
         {
             size_t n = 0;
             for (Held const& h : model.Contents())
             {
-                if (IsOneShotKind(h.kind))
+                if (IsTransientKind(h.kind))
                 {
                     ++n;
                 }
@@ -154,7 +164,7 @@ namespace Arbiter
 
         if (SameKind(top, selected->kind))
         {
-            if (CountIf(stack, IsOneShot) > ModelOneShotCount(model))
+            if (CountIf(stack, IsTransient) > ModelTransientCount(model))
             {
                 return Divergence::SupersededOneShot;
             }
@@ -179,7 +189,7 @@ namespace Arbiter
             return Divergence::CombatCancelledEarly;
         }
 
-        if (IsOneShot(top) && !ModelHolds(model, top, nullptr))
+        if (IsTransient(top) && !ModelHolds(model, top, nullptr))
         {
             return Divergence::SupersededOneShot;
         }

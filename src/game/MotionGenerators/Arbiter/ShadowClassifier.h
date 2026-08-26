@@ -42,7 +42,7 @@ namespace Arbiter
     {
         None,                   ///< the stack agrees with the model
         LayerOrder,             ///< the stack runs the last push, the model the highest layer
-        SupersededOneShot,      ///< a stale one-shot the model superseded still sits in (or resumed from) the stack
+        SupersededOneShot,      ///< a stale one-shot or control the model superseded sits in (or resumed from) the stack
         TargetedMultiplicity,   ///< the stack holds more than one chase/follow
         CombatCancelledEarly,   ///< the stack deleted the chase/follow beneath a non-effect expiry
         Unexpected              ///< no rule matched; the stack and the model disagree for another reason
