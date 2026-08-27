@@ -53,6 +53,7 @@ set(SRC_GRP_TESTS
     PlacementTest.cpp
     ArbiterModelTest.cpp
     ShadowClassifierTest.cpp
+    UpdateBlockLayoutTest.cpp
     GeometryMathTest.cpp
     DataIntegrityTest.cpp
     LFGLogicTest.cpp
@@ -85,6 +86,7 @@ set(SRC_GRP_TESTS
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/DynamicCollision.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/GameObjectModel.cpp
     ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/LFGLogic.cpp
+    ${CMAKE_SOURCE_DIR}/src/game/WorldHandlers/UpdateBlockLayout.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/SessionMailbox.cpp
     ${CMAKE_SOURCE_DIR}/src/game/Server/WorldGatewayAuth.cpp
     # The movement arbiter's pure core: no Unit, no driver, no map.

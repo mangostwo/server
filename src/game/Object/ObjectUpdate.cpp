@@ -229,9 +229,26 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) c
  *
  * Adds this object's GUID to the out-of-range list,
  * indicating it should be removed from the client's view.
+ *
+ * A UNIT THE CLIENT DRAWS ON THE ZONE MAP IS NEVER SENT ONE. The battlefield-vehicle
+ * list is built on CREATE and emptied on DESTROY, and a destroy block is a destroy
+ * block whatever prompted it -- so the moment an observer ashore drifts out of the
+ * vessel's relay range, or a deck is torn down for him, the gunship drops out of that
+ * list and its icon disappears from his map. The icon is meant to hold for the whole
+ * zone, far past anything the observer can see, so the block is refused at the one
+ * place every caller goes through rather than at each of them.
+ *
+ * The leak this trades for is bounded and harmless: the client dedups the list by guid,
+ * caps it at 40, and clears it outright on world init -- and Blizzard ships exactly two
+ * rows carrying the flag.
  */
 void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
 {
+    if (isType(TYPEMASK_UNIT) && ((Unit const*)this)->IsTrackedOnZoneMap())
+    {
+        return;
+    }
+
     data->AddOutOfRangeGUID(GetObjectGuid());
 }
 
@@ -241,10 +258,24 @@ void Object::BuildOutOfRangeUpdateBlock(UpdateData* data) const
  *
  * Sends a destroy packet to the specified player,
  * removing this object from their game world.
+ *
+ * Refused for a unit the client tracks on the zone map, for the reason spelled out over
+ * BuildOutOfRangeUpdateBlock: this is the other door out, and the visibility sweep uses
+ * THIS one for creatures. Guarding only the update block would have left the hole open.
+ *
+ * The cost is that such a unit really removed at runtime keeps its icon until the client
+ * next clears the list -- a zone change or a relog. That is the right way round: an icon
+ * that lingers is a nuisance, an icon that vanishes whenever the player walks inland is
+ * the bug being fixed.
  */
 void Object::DestroyForPlayer(Player* target, bool anim) const
 {
     MANGOS_ASSERT(target);
+
+    if (isType(TYPEMASK_UNIT) && ((Unit const*)this)->IsTrackedOnZoneMap())
+    {
+        return;
+    }
 
     WorldPacket data(SMSG_DESTROY_OBJECT, 9);
     data << GetObjectGuid();
@@ -377,6 +408,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         }
     }
 
+    // WHAT the tail carries is resolved here; the ORDER it goes out in is not ours to
+    // decide twice. It is a non-numeric queue the 3.3.5a client hard-codes, and it lives
+    // in UpdateBlock::WriteMovementTail with a test pinning its bytes.
+    UpdateBlock::MovementTail tail;
+
     // 0x8
     if (updateFlags & UPDATEFLAG_LOWGUID)
     {
@@ -388,23 +424,18 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             case TYPEID_GAMEOBJECT:
             case TYPEID_DYNAMICOBJECT:
             case TYPEID_CORPSE:
-                *data << uint32(GetGUIDLow());              // GetGUIDLow()
+                tail.lowGuid = GetGUIDLow();
                 break;
             case TYPEID_UNIT:
-                *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
+                tail.lowGuid = 0x0000000B;                  // unk, can be 0xB or 0xC
                 break;
             case TYPEID_PLAYER:
-                if (updateFlags & UPDATEFLAG_SELF)
-                {
-                    *data << uint32(0x0000002F);            // unk, can be 0x15 or 0x22
-                }
-                else
-                {
-                    *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
-                }
+                tail.lowGuid = (updateFlags & UPDATEFLAG_SELF) ?
+                    0x0000002F :                            // unk, can be 0x15 or 0x22
+                    0x00000008;                             // unk, can be 0x7 or 0x8
                 break;
             default:
-                *data << uint32(0x00000000);                // unk
+                tail.lowGuid = 0x00000000;                  // unk
                 break;
         }
     }
@@ -420,37 +451,28 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             case TYPEID_GAMEOBJECT:
             case TYPEID_DYNAMICOBJECT:
             case TYPEID_CORPSE:
-                *data << uint32(GetObjectGuid().GetHigh()); // GetGUIDHigh()
+                tail.highGuid = GetObjectGuid().GetHigh();
                 break;
             case TYPEID_UNIT:
-                *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
+                tail.highGuid = 0x0000000B;                 // unk, can be 0xB or 0xC
                 break;
             case TYPEID_PLAYER:
-                if (updateFlags & UPDATEFLAG_SELF)
-                {
-                    *data << uint32(0x0000002F);            // unk, can be 0x15 or 0x22
-                }
-                else
-                {
-                    *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
-                }
+                tail.highGuid = (updateFlags & UPDATEFLAG_SELF) ?
+                    0x0000002F :                            // unk, can be 0x15 or 0x22
+                    0x00000008;                             // unk, can be 0x7 or 0x8
                 break;
             default:
-                *data << uint32(0x00000000);                // unk
+                tail.highGuid = 0x00000000;                 // unk
                 break;
         }
     }
 
-    // 0x4
-    if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)      // packed guid (current target guid)
+    // 0x4 -- packed guid (current target guid)
+    if (updateFlags & UPDATEFLAG_HAS_ATTACKING_TARGET)
     {
-        if (((Unit*)this)->getVictim())
+        if (Unit* victim = ((Unit*)this)->getVictim())
         {
-            *data << ((Unit*)this)->getVictim()->GetPackGUID();
-        }
-        else
-        {
-            data->appendPackGUID(0);
+            tail.attackingTarget = victim->GetObjectGuid().GetRawValue();
         }
     }
 
@@ -465,26 +487,28 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         if (isType(TYPEMASK_GAMEOBJECT)
             && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
-            *data << uint32(((Transport*)this)->GetPathProgress());
+            tail.transportTime = ((Transport*)this)->GetPathProgress();
         }
         else
         {
-            *data << uint32(GameTime::GetGameTimeMS());       // ms time
+            tail.transportTime = GameTime::GetGameTimeMS();  // ms time
         }
     }
 
-    // 0x80
+    // 0x80 -- the Vehicle.dbc row, and the facing the client rotates the map icon by.
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
-        *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->ID); // vehicle id
-        *data << float(((WorldObject*)this)->Where().Facing());
+        tail.vehicleId = ((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->ID;
+        tail.vehicleFacing = ((WorldObject*)this)->Where().Facing();
     }
 
     // 0x200
     if (updateFlags & UPDATEFLAG_ROTATION)
     {
-        *data << int64(((GameObject*)this)->GetPackedRotation());
+        tail.rotation = ((GameObject*)this)->GetPackedRotation();
     }
+
+    UpdateBlock::WriteMovementTail(*data, updateFlags, tail);
 }
 
 /**

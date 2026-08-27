@@ -6792,6 +6792,18 @@ void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
     }
 }
 
+bool Unit::IsTrackedOnZoneMap() const
+{
+    if (!m_vehicleInfo)
+    {
+        return false;
+    }
+
+    VehicleEntry const* ventry = m_vehicleInfo->GetVehicleEntry();
+
+    return ventry && (ventry->Flags & VEHICLE_FLAG_ZONE_MAP_ICON) != 0;
+}
+
 /**
  * @brief Advances active spline movement and updates world position.
  *

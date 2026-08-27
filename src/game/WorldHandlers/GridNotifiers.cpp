@@ -100,8 +100,26 @@ void VisibleNotifier::Notify()
     // leftovers below by having been re-found -- which is what makes their out-of-range
     // correct without anybody keeping a list.
 
+    // THE LEFTOVERS SWEEP IS THE THIRD DOOR OUT, and the only one that works on bare
+    // guids -- so the refusal in BuildOutOfRangeUpdateBlock cannot reach it and has to be
+    // repeated here. It matters for the siege vehicles rather than the gunships: a
+    // demolisher is an ordinary grid creature, it IS in m_clientGUIDs, and every time its
+    // driver rode out of a watcher's cells this sweep took it off that watcher's zone map.
+    //
+    // Dropped from the packet, but still erased from m_clientGUIDs below: the server's
+    // bookkeeping stays honest, so coming back into range sends a fresh create, and the
+    // client's list dedups by guid rather than growing a second entry.
+    GuidSet outOfRange;
+    for (GuidSet::const_iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
+    {
+        if (!player.GetMap()->IsZoneMapTrackedGuid(*itr))
+        {
+            outOfRange.insert(*itr);
+        }
+    }
+
     // generate outOfRange for not iterate objects
-    i_data.AddOutOfRangeGUID(i_clientGUIDs);
+    i_data.AddOutOfRangeGUID(outOfRange);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
     {
         player.m_clientGUIDs.erase(*itr);

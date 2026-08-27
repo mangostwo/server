@@ -111,6 +111,7 @@
 #include "GitRevision.h"
 #include "UpdateTime.h"
 #include "GameTime.h"
+#include "WorldStateMgr.h"
 
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
@@ -974,6 +975,10 @@ void World::SetInitialWorldSettings()
     ///- Initialize Outdoor PvP
     sLog.outString("Starting Outdoor PvP System");
     sOutdoorPvPMgr.InitOutdoorPvP();
+
+    ///- Index the map landmarks the world states drive (AreaPOI.dbc)
+    sLog.outString("Starting World State store");
+    sWorldStateMgr.Initialize();
 
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");

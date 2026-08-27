@@ -289,6 +289,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "moditemvalue",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugModItemValueCommand,        "", NULL },
         { "modvalue",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugModValueCommand,            "", NULL },
         { "play",           SEC_MODERATOR,      false, NULL,                                                "", debugPlayCommandTable },
+        { "poi",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugPoiCommand,                 "", NULL },
         { "recv",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugRecvOpcodeCommand,          "", NULL },
         { "send",           SEC_ADMINISTRATOR,  false, NULL,                                                "", debugSendCommandTable },
         { "setaurastate",   SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSetAuraStateCommand,        "", NULL },
@@ -298,6 +299,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "spellcoefs",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugSpellCoefsCommand,          "", NULL },
         { "spellmods",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugSpellModsCommand,           "", NULL },
         { "uws",            SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugUpdateWorldStateCommand,    "", NULL },
+        { "worldstate",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugWorldStateCommand,          "", NULL },
         { NULL,             0,                  false, NULL,                                                "", NULL }
     };
 

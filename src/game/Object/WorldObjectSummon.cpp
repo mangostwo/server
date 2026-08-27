@@ -62,6 +62,7 @@
 #include "CreatureLinkingMgr.h"
 #include "Chat.h"
 #include "GameTime.h"
+#include "TransportMap.h"
 #ifdef ENABLE_ELUNA
 #include "LuaEngine.h"
 #include "ElunaConfig.h"
@@ -745,6 +746,21 @@ void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
     WorldObjectChangeAccumulator notifier(*this, update_players);
     Cell::VisitWorldObjects(this, notifier, GetMap()->GetBroadcastRadius());
+
+    // ACROSS A VESSEL'S BOUNDARY. The visit above walks cells on this object's own map, and
+    // a deck and the shore it sails past are two maps -- so on that route a value change
+    // never crosses, in either direction. No HaveAtClient test here on purpose: the people
+    // on the far side hold this object through the vessel's map-membership channel, which
+    // deliberately leaves no mark in the set that test reads.
+    std::vector<Player*> across;
+    TransportMap::CollectRelayAudience(this, across);
+    for (Player* observer : across)
+    {
+        if (observer != this && observer->IsInWorld())
+        {
+            BuildUpdateDataForPlayer(observer, update_players);
+        }
+    }
 
     ClearUpdateMask(false);
 }

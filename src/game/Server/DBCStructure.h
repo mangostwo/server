@@ -546,6 +546,33 @@ struct AreaGroupEntry
 };
 
 /**
+* \struct AreaPOIEntry
+* \brief One map landmark -- the fixed points the client draws on a zone or continent map.
+*
+* The client rebuilds its landmark list from this table alone (GetNumMapLandmarks /
+* GetMapLandmarkInfo). A row with WorldStateID == 0 is drawn unconditionally; a row that
+* names one is drawn ONLY while that world state's value is non-zero, and the icon it
+* draws is Icon[value - 1], clamped to 0..8. That is the whole of mechanism B: the server
+* moves a number, the client moves an icon. See WorldStateMgr.
+*/
+struct AreaPOIEntry
+{
+    uint32  ID;                                             // 0        m_ID
+    int32   Importance;                                     // 1        m_importance
+    uint32  Icon[9];                                        // 2-10     m_icon -- selected by world state value minus one
+    uint32  FactionID;                                      // 11       m_factionID
+    float   Pos[3];                                         // 12-14    m_x, m_y, m_z
+    uint32  ContinentID;                                    // 15       m_continentID
+    uint32  Flags;                                          // 16       m_flags
+    uint32  AreaID;                                         // 17       m_areaID
+    char*   Name_lang[16];                                  // 18-33    m_name_lang
+    // 34       m_name_lang string flags
+    // 35-51    m_description_lang (+ string flags), not loaded
+    uint32  WorldStateID;                                   // 52       m_worldStateID -- 0 = always drawn
+    uint32  WorldMapLink;                                   // 53       m_worldMapLink
+};
+
+/**
 * \struct AreaTriggerEntry
 * \brief Entry representing an area which need to send a specific trigger for quest/resting/..
 */
