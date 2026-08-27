@@ -42,6 +42,8 @@
 #include "Creature.h"
 #include "CreatureLinkingMgr.h"
 #include "Pet.h"
+#include "World.h"
+#include "Arbiter/ArbiterShadow.h"
 #include "DBCStores.h"
 
 #include <cassert>
@@ -57,10 +59,82 @@ inline static bool isStatic(MovementGenerator* mv)
 }
 
 /**
+ * @brief Mirrors the default generator Initialize() just pushed into the shadow model.
+ */
+void MotionMaster::ShadowFactoryDefault()
+{
+    if (m_shadow && !empty())
+    {
+        m_shadow->OnFactoryDefault(top()->GetMovementGeneratorType());
+    }
+}
+
+/**
+ * @brief Mirrors one facade request into the shadow model.
+ * @param kind Kind of movement requested.
+ * @param id MovementInform id, 0 when none.
+ */
+void MotionMaster::ShadowRequest(Arbiter::MoveKind kind, uint32 id)
+{
+    if (m_shadow)
+    {
+        m_shadow->OnRequest(kind, id);
+    }
+}
+
+/**
+ * @brief Mirrors Clear(reset, all) into the shadow model.
+ * @param all Whether the default is dropped too.
+ */
+void MotionMaster::ShadowClear(bool all)
+{
+    if (m_shadow)
+    {
+        m_shadow->OnClear(all);
+    }
+}
+
+/**
+ * @brief Mirrors MovementExpired on the generator about to be popped into the shadow model.
+ * @param type Type of the generator the stack is expiring.
+ */
+void MotionMaster::ShadowExpired(MovementGeneratorType type)
+{
+    if (m_shadow && !m_shadowMute)
+    {
+        m_shadow->OnExpired(type);
+    }
+}
+
+/**
+ * @brief Hands the current stack to the shadow model, which logs any divergence.
+ */
+void MotionMaster::ShadowCompare()
+{
+    if (!m_shadow || empty())
+    {
+        return;
+    }
+
+    Arbiter::StackTypes types;
+    for (MovementGenerator* mg : c)   // std::stack's protected container, bottom to top
+    {
+        types.push_back(mg->GetMovementGeneratorType());
+    }
+
+    m_shadow->Compare(types);
+}
+
+/**
  * @brief Initializes the MotionMaster.
  */
 void MotionMaster::Initialize()
 {
+    if (!m_shadow && sWorld.getConfig(CONFIG_BOOL_MOVEMENT_ARBITER_SHADOW))
+    {
+        m_shadow.reset(new ArbiterShadow(*m_owner));
+    }
+
     // Stop current move
     m_owner->StopMoving();
 
@@ -82,6 +156,16 @@ void MotionMaster::Initialize()
     {
         push(&si_idleMovement);
     }
+
+    ShadowFactoryDefault();
+}
+
+/**
+ * @brief Constructor for MotionMaster.
+ * @param unit Pointer to the unit.
+ */
+MotionMaster::MotionMaster(Unit* unit) : m_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE), m_shadowMute(0)
+{
 }
 
 /**
@@ -150,6 +234,8 @@ void MotionMaster::UpdateMotion(uint32 diff)
             m_cleanFlag &= ~MMCF_RESET;
         }
     }
+
+    ShadowCompare();
 }
 
 /**
@@ -170,6 +256,10 @@ void MotionMaster::DirectClean(bool reset, bool all)
             delete curr;
         }
     }
+
+    // Mirrored after the pops: a Finalize that re-enters the facade (AssistanceRun -> AssistanceDistract) is
+    // cleared with everything else. At depth one DirectClean still mirrors while DelayedClean returns first.
+    ShadowClear(all);
 
     if (!all && reset)
     {
@@ -215,6 +305,8 @@ void MotionMaster::DelayedClean(bool reset, bool all)
             m_expList->push_back(curr);
         }
     }
+
+    ShadowClear(all);
 }
 
 /**
@@ -227,6 +319,8 @@ void MotionMaster::DirectExpire(bool reset)
     {
         return;
     }
+
+    ShadowExpired(top()->GetMovementGeneratorType());
 
     MovementGenerator* curr = top();
     pop();
@@ -286,6 +380,8 @@ void MotionMaster::DelayedExpire(bool reset)
         return;
     }
 
+    ShadowExpired(top()->GetMovementGeneratorType());
+
     MovementGenerator* curr = top();
     pop();
 
@@ -322,6 +418,7 @@ void MotionMaster::MoveIdle()
 {
     if (empty() || !isStatic(top()))
     {
+        ShadowRequest(Arbiter::MoveKind::Idle);
         push(&si_idleMovement);
     }
 }
@@ -343,6 +440,7 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     else
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
+        ShadowRequest(Arbiter::MoveKind::Random);
         Mutate(new RandomMovementGenerator(x, y, z, radius, verticalZ));
     }
 }
@@ -369,6 +467,7 @@ void MotionMaster::MoveTargetedHome()
         else
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted home", m_owner->GetGuidStr().c_str());
+            ShadowRequest(Arbiter::MoveKind::Home);
             Mutate(new HomeMovementGenerator());
         }
     }
@@ -377,6 +476,7 @@ void MotionMaster::MoveTargetedHome()
         if (Unit* target = ((Creature*)m_owner)->GetCharmerOrOwner())
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
+            ShadowRequest(Arbiter::MoveKind::FollowTarget);
             Mutate(new FollowMovementGenerator(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE));
         }
         else
@@ -397,6 +497,7 @@ void MotionMaster::MoveConfused()
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move confused", m_owner->GetGuidStr().c_str());
 
+    ShadowRequest(Arbiter::MoveKind::Confused);
     Mutate(new ConfusedMovementGenerator());
 }
 
@@ -416,6 +517,7 @@ void MotionMaster::MoveChase(Unit* target, float dist, float angle)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s chase to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
+    ShadowRequest(Arbiter::MoveKind::Chase);
     Mutate(new ChaseMovementGenerator(*target, dist, angle));
 }
 
@@ -442,6 +544,7 @@ void MotionMaster::MoveFollow(Unit* target, float dist, float angle)
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
 
+    ShadowRequest(Arbiter::MoveKind::FollowTarget);
     Mutate(new FollowMovementGenerator(*target, dist, angle));
 }
 
@@ -457,6 +560,7 @@ void MotionMaster::MovePoint(uint32 id, float x, float y, float z, bool generate
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), id, x, y, z);
 
+    ShadowRequest(Arbiter::MoveKind::Point, id);
     Mutate(new PointMovementGenerator(id, x, y, z, generatePath));
 }
 
@@ -476,6 +580,7 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s seek assistance (X: %f Y: %f Z: %f)",
                          m_owner->GetGuidStr().c_str(), x, y, z);
+        ShadowRequest(Arbiter::MoveKind::AssistanceRun);
         Mutate(new AssistanceMovementGenerator(x, y, z));
     }
 }
@@ -494,6 +599,7 @@ void MotionMaster::MoveSeekAssistanceDistract(uint32 time)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s is distracted after assistance call (Time: %u)",
                          m_owner->GetGuidStr().c_str(), time);
+        ShadowRequest(Arbiter::MoveKind::AssistanceDistract);
         Mutate(new AssistanceDistractMovementGenerator(time));
     }
 }
@@ -514,10 +620,12 @@ void MotionMaster::MoveFleeing(Unit* enemy, uint32 time)
 
     if (m_owner->GetTypeId() != TYPEID_PLAYER && time)
     {
+        ShadowRequest(Arbiter::MoveKind::Fear);
         Mutate(new TimedFleeingMovementGenerator(enemy->GetObjectGuid(), time));
     }
     else
     {
+        ShadowRequest(Arbiter::MoveKind::Fear);
         Mutate(new FleeingMovementGenerator(enemy->GetObjectGuid()));
     }
 }
@@ -543,6 +651,7 @@ void MotionMaster::MoveWaypoint(int32 id /*=0*/, uint32 source /*=0==PATH_NO_PAT
 
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s start MoveWaypoint()", m_owner->GetGuidStr().c_str());
         WaypointMovementGenerator* newWPMMgen = new WaypointMovementGenerator(*creature);
+        ShadowRequest(Arbiter::MoveKind::Waypoint);
         Mutate(newWPMMgen);
         newWPMMgen->InitializeWaypointPath(*creature, id, (WaypointPathOrigin)source, initialDelay, overwriteEntry);
     }
@@ -576,6 +685,7 @@ void MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s taxi to (Path %u node %u)", m_owner->GetGuidStr().c_str(), path, pathnode);
             FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(sTaxiPathNodesByPath[path], pathnode);
+            ShadowRequest(Arbiter::MoveKind::Taxi);
             Mutate(mgen);
         }
         else
@@ -599,6 +709,7 @@ void MotionMaster::MoveDistract(uint32 timer)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s distracted (timer: %u)", m_owner->GetGuidStr().c_str(), timer);
     DistractMovementGenerator* mgen = new DistractMovementGenerator(timer);
+    ShadowRequest(Arbiter::MoveKind::Distract);
     Mutate(mgen);
 }
 
@@ -618,6 +729,7 @@ void MotionMaster::MoveFlyOrLand(uint32 id, float x, float y, float z, bool lift
     }
 
     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s targeted point for %s (Id: %u X: %f Y: %f Z: %f)", m_owner->GetGuidStr().c_str(), liftOff ? "liftoff" : "landing", id, x, y, z);
+    ShadowRequest(Arbiter::MoveKind::FlyLand, id);
     Mutate(new FlyOrLandMovementGenerator(id, x, y, z, liftOff));
 }
 
@@ -636,6 +748,8 @@ void MotionMaster::Mutate(MovementGenerator* m)
                 // DistractMovement interrupted by any other movement
             case DISTRACT_MOTION_TYPE:
             case EFFECT_MOTION_TYPE:
+                // The model applied this expiry when the request was mirrored (ArbiterModel::Request).
+                ++m_shadowMute;
                 MovementExpired(false);
                 // The expiry keeps a chase or follow beneath an effect, for the effect that
                 // ends by itself. This one is being replaced: drop them, as before, or every
@@ -645,6 +759,7 @@ void MotionMaster::Mutate(MovementGenerator* m)
                 {
                     MovementExpired(false);
                 }
+                --m_shadowMute;
             default:
                 break;
         }
@@ -759,6 +874,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
 {
     // Push first: Mutate interrupts the generator on top, and that interrupt
     // finalizes the live spline - launching earlier let it kill the jump itself.
+    ShadowRequest(Arbiter::MoveKind::Effect, id);
     Mutate(new EffectMovementGenerator(id));
 
     Movement::MoveSplineInit init(*m_owner);
@@ -796,6 +912,7 @@ void MotionMaster::MoveFall()
     }
 
     // Push first, same reason as MoveJump.
+    ShadowRequest(Arbiter::MoveKind::Effect);
     Mutate(new EffectMovementGenerator(0));
 
     Movement::MoveSplineInit init(*m_owner);

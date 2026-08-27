@@ -27,12 +27,15 @@
 #define MANGOS_MOTIONMASTER_H
 
 #include "Platform/Define.h"
+#include <memory>
 #include <sstream>
 #include <stack>
 #include <vector>
 
 class MovementGenerator;
 class Unit;
+class ArbiterShadow;
+namespace Arbiter { enum class MoveKind : uint8; }
 struct Position;
 
 // Creature Entry ID used for waypoints show, visible only for GMs
@@ -93,7 +96,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
          * @brief Constructor for MotionMaster.
          * @param unit Pointer to the unit.
          */
-        explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(NULL), m_cleanFlag(MMCF_NONE) {}
+        explicit MotionMaster(Unit* unit);   // Out of line: m_shadow holds an incomplete type
 
         /**
          * @brief Destructor for MotionMaster.
@@ -347,9 +350,26 @@ class MotionMaster : private std::stack<MovementGenerator*>
          */
         void DelayedExpire(bool reset);
 
+        /// Mirrors the default generator Initialize() just pushed into the shadow model.
+        void ShadowFactoryDefault();
+
+        /// Mirrors one facade request into the shadow model.
+        void ShadowRequest(Arbiter::MoveKind kind, uint32 id = 0);
+
+        /// Mirrors Clear(reset, all) into the shadow model.
+        void ShadowClear(bool all);
+
+        /// Mirrors MovementExpired on the generator about to be popped into the shadow model.
+        void ShadowExpired(MovementGeneratorType type);
+
+        /// Hands the current stack to the shadow model, which logs any divergence.
+        void ShadowCompare();
+
         Unit*       m_owner; ///< Pointer to the owner unit.
         ExpireList* m_expList; ///< List of expired movement generators.
         uint8       m_cleanFlag; ///< Flag for cleaning the movement generators.
+        uint8       m_shadowMute; ///< >0 while Mutate applies an expiry the model already applied at request time
+        std::unique_ptr<ArbiterShadow> m_shadow; ///< PR1 shadow mode; null unless Movement.ArbiterShadow
 };
 
 #endif // MANGOS_MOTIONMASTER_H
