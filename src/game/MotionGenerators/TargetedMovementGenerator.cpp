@@ -122,6 +122,7 @@ Motion::MoveIntent TargetedMovementGenerator::Intent(Unit& owner,
 
     if (blockedByState)
     {
+        m_relay = m_relay || status.partial || status.cut;
         ClearMoveState(owner);
         return Motion::MoveIntent::Hold();
     }
@@ -129,6 +130,7 @@ Motion::MoveIntent TargetedMovementGenerator::Intent(Unit& owner,
     // No shuffling out from under a cast with a cast time or a channel.
     if (owner.IsNonMeleeSpellCasted(false, false, true))
     {
+        m_relay = m_relay || status.partial || status.cut;
         if (!owner.IsStopped())
         {
             owner.StopMoving();
@@ -147,7 +149,21 @@ Motion::MoveIntent TargetedMovementGenerator::Intent(Unit& owner,
     if (m_recheckTime.Passed())
     {
         m_recheckTime.Reset(RecheckIntervalMs());
-        needDest = RequiresNewPosition(owner, status.legGoal);
+        needDest = needDest || RequiresNewPosition(owner, status.legGoal);
+    }
+
+    // The leg ran out at the far end of a partial route, or was cut short by a stop:
+    // go on from here rather than standing on a spot we never reached. The edge is
+    // latched, because it may arrive on a tick that holds (a cast, a control state).
+    if (status.partial || status.cut)
+    {
+        m_relay = true;
+    }
+
+    if (m_relay)
+    {
+        m_relay = false;
+        needDest = true;
     }
 
     if (needDest)
@@ -159,7 +175,7 @@ Motion::MoveIntent TargetedMovementGenerator::Intent(Unit& owner,
     }
 
     // The leg ended (or none was ever needed): we are as close as we asked to be.
-    if (!status.traveling && !m_targetReached)
+    if (!status.traveling && !m_targetReached && !status.partial)
     {
         m_targetReached = true;
         ReachTarget(owner);

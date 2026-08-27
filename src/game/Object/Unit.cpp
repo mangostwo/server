@@ -448,6 +448,32 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
     ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, GetHealth() < GetMaxHealth() * 0.35f);
     ModifyAuraState(AURA_STATE_HEALTH_ABOVE_75_PERCENT, GetHealth() > GetMaxHealth() * 0.75f);
+    // A stop took the spline's position: write it now, where a cell switch is safe --
+    // unless something else moved the unit since.
+    if (m_hasPendingCommit)
+    {
+        m_hasPendingCommit = false;
+        if (Where().X() == m_pendingCommitFrom.x && Where().Y() == m_pendingCommitFrom.y &&
+            Where().Z() == m_pendingCommitFrom.z && Where().Facing() == m_pendingCommitFrom.o)
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)this)->SetPosition(m_pendingCommit.x, m_pendingCommit.y,
+                                             m_pendingCommit.z, m_pendingCommit.o);
+            }
+            else
+            {
+                GetMap()->CreatureRelocation((Creature*)this, m_pendingCommit.x, m_pendingCommit.y,
+                                             m_pendingCommit.z, m_pendingCommit.o);
+            }
+
+            // The movement state follows the placement whenever the server is the one that
+            // moved the unit, so the next create block agrees with where it was stopped.
+            m_movementInfo.Report(m_pendingCommit.x, m_pendingCommit.y,
+                                  m_pendingCommit.z, m_pendingCommit.o);
+        }
+    }
+
     UpdateSplineMovement(p_time);
     i_motionMaster.UpdateMotion(p_time);
 }
@@ -5627,11 +5653,6 @@ void Unit::SendPetAIReaction()
 
 void Unit::StopMoving(bool forceSendStop /*=false*/)
 {
-    if (IsStopped() && !forceSendStop)
-    {
-        return;
-    }
-
     clearUnitState(UNIT_STAT_MOVING);
 
     // not need send any packets if not in world
@@ -5639,6 +5660,24 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     {
         return;
     }
+
+    // Gate on the spline, not on the *_MOVE states: home legs, effects and raw script
+    // splines set none, and skipping them left the spline running.
+    if (movespline->Finalized() && !forceSendStop)
+    {
+        return;
+    }
+
+    // A jump or a fall is ballistic: it cannot stop mid-air, so it is left to land and
+    // its effect ends there. Only an interrupt (forced) cuts it.
+    if (movespline->Airborne() && !forceSendStop)
+    {
+        return;
+    }
+
+    // Take where the spline actually is before stopping there, so the stop packet and
+    // the placement agree. The placement itself is written on the next Update.
+    CommitSplinePosition();
 
     Movement::MoveSplineInit init(*this);
     init.Stop();
@@ -5651,22 +5690,38 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
  */
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 {
-    bool isMoving = false;
+    // One stop path: commit the in-flight position and finalize through Stop(), which
+    // sends the stop packet and leaves a spline the driver reads as cut, not arrived.
+    StopMoving(forceSendStop || !movespline->Finalized());
+}
 
-    if (!movespline->Finalized())
+bool Unit::CommitSplinePosition()
+{
+    if (movespline->Finalized())
     {
-        Movement::Location loc = movespline->ComputePosition();
-        movespline->_Interrupt();
-        Place().MoveTo(loc.x, loc.y, loc.z, loc.orientation);
-
-        // The stop packet below, and every create block until the client speaks again, are
-        // written from the movement state -- so it follows the placement whenever the
-        // server is the one that moved the unit.
-        m_movementInfo.Report(loc.x, loc.y, loc.z, loc.orientation);
-        isMoving = true;
+        return false;
     }
 
-    StopMoving(forceSendStop || isMoving);
+    Movement::Location loc = movespline->ComputePosition();
+
+    if (IsBoarded())
+    {
+        // Boarded spline coordinates are seat-local: update the seat pose
+        Geometry::Placement deckPose;
+        deckPose.EnterFrame(GetTransportInfo()->Seat().CurrentFrame(),
+                            Geometry::Vector3(loc.x, loc.y, loc.z), loc.orientation);
+        GetTransportInfo()->SetSeatPose(deckPose);
+        return true;
+    }
+
+    // The placement is written on the next Update. A stop can come from inside a grid
+    // visit (an AI reacting to what just walked into view), where a cell switch would
+    // break the list being walked; Update is the one place it is safe. Where the unit
+    // stands now is kept, so a relocation by anything else in between is not undone.
+    m_pendingCommit = Position(loc.x, loc.y, loc.z, loc.orientation);
+    m_pendingCommitFrom = Position(Where().X(), Where().Y(), Where().Z(), Where().Facing());
+    m_hasPendingCommit = true;
+    return true;
 }
 
 
@@ -6792,7 +6847,12 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
 void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
-    movespline->_Interrupt();
+
+    // A spline that ran out is finished, not cut; only a live one is interrupted here.
+    if (!movespline->Finalized())
+    {
+        movespline->_Interrupt();
+    }
 }
 
 void Unit::SendCollisionHeightUpdate(float height)

@@ -129,7 +129,8 @@ class EffectMovementGenerator final : public IntentMovementGenerator
                                   uint32 diff) override;
 
     private:
-        uint32 m_id; ///< Echoed to the AI when the effect's spline ends.
+        uint32 m_id;         ///< Echoed to the AI when the effect's spline ends.
+        bool m_done = false; ///< The effect's spline ran its course.
 };
 
 #endif // MANGOS_POINTMOVEMENTGENERATOR_H

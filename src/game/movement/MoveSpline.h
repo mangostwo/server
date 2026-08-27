@@ -118,6 +118,7 @@ namespace Movement
             int32           effect_start_time;
             int32           point_Idx; /**< Current point index in the spline. */
             int32           point_Idx_offset; /**< Offset for the point index. */
+            bool            m_cut = false;    /**< Ended early: interrupted, or initialized already done (a stop). */
 
             /**
              * @brief Initializes the spline with the given arguments.
@@ -191,7 +192,7 @@ namespace Movement
             /**
              * @brief Interrupts the spline.
              */
-            void _Interrupt() { splineflags.done = true;}
+            void _Interrupt() { splineflags.done = true; m_cut = true; }
 
         public:
             /**
@@ -255,6 +256,10 @@ namespace Movement
              * @return bool True if the spline is finalized, false otherwise.
              */
             bool Finalized() const { return splineflags.done; }
+            /// Ended early -- interrupted, or born already done as a stop -- rather than run out.
+            bool Cut() const { return m_cut; }
+            /// Ballistic -- a jump or a fall -- which cannot stop mid-air.
+            bool Airborne() const { return splineflags.parabolic || splineflags.falling; }
 
             /**
              * @brief Checks if the spline is cyclic.

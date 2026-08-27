@@ -94,6 +94,7 @@ class MotionDriver
         /// destination has moved far enough to be worth re-routing.
         Motion::Vector3 m_legGoal;
         bool m_haveLeg = false;
+        bool m_partialLeg = false;   ///< The running leg's route only got partway to its goal.
 
         bool m_blocked = false;      ///< The last Move could not be laid.
         bool m_speedChanged = false; ///< A speed change invalidated the running leg.

@@ -47,6 +47,7 @@ void MotionDriver::ResetLeg()
 {
     m_legGoal = Motion::Vector3();
     m_haveLeg = false;
+    m_partialLeg = false;
     m_blocked = false;
     m_speedChanged = false;
     m_wasTraveling = false;
@@ -78,8 +79,26 @@ Motion::MoveStatus MotionDriver::BeginTick(Unit& owner)
 
     Motion::MoveStatus status;
     status.traveling = traveling;
-    status.arrived = m_wasTraveling && !traveling;
     status.blocked = m_blocked;
+
+    // A leg that just ended did so in one of three ways, and they must not be confused:
+    // it ran out at its goal (arrived), something stopped or interrupted it (cut), or it
+    // ran out at the far end of a route that only got partway (partial).
+    if (m_wasTraveling && !traveling)
+    {
+        if (owner.movespline->Cut())
+        {
+            status.cut = true;
+        }
+        else if (m_partialLeg)
+        {
+            status.partial = true;
+        }
+        else
+        {
+            status.arrived = true;
+        }
+    }
     status.pathIndex = owner.movespline->Initialized() ? owner.movespline->currentPathIdx() : 0;
 
     if (m_haveLeg)
@@ -142,6 +161,7 @@ bool MotionDriver::ReconcileMove(Unit& owner, Motion::MoveIntent const& intent)
 bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
 {
     Movement::MoveSplineInit init(owner);
+    m_partialLeg = false;
 
     if (intent.path && intent.path->size() >= 2)
     {
@@ -167,13 +187,17 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
         // Nothing usable at all, or the router failed and this movement kind refuses the
         // straight-line fallback. Either way no leg is laid, and the generator is told
         // so next tick so it can give up or pick somewhere else.
-        if (!routed || (intent.Has(Motion::MOVE_REQUIRE_PATH) && query->Failed()))
+        // Likewise a partial route that gets no closer to the goal: laying it would walk
+        // nowhere and re-lay itself from the same spot every tick.
+        if (!routed || (intent.Has(Motion::MOVE_REQUIRE_PATH) && query->Failed()) ||
+            (query->Partial() && !query->Progresses()))
         {
             m_blocked = true;
             return false;
         }
 
         init.MovebyPath(query->Points());
+        m_partialLeg = query->Partial();
     }
 
     switch (intent.facing.mode)
@@ -207,13 +231,19 @@ bool MotionDriver::LayLeg(Unit& owner, Motion::MoveIntent const& intent)
     // The velocity is left to MoveSplineInit, which resolves the unit's live
     // walk/run/swim/flight speed at Launch -- so a speed change re-paces the next leg
     // instead of a stale value being baked in here.
-    init.Launch();
+    if (init.Launch() == 0)
+    {
+        // The spline refused the leg (Validate): nothing is running, and the next tick
+        // must not judge whatever spline was there before.
+        m_blocked = true;
+        return false;
+    }
 
     m_legGoal = intent.goal;
     m_haveLeg = true;
     m_blocked = false;
     m_speedChanged = false;
-    m_wasTraveling = true;
+    m_wasTraveling = !owner.movespline->Finalized();
 
     return true;
 }

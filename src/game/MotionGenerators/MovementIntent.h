@@ -193,7 +193,9 @@ namespace Motion
     struct MoveStatus
     {
         bool    traveling = false; ///< A leg is running right now.
-        bool    arrived = false;   ///< The leg finished (once).
+        bool    arrived = false;   ///< The leg ran out AT its goal (once).
+        bool    cut = false;       ///< The leg was stopped or interrupted short of its goal (once).
+        bool    partial = false;   ///< The leg ran out short of its goal because its route only got partway (once): re-state the goal to go on.
         bool    blocked = false;   ///< The last Move could not be laid (once).
         int32   pathIndex = 0;     ///< How far along its points the spline is.
         Vector3 legGoal;           ///< The goal of the leg the driver actually laid.

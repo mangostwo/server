@@ -85,6 +85,19 @@ namespace Motion
                             (PATHFIND_NOPATH | PATHFIND_NOT_USING_PATH)) == 0;
                 }
 
+                bool Partial() const override
+                {
+                    return (m_path.getPathType() & PATHFIND_INCOMPLETE) != 0;
+                }
+
+                bool Progresses() const override
+                {
+                    // Under a yard of travel is a route that ends where it starts.
+                    const float advance =
+                        (m_path.getActualEndPosition() - m_path.getStartPosition()).magnitude();
+                    return advance >= 1.0f;
+                }
+
                 bool Reachable() const override
                 {
                     return (m_path.getPathType() & PATHFIND_NORMAL) != 0;
@@ -290,6 +303,19 @@ namespace Motion
                 {
                     return (m_path.getPathType() &
                             (PATHFIND_NOPATH | PATHFIND_NOT_USING_PATH)) == 0;
+                }
+
+                bool Partial() const override
+                {
+                    return (m_path.getPathType() & PATHFIND_INCOMPLETE) != 0;
+                }
+
+                bool Progresses() const override
+                {
+                    // Under a yard of travel is a route that ends where it starts.
+                    const float advance =
+                        (m_path.getActualEndPosition() - m_path.getStartPosition()).magnitude();
+                    return advance >= 1.0f;
                 }
 
                 bool Reachable() const override

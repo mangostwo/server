@@ -73,6 +73,8 @@ Motion::MoveIntent HomeMovementGenerator::Intent(Unit& /*owner*/,
         return Motion::MoveIntent::Done();
     }
 
+    // A stop on the way (a stun, a root) is not an arrival: the leg is re-stated once the
+    // unit may move again, and JustReachedHome fires at home, not where the stun landed.
     return Motion::MoveIntent::Move(m_home, Motion::MOVE_NONE,
                                     Motion::Facing::ToAngle(m_facing));
 }

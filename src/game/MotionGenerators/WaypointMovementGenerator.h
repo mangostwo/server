@@ -199,6 +199,7 @@ class WaypointMovementGenerator final : public IntentMovementGenerator
         bool m_haveLeg = false;
         uint32 m_deadNodes = 0;      ///< Nodes skipped as unreachable in a row.
         bool m_forceNextLeg = false; ///< Walk the next leg unrouted: a whole lap was unreachable.
+        bool m_approached = false; ///< A partial leg toward the node was walked: a block now is as close as it gets.
 };
 
 /**

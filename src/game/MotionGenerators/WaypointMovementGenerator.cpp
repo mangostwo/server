@@ -456,6 +456,7 @@ Motion::MoveIntent WaypointMovementGenerator::WalkPreparedLeg() const
 Motion::MoveIntent WaypointMovementGenerator::PrepareMove(Creature& creature)
 {
     m_haveLeg = false;
+    m_approached = false;
     m_legPoints.clear();
 
     if (!m_path || m_path->empty() || Stopped(creature))
@@ -564,7 +565,7 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
 
     // There was no way to reach the node we aimed at. Count it as arrived so the patrol
     // steps over it, rather than butting into it forever.
-    if (status.blocked)
+    if (status.blocked && !m_approached)
     {
         ClearSegment();
         m_isArrivalDone = true;
@@ -598,10 +599,23 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
         return PrepareMove(creature);
     }
 
+    // The leg ran out at the far end of a partial route: re-state it and walk on. The node
+    // has not been reached, whatever the finalized spline says.
+    if (status.partial && m_haveLeg)
+    {
+        m_approached = true;
+        return WalkPreparedLeg();
+    }
+
+    // A route got partway to the node and from its end there is no way on: the node is
+    // as reached as it gets. Arrive there, so its script, delay and inform still run.
+    const bool asCloseAsItGets = status.blocked && m_approached;
+
     // Sample the stopped state BEFORE arrival handling clears UNIT_STAT_ROAMING_MOVE, so an
     // externally force-stopped unit (a player talking to it, which also finalizes the
     // spline) is paused rather than mistaken for a leg that simply finished.
-    switch (GetWaypointSegmentUpdateState(!status.traveling, creature.IsStopped()))
+    switch (asCloseAsItGets ? WaypointSegmentUpdateState::Finalized
+                            : GetWaypointSegmentUpdateState(!status.traveling, creature.IsStopped()))
     {
         case WaypointSegmentUpdateState::Stopped:
             ClearSegment();

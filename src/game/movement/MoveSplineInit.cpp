@@ -133,6 +133,15 @@ namespace Movement
         {
             real_position = move_spline.ComputePosition();
         }
+        else if (!transportInfo)
+        {
+            // A stop just took the spline's position and the placement has not caught up
+            // (it is written on the unit's next Update): start from where the stop was sent.
+            if (Position const* pending = unit.PendingSplineCommit())
+            {
+                real_position = Location(pending->x, pending->y, pending->z, pending->o);
+            }
+        }
 
         if (args.path.empty())
         {

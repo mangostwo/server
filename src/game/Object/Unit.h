@@ -3977,6 +3977,8 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving(bool forceSendStop = false);
         void InterruptMoving(bool forceSendStop = false);
+        bool CommitSplinePosition(); ///< Take the running spline's position: the seat pose at once, the placement on the next Update. False when no spline runs.
+        Position const* PendingSplineCommit() const { return m_hasPendingCommit ? &m_pendingCommit : NULL; } ///< A stop's position the placement has not caught up with yet.
 
         void SetFeared(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, uint32 time = 0);
         void SetConfused(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0);
@@ -4102,6 +4104,10 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         Position m_last_notified_position;
         bool m_AINotifyScheduled;
         TimeTracker m_movesplineTimer;
+
+        Position m_pendingCommit;     ///< A stop's spline position, written on the next Update.
+        Position m_pendingCommitFrom; ///< The placement when it was taken; a change since means someone else moved the unit.
+        bool m_hasPendingCommit = false;
 
         Diminishing m_Diminishing;
         // Manage all Units threatening us
