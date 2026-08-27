@@ -505,7 +505,14 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK17              = 0x02000000,
     VEHICLE_FLAG_UNK18              = 0x04000000,
     VEHICLE_FLAG_UNK19              = 0x08000000,
-    VEHICLE_FLAG_UNK20              = 0x10000000,           // Vehicle not dismissed after eject passenger?
+    // THE ZONE-MAP ICON, and nothing else on this path. The client tests exactly this bit
+    // on the unit CREATE path, and a unit that carries it is appended to the battlefield
+    // vehicle list Lua_GetNumBattlefieldVehicles reads -- which is what draws the moving
+    // icon on the zone map. The icon itself comes from UiLocomotionType, not from here.
+    // Emulators have long carried this as "Vehicle not dismissed after eject passenger?",
+    // question mark included. That reading is a guess and it is wrong; it survives below
+    // only as behaviour nobody has re-derived, not as a meaning of the bit.
+    VEHICLE_FLAG_ZONE_MAP_ICON      = 0x10000000,
     VEHICLE_FLAG_UNK21              = 0x20000000,
     VEHICLE_FLAG_UNK22              = 0x40000000,
     VEHICLE_FLAG_UNK23              = 0x80000000,

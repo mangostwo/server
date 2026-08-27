@@ -30,6 +30,7 @@ const char Achievementfmt[] = "niixssssssssssssssssxxxxxxxxxxxxxxxxxxiixixxxxxxx
 const char AchievementCriteriafmt[] = "niiiiiiiissssssssssssssssxixiii";
 const char AchievementCategoryfmt[] = "nixxxxxxxxxxxxxxxxxx";
 const char AreaTableEntryfmt[] = "iiinixxxxxissssssssssssssssxiiiiixxx";
+const char AreaPOIEntryfmt[] = "niiiiiiiiiiifffiiissssssssssssssssxxxxxxxxxxxxxxxxxxii";
 const char AreaGroupEntryfmt[] = "niiiiiii";
 const char AreaTriggerEntryfmt[] = "niffffffff";
 const char AuctionHouseEntryfmt[] = "niiixxxxxxxxxxxxxxxxx";

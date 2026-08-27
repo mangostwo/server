@@ -16,7 +16,7 @@
  *   Achievement_Criteria           ACTIVE
  *   AnimationData                  DOC   (8 cols)
  *   AreaGroup                      ACTIVE
- *   AreaPOI                        DOC   (54 cols)
+ *   AreaPOI                        ACTIVE
  *   AreaTable                      ACTIVE
  *   AreaTrigger                    ACTIVE
  *   AttackAnimKits                 DOC   (5 cols)
@@ -257,7 +257,7 @@
  *   gtRegenHPPerSpt                ACTIVE
  *   gtRegenMPPerSpt                ACTIVE
  *
- *   (103 ACTIVE, 142 DOC)  phantoms: ItemCondExtCosts, gtOCTRegenMP
+ *   (104 ACTIVE, 141 DOC)  phantoms: ItemCondExtCosts, gtOCTRegenMP
  */
 
 // AnimationData -- 8 cols, record_size 32, build 3.3.5.12340. INERT reference (not loaded).
@@ -271,25 +271,6 @@ struct AnimationDataEntry
     int32   Fallback;  // 5
     int32   BehaviorID;  // 6
     int32   BehaviorTier;  // 7
-};
-
-// AreaPOI -- 54 cols, record_size 216, build 3.3.5.12340. INERT reference (not loaded).
-struct AreaPOIEntry
-{
-    uint32  ID;  // 0
-    int32   Importance;  // 1
-    uint32  Icon[9];  // 2-10
-    uint32  FactionID;  // 11
-    float   Pos[3];  // 12-14
-    uint32  ContinentID;  // 15
-    uint32  Flags;  // 16
-    uint32  AreaID;  // 17
-    char*   Name_lang[16];  // 18-33
-// uint32  Name_lang_flags;  // 34
-    char*   Description_lang[16];  // 35-50
-// uint32  Description_lang_flags;  // 51
-    uint32  WorldStateID;  // 52
-    uint32  WorldMapLink;  // 53
 };
 
 // AttackAnimKits -- 5 cols, record_size 20, build 3.3.5.12340. INERT reference (not loaded).

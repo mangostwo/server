@@ -280,6 +280,17 @@ void Creature::AddToWorld()
         hull->EnlistCrew(this);
     }
 
+    // AND THE ZONE MAP, if this one is drawn on it. Announced the way a vessel is --
+    // to everyone on the anchor map at once -- because the client builds its map-icon
+    // list from CREATE blocks alone. Waiting for each player's visibility sweep would
+    // mean the icon showing up only once he is close enough to see the vehicle without
+    // it, which is the wrong way round.
+    if (IsTrackedOnZoneMap())
+    {
+        GetMap()->RegisterZoneMapTracked(this);
+        GetMap()->AnnounceZoneMapTracked(this);
+    }
+
     // Make active if required
     if (sWorld.isForceLoadMap(GetMapId()) ||
         (GetCreatureInfo()->ExtraFlags & CREATURE_FLAG_EXTRA_ACTIVE) ||
@@ -325,6 +336,10 @@ void Creature::RemoveFromWorld()
         {
             hull->DelistCrew(this);
         }
+
+        // Off the icon list. No destroy block goes with it -- see
+        // Object::BuildOutOfRangeUpdateBlock -- this only stops it being announced again.
+        GetMap()->UnregisterZoneMapTracked(this);
     }
 
     ///- Remove the creature from the accessor

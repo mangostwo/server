@@ -136,16 +136,6 @@ class TransportMap : public Map
         /// True when the hull's own geometry stands between two points on it.
         bool IsBlocked(Geometry::Vector3 const& from, Geometry::Vector3 const& to) const;
 
-        /**
-         * @brief A spot `distance2d` yards from `master` at its facing plus `angle`.
-         *
-         * The requested bearing is tried first and then swept around the master, because a
-         * ship is small and cluttered and the one spot asked for is very often out over the
-         * rail. Nothing when `master` is not aboard.
-         */
-        std::optional<Position> FreeSpotNear(WorldObject const& master, float distance2d,
-                                             float angle) const;
-
         /// Where something aboard stands, or nothing when it is not on this ship. There is
         /// nothing to look up and nothing to convert: this map's coordinates are the answer.
         std::optional<Geometry::Placement> PositionOf(WorldObject const& obj) const;
@@ -191,7 +181,6 @@ class TransportMap : public Map
          */
         void EnlistCrew(Creature* crew);
         void DelistCrew(Creature* crew);
-        bool HasCrew() const { return !m_crew.empty(); }
 
         /// Drop the index at shutdown. The creatures are this map's to destroy, like any
         /// other map's.
@@ -221,9 +210,36 @@ class TransportMap : public Map
         static void CollectRelaySources(WorldObject const* viewer, float visibility,
                                         std::vector<RelaySource>& out);
 
-        /// One newly-arrived crew member, announced to everyone already watching. `.trans npc
-        /// add` boards mid-voyage, with an audience.
-        void SendCrewMemberCreate(Creature* crew);
+        /**
+         * @brief The players on the far side of a vessel boundary who must hear about `obj`.
+         *
+         * The twin of CollectRelaySources, for BROADCAST rather than for a cell sweep. That
+         * one answers "where else must I look"; this one answers "who else must be told",
+         * and the two are needed in different places for the same reason: a deck and the
+         * shore are two maps, and a cell visit of one never reaches the other.
+         *
+         * Without it a value update never crosses at all -- the accumulator behind
+         * BuildUpdateData visits cameras in cells around the object, and every camera that
+         * matters here is on the other map. A deckhand killed at sea stayed standing for
+         * everyone ashore; a quest giver on the pier stayed frozen for everyone aboard.
+         */
+        static void CollectRelayAudience(WorldObject const* obj, std::vector<Player*>& out);
+
+        /**
+         * @brief ONE object has just arrived aboard: tell everyone who is watching this ship.
+         *
+         * Arriving aboard is a single event whoever you are -- a deckhand boarded by
+         * `.trans npc add` mid-voyage, a passenger who walked up the gangway, a pet drawn
+         * across behind its master. The audience is the same in every case: the players
+         * already on this map, and the observers ashore.
+         *
+         * It exists because neither half of that audience is reached by anything else. A
+         * player ashore is not a camera on this map, so `Map::Add`'s visibility pass never
+         * touches him; his own sweep would find the arrival eventually, but only when he
+         * moves or when the periodic observer sweep comes round -- so a man on the pier
+         * watched his friend walk aboard, vanish, and reappear a second later.
+         */
+        void AnnounceAboard(WorldObject* arrival);
 
         /// Append the crew's create blocks to a packet already carrying the vessel's.
         /// Deliberately does NOT stamp m_clientGUIDs: they ride the vessel's map-membership

@@ -70,6 +70,7 @@
 #include "BattleGround/BattleGroundMgr.h"
 #include "BattleGround/BattleGroundAV.h"
 #include "OutdoorPvP/OutdoorPvP.h"
+#include "WorldStateMgr.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Spell.h"
@@ -3775,6 +3776,12 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid)
             }
             break;
     }
+
+    // The durable ones, last: a map landmark is drawn from a world state whose owner is
+    // no battleground and no script instance, so nobody would be asked for it here. A zone
+    // override is meant to win over a global default, and the client keeps what it was told
+    // last -- which is why this goes after the fixed set above rather than before it.
+    sWorldStateMgr.FillInitialStates(zoneid, data, count);
 
     FillBGWeekendWorldStates(data, count);
 

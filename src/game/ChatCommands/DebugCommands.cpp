@@ -59,6 +59,9 @@
 #include "MapManager.h"
 #include "TransportMap.h"
 #include "Transports.h"
+#include "WorldStateMgr.h"
+#include "DBCStores.h"
+#include "DBCStructure.h"
 
 /**
  * @brief Handler for HandleDebugSendSpellFailCommand command.
@@ -445,6 +448,108 @@ bool ChatHandler::HandleDebugUpdateWorldStateCommand(char* args)
     }
 
     m_session->GetPlayer()->SendUpdateWorldState(world, state);
+    return true;
+}
+
+/**
+ * @brief Handler for HandleDebugWorldStateCommand command.
+ *
+ * `.debug worldstate <stateId> [value]` -- read or set a STORED world state for the zone
+ * the caller is standing in, and push the change to everyone else standing in it. The
+ * difference from `.debug uws` is the whole point: that one fires a packet at the caller
+ * and forgets it, so the value is gone the moment anything re-sends the zone's init set.
+ * This one is what the client will be told again on every zone entry.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
+bool ChatHandler::HandleDebugWorldStateCommand(char* args)
+{
+    uint32 stateId;
+    if (!ExtractUInt32(&args, stateId))
+    {
+        return false;
+    }
+
+    Player* player = m_session->GetPlayer();
+    const uint32 zoneId = player->GetCachedZoneId();
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+    {
+        PSendSysMessage("World state %u in zone %u = %u",
+                        stateId, zoneId, sWorldStateMgr.GetState(zoneId, stateId));
+        return true;
+    }
+
+    const bool changed = sWorldStateMgr.SetState(zoneId, stateId, value);
+    PSendSysMessage("World state %u in zone %u -> %u%s", stateId, zoneId, value,
+                    changed ? "" : " (unchanged, nothing sent)");
+
+    // What it drives, if anything -- the reason to be setting one by hand at all.
+    for (AreaPOIEntry const* poi : sWorldStateMgr.PoisOfState(stateId))
+    {
+        PSendSysMessage("  landmark %u (area %u): icon %u",
+                        poi->ID, poi->AreaID,
+                        value >= 1 && value <= 9 ? poi->Icon[value - 1] : 0);
+    }
+
+    return true;
+}
+
+/**
+ * @brief Handler for HandleDebugPoiCommand command.
+ *
+ * `.debug poi` lists the map landmarks of the caller's zone that the server can move,
+ * with the world state each one reads and its current value. `.debug poi <id> <value>`
+ * moves one: 0 takes it off the map, 1..9 picks Icon[value - 1] from its own row.
+ *
+ * @param args Command arguments.
+ * @returns True if the command executed successfully, false otherwise.
+ */
+bool ChatHandler::HandleDebugPoiCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    const uint32 zoneId = player->GetCachedZoneId();
+
+    uint32 poiId;
+    if (!ExtractUInt32(&args, poiId))
+    {
+        std::vector<AreaPOIEntry const*> pois = sWorldStateMgr.PoisOfZone(zoneId);
+        if (pois.empty())
+        {
+            PSendSysMessage("Zone %u has no world-state-driven map landmark.", zoneId);
+            return true;
+        }
+
+        PSendSysMessage("Zone %u, %u landmark(s):", zoneId, uint32(pois.size()));
+        for (AreaPOIEntry const* poi : pois)
+        {
+            PSendSysMessage("  poi %u  state %u = %u  area %u  \"%s\"",
+                            poi->ID, poi->WorldStateID,
+                            sWorldStateMgr.GetState(zoneId, poi->WorldStateID),
+                            poi->AreaID,
+                            poi->Name_lang[GetSessionDbcLocale()] ?
+                                poi->Name_lang[GetSessionDbcLocale()] : "");
+        }
+
+        return true;
+    }
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+    {
+        return false;
+    }
+
+    if (!sWorldStateMgr.SetPoiState(poiId, value))
+    {
+        PSendSysMessage("Landmark %u is unknown, or reads no world state.", poiId);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    PSendSysMessage("Landmark %u -> %u", poiId, value);
     return true;
 }
 

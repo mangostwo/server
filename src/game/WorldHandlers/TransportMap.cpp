@@ -82,17 +82,6 @@ std::string DescribeSpatially(Unit* u)
 
 namespace
 {
-    /// How far above and below a point to look for a surface when placing something on it.
-    constexpr float HULL_SEARCH_UP = 3.0f;
-    constexpr float HULL_SEARCH_DOWN = 6.0f;
-
-    /// Chest height for the obstruction probe, so the plating a unit stands ON is not itself
-    /// read as the thing blocking it.
-    constexpr float HULL_PROBE_HEIGHT = 1.0f;
-
-    /// Bearings tried when sweeping for a free spot around a master.
-    constexpr int HULL_SPOT_BEARINGS = 8;
-
     /**
      * @brief A totem rides the ship it was planted on for as long as it lives, whoever its
      *        master is and wherever they have got to.
@@ -360,44 +349,6 @@ std::optional<Geometry::Placement> TransportMap::PositionOf(WorldObject const& o
     return std::nullopt;
 }
 
-std::optional<Position> TransportMap::FreeSpotNear(WorldObject const& master, float distance2d,
-                                                   float angle) const
-{
-    const auto anchor = PositionOf(master);
-    if (!anchor)
-    {
-        return std::nullopt;                        // its master is not aboard after all
-    }
-
-    // The requested bearing first, then swept around the master: a ship is small and
-    // cluttered, and the one spot the caller asked for is very often out over the rail.
-    for (int step = 0; step < HULL_SPOT_BEARINGS; ++step)
-    {
-        const float bearing = anchor->Facing() + angle +
-                              (step ? (2 * M_PI_F * float(step) / float(HULL_SPOT_BEARINGS)) : 0.0f);
-
-        const float x = anchor->X() + distance2d * std::cos(bearing);
-        const float y = anchor->Y() + distance2d * std::sin(bearing);
-
-        const auto z = SurfaceAt(x, y, anchor->Z(), HULL_SEARCH_UP, HULL_SEARCH_DOWN);
-        if (!z)
-        {
-            continue;                               // out over the rail
-        }
-
-        // ...and nothing solid in between, or we would set a pet down on the far side of a
-        // bulkhead from the master it is supposed to be heeling.
-        if (IsBlocked(Geometry::Vector3(anchor->X(), anchor->Y(), anchor->Z() + HULL_PROBE_HEIGHT),
-                      Geometry::Vector3(x, y, *z + HULL_PROBE_HEIGHT)))
-        {
-            continue;
-        }
-
-        return Position(x, y, *z, anchor->Facing());
-    }
-
-    return std::nullopt;
-}
 
 /* ******************************** Who is aboard ************************************** */
 
@@ -449,9 +400,22 @@ bool TransportMap::Add(Player* passenger)
         }
     }
 
+    // The zone-map icons of the water she is crossing -- his own ship's, and every other
+    // deck's. This override replaces Map::Add wholesale, so nothing here is inherited: the
+    // base class sends this right after SendInitTransports, and skipping it is why a player
+    // logging in at sea had a bare map until he flew ashore. After the vessel loop above,
+    // which is what put those hulls at his client in the first place.
+    SendInitZoneMapTracked(passenger);
+
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     passenger->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
     UpdateObjectVisibility(passenger, cell, p);
+
+    // THE OTHER HALF OF IT. The line above notifies cameras on THIS map; the people who
+    // watched him walk up the gangway are on another one, and Map::Remove already gave them
+    // his destroy. Without this they lose him until their own sweep comes round -- he
+    // vanishes off the deck and pops back a second later.
+    AnnounceAboard(passenger);
 
     return true;
 }
@@ -615,6 +579,11 @@ void TransportMap::EnlistCrew(Creature* crew)
     {
         crew->SetPhaseMask(m_vessel->GetPhaseMask(), false);
     }
+
+    // Same event, same audience. At start-up there is nobody in either list and this costs
+    // nothing; mid-voyage it is what makes `.trans npc add` land in front of an audience
+    // instead of waiting for everyone to move.
+    AnnounceAboard(crew);
 }
 
 void TransportMap::DelistCrew(Creature* crew)
@@ -694,24 +663,38 @@ void TransportMap::AppendCrewDestroyBlocks(UpdateData& data)
     }
 }
 
-void TransportMap::SendCrewMemberCreate(Creature* crew)
+void TransportMap::AnnounceAboard(WorldObject* arrival)
 {
-    if (!crew || !crew->IsInWorld() || !m_vessel || !m_vessel->GetMap())
+    if (!arrival || !arrival->IsInWorld())
     {
         return;
     }
 
-    PlayerList const& everyone = m_vessel->GetMap()->GetPlayers();
-    for (PlayerList::const_iterator itr = everyone.begin(); itr != everyone.end(); ++itr)
+    // Ashore first, then aboard. Both lists are empty during Commission(), when the deck's
+    // creatures load before the hull has a map at all -- so this is a no-op then, which is
+    // the right answer: there is nobody to tell.
+    std::vector<Player*> audience = ExternalObservers();
+
+    PlayerList const& aboard = GetPlayers();
+    for (PlayerList::const_iterator itr = aboard.begin(); itr != aboard.end(); ++itr)
     {
-        Player* observer = itr->getSource();
-        if (!observer)
+        if (Player* mate = itr->getSource())
+        {
+            audience.push_back(mate);
+        }
+    }
+
+    for (Player* observer : audience)
+    {
+        // He does not need to be told about himself: his own create block reached him
+        // ahead of the vessel's, which is the one ordering that matters here.
+        if (observer == arrival || !observer->IsInWorld())
         {
             continue;
         }
 
         UpdateData data;
-        crew->BuildCreateUpdateBlockForPlayer(&data, observer);
+        arrival->BuildCreateUpdateBlockForPlayer(&data, observer);
 
         WorldPacket packet;
         data.BuildPacket(&packet, true);
@@ -810,6 +793,56 @@ void TransportMap::CollectRelaySources(WorldObject const* viewer, float visibili
         // The whole ship, swept from her origin. Her space is small and a crew is a few
         // dozen, so a radius that certainly covers the hull is cheaper than being exact.
         out.push_back({hull, 0.0f, 0.0f, hull->HullRadius() * 2.0f + visibility});
+    }
+}
+
+void TransportMap::CollectRelayAudience(WorldObject const* obj, std::vector<Player*>& out)
+{
+    Map* on = obj ? obj->FindMap() : NULL;
+    if (!on)
+    {
+        return;
+    }
+
+    // Aboard: the shore watch, gathered once a tick on everyone's behalf.
+    if (TransportMap* hull = on->AsTransport())
+    {
+        std::vector<Player*> const& ashore = hull->ExternalObservers();
+        out.insert(out.end(), ashore.begin(), ashore.end());
+        return;
+    }
+
+    // Ashore: the passengers of every vessel near enough to be looking. Most maps carry no
+    // vessel at all and stop at the lookup; Icecrown carries two.
+    MapManager::TransportsByMapType::const_iterator vessels =
+        sMapMgr.m_TransportsByMap.find(on->GetId());
+    if (vessels == sMapMgr.m_TransportsByMap.end())
+    {
+        return;
+    }
+
+    for (Transport* vessel : vessels->second)
+    {
+        TransportMap* hull = vessel->AsMap();
+        if (!hull || vessel->FindMap() != on)
+        {
+            continue;
+        }
+
+        const float reach = on->GetVisibilityDistance() + hull->HullRadius() + vessel->NodeSlack();
+        if (!vessel->Where().WithinDist(obj->Where(), reach, false))
+        {
+            continue;
+        }
+
+        PlayerList const& aboard = hull->GetPlayers();
+        for (PlayerList::const_iterator itr = aboard.begin(); itr != aboard.end(); ++itr)
+        {
+            if (Player* mate = itr->getSource())
+            {
+                out.push_back(mate);
+            }
+        }
     }
 }
 

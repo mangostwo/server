@@ -547,10 +547,13 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
-        // TODO: Guesswork, but seems to be fairly near correct
+        // TODO: Guesswork, kept as-is only because nothing has re-derived it. The second
+        // bit tested here is the ZONE-MAP ICON gate, which in the client has nothing to do
+        // with despawning -- it happens to be set on the siege vehicles this rule was
+        // observed on, so the behaviour and the flag agree by coincidence, not by meaning.
         // Only if the passenger was on control seat? Also depending on some flags
         if ((seatEntry->Flags & SEAT_FLAG_CAN_CONTROL) &&
-                !(m_vehicleEntry->Flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_UNK20)))
+                !(m_vehicleEntry->Flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_ZONE_MAP_ICON)))
         {
             if (((Creature*)m_owner)->IsTemporarySummon())
             {

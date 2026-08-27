@@ -295,6 +295,40 @@ class Map : public GridRefManager<NGridType>
         virtual TransportMap* AsTransport() { return NULL; }
         virtual TransportMap const* AsTransport() const { return NULL; }
 
+        /**
+         * @brief The zone-map icon channel: create blocks by map membership, not by range.
+         *
+         * A unit carrying VEHICLE_FLAG_ZONE_MAP_ICON is drawn on the zone map, and the
+         * client only ever puts one in that list from a CREATE block. Left to the ordinary
+         * visibility sweep, the icon therefore appears when the player walks close enough
+         * to SEE the vehicle -- which is backwards: the icon is the thing that tells him
+         * where it is so he does not have to. So these are announced exactly the way a
+         * vessel is: everyone on the map gets them on entry, and a new one is pushed to
+         * everyone already there. No distance, no cell.
+         */
+        void RegisterZoneMapTracked(Creature* tracked);
+        void UnregisterZoneMapTracked(Creature* tracked);
+        void SendInitZoneMapTracked(Player* player);
+        void AnnounceZoneMapTracked(Creature* tracked);
+
+        /// Create blocks for this map's tracked units, appended for one observer.
+        void AppendZoneMapTrackedBlocks(UpdateData& data, Player* observer);
+
+        /**
+         * @brief Is this guid a zone-map-tracked unit of the world this map anchors to?
+         *
+         * Asked by the leftovers sweep, which holds bare guids and no objects. It must not
+         * be answered by looking the guid up on one map: a gunship's tracked unit lives on
+         * the VESSEL's map, so the moment a player steps ashore the lookup on his own map
+         * comes back empty and the sweep destroys the very thing the flag exists to keep --
+         * the icon vanished exactly when he got off the ship. Anchor and decks, together.
+         */
+        bool IsZoneMapTrackedGuid(ObjectGuid guid);
+
+        /// The map whose players are told about this one's tracked units -- itself, or for
+        /// a vessel's deck the world map she sails.
+        Map* AnchorWorld();
+
         // can't be nullptr for loaded map
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
 
@@ -539,6 +573,10 @@ class Map : public GridRefManager<NGridType>
         /// Cached largest cinematic visibility radius, or 0 when none.
         float m_cinematicVisibilityRadius;
         MapPersistentState* m_persistentState;
+
+        /// Units on THIS map that the client draws on the zone map. Small by construction:
+        /// two gunships plus whatever siege vehicles a battle has up.
+        std::vector<Creature*> m_zoneMapTracked;
 
         MapRefManager m_mapRefManager;
         MapRefManager::iterator m_mapRefIter;

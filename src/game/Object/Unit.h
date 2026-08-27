@@ -2087,8 +2087,21 @@ uint32  GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 +
         void Unmount(bool from_aura = false);
 
         VehicleInfo* GetVehicleInfo() { return m_vehicleInfo; }
+        VehicleInfo const* GetVehicleInfo() const { return m_vehicleInfo; }
         bool IsVehicle() const { return m_vehicleInfo != NULL; }
         void SetVehicleId(uint32 entry, uint32 overwriteNpcEntry);
+
+        /**
+         * @brief Whether the client draws this unit as a moving icon on the zone map.
+         *
+         * True when the unit's Vehicle.dbc row carries VEHICLE_FLAG_ZONE_MAP_ICON. Such a
+         * unit is entered into the client's battlefield-vehicle list on CREATE and taken
+         * out of it on DESTROY -- range never enters into it, on either side. So it must
+         * never be sent an out-of-range block: the icon is meant to be visible across the
+         * whole zone, and a destroy sent because the observer walked away takes the ship
+         * off the map for him until he happens to see the hull again.
+         */
+        bool IsTrackedOnZoneMap() const;
 
         /**
          * Returns the maximum skill value the given Unit can have. Ie: the sword skill can
