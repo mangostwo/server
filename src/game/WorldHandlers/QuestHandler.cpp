@@ -138,8 +138,8 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recv_data)
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
 
-    // Stop the npc if moving
-    pCreature->StopMoving();
+    // Stop the npc if moving; a patrol holds its leg for a while so the player can talk
+    pCreature->HoldForPlayer();
 
     if (sScriptMgr.OnGossipHello(_player, pCreature))
     {

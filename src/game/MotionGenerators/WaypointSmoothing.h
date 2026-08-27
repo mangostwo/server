@@ -53,7 +53,6 @@ struct WaypointSmoothingNode
 enum class WaypointSegmentUpdateState
 {
     Moving,   ///< Spline still running normally
-    Stopped,  ///< Unit force-stopped while the spline is unfinished
     Finalized ///< Spline has completed
 };
 
@@ -90,12 +89,11 @@ bool IsWaypointSmoothingSafe(WaypointSmoothingNode const& node);
 bool HasReachedWaypointEndpoint(int32 currentPathIdx, size_t endpointPathIndex);
 
 /**
- * @brief Classifies an in-progress segment, giving finalized precedence over stopped.
+ * @brief Classifies an in-progress segment by whether its spline has completed.
  * @param splineFinalized Whether the spline has completed.
- * @param creatureStopped Whether the unit is currently stopped.
  * @return The resulting WaypointSegmentUpdateState.
  */
-WaypointSegmentUpdateState GetWaypointSegmentUpdateState(bool splineFinalized, bool creatureStopped);
+WaypointSegmentUpdateState GetWaypointSegmentUpdateState(bool splineFinalized);
 
 /**
  * @brief Expands the bounding box to include the given point.

@@ -645,6 +645,8 @@ class Creature : public Unit
         CreatureAI* AI() { return i_AI; }
 
         void SetWalk(bool enable, bool asDefault = true);
+        /// Stop where it stands and, for a patrol, hold the leg a while so the player can talk.
+        void HoldForPlayer();
         void SetLevitate(bool enable) override;
         void SetSwim(bool enable) override;
         void SetCanFly(bool enable) override;

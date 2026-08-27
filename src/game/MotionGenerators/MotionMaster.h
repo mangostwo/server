@@ -239,6 +239,13 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveWaypoint(int32 id = 0, uint32 source = 0, uint32 initialDelay = 0, uint32 overwriteEntry = 0);
 
         /**
+         * @brief Holds a waypoint patrol where it stands, for a player to talk to it.
+         * @param ms How long to hold before the patrol goes on; a longer wait already running is kept.
+         * @return True when a waypoint generator was on top and took the pause.
+         */
+        bool PauseWaypoints(int32 ms);
+
+        /**
          * @brief Moves the unit along a taxi flight path.
          * @param path ID of the flight path.
          * @param pathnode Node of the flight path.

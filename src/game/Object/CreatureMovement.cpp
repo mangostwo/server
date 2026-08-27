@@ -29,6 +29,7 @@
  */
 
 #include "Creature.h"
+#include "WaypointMovementGenerator.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 
@@ -38,6 +39,14 @@
  * @param enable true to walk; false to run.
  * @param asDefault true to also update the default running state.
  */
+void Creature::HoldForPlayer()
+{
+    StopMoving();
+    // The pause is asked for by name: nothing infers it from the stop any more, so a
+    // stun or a script's StopMoving() no longer parks a patrol for minutes.
+    GetMotionMaster()->PauseWaypoints(STOP_TIME_FOR_PLAYER);
+}
+
 void Creature::SetWalk(bool enable, bool asDefault)
 {
     if (asDefault)

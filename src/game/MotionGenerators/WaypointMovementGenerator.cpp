@@ -210,6 +210,21 @@ void WaypointMovementGenerator::Finalize(Unit& owner)
     static_cast<Creature&>(owner).SetWalk(!owner.hasUnitState(UNIT_STAT_RUNNING_STATE), false);
 }
 
+void WaypointMovementGenerator::Pause(Unit& owner, int32 ms)
+{
+    // The one pause there is. Whatever leg was in flight is dropped; Intent prepares a
+    // fresh one, toward the same node, once the time is up. A wait already running --
+    // a node's delay, the initial delay -- is left alone, as it always was.
+    owner.StopMoving();
+    ClearSegment();
+    m_haveLeg = false;
+
+    if (m_nextMoveTime.Passed())
+    {
+        Stop(ms);
+    }
+}
+
 bool WaypointMovementGenerator::Stopped(Unit const& owner) const
 {
     return !m_nextMoveTime.Passed() || owner.hasUnitState(UNIT_STAT_WAYPOINT_PAUSED);
@@ -554,10 +569,27 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
                                                      Motion::MoveStatus const& status,
                                                      uint32 diff)
 {
+    // A leg cut short from outside -- a stun, a root, a script's StopMoving -- is neither
+    // an arrival nor a pause; the pause comes only from Pause(). Forget the leg here,
+    // before any hold below can swallow the edge, so the first free tick prepares a
+    // fresh one from where the unit stands, toward the same node.
+    if (status.cut)
+    {
+        ClearSegment();
+        m_haveLeg = false;
+    }
+
     // Waypoint movement can be switched off -- handy for escort quests and the like.
     if (owner.hasUnitState(UNIT_STAT_NOT_MOVE) || !m_path || m_path->empty())
     {
         owner.clearUnitState(UNIT_STAT_ROAMING_MOVE);
+        return Motion::MoveIntent::Hold();
+    }
+
+    // A cast with a cast time holds the patrol where the AI stopped it for the cast; the
+    // leg is prepared afresh once the cast is over.
+    if (owner.IsNonMeleeSpellCasted(false, false, true))
+    {
         return Motion::MoveIntent::Hold();
     }
 
@@ -590,10 +622,7 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
     }
 
     // Nothing is in flight and nothing was laid: this is the first tick after Initialize or
-    // Reset (the driver lays the first leg on the first TICK, not in Initialize). The
-    // force-stop test below would read a creature that has simply not started yet as one a
-    // player just halted, and park it for STOP_TIME_FOR_PLAYER -- three minutes of standing
-    // still at every spawn and after every evade.
+    // Reset (the driver lays the first leg on the first TICK, not in Initialize).
     if (!m_haveLeg && !status.traveling)
     {
         return PrepareMove(creature);
@@ -611,18 +640,9 @@ Motion::MoveIntent WaypointMovementGenerator::Intent(Unit& owner,
     // as reached as it gets. Arrive there, so its script, delay and inform still run.
     const bool asCloseAsItGets = status.blocked && m_approached;
 
-    // Sample the stopped state BEFORE arrival handling clears UNIT_STAT_ROAMING_MOVE, so an
-    // externally force-stopped unit (a player talking to it, which also finalizes the
-    // spline) is paused rather than mistaken for a leg that simply finished.
     switch (asCloseAsItGets ? WaypointSegmentUpdateState::Finalized
-                            : GetWaypointSegmentUpdateState(!status.traveling, creature.IsStopped()))
+                            : GetWaypointSegmentUpdateState(!status.traveling))
     {
-        case WaypointSegmentUpdateState::Stopped:
-            ClearSegment();
-            m_haveLeg = false;
-            Stop(STOP_TIME_FOR_PLAYER);
-            return Motion::MoveIntent::Hold();
-
         case WaypointSegmentUpdateState::Finalized:
             ProcessSegmentProgress(creature, status.pathIndex);
             if (!m_isArrivalDone)

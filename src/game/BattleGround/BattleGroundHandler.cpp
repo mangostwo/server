@@ -83,8 +83,8 @@ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recv_data)
         return;
     }
 
-    // Stop the npc if moving
-    pCreature->StopMoving();
+    // Stop the npc if moving; a patrol holds its leg for a while so the player can talk
+    pCreature->HoldForPlayer();
 
     BattleGroundTypeId bgTypeId = sBattleGroundMgr.GetBattleMasterBG(pCreature->GetEntry());
 
