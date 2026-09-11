@@ -23,9 +23,11 @@ RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install libmysqlclient-dev openssl
 
 COPY --from=build-step /mangos /mangos
-COPY --from=build-step /mangos/etc/realmd.conf.dist /mangos/etc/realmd.conf.dist
+# Keep the template outside /mangos/etc so a bind-mount of etc can't hide it.
+COPY --from=build-step /mangos/etc/realmd.conf.dist /mangos-defaults/realmd.conf.dist
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 WORKDIR /mangos/bin
-RUN chmod +x realmd
+RUN chmod +x realmd /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 3724
-ENTRYPOINT [ "./realmd","-c","/mangos/etc/realmd.conf" ]
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh", "realmd" ]

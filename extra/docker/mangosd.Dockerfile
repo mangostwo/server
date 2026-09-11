@@ -25,12 +25,14 @@ RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install libmysqlclient-dev openssl lua-readline
 
 COPY --from=build-step /mangos /mangos
-COPY --from=build-step /mangos/etc/mangosd.conf.dist /mangos/etc/mangosd.conf.dist
+# Keep the template outside /mangos/etc so a bind-mount of etc can't hide it.
+COPY --from=build-step /mangos/etc/mangosd.conf.dist /mangos-defaults/mangosd.conf.dist
+COPY docker/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN echo "/mangos/lib" >> /etc/ld.so.conf && ldconfig
 
 WORKDIR /mangos/bin
-RUN chmod +x mangosd
+RUN chmod +x mangosd /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 8085
-ENTRYPOINT [ "./mangosd","-c","/mangos/etc/mangosd.conf" ]
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh", "mangosd" ]

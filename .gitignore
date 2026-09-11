@@ -102,3 +102,7 @@ docs/superpowers/
 # "working tree is clean" guard fails on the cache rather than on a real change.
 .ccache/
 .sccache/
+
+# Local docker environment overrides (may hold credentials); keep the example.
+.env
+!.env.example

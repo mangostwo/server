@@ -36,14 +36,18 @@ jobs:
         # Same command GenRevision.cmake uses, so the image tag matches the
         # revision string the compiled server reports at startup.
         run: |
-          # If this exact commit carries a tag, that tag is the version.
-          # Otherwise there is no release for this commit, so publish it as a
-          # beta keyed to the short commit sha (e.g. beta-4ff44ff1a).
+          SHA="$(git rev-parse --short HEAD)"
+          # A tag on this exact commit wins outright  -> e.g. "v22.04.245"
           if VERSION="$(git describe --tags --exact-match 2>/dev/null)"; then
             echo "Tagged release: ${VERSION}"
+          # master with no tag on the commit             -> e.g. "master-4ff44ff1a"
+          elif [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            VERSION="master-${SHA}"
+            echo "master build: ${VERSION}"
+          # any other branch                             -> e.g. "beta-4ff44ff1a"
           else
-            VERSION="beta-$(git rev-parse --short HEAD)"
-            echo "No tag on this commit; using ${VERSION}"
+            VERSION="beta-${SHA}"
+            echo "non-master build: ${VERSION}"
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 

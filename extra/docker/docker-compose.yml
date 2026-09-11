@@ -1,14 +1,29 @@
-#To start the server from this docker-compose file you can run the command "docker-compose up"
-#Configure the location of the configuration file and the data folder
-#The connection to mysql should match the name of the service in this case "mysqldb"
+# Pulls the prebuilt server images published to GitHub Container Registry by
+# .github/workflows/docker_build.yml (no local compilation).
+#   docker compose -f docker-compose.ghcr.yml pull
+#   docker compose -f docker-compose.ghcr.yml up
+#
+# Select the owner and tag without editing this file, e.g.:
+#   REGISTRY_OWNER=mangostwo MANGOS_TAG=v22.04.245 \
+#     docker compose -f docker-compose.ghcr.yml up
+# Tag values follow the workflow: a git tag (v22.04.245), master-<sha>,
+# beta-<sha>, or latest.
 services:
   mangosd:
-    build:
-      context: ..
-      dockerfile: docker/mangosd.Dockerfile
+    image: ghcr.io/${REGISTRY_OWNER:-mangostwo}/mangosd:${MANGOS_TAG:-latest}
     depends_on:
       - mysqldb
-    restart: always
+    restart: unless-stopped
+    # The entrypoint seeds mangosd.conf from these on first start (only when
+    # no mangosd.conf already exists in the mounted etc directory).
+    environment:
+      - DB_HOST=${DB_HOST:-mysqldb}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASS=${DB_PASS:-mangos}
+      - DB_REALMD=${DB_REALMD:-realmd}
+      - DB_WORLD=${DB_WORLD:-mangos2}
+      - DB_CHARS=${DB_CHARS:-character2}
     ports:
       - "8085:8085"
     stdin_open: true
@@ -20,12 +35,18 @@ services:
       - ../../data:/mangos/data
 
   realmd:
-    build:
-      context: ..
-      dockerfile: docker/realmd.Dockerfile
+    image: ghcr.io/${REGISTRY_OWNER:-mangostwo}/realmd:${MANGOS_TAG:-latest}
     depends_on:
       - mysqldb
-    restart: always
+    restart: unless-stopped
+    # The entrypoint seeds realmd.conf from these on first start (only when
+    # no realmd.conf already exists in the mounted etc directory).
+    environment:
+      - DB_HOST=${DB_HOST:-mysqldb}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-root}
+      - DB_PASS=${DB_PASS:-mangos}
+      - DB_REALMD=${DB_REALMD:-realmd}
     ports:
       - "3724:3724"
     volumes:
@@ -34,12 +55,12 @@ services:
 
   mysqldb:
     image: mysql:5.6
-    restart: always
+    restart: unless-stopped
     environment:
-      - MYSQL_USER=mangos
-      - MYSQL_PASSWORD=mangos
-      - MYSQL_ROOT_PASSWORD=mangos
-      - MYSQL_ROOT_HOST=%
+      - MYSQL_USER=${MYSQL_USER:-mangos}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-mangos}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-mangos}
+      - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST:-%}
     ports:
       - "3306:3306"
     volumes:

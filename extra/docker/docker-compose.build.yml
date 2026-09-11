@@ -1,0 +1,14 @@
+# Builds the server images locally from the Dockerfiles in this folder.
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+# Configure the location of the configuration file and the data folder.
+# The connection to mysql should match the name of the service, here "mysqldb".
+services:
+  mangosd:
+    build:
+      context: ..
+      dockerfile: docker/mangosd.Dockerfile
+
+  realmd:
+    build:
+      context: ..
+      dockerfile: docker/realmd.Dockerfile
