@@ -29,6 +29,8 @@ ones:
   — the database connection the servers use.
 - `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `MYSQL_ROOT_HOST`
   — the bundled MySQL container.
+- `INIT_ENV_CONFIG` — whether the entrypoint seeds a `.conf` from the template
+  when none exists (default `true`; see "Bringing your own configuration").
 
 ### Config files are generated for you
 
@@ -39,6 +41,14 @@ On first start each container seeds its config from the shipped template:
   are filled in from the `DB_*` variables above.
 - If the `.conf` already exists, it is left untouched — edit it by hand for
   anything the environment variables do not cover.
+
+### Bringing your own configuration
+
+Mount your own `mangosd.conf` / `realmd.conf` into `/mangos/etc` and the
+entrypoint will detect it and run it as-is, without generating or rewriting
+anything. To turn off seeding altogether (even when no `.conf` is present, e.g.
+you supply it another way or override the command), set
+`INIT_ENV_CONFIG=false`.
 
 The config and data folders are bind-mounted from the repository:
 

@@ -6,6 +6,13 @@
 # environment variables. If the .conf already exists (e.g. bind-mounted by the
 # operator) it is left untouched.
 #
+# Bring-your-own-config is always respected:
+#   * If the target .conf already exists (bind-mounted or baked in), it is left
+#     exactly as-is; nothing is generated or rewritten.
+#   * INIT_ENV_CONFIG defaults to true (seed config from env when no .conf is
+#     present). Set it to false to disable seeding entirely, for operators who
+#     manage configuration themselves.
+#
 # Database environment variables (all optional, defaults shown):
 #   DB_HOST    host of the MySQL server        (mysqldb)
 #   DB_PORT    port of the MySQL server        (3306)
@@ -15,6 +22,8 @@
 #   DB_WORLD   world database name             (mangos2)   [mangosd only]
 #   DB_CHARS   character database name         (character2)[mangosd only]
 set -eu
+
+INIT_ENV_CONFIG="${INIT_ENV_CONFIG:-true}"
 
 DAEMON="${1:?usage: docker-entrypoint.sh <mangosd|realmd> [command...]}"
 shift
@@ -43,21 +52,28 @@ set_dbinfo()
     sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$CONF"
 }
 
-if [ ! -f "$CONF" ]
-then
-    echo "[entrypoint] ${CONF} not found; seeding from ${DIST}"
-    cp "$DIST" "$CONF"
+case "$INIT_ENV_CONFIG" in
+    false|False|FALSE)
+        echo "[entrypoint] INIT_ENV_CONFIG=false; not generating config"
+        ;;
+    *)
+        if [ ! -f "$CONF" ]
+        then
+            echo "[entrypoint] ${CONF} not found; seeding from ${DIST}"
+            cp "$DIST" "$CONF"
 
-    set_dbinfo "LoginDatabaseInfo" "$DB_REALMD"
-    if [ "$DAEMON" = "mangosd" ]
-    then
-        set_dbinfo "WorldDatabaseInfo"     "$DB_WORLD"
-        set_dbinfo "CharacterDatabaseInfo" "$DB_CHARS"
-    fi
-    echo "[entrypoint] database connection info written to ${CONF}"
-else
-    echo "[entrypoint] ${CONF} exists; leaving it untouched"
-fi
+            set_dbinfo "LoginDatabaseInfo" "$DB_REALMD"
+            if [ "$DAEMON" = "mangosd" ]
+            then
+                set_dbinfo "WorldDatabaseInfo"     "$DB_WORLD"
+                set_dbinfo "CharacterDatabaseInfo" "$DB_CHARS"
+            fi
+            echo "[entrypoint] database connection info written to ${CONF}"
+        else
+            echo "[entrypoint] ${CONF} exists; leaving it untouched"
+        fi
+        ;;
+esac
 
 # With no extra arguments, run the daemon against the seeded config. Any
 # arguments passed after the daemon name (e.g. a k8s command/args override)
