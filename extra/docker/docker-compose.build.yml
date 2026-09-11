@@ -5,10 +5,12 @@
 services:
   mangosd:
     build:
-      context: ..
-      dockerfile: docker/mangosd.Dockerfile
+      # Context is the repository root: the Dockerfile compiles the full source
+      # tree (COPY . /mangoserver) and copies extra/docker/docker-entrypoint.sh.
+      context: ../..
+      dockerfile: extra/docker/mangosd.Dockerfile
 
   realmd:
     build:
-      context: ..
-      dockerfile: docker/realmd.Dockerfile
+      context: ../..
+      dockerfile: extra/docker/realmd.Dockerfile
