@@ -36,11 +36,16 @@ jobs:
         # Same command GenRevision.cmake uses, so the image tag matches the
         # revision string the compiled server reports at startup.
         run: |
-          # Drop the trailing "-g<hash>" that git describe appends, keeping
-          # just "<tag>-<commits>" (e.g. v21.9.29-593).
-          VERSION="$(git describe --tags --always --dirty | sed 's/-g[0-9a-f]\{7,\}//')"
+          # If this exact commit carries a tag, that tag is the version.
+          # Otherwise there is no release for this commit, so publish it as a
+          # beta keyed to the short commit sha (e.g. beta-4ff44ff1a).
+          if VERSION="$(git describe --tags --exact-match 2>/dev/null)"; then
+            echo "Tagged release: ${VERSION}"
+          else
+            VERSION="beta-$(git rev-parse --short HEAD)"
+            echo "No tag on this commit; using ${VERSION}"
+          fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Release version: ${VERSION}"
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
