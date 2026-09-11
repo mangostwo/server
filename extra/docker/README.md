@@ -18,3 +18,4 @@ Here the default values:
 - MYSQL_ROOT_HOST=%
 
 The database need to be run manualy in order to have it initialize
+

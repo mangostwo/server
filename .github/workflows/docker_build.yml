@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: extra/docker/DockerFile-mangosd
+          file: extra/docker/mangosd.Dockerfile
           tags: |
             ghcr.io/${{ github.repository_owner }}/mangosd:latest
             ghcr.io/${{ github.repository_owner }}/mangosd:v${{ github.run_number }}
@@ -54,7 +54,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: extra/docker/DockerFile-realmd
+          file: extra/docker/realmd.Dockerfile
           tags: |
             ghcr.io/${{ github.repository_owner }}/realmd:latest
             ghcr.io/${{ github.repository_owner }}/realmd:v${{ github.run_number }}
