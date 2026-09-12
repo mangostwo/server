@@ -77,10 +77,7 @@ namespace
     using world::terrain::FusedTerrain;
     using world::terrain::LiquidInfo;
 
-    // Ids the client hard-codes rather than reads from the DBC.
-    const uint32 OUTLAND_MAP_ID = 530;
-    const uint32 LIQUID_OCEAN_ROW = 2;
-    const uint32 LIQUID_OUTLAND_OCEAN_ROW = 15;
+    // Only canonical liquid rows accept AreaTable overrides.
     const uint32 LIQUID_FIRST_OVERRIDABLE_ROW = 21;
 
     // LiquidType.dbc SoundBank is the family the client uses (0 water .. 3 slime), and
@@ -417,12 +414,9 @@ GridMapLiquidStatus TerrainInfo::getLiquidStatus(float x, float y, float z,
     }
     const LiquidInfo info = liquid->AsLiquid();
 
+    // The tile already carries a DBC row, not a legacy liquid category.
+    // Ocean (2) must not become Green Lava (15) on map 530.
     uint32 entry = info.entry;
-    // Hard-coded in the client: Outland's ocean is its own row.
-    if (m_mapId == OUTLAND_MAP_ID && entry == LIQUID_OCEAN_ROW)
-    {
-        entry = LIQUID_OUTLAND_OCEAN_ROW;
-    }
 
     uint32 soundBank = 0;
     uint32 typeFlags = LiquidFlagsOfRow(entry, soundBank);
