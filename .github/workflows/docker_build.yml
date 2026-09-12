@@ -6,11 +6,9 @@ on:
   pull_request:
     branches: [ master, united ]
 
-# Builds images and pushes nothing, so read is all the token ever needs -- at the
-# workflow level and again on the job, because a job may widen what the workflow grants
-# but never the other way round.
 permissions:
   contents: read
+  packages: write 
 
 concurrency:
   group: docker-build-${{ github.ref }}
@@ -21,13 +19,44 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write # Appliqué aussi au niveau du job
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
-          fetch-depth: 1
+          # 0 = full history + tags, required so `git describe` below can see
+          # the release tags (v21.9.29, ...). A shallow depth omits tags and
+          # `describe` would fall back to a bare short hash.
+          fetch-depth: 0
+
+      - name: Determine release version
+        id: version
+        # Same command GenRevision.cmake uses, so the image tag matches the
+        # revision string the compiled server reports at startup.
+        run: |
+          SHA="$(git rev-parse --short HEAD)"
+          # A tag on this exact commit wins outright  -> e.g. "v22.04.245"
+          if VERSION="$(git describe --tags --exact-match 2>/dev/null)"; then
+            echo "Tagged release: ${VERSION}"
+          # master with no tag on the commit             -> e.g. "master-4ff44ff1a"
+          elif [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            VERSION="master-${SHA}"
+            echo "master build: ${VERSION}"
+          # any other branch                             -> e.g. "beta-4ff44ff1a"
+          else
+            VERSION="beta-${SHA}"
+            echo "non-master build: ${VERSION}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -36,9 +65,11 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: extra/docker/DockerFile-mangosd
-          tags: mangosd:latest
-          push: false
+          file: extra/docker/mangosd.Dockerfile
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/mangosd:latest
+            ghcr.io/${{ github.repository_owner }}/mangosd:${{ steps.version.outputs.version }}
+          push: ${{ github.ref == 'refs/heads/master' }}
           cache-from: type=gha,scope=mangosd
           cache-to: type=gha,scope=mangosd,mode=max
 
@@ -46,8 +77,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: extra/docker/DockerFile-realmd
-          tags: realmd:latest
-          push: false
+          file: extra/docker/realmd.Dockerfile
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/realmd:latest
+            ghcr.io/${{ github.repository_owner }}/realmd:${{ steps.version.outputs.version }}
+          push: ${{ github.ref == 'refs/heads/master' }}
           cache-from: type=gha,scope=realmd
           cache-to: type=gha,scope=realmd,mode=max
