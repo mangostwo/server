@@ -30,9 +30,7 @@ services:
     tty: true
     volumes:
 #      - ./local/path/to/etc:/mangos/etc
-#      - ./local/path/to/data:/mangos/data
-      - ../../etc:/mangos/etc
-      - ../../data:/mangos/data
+      - ./etc:/mangos/etc
 
   realmd:
     image: ghcr.io/${REGISTRY_OWNER:-mangostwo}/realmd:${MANGOS_TAG:-latest}
@@ -51,10 +49,10 @@ services:
       - "3724:3724"
     volumes:
 #      - ./local/path/to/etc:/mangos/etc
-      - ../../etc:/mangos/etc
+      - ./etc:/mangos/etc
 
   mysqldb:
-    image: mysql:9.7
+    image: mysql:5.7
     restart: unless-stopped
     environment:
       - MYSQL_USER=${MYSQL_USER:-mangos}
@@ -65,4 +63,4 @@ services:
       - "3306:3306"
     volumes:
 #      - ./local/path/to/mysqldatabase:/var/lib/mysql
-      - ../../dbdata:/var/lib/mysql
+      - ./dbdata:/var/lib/mysql

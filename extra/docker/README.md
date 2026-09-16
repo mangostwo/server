@@ -50,35 +50,43 @@ anything. To turn off seeding altogether (even when no `.conf` is present, e.g.
 you supply it another way or override the command), set
 `INIT_ENV_CONFIG=false`.
 
-The config and data folders are bind-mounted from the repository:
+The config folder is bind-mounted from the repository:
 
-- configuration: `../../etc`  → `/mangos/etc`
-- client data:   `../../data` → `/mangos/data`
+- configuration: `./etc` → `/mangos/etc`
 
-These paths can be changed in `docker-compose.yml`. Inside `mangosd.conf`,
-`DataDir` should be `/mangos/data`.
+This path can be changed in `docker-compose.yml`. There is no separate data
+volume — client data (`tiles`, `gomodels`, `dbc`) is placed under this same
+mounted `etc` folder; see "Extract and add the client data" below. Inside
+`mangosd.conf`, `DataDir` should point at wherever you place it under
+`/mangos/etc`.
 
-## 2. Start
-
-Registry images (default):
-
-```sh
-docker compose pull
-docker compose up
-```
-
-Build locally instead:
-
-```sh
-docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
-```
-
-## 3. Initialise the databases
+## 2. Initialise the databases
 
 The MySQL data is stored in `../../dbdata`. The game databases must be created
 and populated once before the servers will run — see the `mangostwo/database`
 repository for the schema and migrations. The `mysqldb` service must be running
-for this step.
+for this step; start just that service with:
+
+```sh
+docker compose up mysqldb
+```
+
+For the SQL import itself, follow the "Import the databases" section of the
+official installation guide:
+
+<https://www.getmangos.eu/wiki/documentation/installation-guides/guideslinux/installing-mangos-on-ubuntu-server-2204-r40014/>
+
+Point the `mysql` client at the container instead of a local install, e.g.
+`mysql -h 127.0.0.1 -P 3306 -u root -p`, using the `DB_*` / `MYSQL_*` values
+from your `.env`.
+
+## 3. Extract and add the client data
+
+Run the extractor (`mangos-extractor`, built from `src/tools/extractor`) against
+your client install to produce `tiles`, `gomodels` and `dbc`, then copy the
+result into `./etc` (the folder bind-mounted to `/mangos/etc`) so the
+container can see it. Set `DataDir` in `mangosd.conf` to match wherever you
+place it under `/mangos/etc`.
 
 ## 4. Set the public address players connect to
 
@@ -98,6 +106,46 @@ stays `0.0.0.0` (listen on all interfaces) and does not need changing.
 - `8085` — world server (`mangosd`)
 - `3724` — login server (`realmd`)
 - `3306` — MySQL
+
+## 6. Start
+
+Registry images (default):
+
+```sh
+docker compose pull
+docker compose up -d # Detach version
+# or
+docker compose up
+```
+
+Build locally instead:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+```
+
+
+## Attaching to the mangosd console
+
+`mangosd` runs as the container's foreground process and reads commands from
+stdin, so you can attach to it for interactive console access.
+
+Find the container ID (or name) with:
+
+```sh
+docker compose ps
+```
+
+or, from anywhere, `docker ps` and look for the `mangosd` image/service. Then
+attach to it:
+
+```sh
+docker attach <containerID>
+```
+
+**Detach with `Ctrl+P` then `Ctrl+Q`, not `Ctrl+C`.** `Ctrl+C` sends `SIGINT` to
+`mangosd` inside the container and shuts the server down; the detach sequence
+leaves the process running and just returns you to your shell.
 
 ## Kubernetes / other orchestrators
 
