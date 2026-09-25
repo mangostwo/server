@@ -12,12 +12,13 @@ services:
   mangosd:
     image: ghcr.io/${REGISTRY_OWNER:-mangostwo}/mangosd:${MANGOS_TAG:-latest}
     depends_on:
-      - mysqldb
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
     # The entrypoint seeds mangosd.conf from these on first start (only when
     # no mangosd.conf already exists in the mounted etc directory).
     environment:
-      - DB_HOST=${DB_HOST:-mysqldb}
+      - DB_HOST=${DB_HOST:-mysql}
       - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:-root}
       - DB_PASS=${DB_PASS:-mangos}
@@ -35,12 +36,13 @@ services:
   realmd:
     image: ghcr.io/${REGISTRY_OWNER:-mangostwo}/realmd:${MANGOS_TAG:-latest}
     depends_on:
-      - mysqldb
+      mysql:
+        condition: service_healthy
     restart: unless-stopped
     # The entrypoint seeds realmd.conf from these on first start (only when
     # no realmd.conf already exists in the mounted etc directory).
     environment:
-      - DB_HOST=${DB_HOST:-mysqldb}
+      - DB_HOST=${DB_HOST:-mysql}
       - DB_PORT=${DB_PORT:-3306}
       - DB_USER=${DB_USER:-root}
       - DB_PASS=${DB_PASS:-mangos}
@@ -51,7 +53,7 @@ services:
 #      - ./local/path/to/etc:/mangos/etc
       - ./etc:/mangos/etc
 
-  mysqldb:
+  mysql:
     image: mysql:5.7
     restart: unless-stopped
     environment:
@@ -61,6 +63,12 @@ services:
       - MYSQL_ROOT_HOST=${MYSQL_ROOT_HOST:-%}
     ports:
       - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
     volumes:
 #      - ./local/path/to/mysqldatabase:/var/lib/mysql
       - ./dbdata:/var/lib/mysql
