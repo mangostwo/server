@@ -21,6 +21,10 @@
 #   DB_REALMD  realm/login database name       (realmd)
 #   DB_WORLD   world database name             (mangos2)   [mangosd only]
 #   DB_CHARS   character database name         (character2)[mangosd only]
+#
+# DATA_DIR (optional, mangosd only) overrides the DataDir setting (client
+# data: dbc/maps/vmaps/mmaps) baked into the .conf.dist. Unset leaves the
+# .dist's default untouched.
 set -eu
 
 INIT_ENV_CONFIG="${INIT_ENV_CONFIG:-true}"
@@ -35,6 +39,7 @@ DB_PASS="${DB_PASS:-mangos}"
 DB_REALMD="${DB_REALMD:-realmd}"
 DB_WORLD="${DB_WORLD:-mangos2}"
 DB_CHARS="${DB_CHARS:-character2}"
+DATA_DIR="${DATA_DIR:-}"
 
 CONF="/mangos/etc/${DAEMON}.conf"
 # The template is kept outside /mangos/etc so it survives a bind-mount of the
@@ -49,6 +54,14 @@ set_dbinfo()
     value="${DB_HOST};${DB_PORT};${DB_USER};${DB_PASS};${dbname}"
     # Anchor on the key at start of line; replace the whole line so whatever
     # default the .dist carried is overwritten.
+    sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$CONF"
+}
+
+# Rewrite a "Key = "..."" line in place with a plain string value.
+set_confvalue()
+{
+    key="$1"
+    value="$2"
     sed -i "s|^${key}[[:space:]]*=.*|${key} = \"${value}\"|" "$CONF"
 }
 
@@ -67,6 +80,10 @@ case "$INIT_ENV_CONFIG" in
             then
                 set_dbinfo "WorldDatabaseInfo"     "$DB_WORLD"
                 set_dbinfo "CharacterDatabaseInfo" "$DB_CHARS"
+                if [ -n "$DATA_DIR" ]
+                then
+                    set_confvalue "DataDir" "$DATA_DIR"
+                fi
             fi
             echo "[entrypoint] database connection info written to ${CONF}"
         else
